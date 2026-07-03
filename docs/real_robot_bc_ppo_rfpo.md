@@ -12,11 +12,14 @@
 真机采集示教数据
 -> 转成当前环境一致的 observations/actions NPZ
 -> 用 NPZ 做 BC warm start
--> PPO / RFPO 主要在仿真里继续训练
--> 最后部署或小步微调到真机
+-> 先单独验证 BC policy 在真机上是否基本可用
+-> 再基于 BC policy 做 PPO / RFPO 微调
+-> 最后部署、评测或继续小步在线 fine-tune
 ```
 
 如果要在真机上做在线 PPO / RFPO，则还必须实现一个真实机器人 Gym 环境，提供 `reset()`、`step(action)`、`observation_space`、`action_space`、reward、done、success、安全保护和复位机制。
+
+如果不打算复用旧的仿真 checkpoint，也完全可以直接从真机示教数据开始。旧 checkpoint 不是硬依赖；它们只在“直接部署已有仿真策略”或“复现实验表格/视频”时有价值。更贴近真机的路线是用真机数据重新做 BC，得到新的基础 policy checkpoint，再从这个 checkpoint 出发做 RFPO / PPO。
 
 ## 必须对齐的东西
 
@@ -213,6 +216,37 @@ python tools/train.py agent=fpo \
 
 这里 `bc_checkpoint` 是 RFPO/FPO 的 BC 初始化权重，`bc_anchor_dataset` 可以继续作为在线训练时的动作监督约束。
 
+## 不复用旧 checkpoint 的真机路线
+
+如果目标是真机部署，而不是复现旧仿真实验，可以不管旧的 Allegro/RM75 仿真 checkpoint。推荐流程是：
+
+```text
+采集真机示教
+-> 整理成 real_bc.npz
+-> pretrain_fpo_bc.py 得到 flow_bc_last.pt
+-> 先部署/回放 BC policy，确认它至少能接近完成任务
+-> 用 flow_bc_last.pt 初始化 RFPO
+-> 在真机环境或高度对齐的仿真环境中继续在线微调
+```
+
+这条路线的关键判断是：BC 是地基，RFPO 是微调。BC policy 如果已经能比较稳定地接近、抓住、上抬或到达目标，那么 RFPO 有希望继续提升；如果 BC policy 本身连接近、抓取方向、手指闭合时机都错，在线 RFPO 很难凭探索自动救回来。
+
+真机 BC 数据应该覆盖完整任务，而不是只覆盖某一个片段：
+
+- 接近物体。
+- 到达合适 pregrasp。
+- 手指闭合并稳定抓住。
+- 上抬。
+- 移动到目标位置。
+- 到达目标后停止或保持。
+
+在真正开始在线 RFPO 前，建议先做两级检查：
+
+1. 离线检查：BC loss、action 分布、obs/action 维度、action 是否在 `[-1, 1]` 内。
+2. 真机小规模检查：用很小 action scale 或安全控制器部署 BC policy，看它是否能稳定完成任务的前半段或接近完成完整任务。
+
+只有当 BC policy 已经基本可用时，再上在线 RFPO / PPO。否则在线训练采到的大量失败数据会让学习非常慢，也会增加真机风险。
+
 ## 真机在线 PPO / RFPO 需要额外实现什么
 
 如果在线训练发生在 SAPIEN 里，当前代码已经有对应环境。
@@ -297,6 +331,31 @@ failure:
 
 如果没有可靠的物体 6D pose、目标 pose、lift 高度估计，就很难做真机在线 RL。真机通常需要 AprilTag、外部相机、腕部相机、motion capture、可靠 6D pose 模型或其他传感器来计算 reward。
 
+## 真机环境参数怎么定
+
+真机环境的参数可以参考模拟器里的设计，但不能机械照搬。
+
+可以参考模拟器的部分：
+
+- observation 里应该包含哪些量。
+- action 的维度、顺序、符号和归一化范围。
+- 任务阶段划分，例如 approach、grasp、lift、move-to-target。
+- reward 的大体组成，例如目标距离、lift bonus、success bonus、action penalty。
+- success 阈值的大致量级，例如目标距离阈值、稳定帧数、lift 高度。
+- 机器人工作空间、目标区域、物体初始区域的相对几何关系。
+
+必须根据真机实际调整的部分：
+
+- 相机外参、坐标系转换和物体 pose 估计噪声。
+- 机器人基座、桌面、物体、目标区域的真实相对位置。
+- 控制频率、通信延迟、动作执行时间。
+- action scale、速度限制、加速度限制、力矩/电流限制。
+- 夹爪/手指实际摩擦、柔顺性、闭合速度和接触稳定性。
+- reward 阈值和 done 条件，因为真机传感器噪声通常比仿真大。
+- reset 方式，因为真机很难像模拟器一样瞬间复位。
+
+因此更准确的说法是：真机环境要在语义上对齐模拟器，但参数要按真实硬件、真实传感器和真实任务布局重新标定。不要为了“和模拟器完全一样”牺牲真机可执行性；真正重要的是让 policy 看到的 obs/action 语义一致，并且 reward 能稳定反映任务进展。
+
 ## Reset 是真机在线训练的主要难点
 
 真机在线训练不是只调用算法就行。每条 episode 结束后，环境必须能恢复到下一次训练的初始状态。
@@ -342,10 +401,27 @@ policy action [-1, 1]
 4. 采少量真机示教，保存原始日志和转换后的 `observations/actions`。
 5. 用检查脚本验证 NPZ 维度、范围、坐标系、NaN/Inf。
 6. 用 `tools/pretrain_ppo_bc.py` 和 `tools/pretrain_fpo_bc.py` 分别做 BC。
-7. 在仿真里用真机 BC checkpoint 做 PPO/RFPO 训练，先确认流程能跑。
-8. 真机只做离线 replay 或短 episode 评测。
-9. 如果需要真机在线 RL，再实现 `RealRobotRelocateEnv`、reward、done、reset、安全层。
-10. 从极小 action scale、短 horizon、人工监督开始小步 fine-tune。
+7. 先部署或回放 BC policy，确认 BC 本身能稳定完成或接近完成任务。
+8. 在仿真或真机环境里用真机 BC checkpoint 做 PPO/RFPO 训练，先确认流程能跑。
+9. 真机先做短 episode 评测，不要一开始就长时间自由探索。
+10. 如果需要真机在线 RL，再实现 `RealRobotRelocateEnv`、reward、done、reset、安全层。
+11. 从极小 action scale、短 horizon、人工监督开始小步 fine-tune。
+
+## 真机同学主要需要配合什么
+
+真机侧最核心的配合工作不是改 RFPO 算法，而是把真实系统包装成算法能理解的数据和环境。
+
+主要事项如下：
+
+- 采集示教数据：覆盖完整任务流程，保存原始传感器、机器人状态、控制命令和成功/失败标记。
+- 整理 BC 数据：把真机日志转成 `observations/actions` NPZ，保证维度、顺序、单位、坐标系和 action 范围正确。
+- 标定 observation adapter：把相机/传感器测到的物体、目标、机器人状态转换到 policy 需要的 frame。
+- 标定 action adapter：把 policy 输出的 `[-1, 1]` 动作转换成真机可安全执行的末端/手指控制命令。
+- 搭建可出分环境：定义任务初始状态、目标位置、成功指标、失败指标、reward、done 和 reset。
+- 做安全层：限制速度、力矩、工作空间、动作幅度，加入急停和失败保护。
+- 调整真实参数：参考模拟器设置，但根据真实硬件和传感器调整阈值、动作尺度、目标区域、reset 流程和 reward 尺度。
+
+其中“可出分环境”不是要求真机和模拟器完全一样，而是要求真机环境能稳定地产生有意义的 `obs, reward, done, info`。环境参数可以从模拟器出发，但最终必须以真实机器人能稳定执行、传感器能稳定测量为准。
 
 ## 最重要的判断
 
@@ -358,4 +434,6 @@ policy action [-1, 1]
 但必须让 policy 看到的 observation 和输出的 action 在语义上与训练时完全一样。
 value 由算法自己学；
 reward / done / reset / safety 必须在真机环境中自己实现。
+旧仿真 checkpoint 不是必须的；
+如果用真机示教重新做 BC，先验证 BC policy，再基于它做在线 RFPO。
 ```
