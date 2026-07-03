@@ -1,50 +1,61 @@
-<div align="center">
+# RFPO: Rectified Flow Policy Optimization for Dexterous Hand-Object Interactions
 
-# ViViDex: Learning Vision-based Dexterous Manipulation from Human Videos
+This repository contains the cleaned RFPO training code used for dexterous
+hand-object manipulation experiments in the ViViDex/SAPIEN environment. It keeps
+the original ViViDex simulator stack as the environment foundation, and adds the
+RFPO/FPO training pipeline, RM75 + Inspire hand support, experiment scripts, and
+deployment notes.
 
-[Zerui Chen](https://zerchen.github.io/)<sup>1</sup> &emsp; [Shizhe Chen](https://cshizhe.github.io/)<sup>1</sup> &emsp; [Etienne Arlaud](https://scholar.google.com/citations?user=-0kdc5cAAAAJ&hl=fr)<sup>1</sup> &emsp; [Ivan Laptev](https://www.di.ens.fr/~laptev/)<sup>2</sup> &emsp; [Cordelia Schmid](https://cordeliaschmid.github.io/)<sup>1</sup>
+The original ViViDex README has been preserved as
+[`vividex-readme.md`](vividex-readme.md).
 
-<sup>1</sup>WILLOW, INRIA Paris, France <br>
-<sup>2</sup>MBZUAI
+## Repository Contents
 
-<a href='https://zerchen.github.io/projects/vividex.html'><img src='https://img.shields.io/badge/Project-Page-blue'></a>
-<a href='https://arxiv.org/abs/2404.15709'><img src='https://img.shields.io/badge/Paper-arXiv-red'></a>
-</div>
+- `algos/rl/`: PPO and RFPO/FPO training code.
+- `hand_imitation/`: SAPIEN manipulation environments and robot wrappers.
+- `assets/robot/`: URDFs and meshes for UR5 + Allegro and RM75 + Inspire hand.
+- `norm_trajectories/`: normalized reference trajectories, including RM75
+  retargeted trajectories.
+- `scripts/local/`: local training entrypoints for Allegro and RM75 experiments.
+- `tools/`: BC collection, BC pretraining, RL training, evaluation, rendering,
+  and RM75 retargeting utilities.
+- `docs/`: RFPO design notes and real-robot BC+PPO/RFPO deployment notes.
 
-This is the implementation of **[ViViDex](https://zerchen.github.io/projects/vividex.html)** under the SAPIEN simulator, a novel system for learning dexterous manipulation skills from human videos:
-![teaser](assets/teaser.png)
+## Main Training Entry Points
 
-## Installation 👷
-```
-git clone https://github.com/zerchen/vividex_sapien.git
+Run the paired Allegro BC+PPO / BC+RFPO pipeline:
 
-conda create -n rl python=3.10
-conda activate rl
-conda install pytorch==2.4.1 torchvision==0.19.1 torchaudio==2.4.1 pytorch-cuda=12.1 -c pytorch -c nvidia
-pip install -r requirements.txt
-```
-
-## Usuage 🚀
 ```bash
-cd tools
-# Train the state-based policy
-python train.py env.name=seq_name env.norm_traj=True
+scripts/local/run_allegro_bc_rfpo_vs_ppo_500k.sh
 ```
-Available seq_name can be found at: `norm_trajectories`. You can also download trained checkpoints [here](https://drive.google.com/drive/folders/130JTBsDv4I7NytXLMlo3ehxfJI4I75pB) and check their config files for a reference. When state-based policies are trained, rollout these policies with `generate_expert_trajs.py` and train the visual policy with `imitate_train.py` using either BC or diffusion policy.
 
-## Real robot 🤖
-Please refer to our UR5 ROS [code](https://github.com/inria-paris-robotics-lab/prl_ur5_robot) and Allegro hand ROS [code](https://github.com/inria-paris-robotics-lab/allegro_hand_ros_v4) as an example to set up the real robot experiment.
+Run the paired RM75 BC+PPO / BC+RFPO pipeline:
 
-## Acknowledgements
-Parts of the code are based on [DexArt](https://github.com/Kami-code/dexart-release), [DexPoint](https://github.com/yzqin/dexpoint-release) and [3D-Diffusion-Policy](https://github.com/YanjieZe/3D-Diffusion-Policy). We thank the authors for sharing their excellent work!
-
-## Citation 📝
-If you find ViViDex useful for your research, please consider citing our paper:
-```bibtex
-@inproceedings{chen2025vividex,
-  title={{ViViDex}: Learning Vision-based Dexterous Manipulation from Human Videos},
-  author={Chen, Zerui and Chen, Shizhe and Arlaud, Etienne and Laptev, Ivan and Schmid, Cordelia},
-  booktitle={ICRA},
-  year={2025}
-}
+```bash
+scripts/local/run_rm75_bc_rfpo_vs_ppo.sh
 ```
+
+Both scripts generate BC datasets and BC warm-start checkpoints when missing,
+then launch the corresponding online PPO/RFPO training runs. Large generated
+artifacts such as `.local_runs`, checkpoints, videos, and virtual environments
+are intentionally excluded from git.
+
+## Real-Robot Notes
+
+For real-robot deployment, see
+[`docs/real_robot_bc_ppo_rfpo.md`](docs/real_robot_bc_ppo_rfpo.md). The short
+version is:
+
+- collect real-robot demonstrations;
+- convert them into `observations/actions` NPZ datasets aligned with the policy
+  observation/action spaces;
+- pretrain BC checkpoints;
+- verify the BC policy before online RFPO;
+- implement a real-robot environment with reward, done, reset, and safety logic
+  before attempting online RL on hardware.
+
+## Experiment Summary
+
+See
+[`RM75_ALLEGRO_EXPERIMENT_SUMMARY_20260629.md`](RM75_ALLEGRO_EXPERIMENT_SUMMARY_20260629.md)
+for the current Allegro and RM75 experiment comparison.
