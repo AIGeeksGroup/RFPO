@@ -1,0 +1,29 @@
+name: PPO                                                   # algorithm name
+multi_proc: True                                            # whether to use multi_processing or not
+params:
+  gamma: 0.95                                               # discount factor
+  gae_lambda: 0.95                                          # GAE parameter
+  learning_rate: 1e-5                                       # learning rate for optimizer
+  ent_coef: 0.001                                           # PPO Entropy coefficient
+  vf_coef: 0.5                                              # Added multiplier on Value Function Loss
+  clip_range: 0.2                                           # PPO Clip parameter
+  n_steps: 4096                                             # Number of timesteps to collect per iteration (e.g. global batch) 
+  batch_size: 256                                           # Minibatch size for each ADAM step during PPO opt
+  n_epochs: 5                                               # Number of epochs on collected global batch per iteration
+  eval_deterministic: False                                  # Whether periodic eval uses deterministic policy actions
+  initial_curriculum_stage: 0                                # Start ViViDex curriculum from this stage when supported
+  save_best_model: False                                     # Save best PPO checkpoint by eval mean reward
+  bc_anchor_dataset: null                                    # Optional NPZ with observations/actions for PPO+BC anchor updates
+  bc_anchor_coef: 0.0                                        # Auxiliary BC loss coefficient during PPO updates
+  bc_anchor_min_coef: 0.0                                    # Lower bound after linear decay
+  bc_anchor_decay_steps: 500000                              # Linear decay horizon for BC coefficient
+  bc_anchor_batch_size: 256                                  # BC minibatch per auxiliary update
+  bc_anchor_updates: 1                                       # Number of BC auxiliary updates per PPO update
+  bc_anchor_loss: huber                                      # huber, mse, or l1
+  bc_anchor_huber_delta: 0.05                                # Huber transition point for BC anchor loss
+  bc_anchor_grad_clip: 1.0                                   # Gradient clip for auxiliary BC updates
+policy_kwargs:                                              # Policy parameters (initial STD and architecture)
+  net_arch:
+    - pi: [256, 128]
+      vf: [256, 128]
+  log_std_init: -1.60
