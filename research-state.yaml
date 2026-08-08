@@ -296,7 +296,7 @@ hypotheses:
     priority: high
   - id: H37
     statement: "Geometric median-of-means aggregation improves the initial FPO++ gradient's alignment to observed terminal outcomes while preserving complete-vector structure."
-    status: proposed
+    status: refuted
     motivation: "H34's coordinate median damaged outcome alignment despite preserving scale, implicating broken cross-coordinate structure rather than the absence of heavy-tailed microbatch gradients. GMOM robustly aggregates whole gradient vectors and is supported by prior PPO evidence."
     parent: H34
     priority: high
@@ -315,7 +315,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 114
+  total_runs: 115
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -970,11 +970,21 @@ experiments:
       rollback_active_fraction: 0.6642188
       positive_chunks: 85
       paired_preupdate: true
+    - run: can_step6000_gmom_microbatch_gradient_audit_osmesa_seed20260908
+      metric: outcome_reference_cosine_gain
+      values: [-0.0044406, -0.0098254]
+      control_reference_cosines: [0.7407566, 0.6882293]
+      candidate_reference_cosines: [0.7363160, 0.6784039]
+      candidate_control_norm_ratios: [1.0031260, 1.0025399]
+      solver_iterations: [12, 11]
+      solver_converged: [true, true]
+      audited_chunks: 192
+      eligible_chunks: 250
 
 outer_loop:
   cycle: 24
-  last_direction: "Audit H37 full-vector geometric median-of-means on two fixed outcome-reference replicas before any optimizer integration."
-  last_reflection: "H34 implicates coordinate-wise structure destruction, while H36 shows that clipping activity is not a sufficient target. GMOM is the lowest-cost distinct test of robust complete-vector aggregation and has prior PPO motivation."
+  last_direction: "H37 GMOM is closed without optimizer integration; the next direction must change how useful gradients are estimated or applied rather than robustly aggregate the same four blocks."
+  last_reflection: "Full-vector GMOM converged and preserved the mean almost exactly, but outcome alignment fell by 0.0044 and 0.0098. Together H34 and H37 close coordinate-wise and geometric robust microbatch aggregation at this scale."
 
 workspace:
   findings: "findings.md"

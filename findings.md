@@ -250,6 +250,13 @@ retained only 36.0% and 29.1% of control, below the locked 50% gate in both batc
 activity rate confirms that the mechanism was active rather than vacuous; it exerted too much inward
 pressure to preserve useful progress.
 
+Full-vector geometric median-of-means aggregation did not rescue robust gradient aggregation. On two
+fixed 96-chunk replicas, the geometric median converged in 12 and 11 iterations and retained the
+arithmetic mean's direction and norm almost exactly. Nevertheless, outcome-reference cosine changed
+from 0.741 to 0.736 and from 0.688 to 0.678. H34 and H37 together distinguish two failure modes:
+coordinate-wise median damages joint structure, while geometric median preserves that structure but
+finds no superior robust center in the four FPO++ block gradients.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -295,6 +302,7 @@ pressure to preserve useful progress.
 - At the step-6000 checkpoint, official GAE gets the broad outcome sign right on more than 93% of labeled chunks; further sign filtering is inactive and does not improve gradient alignment.
 - Balanced per-environment accounting rescued H30 from invalid censoring, but zero-endpoint PCGrad's +1/20 random and +2/40 pooled gains remain below the preregistered confirmation threshold.
 - PPO-RB demonstrates that retaining more unclipped positive ratios does not by itself preserve the useful update: its strong boundary activity traded away roughly two thirds of surrogate progress and improved held-out direction in only one batch.
+- Robust microbatch aggregation is closed at this scale: coordinate median damages useful cross-coordinate structure, while full-vector GMOM stays near the ordinary mean and slightly worsens outcome alignment in both replicas.
 
 ## Lessons and Constraints
 
@@ -316,4 +324,4 @@ pressure to preserve useful progress.
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, rank-based GAE weighting, terminal-sign filtering, fixed lower actor learning rate, full-batch gradient accumulation, BC/FPO++ midpoint interpolation, explicit Gaussian-bridge distillation, antithetic endpoint averaging, shorter receding-horizon execution, temporally correlated Gaussian inference, advantage-sign gradient surgery, temporal per-timestep clipping, coordinate-wise median gradient aggregation, and PPO-RB ratio rollback are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The next candidate must preserve useful surrogate progress while improving both held-out update directions, rather than optimizing clipping activity alone.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, rank-based GAE weighting, terminal-sign filtering, fixed lower actor learning rate, full-batch gradient accumulation, BC/FPO++ midpoint interpolation, explicit Gaussian-bridge distillation, antithetic endpoint averaging, shorter receding-horizon execution, temporally correlated Gaussian inference, advantage-sign gradient surgery, temporal per-timestep clipping, coordinate-wise median and geometric-median gradient aggregation, and PPO-RB ratio rollback are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The next candidate must change how useful gradients are estimated or applied, rather than robustly re-aggregating the same microbatches or optimizing clipping activity alone.

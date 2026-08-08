@@ -1,0 +1,129 @@
+{
+  "aggregation_method": "geometric",
+  "cfm_samples": 8,
+  "iteration": 2,
+  "microbatches_per_replica": 4,
+  "num_chunks_audited": 192,
+  "num_eligible_chunks": 250,
+  "num_replicas": 2,
+  "passed": false,
+  "replicas": [
+    {
+      "candidate_control_cosine": 1.0003708600997925,
+      "candidate_control_norm_ratio": 1.0031260251998901,
+      "candidate_gradient_norm": 7.428739070892334,
+      "candidate_reference_cosine": 0.7363159656524658,
+      "candidate_reference_cosine_gain": -0.004440605640411377,
+      "candidate_solver_converged": true,
+      "candidate_solver_iterations": 12,
+      "control_gradient_norm": 7.405588626861572,
+      "control_reference_cosine": 0.7407565712928772,
+      "gates": {
+        "candidate_control_direction": true,
+        "candidate_control_norm": true,
+        "candidate_converged": true,
+        "candidate_reference_absolute": false,
+        "candidate_reference_gain": false,
+        "finite_nonzero": true,
+        "not_below_typical_microbatch": true
+      },
+      "median_microbatch_reference_cosine": 0.3251171112060547,
+      "microbatch_reference_cosines": [
+        0.3121882379055023,
+        0.28469330072402954,
+        0.44080817699432373,
+        0.33804601430892944
+      ],
+      "microbatch_size": 24,
+      "microbatches": [
+        {
+          "gae_mean": 0.03429735079407692,
+          "gae_std": 0.08178506046533585,
+          "gradient_norm": 15.352705955505371,
+          "microbatch": 0
+        },
+        {
+          "gae_mean": 0.041233766824007034,
+          "gae_std": 0.13401737809181213,
+          "gradient_norm": 16.793325424194336,
+          "microbatch": 1
+        },
+        {
+          "gae_mean": 0.05079258978366852,
+          "gae_std": 0.12700270116329193,
+          "gradient_norm": 16.338666915893555,
+          "microbatch": 2
+        },
+        {
+          "gae_mean": 0.056651607155799866,
+          "gae_std": 0.16310617327690125,
+          "gradient_norm": 15.284470558166504,
+          "microbatch": 3
+        }
+      ],
+      "num_chunks": 96,
+      "passed": false,
+      "reference_gradient_norm": 1.8872038125991821,
+      "replica": 0
+    },
+    {
+      "candidate_control_cosine": 1.001102328300476,
+      "candidate_control_norm_ratio": 1.002539873123169,
+      "candidate_gradient_norm": 8.357993125915527,
+      "candidate_reference_cosine": 0.6784038543701172,
+      "candidate_reference_cosine_gain": -0.009825408458709717,
+      "candidate_solver_converged": true,
+      "candidate_solver_iterations": 11,
+      "control_gradient_norm": 8.33681869506836,
+      "control_reference_cosine": 0.6882292628288269,
+      "gates": {
+        "candidate_control_direction": true,
+        "candidate_control_norm": true,
+        "candidate_converged": true,
+        "candidate_reference_absolute": false,
+        "candidate_reference_gain": false,
+        "finite_nonzero": true,
+        "not_below_typical_microbatch": true
+      },
+      "median_microbatch_reference_cosine": 0.4049241244792938,
+      "microbatch_reference_cosines": [
+        0.49698057770729065,
+        0.3722703456878662,
+        0.43757790327072144,
+        0.12110592424869537
+      ],
+      "microbatch_size": 24,
+      "microbatches": [
+        {
+          "gae_mean": -0.0022733609657734632,
+          "gae_std": 0.20929771661758423,
+          "gradient_norm": 15.716303825378418,
+          "microbatch": 0
+        },
+        {
+          "gae_mean": 0.030522972345352173,
+          "gae_std": 0.1310087889432907,
+          "gradient_norm": 15.869626998901367,
+          "microbatch": 1
+        },
+        {
+          "gae_mean": 0.011954779736697674,
+          "gae_std": 0.14850786328315735,
+          "gradient_norm": 17.15200424194336,
+          "microbatch": 2
+        },
+        {
+          "gae_mean": 0.019695492461323738,
+          "gae_std": 0.10765025019645691,
+          "gradient_norm": 14.2581205368042,
+          "microbatch": 3
+        }
+      ],
+      "num_chunks": 96,
+      "passed": false,
+      "reference_gradient_norm": 1.3640412092208862,
+      "replica": 1
+    }
+  ],
+  "seed": 20260908
+}
