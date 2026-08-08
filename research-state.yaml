@@ -76,7 +76,7 @@ hypotheses:
     priority: high
   - id: H6
     statement: "Resetting the reused CFM invalid-step mask every rollout iteration prevents cumulative sample loss and improves early Can FPO++ reward learning."
-    status: pending
+    status: refuted
     motivation: "The released loop marks post-boundary actions invalid in a persistent buffer but never clears that buffer between independent rollouts."
     parent: H2
     priority: high
@@ -95,7 +95,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 59
+  total_runs: 65
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -330,11 +330,39 @@ experiments:
       metric: success_rate
       value: 0.12
       episodes: 50
+    - run: can_maskreset_control_5iter_seed0
+      metric: pooled_collection_success
+      value: 0.0877
+      successes: 53
+      episodes: 604
+      iterations: "2-5"
+    - run: can_maskreset_candidate_5iter_seed0
+      metric: pooled_collection_success
+      value: 0.0927
+      successes: 56
+      episodes: 604
+      iterations: "2-5"
+    - run: can_maskreset_control_5iter_seed0_zero_final
+      metric: success_rate
+      value: 0.84
+      episodes: 50
+    - run: can_maskreset_control_5iter_seed0_random_final
+      metric: success_rate
+      value: 0.10
+      episodes: 50
+    - run: can_maskreset_candidate_5iter_seed0_zero_final
+      metric: success_rate
+      value: 0.82
+      episodes: 50
+    - run: can_maskreset_candidate_5iter_seed0_random_final
+      metric: success_rate
+      value: 0.10
+      episodes: 50
 
 outer_loop:
   cycle: 1
-  last_direction: "Test whether resetting the cumulatively contaminated CFM validity mask preserves usable on-policy data and improves early Can reward learning."
-  last_reflection: "Doubling per-action CFM samples from 8 to 16 reduced pooled actor-update collection success from 9.12% to 7.95%; final zero/random evaluation was also slightly lower at 78%/12% versus 80%/14%. H5 is refuted, so no 32-sample or 5M-step extension is justified."
+  last_direction: "Test a single credit-assignment change that propagates sparse terminal success farther through Can episodes without changing rewards or policy sampling."
+  last_reflection: "Resetting the CFM validity mask fixed a real cumulative data-loss defect (98.07% valid at iteration 5 versus 95.81%), but pooled actor-update success improved only 0.50 points and final zero/random evaluation was 82%/10% versus 84%/10%. H6 is refuted as a reward-improvement claim."
 
 workspace:
   findings: "findings.md"
