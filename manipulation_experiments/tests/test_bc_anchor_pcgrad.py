@@ -44,3 +44,18 @@ def test_projection_handles_missing_anchor_gradient():
     torch.testing.assert_close(projected[0], primary[0])
     torch.testing.assert_close(projected[1], torch.tensor([0.0]))
 
+
+def test_projected_negative_branch_no_longer_cancels_positive_branch():
+    positive = torch.tensor([2.0, 0.0])
+    negative = torch.tensor([-1.0, 3.0])
+
+    projected, dot, conflict = project_conflicting_gradient(
+        [negative], [positive]
+    )
+    candidate = positive + projected[0]
+
+    assert conflict
+    torch.testing.assert_close(dot, torch.tensor(-2.0))
+    torch.testing.assert_close(projected[0], torch.tensor([0.0, 3.0]))
+    torch.testing.assert_close(candidate, torch.tensor([2.0, 3.0]))
+    assert torch.dot(candidate, positive) > 0

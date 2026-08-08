@@ -172,6 +172,11 @@ class FlowPPOConfig:
     rank_advantage_audit_iteration: int = 2
     rank_advantage_audit_chunks: int = 64
     rank_advantage_audit_output_json: Optional[str] = None
+    advantage_sign_pcgrad_audit: bool = False
+    advantage_sign_pcgrad_audit_iteration: int = 2
+    advantage_sign_pcgrad_audit_chunks: int = 64
+    advantage_sign_pcgrad_min_per_sign: int = 8
+    advantage_sign_pcgrad_audit_output_json: Optional[str] = None
     bc_anchor_pcgrad_audit: bool = False
     bc_anchor_pcgrad_audit_iteration: int = 2
     bc_anchor_pcgrad_audit_chunks: int = 64
@@ -795,6 +800,34 @@ def main(cfg: FlowPPOConfig):
             raise ValueError("rank-advantage audit settings must be positive")
         if cfg.rank_advantage_audit_chunks % 2:
             raise ValueError("rank-advantage audit requires an even chunk count")
+    if cfg.advantage_sign_pcgrad_audit:
+        if any(
+            (
+                cfg.discounted_success_critic_audit,
+                cfg.critic_warmup_scheduler_audit,
+                cfg.direct_advantage_audit,
+                cfg.rank_advantage_audit,
+                cfg.bc_anchor_pcgrad_audit,
+            )
+        ):
+            raise ValueError("advantage-sign PCGrad and side audits are mutually exclusive")
+        if cfg.loss_mode != "fpo" or not cfg.do_chunk_level_ppo:
+            raise ValueError("advantage-sign PCGrad audit requires chunk-level FPO")
+        if world_size != 1:
+            raise ValueError("advantage-sign PCGrad audit currently requires one process")
+        if min(
+            cfg.advantage_sign_pcgrad_audit_iteration,
+            cfg.advantage_sign_pcgrad_audit_chunks,
+            cfg.advantage_sign_pcgrad_min_per_sign,
+        ) < 1:
+            raise ValueError("advantage-sign PCGrad audit settings must be positive")
+        if cfg.advantage_sign_pcgrad_audit_chunks % 2:
+            raise ValueError("advantage-sign PCGrad audit requires an even chunk count")
+        if (
+            2 * cfg.advantage_sign_pcgrad_min_per_sign
+            > cfg.advantage_sign_pcgrad_audit_chunks // 2
+        ):
+            raise ValueError("advantage-sign PCGrad support cannot fit in each audit batch")
     if cfg.bc_anchor_pcgrad_audit:
         if cfg.loss_mode != "fpo" or not cfg.do_chunk_level_ppo:
             raise ValueError("BC-anchor PCGrad audit requires chunk-level FPO")
@@ -2018,6 +2051,218 @@ def main(cfg: FlowPPOConfig):
                     rollout_advantage_std.item(),
                     int(moment_sums[2].item()),
                 )
+
+        if (
+            cfg.advantage_sign_pcgrad_audit
+            and iteration == cfg.advantage_sign_pcgrad_audit_iteration
+        ):
+            eligible_mask = b_mc_valid[:, 0].bool() & (
+                b_cfm_value_invalid.sum(dim=1) == 0
+            )
+            eligible_indices = torch.where(eligible_mask)[0]
+            required_chunks = cfg.advantage_sign_pcgrad_audit_chunks
+            if eligible_indices.numel() < required_chunks:
+                raise RuntimeError(
+                    "advantage-sign PCGrad audit requires "
+                    f"{required_chunks} fully valid labeled chunks, "
+                    f"found {eligible_indices.numel()}"
+                )
+            audit_generator = torch.Generator().manual_seed(
+                cfg.seed + iteration * 8081
+            )
+            audit_indices = eligible_indices[
+                torch.randperm(
+                    eligible_indices.numel(), generator=audit_generator
+                )[:required_chunks]
+            ]
+            audit_batch_size = required_chunks // 2
+            batch_results = []
+            actor_module.eval()
+            for audit_batch in range(2):
+                batch_slice = slice(
+                    audit_batch * audit_batch_size,
+                    (audit_batch + 1) * audit_batch_size,
+                )
+                batch_indices = audit_indices[batch_slice]
+                control_weights = b_advantages[batch_indices, 0].float()
+                control_std = control_weights.std()
+                if not torch.isfinite(control_std) or control_std <= 0:
+                    raise RuntimeError(
+                        "advantage-sign PCGrad audit has degenerate GAE weights"
+                    )
+                control_weights = (
+                    control_weights - control_weights.mean()
+                ) / (control_std + 1e-8)
+                positive_mask = control_weights > 0
+                negative_mask = control_weights < 0
+                positive_count = int(positive_mask.sum().item())
+                negative_count = int(negative_mask.sum().item())
+                if min(positive_count, negative_count) < cfg.advantage_sign_pcgrad_min_per_sign:
+                    raise RuntimeError(
+                        "advantage-sign PCGrad audit lacks sign support in batch "
+                        f"{audit_batch}: positive={positive_count}, negative={negative_count}"
+                    )
+
+                positive_weights = torch.where(
+                    positive_mask, control_weights, torch.zeros_like(control_weights)
+                )
+                negative_weights = torch.where(
+                    negative_mask, control_weights, torch.zeros_like(control_weights)
+                )
+                reference_weights = b_mc_returns[batch_indices, 0].float()
+                reference_weights = reference_weights - reference_weights.mean()
+
+                _, reference_gradient = replay_audit_gradient(
+                    batch_indices,
+                    reference_weights,
+                    b_actions=b_actions,
+                    b_cfm_losses=b_cfm_losses,
+                    b_cfm_loss_ts=b_cfm_loss_ts,
+                    b_cfm_loss_epsilons=b_cfm_loss_epsilons,
+                    b_cfm_value_invalid=b_cfm_value_invalid,
+                    b_obs_images=b_obs_images,
+                    b_obs_state=b_obs_state,
+                )
+                _, control_gradient = replay_audit_gradient(
+                    batch_indices,
+                    control_weights,
+                    b_actions=b_actions,
+                    b_cfm_losses=b_cfm_losses,
+                    b_cfm_loss_ts=b_cfm_loss_ts,
+                    b_cfm_loss_epsilons=b_cfm_loss_epsilons,
+                    b_cfm_value_invalid=b_cfm_value_invalid,
+                    b_obs_images=b_obs_images,
+                    b_obs_state=b_obs_state,
+                )
+                _, positive_gradient = replay_audit_gradient(
+                    batch_indices,
+                    positive_weights,
+                    b_actions=b_actions,
+                    b_cfm_losses=b_cfm_losses,
+                    b_cfm_loss_ts=b_cfm_loss_ts,
+                    b_cfm_loss_epsilons=b_cfm_loss_epsilons,
+                    b_cfm_value_invalid=b_cfm_value_invalid,
+                    b_obs_images=b_obs_images,
+                    b_obs_state=b_obs_state,
+                )
+                _, negative_gradient = replay_audit_gradient(
+                    batch_indices,
+                    negative_weights,
+                    b_actions=b_actions,
+                    b_cfm_losses=b_cfm_losses,
+                    b_cfm_loss_ts=b_cfm_loss_ts,
+                    b_cfm_loss_epsilons=b_cfm_loss_epsilons,
+                    b_cfm_value_invalid=b_cfm_value_invalid,
+                    b_obs_images=b_obs_images,
+                    b_obs_state=b_obs_state,
+                )
+                projected_negative_list, sign_dot, projection_active = (
+                    project_conflicting_gradient(
+                        [negative_gradient], [positive_gradient]
+                    )
+                )
+                projected_negative = projected_negative_list[0]
+                if projected_negative is None:
+                    raise RuntimeError("advantage-sign projection lost its gradient")
+                candidate_gradient = positive_gradient + projected_negative
+                recombined_gradient = positive_gradient + negative_gradient
+
+                vectors = {
+                    "reference": reference_gradient,
+                    "control": control_gradient,
+                    "positive": positive_gradient,
+                    "negative": negative_gradient,
+                    "candidate": candidate_gradient,
+                }
+                norms = {name: vector.norm() for name, vector in vectors.items()}
+                if any(
+                    (not torch.isfinite(norm).item()) or norm.item() <= 0
+                    for norm in norms.values()
+                ):
+                    raise RuntimeError(
+                        "advantage-sign PCGrad audit produced an invalid gradient norm"
+                    )
+                decomposition_cosine = torch.nn.functional.cosine_similarity(
+                    control_gradient.unsqueeze(0),
+                    recombined_gradient.unsqueeze(0),
+                    dim=1,
+                ).item()
+                if decomposition_cosine < 0.99999:
+                    raise RuntimeError(
+                        "advantage-sign gradient decomposition does not reproduce control"
+                    )
+                control_reference_cosine = torch.nn.functional.cosine_similarity(
+                    control_gradient.unsqueeze(0),
+                    reference_gradient.unsqueeze(0),
+                    dim=1,
+                ).item()
+                candidate_reference_cosine = torch.nn.functional.cosine_similarity(
+                    candidate_gradient.unsqueeze(0),
+                    reference_gradient.unsqueeze(0),
+                    dim=1,
+                ).item()
+                candidate_control_cosine = torch.nn.functional.cosine_similarity(
+                    candidate_gradient.unsqueeze(0),
+                    control_gradient.unsqueeze(0),
+                    dim=1,
+                ).item()
+                batch_results.append(
+                    {
+                        "batch": audit_batch,
+                        "num_chunks": audit_batch_size,
+                        "positive_chunks": positive_count,
+                        "negative_chunks": negative_count,
+                        "positive_gradient_norm": float(norms["positive"].item()),
+                        "negative_gradient_norm": float(norms["negative"].item()),
+                        "control_gradient_norm": float(norms["control"].item()),
+                        "candidate_gradient_norm": float(norms["candidate"].item()),
+                        "reference_gradient_norm": float(norms["reference"].item()),
+                        "positive_negative_gradient_dot": float(sign_dot.item()),
+                        "positive_negative_gradient_cosine": float(
+                            torch.nn.functional.cosine_similarity(
+                                positive_gradient.unsqueeze(0),
+                                negative_gradient.unsqueeze(0),
+                                dim=1,
+                            ).item()
+                        ),
+                        "projection_active": projection_active,
+                        "control_decomposition_cosine": decomposition_cosine,
+                        "control_reference_cosine": control_reference_cosine,
+                        "candidate_reference_cosine": candidate_reference_cosine,
+                        "candidate_reference_cosine_gain": (
+                            candidate_reference_cosine - control_reference_cosine
+                        ),
+                        "candidate_control_cosine": candidate_control_cosine,
+                        "candidate_control_norm_ratio": float(
+                            (norms["candidate"] / norms["control"]).item()
+                        ),
+                    }
+                )
+            actor_module.train()
+            if cfg.freeze_vision_encoder:
+                actor_module.model.vision_encoder.eval()
+            audit_result = {
+                "iteration": iteration,
+                "num_eligible_chunks": int(eligible_indices.numel()),
+                "num_chunks_audited": required_chunks,
+                "num_batches": 2,
+                "min_per_sign": cfg.advantage_sign_pcgrad_min_per_sign,
+                "cfm_samples": n_action_samples,
+                "batches": batch_results,
+            }
+            audit_output_path = (
+                Path(cfg.advantage_sign_pcgrad_audit_output_json)
+                if cfg.advantage_sign_pcgrad_audit_output_json is not None
+                else run_dir / "advantage_sign_pcgrad_audit.json"
+            )
+            audit_output_path.parent.mkdir(parents=True, exist_ok=True)
+            audit_output_path.write_text(
+                json.dumps(audit_result, indent=2, sort_keys=True) + "\n"
+            )
+            logger.info(
+                "Advantage-sign PCGrad audit: %s",
+                json.dumps(audit_result, sort_keys=True),
+            )
 
         critic_side_audit_iteration = (
             cfg.discounted_success_critic_audit_iteration
