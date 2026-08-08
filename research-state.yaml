@@ -102,6 +102,12 @@ hypotheses:
     motivation: "Unlike a delta-zero source, N(0, 0.5^2 I) continuously overlaps the official N(0, I) source while concentrating samples near the successful deterministic mode."
     parent: H8
     priority: high
+  - id: H10
+    statement: "Resetting the validity mask unlocks tempered-source Can learning by preserving samples lost after its more frequent successful episode boundaries."
+    status: pending
+    motivation: "The tempered mixture ended with only 93.91% valid CFM actions, so the bookkeeping defect is materially larger than in the official control."
+    parent: H9
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -437,7 +443,7 @@ experiments:
 
 outer_loop:
   cycle: 1
-  last_direction: "Test whether resetting the cumulative CFM invalid mask unlocks the tempered-source signal, which creates more episode boundaries and loses valid samples faster than the official control."
+  last_direction: "Run one fixed tempered-source plus per-rollout mask-reset interaction pilot, with no source or optimizer sweep."
   last_reflection: "A 20% scale-0.5 source subset recovered full-noise collection from H8's 7.08% to 9.09%, but gained only 0.32 points over control and reduced final random success to 6%. H9 is refuted without a source sweep; its 93.91% final valid-CFM fraction motivates one interaction test with mask reset."
 
 workspace:
