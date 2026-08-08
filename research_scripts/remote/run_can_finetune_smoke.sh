@@ -22,6 +22,10 @@ GAE_LAMBDA="${GAE_LAMBDA:-0.99}"
 ADVANTAGE_WEIGHTING="${ADVANTAGE_WEIGHTING:-signed}"
 ADVANTAGE_WEIGHT_ESS_FRACTION="${ADVANTAGE_WEIGHT_ESS_FRACTION:-0.5}"
 ADVANTAGE_NORMALIZATION_SCOPE="${ADVANTAGE_NORMALIZATION_SCOPE:-minibatch}"
+SUCCESS_REPLAY_AUDIT="${SUCCESS_REPLAY_AUDIT:-False}"
+SUCCESS_REPLAY_AUDIT_ITERATION="${SUCCESS_REPLAY_AUDIT_ITERATION:-2}"
+SUCCESS_REPLAY_AUDIT_CHUNKS="${SUCCESS_REPLAY_AUDIT_CHUNKS:-64}"
+SUCCESS_REPLAY_AUDIT_MIN_CHUNKS="${SUCCESS_REPLAY_AUDIT_MIN_CHUNKS:-32}"
 MASTER_PORT="${MASTER_PORT:-29500}"
 SEED="${SEED:-0}"
 RUN_NAME="${RUN_NAME:-can_fpopp_smoke_seed${SEED}_$(timestamp)}"
@@ -57,6 +61,10 @@ torchrun --nproc_per_node=1 --master_port "$MASTER_PORT" finetune_online_rl.py \
   --advantage-weighting "$ADVANTAGE_WEIGHTING" \
   --advantage-weight-ess-fraction "$ADVANTAGE_WEIGHT_ESS_FRACTION" \
   --advantage-normalization-scope "$ADVANTAGE_NORMALIZATION_SCOPE" \
+  --success-replay-audit "$SUCCESS_REPLAY_AUDIT" \
+  --success-replay-audit-iteration "$SUCCESS_REPLAY_AUDIT_ITERATION" \
+  --success-replay-audit-chunks "$SUCCESS_REPLAY_AUDIT_CHUNKS" \
+  --success-replay-audit-min-chunks "$SUCCESS_REPLAY_AUDIT_MIN_CHUNKS" \
   --n-action-samples "$N_ACTION_SAMPLES" \
   --n-action-steps 16 \
   --num-envs "$NUM_ENVS" \

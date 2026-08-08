@@ -33,6 +33,7 @@ from src.dexmg_env import VectorizedEnvWrapper, create_vectorized_env
 from src.flow_model import FlowMatchingPolicy
 from src.flow_model_config import FlowMatchingConfig
 from src.rollout_bookkeeping import build_rollout_zero_sampling_mask, prepare_invalid_step_mask
+from src.replay_audit import effective_sample_fraction, successful_chunk_mask
 from src.advantage_weighting import (
     clipped_mirror_ratio_loss,
     ess_softmax_weights,
@@ -106,6 +107,11 @@ class FlowPPOConfig:
     advantage_weight_ess_fraction: float = 0.5
     advantage_normalization_scope: Literal["minibatch", "rollout"] = "minibatch"
     reset_cfm_invalid_mask_each_iteration: bool = False
+    success_replay_audit: bool = False
+    success_replay_audit_iteration: int = 2
+    success_replay_audit_chunks: int = 64
+    success_replay_audit_min_chunks: int = 32
+    success_replay_audit_output_json: Optional[str] = None
     rollout_zero_fraction: float = 0.0
     rollout_tempered_fraction: float = 0.0
     rollout_tempered_scale: float = 0.5
@@ -595,6 +601,18 @@ def main(cfg: FlowPPOConfig):
 
     logger.info(colored(f"[{rank}/{world_size}] Using device: {device}", "green"))
 
+    if cfg.success_replay_audit:
+        if cfg.loss_mode != "fpo" or not cfg.do_chunk_level_ppo:
+            raise ValueError("success replay audit requires chunk-level FPO")
+        if world_size != 1:
+            raise ValueError("success replay audit currently requires one process")
+        if min(
+            cfg.success_replay_audit_iteration,
+            cfg.success_replay_audit_chunks,
+            cfg.success_replay_audit_min_chunks,
+        ) < 1:
+            raise ValueError("success replay audit iteration and chunk counts must be positive")
+
     # Run dir on all ranks (avoid races)
     run_start_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     run_dir = Path("runs") / f"{cfg.experiment}_{run_start_time}" if cfg.output_dir is None else Path(cfg.output_dir)
@@ -975,6 +993,89 @@ def main(cfg: FlowPPOConfig):
         )
         return cfm_loss, cfm_loss_t, cfm_loss_eps
 
+    def replay_audit_gradient(
+        chunk_indices: torch.Tensor,
+        chunk_weights: torch.Tensor,
+        *,
+        b_actions: torch.Tensor,
+        b_cfm_losses: torch.Tensor,
+        b_cfm_loss_ts: torch.Tensor,
+        b_cfm_loss_epsilons: torch.Tensor,
+        b_cfm_value_invalid: torch.Tensor,
+        b_obs_images: dict[str, torch.Tensor],
+        b_obs_state: torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """Compute a diagnostic chunk-level PPO gradient without populating .grad."""
+        audit_actions = b_actions[chunk_indices].to(device)
+        audit_old_losses = b_cfm_losses[chunk_indices].to(device)
+        audit_times = b_cfm_loss_ts[chunk_indices].to(device)
+        audit_noises = b_cfm_loss_epsilons[chunk_indices].to(device)
+        audit_valid = 1.0 - b_cfm_value_invalid[chunk_indices].to(device)
+        audit_obs = {key: value[chunk_indices, 0].to(device) for key, value in b_obs_images.items()}
+        audit_obs["observation.state"] = b_obs_state[chunk_indices, 0].to(device)
+        audit_obs["action"] = audit_actions
+
+        fixed_times = audit_times.permute(0, 2, 1).reshape(-1, n_action_steps, 1)
+        if not (fixed_times[:, 0, 0] == fixed_times[:, -1, 0]).all():
+            raise RuntimeError("replay audit received inconsistent CFM times within a chunk")
+        fixed_times = fixed_times[:, 0:1, :]
+        fixed_noises = audit_noises.permute(0, 2, 1, 3).reshape(
+            -1, n_action_steps, action_dim
+        )
+        current_losses, _, _ = get_cfm_values(
+            actor_module,
+            audit_obs,
+            n_action_samples,
+            fixed_times,
+            fixed_noises,
+        )
+        current_losses = current_losses.permute(1, 0, 2)
+        old_losses = audit_old_losses.reshape(
+            audit_old_losses.shape[0], -1, n_groups, group_size
+        )
+        current_losses = current_losses.reshape(
+            current_losses.shape[0], -1, n_groups, group_size
+        )
+        if cfg.clamp_old_cfm_loss is not None:
+            old_losses = old_losses.clamp(max=cfg.clamp_old_cfm_loss)
+
+        if cfg.do_average_cfm_loss_in_chunk:
+            denominator = audit_valid.sum(dim=1).unsqueeze(-1).unsqueeze(-1).clamp_min(1.0)
+            old_losses = (old_losses * audit_valid[:, :, None, None]).sum(dim=1) / denominator
+            current_losses = (
+                current_losses * audit_valid[:, :, None, None]
+            ).sum(dim=1) / denominator
+        else:
+            old_losses = (old_losses * audit_valid[:, :, None, None]).sum(dim=1)
+            current_losses = (current_losses * audit_valid[:, :, None, None]).sum(dim=1)
+
+        logratio = old_losses.mean(dim=-1) - current_losses.mean(dim=-1)
+        if cfg.clamp_logratio is not None:
+            logratio = clamp_ste(
+                logratio,
+                min=-cfg.clamp_logratio,
+                max=cfg.clamp_logratio,
+            )
+        ratios = logratio.exp()
+        weights = chunk_weights.to(device).reshape(-1, 1)
+        loss_unclipped = -weights * ratios
+        loss_clipped = -weights * ratios.clamp(1 - cfg.clip_coef, 1 + cfg.clip_coef)
+        audit_loss = torch.maximum(loss_unclipped, loss_clipped).mean()
+        parameters = [parameter for parameter in actor_module.parameters() if parameter.requires_grad]
+        gradients = torch.autograd.grad(audit_loss, parameters, allow_unused=True)
+        vector = torch.cat(
+            [
+                (torch.zeros_like(parameter) if gradient is None else gradient)
+                .detach()
+                .flatten()
+                .cpu()
+                for parameter, gradient in zip(parameters, gradients, strict=True)
+            ]
+        )
+        if not torch.isfinite(ratios).all() or not torch.isfinite(vector).all():
+            raise RuntimeError("success replay audit produced non-finite ratios or gradients")
+        return ratios.detach().cpu(), vector
+
     def get_log_prob_and_entropy(actor, obs):
         log_prob, entropy, sde_sigma = actor(obs, is_dppo=True)
 
@@ -1287,6 +1388,76 @@ def main(cfg: FlowPPOConfig):
                     int(moment_sums[2].item()),
                 )
 
+        replay_audit_indices = None
+        replay_audit_pre_gradient = None
+        replay_audit_selection_cosine = None
+        if cfg.success_replay_audit and iteration == cfg.success_replay_audit_iteration:
+            success_mask = successful_chunk_mask(rewards_stored, dones_stored, n_action_steps)
+            valid_chunk_mask = b_cfm_value_invalid.sum(dim=1) < n_action_steps
+            success_indices = torch.where(success_mask & valid_chunk_mask)[0]
+            if success_indices.numel() < cfg.success_replay_audit_min_chunks:
+                raise RuntimeError(
+                    "success replay audit requires at least "
+                    f"{cfg.success_replay_audit_min_chunks} chunks, found {success_indices.numel()}"
+                )
+            audit_generator = torch.Generator().manual_seed(cfg.seed + iteration * 1009)
+            replay_audit_indices = success_indices[
+                torch.randperm(success_indices.numel(), generator=audit_generator)[
+                    : cfg.success_replay_audit_chunks
+                ]
+            ]
+            unit_weights = torch.ones(replay_audit_indices.numel())
+            pre_ratios, replay_audit_pre_gradient = replay_audit_gradient(
+                replay_audit_indices,
+                unit_weights,
+                b_actions=b_actions,
+                b_cfm_losses=b_cfm_losses,
+                b_cfm_loss_ts=b_cfm_loss_ts,
+                b_cfm_loss_epsilons=b_cfm_loss_epsilons,
+                b_cfm_value_invalid=b_cfm_value_invalid,
+                b_obs_images=b_obs_images,
+                b_obs_state=b_obs_state,
+            )
+            logger.info(
+                "Success replay pre-update ratios: mean=%.6f std=%.6f min=%.6f max=%.6f",
+                pre_ratios.mean().item(),
+                pre_ratios.std(unbiased=False).item(),
+                pre_ratios.min().item(),
+                pre_ratios.max().item(),
+            )
+
+            positive_mask = (b_advantages[:, 0] > 0) & valid_chunk_mask
+            positive_indices = torch.where(positive_mask)[0]
+            if positive_indices.numel() < cfg.success_replay_audit_min_chunks:
+                raise RuntimeError(
+                    "success replay audit requires at least "
+                    f"{cfg.success_replay_audit_min_chunks} positive chunks, "
+                    f"found {positive_indices.numel()}"
+                )
+            positive_indices = positive_indices[
+                torch.randperm(positive_indices.numel(), generator=audit_generator)[
+                    : cfg.success_replay_audit_chunks
+                ]
+            ]
+            positive_weights = b_advantages[positive_indices, 0].clamp_min(0)
+            positive_weights = positive_weights / positive_weights.mean().clamp_min(1e-12)
+            _, positive_gradient = replay_audit_gradient(
+                positive_indices,
+                positive_weights,
+                b_actions=b_actions,
+                b_cfm_losses=b_cfm_losses,
+                b_cfm_loss_ts=b_cfm_loss_ts,
+                b_cfm_loss_epsilons=b_cfm_loss_epsilons,
+                b_cfm_value_invalid=b_cfm_value_invalid,
+                b_obs_images=b_obs_images,
+                b_obs_state=b_obs_state,
+            )
+            replay_audit_selection_cosine = torch.nn.functional.cosine_similarity(
+                replay_audit_pre_gradient.unsqueeze(0), positive_gradient.unsqueeze(0), dim=1
+            ).item()
+            replay_audit_positive_gradient_norm = positive_gradient.norm().item()
+            del positive_gradient
+
         # ---------- Policy update ----------
         b_inds = np.arange(local_batch_size)
         clipfracs = []
@@ -1531,6 +1702,54 @@ def main(cfg: FlowPPOConfig):
 
             if early_stop:
                 break
+
+        if replay_audit_indices is not None:
+            actor_module.eval()
+            post_ratios, post_gradient = replay_audit_gradient(
+                replay_audit_indices,
+                torch.ones(replay_audit_indices.numel()),
+                b_actions=b_actions,
+                b_cfm_losses=b_cfm_losses,
+                b_cfm_loss_ts=b_cfm_loss_ts,
+                b_cfm_loss_epsilons=b_cfm_loss_epsilons,
+                b_cfm_value_invalid=b_cfm_value_invalid,
+                b_obs_images=b_obs_images,
+                b_obs_state=b_obs_state,
+            )
+            replay_gradient_cosine = torch.nn.functional.cosine_similarity(
+                replay_audit_pre_gradient.unsqueeze(0), post_gradient.unsqueeze(0), dim=1
+            ).item()
+            replay_result = {
+                "iteration": iteration,
+                "num_successful_chunks_available": int(success_indices.numel()),
+                "num_successful_chunks_audited": int(replay_audit_indices.numel()),
+                "pre_ratio_mean": float(pre_ratios.mean().item()),
+                "pre_ratio_std": float(pre_ratios.std(unbiased=False).item()),
+                "pre_ratio_min": float(pre_ratios.min().item()),
+                "pre_ratio_max": float(pre_ratios.max().item()),
+                "pre_replay_gradient_norm": float(replay_audit_pre_gradient.norm().item()),
+                "fresh_positive_gradient_norm": replay_audit_positive_gradient_norm,
+                "post_replay_gradient_norm": float(post_gradient.norm().item()),
+                "active_positive_ratio_fraction": float(
+                    (post_ratios <= 1 + cfg.clip_coef).float().mean().item()
+                ),
+                "ratio_ess_fraction": float(effective_sample_fraction(post_ratios).item()),
+                "ratio_mean": float(post_ratios.mean().item()),
+                "ratio_std": float(post_ratios.std(unbiased=False).item()),
+                "ratio_min": float(post_ratios.min().item()),
+                "ratio_max": float(post_ratios.max().item()),
+                "pre_post_replay_gradient_cosine": replay_gradient_cosine,
+                "success_fresh_positive_gradient_cosine": replay_audit_selection_cosine,
+            }
+            replay_output_path = (
+                Path(cfg.success_replay_audit_output_json)
+                if cfg.success_replay_audit_output_json is not None
+                else run_dir / "success_replay_audit.json"
+            )
+            replay_output_path.parent.mkdir(parents=True, exist_ok=True)
+            replay_output_path.write_text(json.dumps(replay_result, indent=2, sort_keys=True) + "\n")
+            logger.info("Success replay audit: %s", json.dumps(replay_result, sort_keys=True))
+            actor.train()
 
         # Metrics (rank local)
         y_pred, y_true = b_values.cpu().numpy(), b_returns.cpu().numpy()
