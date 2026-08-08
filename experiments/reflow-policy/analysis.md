@@ -81,6 +81,22 @@ over both step counts was exactly 13/120 for each method. The geometry mechanism
 task advantage now both replicate across training seeds. The next experiment is an official-scale
 200-episode, 50-environment, 10-step confirmation using a new environment seed.
 
+## Official-scale confirmation
+
+The second training-seed pair was evaluated at 10 Euler steps with seed 20260810, 200 episodes, and
+50 environments per cell.
+
+| Sampling mode | CFM control | Reflow | Difference |
+|---|---:|---:|---:|
+| zero | 147/200 (73.5%) | 150/200 (75.0%) | +3 successes (+1.5 pp) |
+| random | 24/200 (12.0%) | 23/200 (11.5%) | -1 success (-0.5 pp) |
+
+The zero result did not meet the preregistered +10-success (+5 pp) gate. Its approximate unpooled
+95% difference interval was [-7.1 pp, +10.1 pp], and a two-sided Fisher exact test gave p=0.819.
+Random sampling passed the non-inferiority gate (Fisher p=1.0). The large evaluation therefore
+supports performance preservation but not a stable benchmark improvement. Do not proceed to online
+FPO++ integration based on pure one-stage reflow.
+
 Remote evidence:
 
 - `~/workspace/outputs/fpo-control/results/can_reflow_control100_seed20260808/geometry.json`
@@ -93,3 +109,5 @@ Remote evidence:
 - `~/workspace/outputs/fpo-control/results/can_reflow_stage1_100_trainseed20260809/geometry.json`
 - `~/workspace/outputs/fpo-control/logs/can_reflow_control100_trainseed20260809_eval20260808_driver.log`
 - `~/workspace/outputs/fpo-control/logs/can_reflow_stage1_100_trainseed20260809_eval20260808_driver.log`
+- `~/workspace/outputs/fpo-control/logs/can_reflow_control100_trainseed20260809_official200_eval20260810_driver.log`
+- `~/workspace/outputs/fpo-control/logs/can_reflow_stage1_100_trainseed20260809_official200_eval20260810_driver.log`

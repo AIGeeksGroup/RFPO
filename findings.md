@@ -48,6 +48,13 @@ from two training seeds, reflow/control zero success was 47/60 versus 40/60 at 1
 versus 43/60 at four steps; random success was tied at 13/120. This is sufficient evidence to move
 from screening to one official-scale confirmation, but not yet to claim final benchmark improvement.
 
+The official-scale confirmation separated the efficiency result from the reward claim. At 10 Euler
+steps and 200 episodes, reflow/control zero success was 150/200 versus 147/200 (+1.5 percentage
+points), far below the preregistered +5-point gate and statistically indistinguishable (Fisher
+p=0.819). Random success was 23/200 versus 24/200. Pure one-stage reflow therefore preserves Can
+performance while reliably straightening the flow, but it does not establish a benchmark reward
+improvement and should not be integrated into online FPO++ on that premise.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -57,6 +64,7 @@ from screening to one official-scale confirmation, but not yet to claim final be
 - WarmPrior cannot be grafted onto a Gaussian-trained FPO checkpoint at inference time; training-time source adaptation is necessary on Can.
 - A short 100-update training-time adaptation is also insufficient: it preserves neither deterministic success nor random exploration.
 - Conditional reflow's lower integration error transferred to a positive low-step rollout screen; this is the first improvement candidate to pass both mechanism and task gates.
+- Small 20-episode screens overestimated pure reflow's reward effect; the 200-episode result retained only +1.5 points while confirming non-degradation.
 
 ## Lessons and Constraints
 
@@ -70,8 +78,8 @@ from screening to one official-scale confirmation, but not yet to claim final be
 - Does conditional reflow preserve the multimodal exploration that gives flow policies their advantage?
 - Is curvature correlated with FPO ratio variance or gradient disagreement?
 - Should reflow be an offline post-training stage, an auxiliary online loss, or both?
-- Does the cross-training-seed 10-step success gain survive a 200-episode official-scale confirmation?
+- Can a mixed data-endpoint/reflow objective retain straightening while improving action grounding enough to produce a real reward gain?
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior screening is closed after two negative variants. Conditional reflow now passes geometry and rollout gates across two training seeds; one official-scale Can confirmation is in scope before considering online FPO++ integration.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior screening is closed after two negative variants. Pure conditional reflow is supported as a geometry and sampling-efficiency method but refuted as a five-point Can reward improvement; online integration is stopped pending a new small-scale hypothesis.

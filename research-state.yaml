@@ -34,10 +34,16 @@ hypotheses:
     priority: high
   - id: H1
     statement: "Conditional reflow reduces policy trajectory curvature and preserves return when the Euler sampling steps are reduced."
-    status: training_seed_supported
+    status: supported
     motivation: "Rectified Flow predicts straighter paths and lower numerical integration error after reflow."
     parent: null
     priority: high
+  - id: H1b
+    statement: "One-stage conditional reflow improves official 10-step Can success by at least five percentage points."
+    status: refuted
+    motivation: "Screening gains must survive an official-scale evaluation before being treated as a benchmark improvement."
+    parent: H1
+    priority: low
   - id: H2
     statement: "Using reflow regularization during FPO++ training reduces CFM-ratio dispersion and improves training stability or final return."
     status: pending
@@ -66,12 +72,12 @@ experiments:
     can_baseline200_random_success: 0.14
     can_two_run_random_pooled_success: 0.1175
   best_value:
-    run: can_reflow_stage1_100_nfe10_zero_pooled_screens
+    run: can_reflow_stage1_100_nfe10_zero_official200
     metric: success_rate
-    value: 0.783333
-    matched_control: 0.666667
-    episodes_per_method: 60
-  total_runs: 45
+    value: 0.75
+    matched_control: 0.735
+    episodes_per_method: 200
+  total_runs: 49
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -246,11 +252,27 @@ experiments:
       metric: success_rate
       value: 0.10
       episodes: 20
+    - run: can_reflow_control100_trainseed20260809_nfe10_zero_official200
+      metric: success_rate
+      value: 0.735
+      episodes: 200
+    - run: can_reflow_stage1_100_trainseed20260809_nfe10_zero_official200
+      metric: success_rate
+      value: 0.75
+      episodes: 200
+    - run: can_reflow_control100_trainseed20260809_nfe10_random_official200
+      metric: success_rate
+      value: 0.12
+      episodes: 200
+    - run: can_reflow_stage1_100_trainseed20260809_nfe10_random_official200
+      metric: success_rate
+      value: 0.115
+      episodes: 200
 
 outer_loop:
   cycle: 1
-  last_direction: "Run one official-scale 200-episode, 50-environment, 10-step confirmation on the second training seed with a new environment seed."
-  last_reflection: "A second training seed repeated the 22% geometry improvement and passed rollout screening. Across three matched comparisons, reflow/control zero success was 47/60 versus 40/60 at 10 steps and 46/60 versus 43/60 at four steps, with identical pooled random success. This justifies one larger benchmark confirmation without a parameter sweep."
+  last_direction: "Stop pure reflow as a reward-improvement path; select one lightweight candidate that preserves data-action grounding while retaining the verified straightening effect."
+  last_reflection: "Official-scale Can evaluation gave 150/200 reflow versus 147/200 control at 10-step zero and 23/200 versus 24/200 random. Pure reflow preserves performance and improves geometry, but misses the preregistered +5 pp reward gate. H1 is supported for straightening and low-step preservation; H1b is refuted."
 
 workspace:
   findings: "findings.md"
