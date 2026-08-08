@@ -34,6 +34,7 @@ from src.flow_model import FlowMatchingPolicy
 from src.flow_model_config import FlowMatchingConfig
 from src.rollout_bookkeeping import build_rollout_zero_sampling_mask, prepare_invalid_step_mask
 from src.replay_audit import effective_sample_fraction, successful_chunk_mask
+from src.cfm_sampling import sample_cfm_variables
 from src.advantage_weighting import (
     clipped_mirror_ratio_loss,
     ess_softmax_weights,
@@ -112,6 +113,11 @@ class FlowPPOConfig:
     success_replay_audit_chunks: int = 64
     success_replay_audit_min_chunks: int = 32
     success_replay_audit_output_json: Optional[str] = None
+    cfm_ratio_generalization_audit: bool = False
+    cfm_ratio_generalization_audit_iteration: int = 2
+    cfm_ratio_generalization_audit_chunks: int = 64
+    cfm_ratio_generalization_audit_min_chunks: int = 32
+    cfm_ratio_generalization_audit_output_json: Optional[str] = None
     rollout_zero_fraction: float = 0.0
     rollout_tempered_fraction: float = 0.0
     rollout_tempered_scale: float = 0.5
@@ -612,6 +618,17 @@ def main(cfg: FlowPPOConfig):
             cfg.success_replay_audit_min_chunks,
         ) < 1:
             raise ValueError("success replay audit iteration and chunk counts must be positive")
+    if cfg.cfm_ratio_generalization_audit:
+        if cfg.loss_mode != "fpo" or not cfg.do_chunk_level_ppo:
+            raise ValueError("CFM ratio generalization audit requires chunk-level FPO")
+        if world_size != 1:
+            raise ValueError("CFM ratio generalization audit currently requires one process")
+        if min(
+            cfg.cfm_ratio_generalization_audit_iteration,
+            cfg.cfm_ratio_generalization_audit_chunks,
+            cfg.cfm_ratio_generalization_audit_min_chunks,
+        ) < 1:
+            raise ValueError("CFM ratio audit iteration and chunk counts must be positive")
 
     # Run dir on all ranks (avoid races)
     run_start_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -1458,6 +1475,103 @@ def main(cfg: FlowPPOConfig):
             replay_audit_positive_gradient_norm = positive_gradient.norm().item()
             del positive_gradient
 
+        ratio_audit_indices = None
+        ratio_audit_stored_pre_gradient = None
+        ratio_audit_heldout_pre_gradient = None
+        ratio_audit_heldout_tensors = None
+        if (
+            cfg.cfm_ratio_generalization_audit
+            and iteration == cfg.cfm_ratio_generalization_audit_iteration
+        ):
+            valid_chunk_mask = b_cfm_value_invalid.sum(dim=1) < n_action_steps
+            positive_indices = torch.where((b_advantages[:, 0] > 0) & valid_chunk_mask)[0]
+            if positive_indices.numel() < cfg.cfm_ratio_generalization_audit_min_chunks:
+                raise RuntimeError(
+                    "CFM ratio audit requires at least "
+                    f"{cfg.cfm_ratio_generalization_audit_min_chunks} positive chunks, "
+                    f"found {positive_indices.numel()}"
+                )
+            audit_generator = torch.Generator().manual_seed(cfg.seed + iteration * 2017)
+            ratio_audit_indices = positive_indices[
+                torch.randperm(positive_indices.numel(), generator=audit_generator)[
+                    : cfg.cfm_ratio_generalization_audit_chunks
+                ]
+            ]
+            unit_weights = torch.ones(ratio_audit_indices.numel())
+            stored_pre_ratios, ratio_audit_stored_pre_gradient = replay_audit_gradient(
+                ratio_audit_indices,
+                unit_weights,
+                b_actions=b_actions,
+                b_cfm_losses=b_cfm_losses,
+                b_cfm_loss_ts=b_cfm_loss_ts,
+                b_cfm_loss_epsilons=b_cfm_loss_epsilons,
+                b_cfm_value_invalid=b_cfm_value_invalid,
+                b_obs_images=b_obs_images,
+                b_obs_state=b_obs_state,
+            )
+
+            audit_count = ratio_audit_indices.numel()
+            heldout_actions = b_actions[ratio_audit_indices]
+            heldout_images = {
+                key: value[ratio_audit_indices] for key, value in b_obs_images.items()
+            }
+            heldout_states = b_obs_state[ratio_audit_indices]
+            heldout_invalid = b_cfm_value_invalid[ratio_audit_indices]
+            heldout_times, heldout_noises = sample_cfm_variables(
+                batch_size=audit_count,
+                num_samples=n_action_samples,
+                horizon=n_action_steps,
+                action_dim=action_dim,
+                mode="iid",
+                time_generator=torch.Generator(device=device).manual_seed(cfg.seed + 424_242),
+                noise_generator=torch.Generator(device=device).manual_seed(cfg.seed + 424_243),
+                device=device,
+                dtype=heldout_actions.dtype,
+            )
+            heldout_obs = {
+                key: value[:, 0].to(device) for key, value in heldout_images.items()
+            }
+            heldout_obs["observation.state"] = heldout_states[:, 0].to(device)
+            heldout_obs["action"] = heldout_actions.to(device)
+            with torch.no_grad():
+                heldout_losses, returned_times, returned_noises = get_cfm_values(
+                    actor_module,
+                    heldout_obs,
+                    n_action_samples,
+                    heldout_times,
+                    heldout_noises,
+                )
+            heldout_losses = heldout_losses.permute(1, 0, 2).cpu()
+            heldout_times_stored = returned_times.permute(1, 0, 2).cpu()
+            heldout_noises_stored = returned_noises.permute(1, 0, 2, 3).cpu()
+            heldout_local_indices = torch.arange(audit_count)
+            heldout_pre_ratios, ratio_audit_heldout_pre_gradient = replay_audit_gradient(
+                heldout_local_indices,
+                unit_weights,
+                b_actions=heldout_actions,
+                b_cfm_losses=heldout_losses,
+                b_cfm_loss_ts=heldout_times_stored,
+                b_cfm_loss_epsilons=heldout_noises_stored,
+                b_cfm_value_invalid=heldout_invalid,
+                b_obs_images=heldout_images,
+                b_obs_state=heldout_states,
+            )
+            ratio_audit_heldout_tensors = (
+                heldout_local_indices,
+                heldout_actions,
+                heldout_losses,
+                heldout_times_stored,
+                heldout_noises_stored,
+                heldout_invalid,
+                heldout_images,
+                heldout_states,
+            )
+            logger.info(
+                "CFM ratio audit pre-update: stored_std=%.6g heldout_std=%.6g",
+                stored_pre_ratios.std(unbiased=False).item(),
+                heldout_pre_ratios.std(unbiased=False).item(),
+            )
+
         # ---------- Policy update ----------
         b_inds = np.arange(local_batch_size)
         clipfracs = []
@@ -1749,6 +1863,92 @@ def main(cfg: FlowPPOConfig):
             replay_output_path.parent.mkdir(parents=True, exist_ok=True)
             replay_output_path.write_text(json.dumps(replay_result, indent=2, sort_keys=True) + "\n")
             logger.info("Success replay audit: %s", json.dumps(replay_result, sort_keys=True))
+            actor.train()
+
+        if ratio_audit_indices is not None:
+            actor_module.eval()
+            unit_weights = torch.ones(ratio_audit_indices.numel())
+            stored_post_ratios, stored_post_gradient = replay_audit_gradient(
+                ratio_audit_indices,
+                unit_weights,
+                b_actions=b_actions,
+                b_cfm_losses=b_cfm_losses,
+                b_cfm_loss_ts=b_cfm_loss_ts,
+                b_cfm_loss_epsilons=b_cfm_loss_epsilons,
+                b_cfm_value_invalid=b_cfm_value_invalid,
+                b_obs_images=b_obs_images,
+                b_obs_state=b_obs_state,
+            )
+            (
+                heldout_local_indices,
+                heldout_actions,
+                heldout_losses,
+                heldout_times_stored,
+                heldout_noises_stored,
+                heldout_invalid,
+                heldout_images,
+                heldout_states,
+            ) = ratio_audit_heldout_tensors
+            heldout_post_ratios, heldout_post_gradient = replay_audit_gradient(
+                heldout_local_indices,
+                unit_weights,
+                b_actions=heldout_actions,
+                b_cfm_losses=heldout_losses,
+                b_cfm_loss_ts=heldout_times_stored,
+                b_cfm_loss_epsilons=heldout_noises_stored,
+                b_cfm_value_invalid=heldout_invalid,
+                b_obs_images=heldout_images,
+                b_obs_state=heldout_states,
+            )
+            stored_active = (stored_post_ratios <= 1 + cfg.clip_coef).float().mean().item()
+            heldout_active = (heldout_post_ratios <= 1 + cfg.clip_coef).float().mean().item()
+            stored_median_abs_logratio = stored_post_ratios.log().abs().median().item()
+            heldout_median_abs_logratio = heldout_post_ratios.log().abs().median().item()
+            heldout_gradient_cosine = torch.nn.functional.cosine_similarity(
+                ratio_audit_heldout_pre_gradient.unsqueeze(0),
+                heldout_post_gradient.unsqueeze(0),
+                dim=1,
+            ).item()
+            ratio_audit_result = {
+                "iteration": iteration,
+                "num_positive_chunks_available": int(positive_indices.numel()),
+                "num_chunks_audited": int(ratio_audit_indices.numel()),
+                "stored_active_positive_ratio_fraction": stored_active,
+                "heldout_active_positive_ratio_fraction": heldout_active,
+                "heldout_active_fraction_gain": heldout_active - stored_active,
+                "stored_median_absolute_logratio": stored_median_abs_logratio,
+                "heldout_median_absolute_logratio": heldout_median_abs_logratio,
+                "heldout_to_stored_median_absolute_logratio": (
+                    heldout_median_abs_logratio / max(stored_median_abs_logratio, 1e-12)
+                ),
+                "heldout_ratio_ess_fraction": float(
+                    effective_sample_fraction(heldout_post_ratios).item()
+                ),
+                "stored_pre_gradient_norm": float(
+                    ratio_audit_stored_pre_gradient.norm().item()
+                ),
+                "stored_post_gradient_norm": float(stored_post_gradient.norm().item()),
+                "heldout_pre_gradient_norm": float(
+                    ratio_audit_heldout_pre_gradient.norm().item()
+                ),
+                "heldout_post_gradient_norm": float(heldout_post_gradient.norm().item()),
+                "heldout_pre_post_gradient_cosine": heldout_gradient_cosine,
+                "stored_ratio_mean": float(stored_post_ratios.mean().item()),
+                "heldout_ratio_mean": float(heldout_post_ratios.mean().item()),
+            }
+            ratio_output_path = (
+                Path(cfg.cfm_ratio_generalization_audit_output_json)
+                if cfg.cfm_ratio_generalization_audit_output_json is not None
+                else run_dir / "cfm_ratio_generalization_audit.json"
+            )
+            ratio_output_path.parent.mkdir(parents=True, exist_ok=True)
+            ratio_output_path.write_text(
+                json.dumps(ratio_audit_result, indent=2, sort_keys=True) + "\n"
+            )
+            logger.info(
+                "CFM ratio generalization audit: %s",
+                json.dumps(ratio_audit_result, sort_keys=True),
+            )
             actor.train()
 
         # Metrics (rank local)
