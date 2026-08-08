@@ -32,6 +32,7 @@ from lerobot.common.policies.pretrained import PreTrainedPolicy
 from src.dexmg_env import VectorizedEnvWrapper, create_vectorized_env
 from src.flow_model import FlowMatchingPolicy
 from src.flow_model_config import FlowMatchingConfig
+from src.rollout_bookkeeping import prepare_invalid_step_mask
 
 # ---- Multiprocessing start method (CUDA compat) ------------------------------
 try:
@@ -96,6 +97,7 @@ class FlowPPOConfig:
     trust_region_mode: Literal["ppo", "spo", "aspo"] = "ppo"
     clamp_logratio: Optional[float] = None
     cfm_loss_weight_from_t: str = "constant"
+    reset_cfm_invalid_mask_each_iteration: bool = False
     exploration_noise_std: Optional[float] = None
     zero_sampling: bool = True  # deprecated. now we evaluate with both zero and non zero sampling
     save_non_zero_sampling_video: bool = False
@@ -948,6 +950,10 @@ def main(cfg: FlowPPOConfig):
 
     while (iteration * cfg.data_collection_steps * cfg.num_envs) < cfg.total_timesteps:
         iteration += 1
+        prepare_invalid_step_mask(
+            cfm_value_invalid_stored,
+            reset_each_iteration=cfg.reset_cfm_invalid_mask_each_iteration,
+        )
         if rank == 0:
             logger.info(colored(
                 f"Iteration: {iteration}/{num_iterations} | "
@@ -1071,6 +1077,18 @@ def main(cfg: FlowPPOConfig):
         if rank == 0:
             logger.info(
                 f"[Rank {rank}] SR: {success_rate_global:.2%} from {int(episodes_global)} episodes | SPS_local(rank0 est): {sps_local_total:.2f}"
+            )
+
+        valid_cfm_steps = (cfm_value_invalid_stored == 0).sum().to(device=device, dtype=torch.float32)
+        total_cfm_steps = torch.tensor(cfm_value_invalid_stored.numel(), device=device, dtype=torch.float32)
+        if is_ddp:
+            dist.all_reduce(valid_cfm_steps, op=dist.ReduceOp.SUM)
+            dist.all_reduce(total_cfm_steps, op=dist.ReduceOp.SUM)
+        valid_cfm_action_fraction = (valid_cfm_steps / total_cfm_steps).item()
+        if rank == 0:
+            logger.info(
+                f"[Rank {rank}] Valid CFM action fraction: {valid_cfm_action_fraction:.2%} "
+                f"({int(valid_cfm_steps.item())}/{int(total_cfm_steps.item())})"
             )
 
         # ---------- Reshape for training ----------
@@ -1430,6 +1448,7 @@ def main(cfg: FlowPPOConfig):
                 f" | pg_loss: {float(pg_loss):.4f}"
                 f" | v_loss: {float(v_loss):.4f}"
                 f" | total_loss: {float(loss):.4f}"
+                f" | valid_cfm: {valid_cfm_action_fraction:.2%}"
             )
             logger.info(colored(msg, "green"))
             if cfg.wandb_enable:
@@ -1443,6 +1462,7 @@ def main(cfg: FlowPPOConfig):
                     "training/critic_grad_norm_after_clip": float(critic_grad_norm_after),
                     "charts/rewards": b_rewards.sum().item(),
                     "charts/success_rate": success_rate_global,
+                    "charts/valid_cfm_action_fraction": valid_cfm_action_fraction,
                     "charts/action_norm_mean": action_norms.mean(),
                     "charts/action_norm_std": action_norms.std(),
                     "values/advantages": b_advantages.mean().item(),
@@ -1628,5 +1648,4 @@ def main(cfg: FlowPPOConfig):
 if __name__ == "__main__":
     args_cli = tyro.cli(FlowPPOConfig, config=(tyro.conf.FlagConversionOff,))
     main(args_cli)
-
 

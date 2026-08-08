@@ -74,6 +74,12 @@ hypotheses:
     motivation: "The paper identifies sparse random-sampling successes as a source of high gradient variance, and lists 16 samples as an in-scope setting."
     parent: H2
     priority: high
+  - id: H6
+    statement: "Resetting the reused CFM invalid-step mask every rollout iteration prevents cumulative sample loss and improves early Can FPO++ reward learning."
+    status: pending
+    motivation: "The released loop marks post-boundary actions invalid in a persistent buffer but never clears that buffer between independent rollouts."
+    parent: H2
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -327,7 +333,7 @@ experiments:
 
 outer_loop:
   cycle: 1
-  last_direction: "Select a reward-aware intervention that changes the sparse-success signal rather than spending more Monte Carlo compute on the same signal."
+  last_direction: "Test whether resetting the cumulatively contaminated CFM validity mask preserves usable on-policy data and improves early Can reward learning."
   last_reflection: "Doubling per-action CFM samples from 8 to 16 reduced pooled actor-update collection success from 9.12% to 7.95%; final zero/random evaluation was also slightly lower at 78%/12% versus 80%/14%. H5 is refuted, so no 32-sample or 5M-step extension is justified."
 
 workspace:

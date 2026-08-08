@@ -14,6 +14,7 @@ TOTAL_TIMESTEPS="${TOTAL_TIMESTEPS:-$((NUM_ENVS * DATA_COLLECTION_STEPS))}"
 EVAL_EPISODES="${EVAL_EPISODES:-20}"
 N_ACTION_SAMPLES="${N_ACTION_SAMPLES:-8}"
 ROLLOUT_FREQ="${ROLLOUT_FREQ:-1}"
+RESET_CFM_INVALID_MASK_EACH_ITERATION="${RESET_CFM_INVALID_MASK_EACH_ITERATION:-False}"
 MASTER_PORT="${MASTER_PORT:-29500}"
 SEED="${SEED:-0}"
 RUN_NAME="${RUN_NAME:-can_fpopp_smoke_seed${SEED}_$(timestamp)}"
@@ -55,6 +56,7 @@ torchrun --nproc_per_node=1 --master_port "$MASTER_PORT" finetune_online_rl.py \
   --discount 0.99 \
   --sde-sigma 0 \
   --cfm-loss-average-group-size 1 \
+  --reset-cfm-invalid-mask-each-iteration "$RESET_CFM_INVALID_MASK_EACH_ITERATION" \
   --cfm-loss-use-huber True \
   --cfm-loss-huber-delta 0.5 \
   --clip-coef 0.02 \
