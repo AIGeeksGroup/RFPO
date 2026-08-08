@@ -60,6 +60,10 @@ from src.bc_anchor_pcgrad import (
     gradient_norm,
     project_conflicting_gradient,
 )
+from src.temporal_ratio_clipping import (
+    clipped_ratio_objective,
+    positive_active_fraction,
+)
 
 # ---- Multiprocessing start method (CUDA compat) ------------------------------
 try:
@@ -177,6 +181,10 @@ class FlowPPOConfig:
     advantage_sign_pcgrad_audit_chunks: int = 64
     advantage_sign_pcgrad_min_per_sign: int = 8
     advantage_sign_pcgrad_audit_output_json: Optional[str] = None
+    temporal_ratio_clipping_audit: bool = False
+    temporal_ratio_clipping_audit_iteration: int = 2
+    temporal_ratio_clipping_audit_chunks: int = 64
+    temporal_ratio_clipping_audit_output_json: Optional[str] = None
     bc_anchor_pcgrad_audit: bool = False
     bc_anchor_pcgrad_audit_iteration: int = 2
     bc_anchor_pcgrad_audit_chunks: int = 64
@@ -828,6 +836,29 @@ def main(cfg: FlowPPOConfig):
             > cfg.advantage_sign_pcgrad_audit_chunks // 2
         ):
             raise ValueError("advantage-sign PCGrad support cannot fit in each audit batch")
+    if cfg.temporal_ratio_clipping_audit:
+        if any(
+            (
+                cfg.discounted_success_critic_audit,
+                cfg.critic_warmup_scheduler_audit,
+                cfg.direct_advantage_audit,
+                cfg.rank_advantage_audit,
+                cfg.advantage_sign_pcgrad_audit,
+                cfg.bc_anchor_pcgrad_audit,
+            )
+        ):
+            raise ValueError("temporal-ratio clipping and side audits are mutually exclusive")
+        if cfg.loss_mode != "fpo" or not cfg.do_chunk_level_ppo:
+            raise ValueError("temporal-ratio clipping audit requires chunk-level FPO")
+        if world_size != 1:
+            raise ValueError("temporal-ratio clipping audit currently requires one process")
+        if min(
+            cfg.temporal_ratio_clipping_audit_iteration,
+            cfg.temporal_ratio_clipping_audit_chunks,
+        ) < 1:
+            raise ValueError("temporal-ratio clipping audit settings must be positive")
+        if cfg.temporal_ratio_clipping_audit_chunks % 2:
+            raise ValueError("temporal-ratio clipping audit requires an even chunk count")
     if cfg.bc_anchor_pcgrad_audit:
         if cfg.loss_mode != "fpo" or not cfg.do_chunk_level_ppo:
             raise ValueError("BC-anchor PCGrad audit requires chunk-level FPO")
@@ -1289,6 +1320,7 @@ def main(cfg: FlowPPOConfig):
         chunk_indices: torch.Tensor,
         chunk_weights: torch.Tensor,
         *,
+        temporal_clipping: bool = False,
         b_actions: torch.Tensor,
         b_cfm_losses: torch.Tensor,
         b_cfm_loss_ts: torch.Tensor,
@@ -1331,6 +1363,19 @@ def main(cfg: FlowPPOConfig):
         if cfg.clamp_old_cfm_loss is not None:
             old_losses = old_losses.clamp(max=cfg.clamp_old_cfm_loss)
 
+        if temporal_clipping:
+            old_losses = old_losses.mean(dim=-1)
+            current_losses = current_losses.mean(dim=-1)
+            return clipped_ratio_objective(
+                old_losses,
+                current_losses,
+                chunk_weights.to(device),
+                audit_valid,
+                cfg.clip_coef,
+                temporal=True,
+                clamp_logratio=cfg.clamp_logratio,
+            )
+
         if cfg.do_average_cfm_loss_in_chunk:
             denominator = audit_valid.sum(dim=1).unsqueeze(-1).unsqueeze(-1).clamp_min(1.0)
             old_losses = (old_losses * audit_valid[:, :, None, None]).sum(dim=1) / denominator
@@ -1359,6 +1404,7 @@ def main(cfg: FlowPPOConfig):
         chunk_indices: torch.Tensor,
         chunk_weights: torch.Tensor,
         *,
+        temporal_clipping: bool = False,
         b_actions: torch.Tensor,
         b_cfm_losses: torch.Tensor,
         b_cfm_loss_ts: torch.Tensor,
@@ -1371,6 +1417,7 @@ def main(cfg: FlowPPOConfig):
         ratios, audit_loss = replay_audit_objective(
             chunk_indices,
             chunk_weights,
+            temporal_clipping=temporal_clipping,
             b_actions=b_actions,
             b_cfm_losses=b_cfm_losses,
             b_cfm_loss_ts=b_cfm_loss_ts,
@@ -2261,6 +2308,225 @@ def main(cfg: FlowPPOConfig):
             )
             logger.info(
                 "Advantage-sign PCGrad audit: %s",
+                json.dumps(audit_result, sort_keys=True),
+            )
+
+        if (
+            cfg.temporal_ratio_clipping_audit
+            and iteration == cfg.temporal_ratio_clipping_audit_iteration
+        ):
+            eligible_mask = b_mc_valid[:, 0].bool() & (
+                b_cfm_value_invalid.sum(dim=1) == 0
+            )
+            eligible_indices = torch.where(eligible_mask)[0]
+            required_chunks = cfg.temporal_ratio_clipping_audit_chunks
+            if eligible_indices.numel() < required_chunks:
+                raise RuntimeError(
+                    "temporal-ratio clipping audit requires "
+                    f"{required_chunks} fully valid labeled chunks, "
+                    f"found {eligible_indices.numel()}"
+                )
+            audit_generator = torch.Generator().manual_seed(
+                cfg.seed + iteration * 9091
+            )
+            audit_indices = eligible_indices[
+                torch.randperm(
+                    eligible_indices.numel(), generator=audit_generator
+                )[:required_chunks]
+            ]
+            audit_batch_size = required_chunks // 2
+            batch_results = []
+            actor_module.eval()
+            for audit_batch in range(2):
+                batch_slice = slice(
+                    audit_batch * audit_batch_size,
+                    (audit_batch + 1) * audit_batch_size,
+                )
+                batch_indices = audit_indices[batch_slice]
+                weights = b_advantages[batch_indices, 0].float()
+                weight_std = weights.std()
+                if not torch.isfinite(weight_std) or weight_std <= 0:
+                    raise RuntimeError(
+                        "temporal-ratio clipping audit has degenerate GAE weights"
+                    )
+                weights = (weights - weights.mean()) / (weight_std + 1e-8)
+                if not (weights > 0).any():
+                    raise RuntimeError(
+                        "temporal-ratio clipping audit requires positive advantages"
+                    )
+
+                control_pre_ratios, control_pre_loss = replay_audit_objective(
+                    batch_indices,
+                    weights,
+                    temporal_clipping=False,
+                    b_actions=b_actions,
+                    b_cfm_losses=b_cfm_losses,
+                    b_cfm_loss_ts=b_cfm_loss_ts,
+                    b_cfm_loss_epsilons=b_cfm_loss_epsilons,
+                    b_cfm_value_invalid=b_cfm_value_invalid,
+                    b_obs_images=b_obs_images,
+                    b_obs_state=b_obs_state,
+                )
+                parameters, control_pre_gradient = autograd_list(control_pre_loss)
+                candidate_pre_ratios, candidate_pre_loss = replay_audit_objective(
+                    batch_indices,
+                    weights,
+                    temporal_clipping=True,
+                    b_actions=b_actions,
+                    b_cfm_losses=b_cfm_losses,
+                    b_cfm_loss_ts=b_cfm_loss_ts,
+                    b_cfm_loss_epsilons=b_cfm_loss_epsilons,
+                    b_cfm_value_invalid=b_cfm_value_invalid,
+                    b_obs_images=b_obs_images,
+                    b_obs_state=b_obs_state,
+                )
+                _, candidate_pre_gradient = autograd_list(candidate_pre_loss)
+                base_values = [parameter.detach().clone() for parameter in parameters]
+                pre_cosine = float(
+                    list_gradient_cosine(
+                        candidate_pre_gradient, control_pre_gradient
+                    ).item()
+                )
+                control_pre_norm = float(gradient_norm(control_pre_gradient).item())
+                candidate_pre_norm = float(gradient_norm(candidate_pre_gradient).item())
+                step_scale = apply_virtual_actor_step(parameters, control_pre_gradient)
+
+                control_post_ratios, control_post_loss = replay_audit_objective(
+                    batch_indices,
+                    weights,
+                    temporal_clipping=False,
+                    b_actions=b_actions,
+                    b_cfm_losses=b_cfm_losses,
+                    b_cfm_loss_ts=b_cfm_loss_ts,
+                    b_cfm_loss_epsilons=b_cfm_loss_epsilons,
+                    b_cfm_value_invalid=b_cfm_value_invalid,
+                    b_obs_images=b_obs_images,
+                    b_obs_state=b_obs_state,
+                )
+                _, control_post_gradient = autograd_list(control_post_loss)
+                candidate_post_ratios, candidate_post_loss = replay_audit_objective(
+                    batch_indices,
+                    weights,
+                    temporal_clipping=True,
+                    b_actions=b_actions,
+                    b_cfm_losses=b_cfm_losses,
+                    b_cfm_loss_ts=b_cfm_loss_ts,
+                    b_cfm_loss_epsilons=b_cfm_loss_epsilons,
+                    b_cfm_value_invalid=b_cfm_value_invalid,
+                    b_obs_images=b_obs_images,
+                    b_obs_state=b_obs_state,
+                )
+                _, candidate_post_gradient = autograd_list(candidate_post_loss)
+                restore_parameters(parameters, base_values)
+
+                control_post_norm = float(gradient_norm(control_post_gradient).item())
+                candidate_post_norm = float(gradient_norm(candidate_post_gradient).item())
+                control_post_cosine = float(
+                    list_gradient_cosine(
+                        control_post_gradient, control_pre_gradient
+                    ).item()
+                )
+                candidate_post_cosine = float(
+                    list_gradient_cosine(
+                        candidate_post_gradient, control_pre_gradient
+                    ).item()
+                )
+                valid_mask = torch.ones(
+                    (audit_batch_size, n_action_steps),
+                    device=device,
+                    dtype=torch.bool,
+                )
+                device_weights = weights.to(device)
+                control_active = float(
+                    positive_active_fraction(
+                        control_post_ratios,
+                        device_weights,
+                        valid_mask,
+                        cfg.clip_coef,
+                    ).item()
+                )
+                candidate_active = float(
+                    positive_active_fraction(
+                        candidate_post_ratios,
+                        device_weights,
+                        valid_mask,
+                        cfg.clip_coef,
+                    ).item()
+                )
+                tensors = (
+                    control_pre_ratios,
+                    candidate_pre_ratios,
+                    control_post_ratios,
+                    candidate_post_ratios,
+                    control_pre_loss,
+                    candidate_pre_loss,
+                    control_post_loss,
+                    candidate_post_loss,
+                )
+                if not all(torch.isfinite(tensor).all().item() for tensor in tensors):
+                    raise RuntimeError(
+                        "temporal-ratio clipping audit produced non-finite values"
+                    )
+                if min(
+                    control_pre_norm,
+                    candidate_pre_norm,
+                    control_post_norm,
+                    candidate_post_norm,
+                ) <= 0:
+                    raise RuntimeError(
+                        "temporal-ratio clipping audit produced a zero gradient"
+                    )
+                batch_results.append(
+                    {
+                        "batch": audit_batch,
+                        "num_chunks": audit_batch_size,
+                        "virtual_step_scale": step_scale,
+                        "pre_gradient_cosine": pre_cosine,
+                        "pre_candidate_control_norm_ratio": (
+                            candidate_pre_norm / control_pre_norm
+                        ),
+                        "control_post_gradient_cosine": control_post_cosine,
+                        "candidate_post_gradient_cosine": candidate_post_cosine,
+                        "candidate_post_cosine_gain": (
+                            candidate_post_cosine - control_post_cosine
+                        ),
+                        "control_positive_active_fraction": control_active,
+                        "candidate_positive_active_fraction": candidate_active,
+                        "candidate_positive_active_gain": (
+                            candidate_active - control_active
+                        ),
+                        "candidate_control_post_norm_ratio": (
+                            candidate_post_norm / control_post_norm
+                        ),
+                        "control_pre_loss": float(control_pre_loss.detach().item()),
+                        "candidate_pre_loss": float(candidate_pre_loss.detach().item()),
+                        "control_post_loss": float(control_post_loss.detach().item()),
+                        "candidate_post_loss": float(candidate_post_loss.detach().item()),
+                    }
+                )
+            actor_module.train()
+            if cfg.freeze_vision_encoder:
+                actor_module.model.vision_encoder.eval()
+            audit_result = {
+                "iteration": iteration,
+                "num_eligible_chunks": int(eligible_indices.numel()),
+                "num_chunks_audited": required_chunks,
+                "num_batches": 2,
+                "cfm_samples": n_action_samples,
+                "action_timesteps": n_action_steps,
+                "batches": batch_results,
+            }
+            audit_output_path = (
+                Path(cfg.temporal_ratio_clipping_audit_output_json)
+                if cfg.temporal_ratio_clipping_audit_output_json is not None
+                else run_dir / "temporal_ratio_clipping_audit.json"
+            )
+            audit_output_path.parent.mkdir(parents=True, exist_ok=True)
+            audit_output_path.write_text(
+                json.dumps(audit_result, indent=2, sort_keys=True) + "\n"
+            )
+            logger.info(
+                "Temporal-ratio clipping audit: %s",
                 json.dumps(audit_result, sort_keys=True),
             )
 
