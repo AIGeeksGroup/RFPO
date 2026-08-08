@@ -68,6 +68,7 @@ from src.median_microbatch_gradient import (
     aggregate_microbatch_gradients,
     geometric_median,
     middle_pair_mean,
+    stable_vector_cosine,
 )
 from src.terminal_consistency_filter import terminal_consistent_weights
 from src.ratio_rollback import rollback_clipped_ratio_loss
@@ -2271,11 +2272,7 @@ def main(cfg: FlowPPOConfig):
                     )
 
                 def vector_cosine(first: torch.Tensor, second: torch.Tensor) -> float:
-                    return float(
-                        torch.nn.functional.cosine_similarity(
-                            first.unsqueeze(0), second.unsqueeze(0), dim=1
-                        ).item()
-                    )
+                    return stable_vector_cosine(first, second)
 
                 control_reference_cosine = vector_cosine(
                     control_gradient, reference_gradient

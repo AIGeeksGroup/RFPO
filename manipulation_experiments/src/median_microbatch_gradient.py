@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 import torch
+import torch.nn.functional as F
 
 
 @dataclass(frozen=True)
@@ -10,6 +11,21 @@ class GeometricMedianResult:
     value: torch.Tensor
     iterations: int
     converged: bool
+
+
+def stable_vector_cosine(first: torch.Tensor, second: torch.Tensor) -> float:
+    """Compute diagnostic cosine in float64 for stable long-vector reductions."""
+    if first.ndim != 1 or second.ndim != 1 or first.shape != second.shape:
+        raise ValueError("cosine inputs must be matching flat vectors")
+    if not torch.isfinite(first).all() or not torch.isfinite(second).all():
+        raise ValueError("cosine inputs must be finite")
+    return float(
+        F.cosine_similarity(
+            first.double().unsqueeze(0),
+            second.double().unsqueeze(0),
+            dim=1,
+        ).item()
+    )
 
 
 def middle_pair_mean(values: torch.Tensor, *, dim: int = 0) -> torch.Tensor:

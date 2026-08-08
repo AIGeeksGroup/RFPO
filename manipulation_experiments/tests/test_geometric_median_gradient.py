@@ -1,7 +1,16 @@
 import pytest
 import torch
 
-from src.median_microbatch_gradient import geometric_median
+from src.median_microbatch_gradient import geometric_median, stable_vector_cosine
+
+
+def test_stable_vector_cosine_does_not_exceed_one_for_long_collinear_vectors():
+    first = torch.linspace(1.0, 1000.0, 1_000_000, dtype=torch.float32)
+    second = first * 1.003
+
+    cosine = stable_vector_cosine(first, second)
+
+    assert 0.999999999 <= cosine <= 1.0
 
 
 def test_geometric_median_preserves_symmetric_vector_structure():
@@ -63,4 +72,3 @@ def test_geometric_median_returns_identical_gradient_without_division_by_zero():
 def test_geometric_median_validates_gradients(gradients, message):
     with pytest.raises(ValueError, match=message):
         geometric_median(gradients)
-
