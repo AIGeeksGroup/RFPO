@@ -591,3 +591,14 @@ infrastructure:
   manipulation_environment: verified
   isaac_environment: verified
   checkpoints: verified
+  active_blocker:
+    status: "needs external action"
+    scope: "H16 Can audit on physical GPU 1"
+    cause: "MuJoCo offscreen rendering on GPU 1 takes about 19.1 seconds per step after the first step"
+    ruled_out:
+      - "H16 audit code, which is not entered during iteration 1"
+      - "policy-only CUDA inference"
+      - "generic CUDA matrix compute with a live EGL environment"
+      - "world-size-1 DDP/NCCL"
+      - "thermal, power, ECC, PCIe replay, or active competing GPU processes"
+    required_action: "administrator reset of GPU 1, or approval to render on a different idle GPU while retaining policy compute on GPU 1"
