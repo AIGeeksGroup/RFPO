@@ -270,7 +270,7 @@ hypotheses:
     priority: high
   - id: H35
     statement: "Filtering terminal-labeled FPO++ chunks whose normalized GAE sign contradicts their observed discounted terminal outcome improves the first actor-gradient direction."
-    status: active
+    status: refuted
     motivation: "H21-H22 show that official GAE ordering and magnitudes are useful but imperfect, while H15 shows success-only selection is biased. A coefficient-free sign-consistency filter retains both successes and failures and removes only contributions contradicted by their own observed terminal outcome."
     parent: H21
     priority: high
@@ -903,11 +903,20 @@ experiments:
       candidate_control_norm_ratios: [0.9823077, 1.0576193]
       audited_chunks: 192
       eligible_chunks: 207
+    - run: can_step6000_terminal_consistency_filter_audit_osmesa_seed20260905
+      metric: outcome_reference_cosine_gain
+      values: [-0.0002285, -0.0023960]
+      control_reference_cosines: [0.7232831, 0.7845886]
+      candidate_reference_cosines: [0.7230545, 0.7821926]
+      retained_fractions: [0.953125, 0.9375]
+      candidate_control_norm_ratios: [0.9986401, 0.9945556]
+      audited_chunks: 128
+      eligible_chunks: 221
 
 outer_loop:
-  cycle: 21
-  last_direction: "Audit a coefficient-free terminal-consistency filter on normalized GAE weights as H35 before optimizer integration."
-  last_reflection: "H34 retained candidate/control cosine above 0.88 and norm ratios near one, but reduced outcome-reference cosine by 0.138 and 0.070 in the two fixed replicas. Microbatch variation contains task-relevant joint coordinate structure, so coordinate-wise robust aggregation is closed without variants."
+  cycle: 22
+  last_direction: "Preserve the already useful initial GAE gradient and revisit only update-path interventions for H36."
+  last_reflection: "H35 found 93.8-95.3% sign agreement between normalized GAE and centered terminal outcomes. Removing the few contradictions changed outcome-gradient cosine by -0.0002 and -0.0024, so advantage sign filtering is closed without soft or thresholded variants."
 
 workspace:
   findings: "findings.md"
