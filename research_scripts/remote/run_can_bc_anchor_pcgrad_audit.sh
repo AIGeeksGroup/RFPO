@@ -17,14 +17,14 @@ export MUJOCO_GL=osmesa
 export PYOPENGL_PLATFORM=osmesa
 
 CHECKPOINT_ROOT="${CHECKPOINT_ROOT:-$PROJECT_ROOT/manipulation_experiments/downloaded_checkpoints}"
-RUN_NAME="${RUN_NAME:-can_step6000_bc_anchor_pcgrad_audit_osmesa_seed20260827}"
+RUN_NAME="${RUN_NAME:-can_step6000_bc_anchor_pcgrad_audit_osmesa_formal_seed20260827}"
 OUTPUT_DIR="${OUTPUT_DIR:-$RUNTIME_ROOT/results/$RUN_NAME}"
 LOG_PATH="${LOG_PATH:-$RUNTIME_ROOT/logs/$RUN_NAME.log}"
 
 export CAN_CHECKPOINT="${CAN_CHECKPOINT:-$CHECKPOINT_ROOT/95j3noe4_step_6000}"
 export NUM_ENVS=16
 export DATA_COLLECTION_STEPS=320
-export TOTAL_TIMESTEPS=640
+export TOTAL_TIMESTEPS=10240
 export EVAL_EPISODES=1
 export N_ACTION_SAMPLES=8
 export LEARNING_RATE_ACTOR=1e-5
