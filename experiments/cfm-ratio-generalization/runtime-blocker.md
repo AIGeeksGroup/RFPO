@@ -1,7 +1,8 @@
-# Runtime Blocker: GPU 1 Offscreen Rendering
+# Resolved Runtime Blocker: GPU 1 Offscreen Rendering
 
-H16 remains active. Its smoke runs did not reach the iteration-2 audit because Can environment
-rendering on physical GPU 1 became pathologically slow on 2026-08-09.
+The original H16 smoke runs did not reach the iteration-2 audit because Can environment rendering
+on physical GPU 1 became pathologically slow on 2026-08-09. An isolated OSMesa fallback restored
+normal rollout throughput without changing the FPO conda environment.
 
 ## Evidence
 
@@ -17,7 +18,22 @@ rendering on physical GPU 1 became pathologically slow on 2026-08-09.
   environment. GPU clocks were at their configured maximum, with no thermal slowdown, ECC error,
   PCIe replay, recovery request, or competing process.
 - Killing the render process returned GPU 1 to 0% utilization and 5 MiB, but a new render process
-  reproduced the same second-step slowdown. OSMesa is unavailable in the installed environment.
+  reproduced the same second-step slowdown.
+
+## Resolution
+
+- Extracted Ubuntu's checksummed `libosmesa6` and matching `libglapi-mesa` packages into
+  `~/workspace/scratch/fpo-osmesa/osmesa-root` without root access or changes to the training env.
+- A one-environment diagnostic completed four steps in 0.120, 0.070, 0.069, and 0.069 seconds.
+- The 8-environment H16 smoke sustained about 70-90 environment steps per second.
+- The locked 30-environment audit sustained about 130-190 environment steps per second and
+  completed both updates.
+
+Matched-state rendering was close but not bit-identical. Reset low-dimensional state was exact;
+mean absolute image difference was 0.00812. The deterministic step-6000 policy's first action had
+mean/max absolute differences of 0.00322/0.00740 and an L2 difference of 0.01025, about 1% of the
+reference action norm. OSMesa is accepted for mechanism diagnostics, not as final evidence that a
+reward benchmark improved.
 
 ## Artifacts
 
@@ -35,9 +51,8 @@ research_scripts/diagnostics/check_egl_cuda_interop.py
 research_scripts/diagnostics/check_egl_policy_interop.py
 ```
 
-## Resume Condition
+## Remaining Condition
 
-Either an administrator must reset physical GPU 1, or the user must authorize using another idle
-GPU for MuJoCo rendering while policy compute remains on physical GPU 1. After either action, rerun
-the one-environment zero-action diagnostic and require every measured step to complete in under two
-seconds before restarting the locked H16 smoke.
+Before any final reward benchmark, reset physical GPU 1 or use another authorized GPU for EGL
+rendering while keeping policy compute on physical GPU 1. Rerun the one-environment diagnostic and
+require every measured step to complete in under two seconds.

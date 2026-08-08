@@ -137,6 +137,12 @@ problem. Pre/post replay-gradient cosine was 0.614, and the success-only gradien
 orthogonal to the same-rollout fresh positive-advantage gradient (cosine 0.049). Selecting success
 episodes introduces a conflicting update rather than simply reusing more on-policy information.
 
+Fresh held-out CFM draws did not rescue the update-generalization hypothesis. In the locked H16
+audit, held-out draws retained 54.69% active positive ratios versus 48.24% for stored draws, a gain
+of only 6.45 points against the 15-point gate. Their median absolute log-ratio was 77.8% of the stored
+value and ESS was 99.63%, but the held-out pre/post gradient cosine was only 0.743. Fixed-draw
+overfitting is measurable but not dominant, so behavior-loss resampling per PPO epoch is stopped.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -160,6 +166,7 @@ episodes introduces a conflicting update rather than simply reusing more on-poli
 - Freezing advantage moments over a complete rollout does not improve FPO++; simple rescaling changes are now closed alongside reward-weighting changes.
 - Joint antithetic time/noise pairs reduce finite-MC gradient dispersion, but the locked audit could not establish sufficiently invariant average update direction.
 - One-update-old successful chunks retain high ratio ESS but are mostly positive-clipped, and success-only selection produces a strongly biased gradient direction.
+- Independent MC8 draws are modestly less shifted than stored draws, but do not retain enough active positive terms or gradient alignment to justify epoch-level behavior-loss resampling.
 
 ## Lessons and Constraints
 
@@ -178,4 +185,4 @@ episodes introduces a conflicting update rather than simply reusing more on-poli
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, and successful replay are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The verified step-6000 Can policy supplies a high-signal short-budget screen; the next candidate is critic-free terminal outcome weighting, beginning with an offline label and gradient-agreement audit.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, and epoch-resampled CFM losses are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The verified step-6000 Can policy supplies a high-signal short-budget screen; the next direction must begin with a new mechanism audit rather than another scalar, source, or fixed-draw schedule variant.

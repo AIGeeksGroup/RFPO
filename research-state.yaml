@@ -140,7 +140,7 @@ hypotheses:
     priority: high
   - id: H16
     statement: "FPO++ overfits rollout-stored MC8 CFM variables across update epochs, leaving independent held-out MC8 ratios closer to the behavior policy and less clipped."
-    status: active
+    status: refuted
     motivation: "H15 found severe one-update clipping on stored successful chunks; fresh behavior-anchored CFM draws per epoch could improve estimator generalization without changing rewards or exploration."
     parent: H2
     priority: high
@@ -159,7 +159,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 86
+  total_runs: 88
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -570,11 +570,19 @@ experiments:
       success_fresh_positive_gradient_cosine: 0.04877
       audited_chunks: 64
       available_successful_chunks: 1608
+    - run: can_step6000_cfmratio_audit_osmesa_formal_seed20260815
+      metric: heldout_active_fraction_gain
+      value: 0.06445
+      heldout_to_stored_median_absolute_logratio: 0.77843
+      heldout_ratio_ess_fraction: 0.99630
+      heldout_pre_post_gradient_cosine: 0.74273
+      audited_chunks: 64
+      available_positive_chunks: 1754
 
 outer_loop:
   cycle: 4
-  last_direction: "Audit stored-versus-held-out CFM ratio generalization before changing epoch-level sampling; avoid more reward selection and scalar reweighting."
-  last_reflection: "H15 refutes replay and provides exploratory evidence against terminal-outcome and successful-chunk objectives. The remaining specific bottleneck is repeated optimization on fixed rollout CFM variables."
+  last_direction: "H16 refutes epoch-level CFM resampling; return to a fresh mechanism screen rather than tuning fixed-draw or scalar-weight variants."
+  last_reflection: "Held-out CFM draws are modestly less shifted than stored draws, but not enough to preserve active terms or a stable gradient direction. Fixed-draw overfitting is not the dominant FPO++ bottleneck."
 
 workspace:
   findings: "findings.md"
@@ -592,8 +600,8 @@ infrastructure:
   isaac_environment: verified
   checkpoints: verified
   active_blocker:
-    status: "needs external action"
-    scope: "H16 Can audit on physical GPU 1"
+    status: "resolved for mechanism audits"
+    scope: "MuJoCo rendering on physical GPU 1"
     cause: "MuJoCo offscreen rendering on GPU 1 takes about 19.1 seconds per step after the first step"
     ruled_out:
       - "H16 audit code, which is not entered during iteration 1"
@@ -601,4 +609,5 @@ infrastructure:
       - "generic CUDA matrix compute with a live EGL environment"
       - "world-size-1 DDP/NCCL"
       - "thermal, power, ECC, PCIe replay, or active competing GPU processes"
-    required_action: "administrator reset of GPU 1, or approval to render on a different idle GPU while retaining policy compute on GPU 1"
+    resolution: "rootless isolated OSMesa restored normal throughput; matched-state policy action L2 changed by about 1%"
+    remaining_condition: "final reward benchmarks require healthy EGL after a GPU reset or an authorized rendering GPU"

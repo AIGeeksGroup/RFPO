@@ -646,8 +646,11 @@ def create_vectorized_env(
 
     # If CUDA_VISIBLE_DEVICES is set, all environments should render on device 0 (the only one visible).
     # Otherwise, distribute rendering across available GPUs.
+    render_gpu_devices = os.environ.get("FPO_RENDER_GPU")
     cuda_visible_devices = os.environ.get("CUDA_VISIBLE_DEVICES")
-    if cuda_visible_devices:
+    if render_gpu_devices:
+        visible_device_ids = [int(device_id) for device_id in render_gpu_devices.split(",")]
+    elif cuda_visible_devices:
         # When this is set, the process only sees the specified GPUs, and they are indexed from 0.
         # For rendering in robosuite, we should always use device 0.
         # visible_device_ids = [0]
@@ -658,7 +661,11 @@ def create_vectorized_env(
 
     num_visible_gpus = len(visible_device_ids) if visible_device_ids else 1
 
-    print(f"num_visible_gpus: {num_visible_gpus}", visible_device_ids)
+    print(
+        f"num_visible_gpus: {num_visible_gpus}",
+        visible_device_ids,
+        f"render_override: {render_gpu_devices}",
+    )
 
     if seeds is None:
         seeds = [None] * num_envs
