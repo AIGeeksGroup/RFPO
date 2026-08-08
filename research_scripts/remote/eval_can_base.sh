@@ -10,10 +10,9 @@ CHECKPOINT_ROOT="${CHECKPOINT_ROOT:-$PROJECT_ROOT/manipulation_experiments/downl
 CAN_CHECKPOINT="$CHECKPOINT_ROOT/95j3noe4_step_1000"
 
 if [[ ! -f "$CAN_CHECKPOINT/policy/model.safetensors" ]]; then
-  python -m pip install gdown
-  gdown --folder \
-    https://drive.google.com/drive/folders/1vQ3Tv-mwNZIFipp5Bv0SQlfYfIhlf8_t \
-    -O "$CHECKPOINT_ROOT"
+  echo "Missing Can checkpoint: $CAN_CHECKPOINT" >&2
+  echo "Run research_scripts/remote/download_manip_checkpoints.sh first." >&2
+  exit 1
 fi
 
 for zero_sampling in True False; do
@@ -28,4 +27,3 @@ for zero_sampling in True False; do
     --wandb-enable False \
     --output-dir "$RUNTIME_ROOT/results/can_base_${zero_sampling}_$(timestamp)"
 done
-

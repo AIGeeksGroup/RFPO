@@ -67,3 +67,11 @@ workspace:
   experiments_dir: "experiments/"
   to_human_dir: "to_human/"
   paper_dir: "paper/"
+
+infrastructure:
+  server: "haoyu@36.33.157.152:30061"
+  remote_code: "~/workspace/code/fpo-control"
+  remote_outputs: "~/workspace/outputs/fpo-control"
+  manipulation_environment: verified
+  isaac_environment: installing
+  checkpoints: downloading
