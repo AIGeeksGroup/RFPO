@@ -33,7 +33,11 @@ from src.dexmg_env import VectorizedEnvWrapper, create_vectorized_env
 from src.flow_model import FlowMatchingPolicy
 from src.flow_model_config import FlowMatchingConfig
 from src.rollout_bookkeeping import build_rollout_zero_sampling_mask, prepare_invalid_step_mask
-from src.advantage_weighting import clipped_mirror_ratio_loss, ess_softmax_weights
+from src.advantage_weighting import (
+    clipped_mirror_ratio_loss,
+    ess_softmax_weights,
+    normalize_advantages_from_moments,
+)
 
 # ---- Multiprocessing start method (CUDA compat) ------------------------------
 try:
@@ -100,6 +104,7 @@ class FlowPPOConfig:
     cfm_loss_weight_from_t: str = "constant"
     advantage_weighting: Literal["signed", "ess_softmax"] = "signed"
     advantage_weight_ess_fraction: float = 0.5
+    advantage_normalization_scope: Literal["minibatch", "rollout"] = "minibatch"
     reset_cfm_invalid_mask_each_iteration: bool = False
     rollout_zero_fraction: float = 0.0
     rollout_tempered_fraction: float = 0.0
@@ -1243,6 +1248,45 @@ def main(cfg: FlowPPOConfig):
         b_advantages = advantages.reshape(-1, n_action_steps, num_envs_per_process).permute(0, 2, 1).reshape(-1, n_action_steps)
         b_returns = returns.reshape(-1, n_action_steps, num_envs_per_process).permute(0, 2, 1).reshape(-1, n_action_steps)
 
+        rollout_advantage_mean = torch.tensor(float("nan"), device=device)
+        rollout_advantage_std = torch.tensor(float("nan"), device=device)
+        if cfg.norm_adv and cfg.advantage_normalization_scope == "rollout":
+            advantage_columns = slice(0, 1) if cfg.do_chunk_level_ppo else slice(None)
+            rollout_advantages = b_advantages[:, advantage_columns].to(device)
+            rollout_valid_mask = (1.0 - b_cfm_value_invalid[:, advantage_columns]).to(
+                device=device, dtype=torch.bool
+            )
+            valid_advantages = rollout_advantages[rollout_valid_mask]
+            moment_sums = torch.stack(
+                [
+                    valid_advantages.sum(),
+                    valid_advantages.square().sum(),
+                    valid_advantages.new_tensor(valid_advantages.numel()),
+                ]
+            )
+            if is_ddp:
+                dist.all_reduce(moment_sums, op=dist.ReduceOp.SUM)
+            if moment_sums[2] <= 0:
+                raise RuntimeError("rollout advantage normalization requires a valid sample")
+            rollout_advantage_mean = moment_sums[0] / moment_sums[2]
+            rollout_advantage_variance = (
+                moment_sums[1] / moment_sums[2] - rollout_advantage_mean.square()
+            ).clamp_min(0.0)
+            rollout_advantage_std = rollout_advantage_variance.sqrt()
+            b_advantages[:, advantage_columns] = normalize_advantages_from_moments(
+                rollout_advantages,
+                rollout_advantage_mean,
+                rollout_advantage_variance,
+            ).cpu()
+            if rank == 0:
+                logger.info(
+                    "[Rank %d] Rollout advantage moments: mean=%.6f std=%.6f count=%d",
+                    rank,
+                    rollout_advantage_mean.item(),
+                    rollout_advantage_std.item(),
+                    int(moment_sums[2].item()),
+                )
+
         # ---------- Policy update ----------
         b_inds = np.arange(local_batch_size)
         clipfracs = []
@@ -1389,7 +1433,7 @@ def main(cfg: FlowPPOConfig):
                 else:
                     raise ValueError(f"Invalid loss mode: {cfg.loss_mode}")
 
-                if cfg.norm_adv:
+                if cfg.norm_adv and cfg.advantage_normalization_scope == "minibatch":
                     if is_ddp:
                         # Compute local statistics
                         adv_mean = mb_advantages.mean()

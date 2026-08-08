@@ -4,6 +4,7 @@ from src.advantage_weighting import (
     clipped_mirror_ratio_loss,
     effective_sample_size,
     ess_softmax_weights,
+    normalize_advantages_from_moments,
 )
 
 
@@ -55,3 +56,24 @@ def test_clipped_mirror_ratio_loss_broadcasts_and_clips_positive_updates():
         ratio.grad,
         torch.tensor([[-0.5, 0.0], [-0.125, -0.125]]),
     )
+
+
+def test_normalize_advantages_from_fixed_population_moments():
+    advantages = torch.tensor([-1.0, 1.0, 3.0])
+    mean = torch.tensor(1.0)
+    variance = torch.tensor(8.0 / 3.0)
+
+    normalized = normalize_advantages_from_moments(advantages, mean, variance)
+
+    torch.testing.assert_close(normalized.mean(), torch.tensor(0.0), atol=1e-7, rtol=0.0)
+    torch.testing.assert_close(
+        normalized.square().mean(), torch.tensor(1.0), atol=3e-7, rtol=0.0
+    )
+
+
+def test_normalize_advantages_handles_zero_variance():
+    normalized = normalize_advantages_from_moments(
+        torch.ones(4), torch.tensor(1.0), torch.tensor(0.0)
+    )
+
+    torch.testing.assert_close(normalized, torch.zeros(4))

@@ -3,6 +3,19 @@ from __future__ import annotations
 import torch
 
 
+def normalize_advantages_from_moments(
+    advantages: torch.Tensor,
+    mean: torch.Tensor,
+    variance: torch.Tensor,
+    *,
+    epsilon: float = 1e-8,
+) -> torch.Tensor:
+    """Normalize advantages using fixed rollout-level population moments."""
+    if epsilon <= 0.0:
+        raise ValueError("epsilon must be positive")
+    return (advantages - mean) / (variance.clamp_min(0.0).sqrt() + epsilon)
+
+
 def effective_sample_size(weights: torch.Tensor) -> torch.Tensor:
     """Return the scale-invariant effective sample size of nonnegative weights."""
     flat_weights = weights.reshape(-1)
