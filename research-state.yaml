@@ -274,6 +274,12 @@ hypotheses:
     motivation: "H21-H22 show that official GAE ordering and magnitudes are useful but imperfect, while H15 shows success-only selection is biased. A coefficient-free sign-consistency filter retains both successes and failures and removes only contributions contradicted by their own observed terminal outcome."
     parent: H21
     priority: high
+  - id: H30b
+    statement: "The completed zero-endpoint PCGrad candidate improves balanced full-Gaussian Can success over its matched control without materially degrading zero-source success."
+    status: active
+    motivation: "H29 passed its mechanism audit and H30 training was valid, but the original reward screen was censored by requesting fewer episodes than asynchronous environments. Existing frozen checkpoints can be compared without retraining using one episode from every environment."
+    parent: H30
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -915,7 +921,7 @@ experiments:
 
 outer_loop:
   cycle: 22
-  last_direction: "Preserve the already useful initial GAE gradient and revisit only update-path interventions for H36."
+  last_direction: "Correct the invalidated H30 reward measurement with a balanced frozen-checkpoint screen as H30b before inventing H36."
   last_reflection: "H35 found 93.8-95.3% sign agreement between normalized GAE and centered terminal outcomes. Removing the few contradictions changed outcome-gradient cosine by -0.0002 and -0.0024, so advantage sign filtering is closed without soft or thresholded variants."
 
 workspace:
