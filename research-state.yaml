@@ -126,6 +126,12 @@ hypotheses:
     motivation: "Terminal binary rewards make minibatch composition highly variable; recomputing normalization after every reshuffle changes trajectory weights across epochs without adding information."
     parent: H2
     priority: high
+  - id: H14
+    statement: "Joint antithetic time/noise pairs reduce MC8 CFM policy-gradient estimator variance at unchanged compute."
+    status: active
+    motivation: "FPO++ ratios depend on Monte Carlo CFM samples; symmetric pairing can improve estimator information efficiency without changing the objective or exploration distribution."
+    parent: H2
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
