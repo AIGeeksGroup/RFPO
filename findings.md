@@ -247,6 +247,7 @@ weight interpolation to retain.
 - Should reflow be an offline post-training stage, an auxiliary online loss, or both?
 - Which reward-aware FPO++ mechanism can improve Can success without relying on unstable BC-source exploration changes?
 - A frozen BC velocity-field anchor strongly conflicts with FPO++ and prevents drift, but global PCGrad retains only 34-46% of one-step surrogate gain. Generic flow-space behavior protection is too broad; a deterministic endpoint anchor is the next narrower test.
+- Narrowing the anchor to the deterministic zero-source action endpoint passes the fixed-batch mechanism audit: it retains 72.8-73.7% of surrogate gain while removing 66.5-76.4% of endpoint drift. Reward improvement remains untested pending H30.
 - Which training-time intervention remains distinct from the closed source, estimator, critic, optimizer, interpolation, and inference-averaging routes?
 
 ## Optimization Trajectory

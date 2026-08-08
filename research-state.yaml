@@ -234,9 +234,15 @@ hypotheses:
     priority: high
   - id: H29
     statement: "Conflict projection against the frozen zero-source action endpoint preserves deterministic Can behavior while retaining most useful FPO++ surrogate improvement."
-    status: active
+    status: supported
     motivation: "H28's generic velocity-field anchor removed 93-98% of BC drift but also 54-66% of surrogate gain; protecting only the benchmark-relevant endpoint may avoid irrelevant constraints."
     parent: H28
+    priority: high
+  - id: H30
+    statement: "Training-time zero-endpoint conflict projection improves full-Gaussian Can success without materially degrading zero-source success."
+    status: active
+    motivation: "H29 passed both fixed-batch mechanism gates while retaining over 72% of surrogate progress and removing over 66% of deterministic endpoint drift."
+    parent: H29
     priority: high
 
 experiments:
