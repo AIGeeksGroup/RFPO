@@ -1,5 +1,7 @@
 """Source-distribution helpers for flow-policy sampling."""
 
+import math
+
 import torch
 from torch import Tensor
 
@@ -35,6 +37,25 @@ def apply_previous_action_prior(
     source = source_noise.clone()
     source[:, :warm_steps] = torch.where(warm_mask, warm_source, source[:, :warm_steps])
     return source
+
+
+def update_ar1_gaussian_source(
+    innovation: Tensor,
+    previous_source: Tensor | None,
+    correlation: float,
+) -> Tensor:
+    """Update a stationary standard-Gaussian AR(1) source."""
+    if not 0.0 <= correlation < 1.0:
+        raise ValueError("correlation must be in [0, 1)")
+    if previous_source is None:
+        return innovation.clone()
+    if previous_source.shape != innovation.shape:
+        raise ValueError("previous source and innovation must have identical shapes")
+
+    return (
+        correlation * previous_source
+        + math.sqrt(1.0 - correlation**2) * innovation
+    )
 
 
 def split_action_history(

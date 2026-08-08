@@ -69,12 +69,16 @@ class EvalCheckpointConfig:
     """Environment name for evaluation."""
     zero_sampling: bool = True
     """Legacy source selector used when sampling_mode is unset."""
-    sampling_mode: Optional[Literal["zero", "random", "antithetic_average"]] = None
+    sampling_mode: Optional[
+        Literal["zero", "random", "antithetic_average", "correlated_random"]
+    ] = None
     """Explicit evaluation source mode; overrides zero_sampling when set."""
     source_prior_mode: Optional[str] = None
     """Optional checkpoint override: 'gaussian' or exploratory 'previous_action'."""
     source_prior_sigma: float = 0.5
     """Residual noise scale for previous_action source positions."""
+    source_temporal_correlation: float = 0.9
+    """AR(1) coefficient used only by correlated_random sampling."""
     sampling_steps: Optional[int] = None
     """Optional Euler-step override for low-NFE checkpoint evaluation."""
     action_steps: Optional[int] = None
@@ -156,7 +160,10 @@ def _run_rollouts(
     num_episodes: int,
     task: str,
     save_video: bool = True,
-    sampling_mode: Literal["zero", "random", "antithetic_average"] = "random",
+    sampling_mode: Literal[
+        "zero", "random", "antithetic_average", "correlated_random"
+    ] = "random",
+    source_temporal_correlation: float = 0.9,
     annotate_video: bool = True,
 ):
     """Run *num_episodes* episodes with *policy* in vectorized *env* and compute success-rate."""
@@ -210,6 +217,11 @@ def _run_rollouts(
                 obs,
                 zero_sampling=sampling_mode == "zero",
                 antithetic_sampling=sampling_mode == "antithetic_average",
+                temporal_source_correlation=(
+                    source_temporal_correlation
+                    if sampling_mode == "correlated_random"
+                    else 0.0
+                ),
             )
             if not torch.isfinite(action).all():
                 raise FloatingPointError(f"non-finite action produced in {sampling_mode} mode")
@@ -503,6 +515,13 @@ def main(cfg: EvalCheckpointConfig):
     if sampling_mode is None:
         sampling_mode = "zero" if cfg.zero_sampling else "random"
     logger.info("Evaluation sampling mode: %s", sampling_mode)
+    if sampling_mode == "correlated_random":
+        if not 0.0 < cfg.source_temporal_correlation < 1.0:
+            raise ValueError("--source-temporal-correlation must be in (0, 1)")
+        logger.info(
+            "Temporal Gaussian source correlation: %.3f",
+            cfg.source_temporal_correlation,
+        )
     logger.info(colored("Checkpoint Evaluation", "cyan", attrs=["bold"]))
     logger.info(colored("=" * 80, "cyan"))
 
@@ -623,6 +642,7 @@ def main(cfg: EvalCheckpointConfig):
         task=cfg.eval_env,
         save_video=cfg.save_video,
         sampling_mode=sampling_mode,
+        source_temporal_correlation=cfg.source_temporal_correlation,
         annotate_video=cfg.annotate_video,
     )
 
@@ -682,6 +702,8 @@ def main(cfg: EvalCheckpointConfig):
         f.write(f"Run ID: {cfg.wandb_run_id}\n")
         f.write(f"Episodes: {cfg.eval_num_episodes}\n")
         f.write(f"Sampling Mode: {sampling_mode}\n")
+        if sampling_mode == "correlated_random":
+            f.write(f"Source Temporal Correlation: {cfg.source_temporal_correlation}\n")
         f.write(f"Action Steps: {policy.config.n_action_steps}\n")
         f.write(f"Success Rate: {mean_success_rate * 100:.2f}% +/- {std_success_rate * 100:.2f}%\n")
         f.write(f"Average Return: {avg_return:.3f} +/- {std_return:.3f}\n")

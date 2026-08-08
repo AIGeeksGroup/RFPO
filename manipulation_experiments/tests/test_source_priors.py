@@ -1,7 +1,11 @@
 import pytest
 import torch
 
-from src.source_priors import apply_previous_action_prior, split_action_history
+from src.source_priors import (
+    apply_previous_action_prior,
+    split_action_history,
+    update_ar1_gaussian_source,
+)
 
 
 def test_previous_action_prior_warms_only_available_prefixes():
@@ -33,6 +37,31 @@ def test_previous_action_prior_rejects_negative_sigma():
             torch.ones(1, dtype=torch.bool),
             sigma=-0.1,
         )
+
+
+def test_ar1_source_preserves_first_innovation_without_aliasing():
+    innovation = torch.tensor([[1.0, -2.0]])
+
+    source = update_ar1_gaussian_source(innovation, None, 0.9)
+
+    torch.testing.assert_close(source, innovation)
+    assert source.data_ptr() != innovation.data_ptr()
+
+
+def test_ar1_source_uses_stationary_innovation_scale():
+    previous = torch.tensor([[2.0, -1.0]])
+    innovation = torch.tensor([[1.0, 3.0]])
+
+    source = update_ar1_gaussian_source(innovation, previous, 0.6)
+
+    torch.testing.assert_close(source, 0.6 * previous + 0.8 * innovation)
+
+
+def test_ar1_source_rejects_invalid_inputs():
+    with pytest.raises(ValueError, match="correlation"):
+        update_ar1_gaussian_source(torch.zeros(2), None, 1.0)
+    with pytest.raises(ValueError, match="identical shapes"):
+        update_ar1_gaussian_source(torch.zeros(2), torch.zeros(3), 0.9)
 
 
 def test_split_action_history_falls_back_at_episode_boundary():

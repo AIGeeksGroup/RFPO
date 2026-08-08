@@ -22,7 +22,7 @@ from .flow_net_mlp import FlowMatchingMLPModel
 from .flow_net_unet import FlowMatchingUnetModel
 from .flow_net_residual_mlp import FlowMatchingResidualMLPModel
 from .noise_injection_network import NoiseInjectionNetwork
-from .source_priors import apply_previous_action_prior
+from .source_priors import apply_previous_action_prior, update_ar1_gaussian_source
 
 
 # Helper functions for vision encoder
@@ -134,6 +134,7 @@ class FlowMatchingPolicy(PreTrainedPolicy):
         self.previous_action_buffers = {
             env_id: deque([], maxlen=self.config.n_action_steps) for env_id in range(self.num_envs)
         }
+        self.temporal_source_buffers = {env_id: None for env_id in range(self.num_envs)}
         self.mdp_x_t_path_buffers = {
             env_id: deque([], maxlen=self.config.n_action_steps) for env_id in range(self.num_envs)
         }
@@ -167,6 +168,7 @@ class FlowMatchingPolicy(PreTrainedPolicy):
                 self.action_buffers = {}
                 self.mdp_x_t_path_buffers = {}
                 self.previous_action_buffers = {}
+                self.temporal_source_buffers = {}
 
             else:
                 # Reset all buffers
@@ -174,6 +176,7 @@ class FlowMatchingPolicy(PreTrainedPolicy):
                     self.action_buffers[env_id] = deque([], maxlen=self.config.n_action_steps)
                     self.mdp_x_t_path_buffers[env_id] = deque([], maxlen=self.config.n_action_steps)
                     self.previous_action_buffers[env_id] = deque([], maxlen=self.config.n_action_steps)
+                    self.temporal_source_buffers[env_id] = None
         else:
             # Reset only specified environment buffers
             if not isinstance(env_ids, torch.Tensor):
@@ -184,6 +187,7 @@ class FlowMatchingPolicy(PreTrainedPolicy):
                     self.action_buffers[env_id] = deque([], maxlen=self.config.n_action_steps)
                     self.mdp_x_t_path_buffers[env_id] = deque([], maxlen=self.config.n_action_steps)
                     self.previous_action_buffers[env_id] = deque([], maxlen=self.config.n_action_steps)
+                    self.temporal_source_buffers[env_id] = None
     def step_ema(self):
         """Update the EMA model with current model parameters."""
         if self.ema_model is not None:
@@ -216,6 +220,7 @@ class FlowMatchingPolicy(PreTrainedPolicy):
         antithetic_sampling: bool = False,
         zero_sampling_mask: Tensor | None = None,
         source_sampling_scale: Tensor | None = None,
+        temporal_source_correlation: float = 0.0,
     ) -> Tensor:
         """Select actions for multiple environments with separate buffers.
         
@@ -234,6 +239,23 @@ class FlowMatchingPolicy(PreTrainedPolicy):
                 raise ValueError("antithetic sampling cannot be combined with other source or SDE options")
             if self.config.source_prior_mode != "gaussian":
                 raise ValueError("antithetic sampling requires the Gaussian source prior")
+        if not 0.0 <= temporal_source_correlation < 1.0:
+            raise ValueError("temporal_source_correlation must be in [0, 1)")
+        if temporal_source_correlation > 0:
+            if (
+                zero_sampling
+                or sde_sampling
+                or antithetic_sampling
+                or zero_sampling_mask is not None
+                or source_sampling_scale is not None
+            ):
+                raise ValueError(
+                    "temporal source correlation cannot be combined with other source or SDE options"
+                )
+            if self.config.source_prior_mode != "gaussian":
+                raise ValueError(
+                    "temporal source correlation requires the Gaussian source prior"
+                )
         if zero_sampling_mask is not None:
             if zero_sampling or source_sampling_scale is not None:
                 raise ValueError("zero sampling options and source_sampling_scale cannot be combined")
@@ -294,6 +316,25 @@ class FlowMatchingPolicy(PreTrainedPolicy):
                 )
                 action_chunks = average_antithetic_predictions(positive_actions, negative_actions)
                 mdp_x_t_path = average_antithetic_predictions(positive_path, negative_path)
+            elif temporal_source_correlation > 0:
+                innovations = torch.randn(
+                    len(envs_needing_actions),
+                    self.config.horizon,
+                    self.model.action_dim,
+                    device=next(iter(sub_batch.values())).device,
+                )
+                correlated_sources = []
+                for i, env_id in enumerate(envs_needing_actions):
+                    source = update_ar1_gaussian_source(
+                        innovations[i],
+                        self.temporal_source_buffers[env_id],
+                        temporal_source_correlation,
+                    )
+                    self.temporal_source_buffers[env_id] = source.clone()
+                    correlated_sources.append(source)
+                action_chunks, mdp_x_t_path = self.predict_action_chunk(
+                    sub_batch, source_noise=torch.stack(correlated_sources)
+                )
             else:
                 action_chunks, mdp_x_t_path = self.predict_action_chunk(
                     sub_batch,
