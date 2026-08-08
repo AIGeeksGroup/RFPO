@@ -268,6 +268,12 @@ hypotheses:
     motivation: "H24 shows that summing minibatch gradients does not remove update drift, but a mean retains outlier components. A coefficient-free coordinate median can suppress microbatch-specific gradient outliers at the first update without changing rewards, advantages, sources, or CFM samples."
     parent: H24
     priority: high
+  - id: H35
+    statement: "Filtering terminal-labeled FPO++ chunks whose normalized GAE sign contradicts their observed discounted terminal outcome improves the first actor-gradient direction."
+    status: active
+    motivation: "H21-H22 show that official GAE ordering and magnitudes are useful but imperfect, while H15 shows success-only selection is biased. A coefficient-free sign-consistency filter retains both successes and failures and removes only contributions contradicted by their own observed terminal outcome."
+    parent: H21
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -900,7 +906,7 @@ experiments:
 
 outer_loop:
   cycle: 21
-  last_direction: "Stop coordinate-robust aggregation and identify an H35 intervention that changes the reward target rather than mixing the same GAE gradients."
+  last_direction: "Audit a coefficient-free terminal-consistency filter on normalized GAE weights as H35 before optimizer integration."
   last_reflection: "H34 retained candidate/control cosine above 0.88 and norm ratios near one, but reduced outcome-reference cosine by 0.138 and 0.070 in the two fixed replicas. Microbatch variation contains task-relevant joint coordinate structure, so coordinate-wise robust aggregation is closed without variants."
 
 workspace:
