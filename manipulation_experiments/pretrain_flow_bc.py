@@ -43,6 +43,7 @@ from termcolor import colored
 from src.flow_model_config import FlowMatchingConfig
 from src.dexmg_env import VectorizedEnvWrapper, create_vectorized_env
 from src.flow_model import FlowMatchingPolicy
+from src.reflow_targets import mix_reflow_targets
 from src.source_priors import split_action_history
 
 # Set multiprocessing start method for CUDA compatibility
@@ -152,6 +153,8 @@ class TrainFlowBCConfig:
     """Frozen teacher checkpoint used to generate paired reflow endpoints online."""
     reflow_teacher_sampling_steps: int = 64
     """Euler steps used by the frozen reflow teacher."""
+    reflow_teacher_mix_probability: float = 1.0
+    """Per-sample probability of using a teacher endpoint instead of the dataset action."""
     
     # Model parameters
     vision_backbone: str = "resnet18" # clip
@@ -958,6 +961,8 @@ def main(cfg: TrainFlowBCConfig):
 
     reflow_teacher = None
     if cfg.reflow_teacher_ckpt is not None:
+        if not 0.0 <= cfg.reflow_teacher_mix_probability <= 1.0:
+            raise ValueError("reflow_teacher_mix_probability must be in [0, 1]")
         if policy_cfg.source_prior_mode != "gaussian":
             raise ValueError("reflow teacher mode currently requires a Gaussian source prior")
         teacher_checkpoint = Path(cfg.reflow_teacher_ckpt)
@@ -1136,6 +1141,8 @@ def main(cfg: TrainFlowBCConfig):
         total_loss_for_logging = torch.tensor(0.0, device=device)
         valid_history_count = torch.tensor(0, device=device, dtype=torch.long)
         history_sample_count = torch.tensor(0, device=device, dtype=torch.long)
+        reflow_target_count = torch.tensor(0, device=device, dtype=torch.long)
+        reflow_sample_count = torch.tensor(0, device=device, dtype=torch.long)
         iter_start_t = time.perf_counter()
 
         # Inner loop for gradient accumulation
@@ -1178,6 +1185,8 @@ def main(cfg: TrainFlowBCConfig):
             reflow_t = None
             if reflow_teacher is not None:
                 batch_size = batch[ACTION].shape[0]
+                dataset_actions = batch[ACTION]
+                dataset_is_pad = batch[f"{ACTION}_is_pad"]
                 reflow_source = torch.randn(
                     (batch_size, policy_cfg.horizon, reflow_teacher.model.action_dim),
                     device=device,
@@ -1186,10 +1195,15 @@ def main(cfg: TrainFlowBCConfig):
                     teacher_actions, _ = reflow_teacher.predict_action_chunk(
                         batch, source_noise=reflow_source
                     )
-                batch[ACTION] = teacher_actions
-                batch[f"{ACTION}_is_pad"] = torch.zeros(
-                    teacher_actions.shape[:2], dtype=torch.bool, device=device
+                use_teacher = torch.rand(batch_size, device=device) < cfg.reflow_teacher_mix_probability
+                batch[ACTION], batch[f"{ACTION}_is_pad"] = mix_reflow_targets(
+                    dataset_actions,
+                    dataset_is_pad,
+                    teacher_actions,
+                    use_teacher,
                 )
+                reflow_target_count += use_teacher.sum()
+                reflow_sample_count += use_teacher.numel()
                 reflow_t = torch.rand((batch_size, 1, 1), device=device)
 
             # Save sample images for inspection (only once at step 0)
@@ -1243,6 +1257,8 @@ def main(cfg: TrainFlowBCConfig):
             dist.all_reduce(total_loss_for_logging, op=dist.ReduceOp.AVG)
             dist.all_reduce(valid_history_count, op=dist.ReduceOp.SUM)
             dist.all_reduce(history_sample_count, op=dist.ReduceOp.SUM)
+            dist.all_reduce(reflow_target_count, op=dist.ReduceOp.SUM)
+            dist.all_reduce(reflow_sample_count, op=dist.ReduceOp.SUM)
 
         # Compute gradient norm before clipping (for logging)
         grad_norm_before_clip = torch.nn.utils.clip_grad_norm_(policy.parameters(), cfg.grad_clip_norm)
@@ -1272,6 +1288,11 @@ def main(cfg: TrainFlowBCConfig):
             if history_sample_count.item() > 0
             else None
         )
+        reflow_target_frac = (
+            reflow_target_count.float() / reflow_sample_count
+            if reflow_sample_count.item() > 0
+            else None
+        )
 
         if rank == 0 and step % cfg.log_freq == 0:
             msg = (
@@ -1285,6 +1306,8 @@ def main(cfg: TrainFlowBCConfig):
             )
             if valid_history_frac is not None:
                 msg += f" | valid_history_frac: {valid_history_frac.item():.4f}"
+            if reflow_target_frac is not None:
+                msg += f" | reflow_target_frac: {reflow_target_frac.item():.4f}"
             logger.info(msg)
             if cfg.wandb_enable:
                 wandb.log(
@@ -1299,6 +1322,11 @@ def main(cfg: TrainFlowBCConfig):
                         **(
                             {"train/valid_history_frac": valid_history_frac.item()}
                             if valid_history_frac is not None
+                            else {}
+                        ),
+                        **(
+                            {"train/reflow_target_frac": reflow_target_frac.item()}
+                            if reflow_target_frac is not None
                             else {}
                         ),
                     },

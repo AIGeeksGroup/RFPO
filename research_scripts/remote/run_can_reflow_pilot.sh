@@ -21,6 +21,7 @@ if [[ "$MODE" == "reflow" ]]; then
   extra_args+=(
     --reflow-teacher-ckpt "$CAN_CHECKPOINT"
     --reflow-teacher-sampling-steps "${TEACHER_STEPS:-64}"
+    --reflow-teacher-mix-probability "${REFLOW_MIX_PROBABILITY:-1.0}"
   )
 fi
 
@@ -38,4 +39,3 @@ python pretrain_flow_bc.py \
   --wandb-enable False \
   --output-dir "$RUNTIME_ROOT/results/$RUN_TAG" \
   "${extra_args[@]}"
-
