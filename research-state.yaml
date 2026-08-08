@@ -276,7 +276,7 @@ hypotheses:
     priority: high
   - id: H30b
     statement: "The completed zero-endpoint PCGrad candidate improves balanced full-Gaussian Can success over its matched control without materially degrading zero-source success."
-    status: active
+    status: refuted
     motivation: "H29 passed its mechanism audit and H30 training was valid, but the original reward screen was censored by requesting fewer episodes than asynchronous environments. Existing frozen checkpoints can be compared without retraining using one episode from every environment."
     parent: H30
     priority: high
@@ -918,11 +918,25 @@ experiments:
       candidate_control_norm_ratios: [0.9986401, 0.9945556]
       audited_chunks: 128
       eligible_chunks: 221
+    - run: can_step6000_h30b_control_balanced20_seed20260906
+      metric: success_rate
+      zero_success: 0.95
+      random_success: 0.45
+      episodes_per_mode: 20
+      balanced_episodes_per_env: true
+    - run: can_step6000_h30b_candidate_balanced20_seed20260906
+      metric: success_rate
+      zero_success: 1.0
+      random_success: 0.50
+      episodes_per_mode: 20
+      balanced_episodes_per_env: true
+      pooled_success_gain: 0.05
+      random_success_count_gain: 1
 
 outer_loop:
-  cycle: 22
-  last_direction: "Correct the invalidated H30 reward measurement with a balanced frozen-checkpoint screen as H30b before inventing H36."
-  last_reflection: "H35 found 93.8-95.3% sign agreement between normalized GAE and centered terminal outcomes. Removing the few contradictions changed outcome-gradient cosine by -0.0002 and -0.0024, so advantage sign filtering is closed without soft or thresholded variants."
+  cycle: 23
+  last_direction: "Treat H30b as suggestive but below gate; do not confirm or tune it, and require a new H36 mechanism before further reward runs."
+  last_reflection: "Balanced H30b evaluation removed censoring and showed candidate gains of 1/20 in both zero and random modes, for +2/40 pooled. The pooled and non-degradation gates passed, but the locked random-source +2/20 gate failed, so no 50-episode confirmation is authorized."
 
 workspace:
   findings: "findings.md"

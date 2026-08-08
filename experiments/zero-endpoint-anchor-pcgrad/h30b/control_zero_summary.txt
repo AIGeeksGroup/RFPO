@@ -1,0 +1,13 @@
+Evaluation Summary
+================================================================================
+Environment: Can
+Checkpoint: latest
+Run ID: None
+Episodes: 20
+Balanced Episodes Per Env: True
+Sampling Mode: zero
+Action Steps: 16
+Success Rate: 95.00% +/- 21.79%
+Average Return: 0.950 +/- 0.218
+FPS: 109.8
+================================================================================

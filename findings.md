@@ -236,6 +236,12 @@ terminal outcomes on 93.8-95.3% of labeled chunks. Removing the few contradictio
 norms nearly unchanged and slightly reduced outcome alignment in both replicas. The residual error in
 the official GAE gradient is therefore not a useful sign-misclassification problem.
 
+Corrected balanced evaluation of zero-endpoint PCGrad produced a small same-direction gain but missed
+its primary screen gate. Control scored 19/20 zero and 9/20 random, while the candidate scored 20/20
+and 10/20. The candidate improved pooled success by 2/40 without deterministic degradation, but its
+random gain was only 1/20 rather than the locked 2/20 required for confirmation. This is suggestive,
+not benchmark-improvement evidence.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -279,6 +285,7 @@ the official GAE gradient is therefore not a useful sign-misclassification probl
 - Finer trust-region clipping cannot improve an update before any ratios reach the clipping boundary; at the official first-step scale, both chunk and temporal ratios remained fully active.
 - Coordinate-wise robust aggregation can preserve global gradient scale while deleting task-relevant cross-coordinate structure; closeness to the mean is not evidence of improved outcome alignment.
 - At the step-6000 checkpoint, official GAE gets the broad outcome sign right on more than 93% of labeled chunks; further sign filtering is inactive and does not improve gradient alignment.
+- Balanced per-environment accounting rescued H30 from invalid censoring, but zero-endpoint PCGrad's +1/20 random and +2/40 pooled gains remain below the preregistered confirmation threshold.
 
 ## Lessons and Constraints
 
