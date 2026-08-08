@@ -1,0 +1,11 @@
+{
+  "alpha_finetuned": 0.5,
+  "anchor_checkpoint": "/mnt/data/users/haoyu/workspace/outputs/fpo-control/results/can_step6000_advnorm_minibatch_5iter_seed20260812/checkpoints/step_48000",
+  "anchor_to_finetuned_l2": 0.5473600658756572,
+  "anchor_to_interpolated_l2": 0.27368003301416804,
+  "copied_tensor_count": 0,
+  "finetuned_checkpoint": "/mnt/data/users/haoyu/workspace/outputs/fpo-control/results/can_step6000_advnorm_minibatch_5iter_seed20260812/checkpoints/step_240000",
+  "floating_tensor_count": 35,
+  "method": "linear_policy_weight_interpolation",
+  "relative_anchor_distance": 0.5000000001394684
+}

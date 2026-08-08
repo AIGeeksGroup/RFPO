@@ -190,6 +190,13 @@ improved only in one batch (`0.291` to `0.409`) and worsened in the other (`0.28
 pooled active positive ratio fell from 0.537 to 0.424. Minibatch update order contributes at most
 part of the instability; simply reducing optimizer-step frequency is not a viable improvement.
 
+WiSE-FT-style interpolation between an exact step-6000 actor anchor and its four-update FPO++
+endpoint also failed. On a paired 20-episode screen, anchor/endpoint/midpoint scored 100/90/95% with
+zero sampling and 75/75/60% with random sampling. The midpoint recovered only half of the endpoint's
+deterministic loss while introducing a new 15-point stochastic deficit. Moreover, the FPO++ endpoint
+did not beat its anchor under random sampling on this seed, leaving no demonstrated online gain for
+weight interpolation to retain.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -221,6 +228,7 @@ part of the instability; simply reducing optimizer-step frequency is not a viabl
 - Exact GAE rank preservation is insufficient: discarding advantage magnitudes reduced outcome-gradient cosine in both formal batches.
 - A fourfold actor learning-rate reduction scales down surrogate improvement but does not materially preserve held-out gradient direction; global Adam step size is not the dominant failure mechanism.
 - Full-batch gradient accumulation retains surrogate progress but does not consistently preserve held-out direction, so sequential minibatch Adam steps are not the sole source of rotation.
+- Midpoint weight interpolation can partially recover deterministic BC behavior, but here it degraded random-source success and cannot manufacture an online gain absent at the finetuned endpoint.
 
 ## Lessons and Constraints
 
@@ -235,8 +243,8 @@ part of the instability; simply reducing optimizer-step frequency is not a viabl
 - Is curvature correlated with FPO ratio variance or gradient disagreement?
 - Should reflow be an offline post-training stage, an auxiliary online loss, or both?
 - Which reward-aware FPO++ mechanism can improve Can success without relying on unstable BC-source exploration changes?
-- Can sign-stratified minibatches reduce composition-dependent advantage-normalization variance without changing total sample weights?
+- Can successful zero-source actions be distilled with fresh Gaussian CFM sources to bridge the official step-1000 exploration gap explicitly?
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, rank-based GAE weighting, fixed lower actor learning rate, and full-batch gradient accumulation are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The verified step-6000 Can policy supplies a high-signal short-budget screen; the next direction is a weight-preserving stratified minibatch schedule that targets composition variance rather than optimizer-step size.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, rank-based GAE weighting, fixed lower actor learning rate, full-batch gradient accumulation, and BC/FPO++ midpoint interpolation are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The next direction returns to the official step-1000 source gap and asks whether successful zero-source actions can be explicitly distilled under fresh Gaussian CFM sources before another reward screen.

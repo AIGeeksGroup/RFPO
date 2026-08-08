@@ -202,7 +202,7 @@ hypotheses:
     priority: high
   - id: H25
     statement: "A fixed midpoint interpolation between the step-6000 BC actor and its FPO++-finetuned actor improves deterministic Can stability while retaining stochastic-source gains."
-    status: active
+    status: refuted
     motivation: "The existing five-update FPO++ run improves random-source success but degrades zero-source success; WiSE-FT-style interpolation can recover pretrained robustness without another unstable policy-gradient update."
     parent: null
     priority: high
@@ -733,11 +733,27 @@ experiments:
       audited_chunks: 64
       eligible_chunks: 162
       gradient_accumulation_steps: 8
+    - run: can_step6000_wiseft_screen_seed20260823_anchor
+      metric: paired_zero_random_success
+      zero_success: 1.0
+      random_success: 0.75
+      episodes_per_mode: 20
+    - run: can_step6000_wiseft_screen_seed20260823_finetuned
+      metric: paired_zero_random_success
+      zero_success: 0.90
+      random_success: 0.75
+      episodes_per_mode: 20
+    - run: can_step6000_wiseft_screen_seed20260823_midpoint
+      metric: paired_zero_random_success
+      zero_success: 0.95
+      random_success: 0.60
+      episodes_per_mode: 20
+      interpolation_alpha: 0.5
 
 outer_loop:
-  cycle: 12
-  last_direction: "Screen a fixed WiSE-FT midpoint between the exact step-6000 actor anchor and its four-update FPO++ endpoint."
-  last_reflection: "Sign-stratified minibatches overlap the already refuted rollout-normalization intervention. Existing matched checkpoints instead permit a no-training test of whether weight interpolation recovers zero-source robustness while retaining online random-source gains."
+  cycle: 13
+  last_direction: "Audit whether successful zero-source actions can be distilled through a Gaussian-source CFM objective that explicitly bridges the official exploration distribution."
+  last_reflection: "The step-6000 FPO++ endpoint tied its exact actor anchor on paired random success and lost zero success; midpoint interpolation then degraded random success. Return to the official step-1000 source gap and test an explicit training-time bridge rather than post-training averaging."
 
 workspace:
   findings: "findings.md"
