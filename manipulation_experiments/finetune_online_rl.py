@@ -64,6 +64,10 @@ from src.temporal_ratio_clipping import (
     clipped_ratio_objective,
     positive_active_fraction,
 )
+from src.median_microbatch_gradient import (
+    aggregate_microbatch_gradients,
+    middle_pair_mean,
+)
 
 # ---- Multiprocessing start method (CUDA compat) ------------------------------
 try:
@@ -185,6 +189,10 @@ class FlowPPOConfig:
     temporal_ratio_clipping_audit_iteration: int = 2
     temporal_ratio_clipping_audit_chunks: int = 64
     temporal_ratio_clipping_audit_output_json: Optional[str] = None
+    median_microbatch_gradient_audit: bool = False
+    median_microbatch_gradient_audit_iteration: int = 2
+    median_microbatch_gradient_audit_chunks: int = 192
+    median_microbatch_gradient_audit_output_json: Optional[str] = None
     bc_anchor_pcgrad_audit: bool = False
     bc_anchor_pcgrad_audit_iteration: int = 2
     bc_anchor_pcgrad_audit_chunks: int = 64
@@ -845,6 +853,7 @@ def main(cfg: FlowPPOConfig):
                 cfg.rank_advantage_audit,
                 cfg.advantage_sign_pcgrad_audit,
                 cfg.bc_anchor_pcgrad_audit,
+                cfg.median_microbatch_gradient_audit,
             )
         ):
             raise ValueError("temporal-ratio clipping and side audits are mutually exclusive")
@@ -859,6 +868,27 @@ def main(cfg: FlowPPOConfig):
             raise ValueError("temporal-ratio clipping audit settings must be positive")
         if cfg.temporal_ratio_clipping_audit_chunks % 2:
             raise ValueError("temporal-ratio clipping audit requires an even chunk count")
+    if cfg.median_microbatch_gradient_audit:
+        if any(
+            (
+                cfg.discounted_success_critic_audit,
+                cfg.critic_warmup_scheduler_audit,
+                cfg.direct_advantage_audit,
+                cfg.rank_advantage_audit,
+                cfg.advantage_sign_pcgrad_audit,
+                cfg.temporal_ratio_clipping_audit,
+                cfg.bc_anchor_pcgrad_audit,
+            )
+        ):
+            raise ValueError("median-microbatch gradient and side audits are mutually exclusive")
+        if cfg.loss_mode != "fpo" or not cfg.do_chunk_level_ppo:
+            raise ValueError("median-microbatch gradient audit requires chunk-level FPO")
+        if world_size != 1:
+            raise ValueError("median-microbatch gradient audit currently requires one process")
+        if cfg.median_microbatch_gradient_audit_iteration < 1:
+            raise ValueError("median-microbatch gradient audit iteration must be positive")
+        if cfg.median_microbatch_gradient_audit_chunks != 192:
+            raise ValueError("median-microbatch gradient audit requires exactly 192 chunks")
     if cfg.bc_anchor_pcgrad_audit:
         if cfg.loss_mode != "fpo" or not cfg.do_chunk_level_ppo:
             raise ValueError("BC-anchor PCGrad audit requires chunk-level FPO")
@@ -2098,6 +2128,206 @@ def main(cfg: FlowPPOConfig):
                     rollout_advantage_std.item(),
                     int(moment_sums[2].item()),
                 )
+
+        if (
+            cfg.median_microbatch_gradient_audit
+            and iteration == cfg.median_microbatch_gradient_audit_iteration
+        ):
+            eligible_mask = b_mc_valid[:, 0].bool() & (
+                b_cfm_value_invalid.sum(dim=1) == 0
+            )
+            eligible_indices = torch.where(eligible_mask)[0]
+            required_chunks = cfg.median_microbatch_gradient_audit_chunks
+            if eligible_indices.numel() < required_chunks:
+                raise RuntimeError(
+                    "median-microbatch gradient audit requires "
+                    f"{required_chunks} fully valid labeled chunks, "
+                    f"found {eligible_indices.numel()}"
+                )
+            audit_generator = torch.Generator().manual_seed(
+                cfg.seed + iteration * 10009
+            )
+            audit_indices = eligible_indices[
+                torch.randperm(
+                    eligible_indices.numel(), generator=audit_generator
+                )[:required_chunks]
+            ]
+            replica_size = required_chunks // 2
+            microbatch_size = replica_size // 4
+            replica_results = []
+            actor_module.eval()
+            for replica in range(2):
+                replica_start = replica * replica_size
+                replica_indices = audit_indices[
+                    replica_start : replica_start + replica_size
+                ]
+                reference_weights = b_mc_returns[replica_indices, 0].float()
+                reference_weights = reference_weights - reference_weights.mean()
+                _, reference_gradient = replay_audit_gradient(
+                    replica_indices,
+                    reference_weights,
+                    b_actions=b_actions,
+                    b_cfm_losses=b_cfm_losses,
+                    b_cfm_loss_ts=b_cfm_loss_ts,
+                    b_cfm_loss_epsilons=b_cfm_loss_epsilons,
+                    b_cfm_value_invalid=b_cfm_value_invalid,
+                    b_obs_images=b_obs_images,
+                    b_obs_state=b_obs_state,
+                )
+
+                microbatch_gradients = []
+                microbatch_weight_stats = []
+                for microbatch in range(4):
+                    microbatch_start = microbatch * microbatch_size
+                    microbatch_indices = replica_indices[
+                        microbatch_start : microbatch_start + microbatch_size
+                    ]
+                    weights = b_advantages[microbatch_indices, 0].float()
+                    weight_mean = weights.mean()
+                    weight_std = weights.std()
+                    if not torch.isfinite(weight_std) or weight_std <= 0:
+                        raise RuntimeError(
+                            "median-microbatch gradient audit has degenerate GAE weights "
+                            f"in replica {replica}, microbatch {microbatch}"
+                        )
+                    normalized_weights = (weights - weight_mean) / (weight_std + 1e-8)
+                    _, gradient = replay_audit_gradient(
+                        microbatch_indices,
+                        normalized_weights,
+                        b_actions=b_actions,
+                        b_cfm_losses=b_cfm_losses,
+                        b_cfm_loss_ts=b_cfm_loss_ts,
+                        b_cfm_loss_epsilons=b_cfm_loss_epsilons,
+                        b_cfm_value_invalid=b_cfm_value_invalid,
+                        b_obs_images=b_obs_images,
+                        b_obs_state=b_obs_state,
+                    )
+                    microbatch_gradients.append(gradient)
+                    microbatch_weight_stats.append(
+                        {
+                            "microbatch": microbatch,
+                            "gae_mean": float(weight_mean.item()),
+                            "gae_std": float(weight_std.item()),
+                            "gradient_norm": float(gradient.norm().item()),
+                        }
+                    )
+
+                control_gradient, candidate_gradient = aggregate_microbatch_gradients(
+                    microbatch_gradients
+                )
+                vectors = {
+                    "reference": reference_gradient,
+                    "control": control_gradient,
+                    "candidate": candidate_gradient,
+                    **{
+                        f"microbatch_{index}": gradient
+                        for index, gradient in enumerate(microbatch_gradients)
+                    },
+                }
+                norms = {name: vector.norm() for name, vector in vectors.items()}
+                finite_nonzero = all(
+                    torch.isfinite(vector).all().item()
+                    and torch.isfinite(norms[name]).item()
+                    and norms[name].item() > 0
+                    for name, vector in vectors.items()
+                )
+                if not finite_nonzero:
+                    raise RuntimeError(
+                        "median-microbatch gradient audit produced a non-finite or zero gradient"
+                    )
+
+                def vector_cosine(first: torch.Tensor, second: torch.Tensor) -> float:
+                    return float(
+                        torch.nn.functional.cosine_similarity(
+                            first.unsqueeze(0), second.unsqueeze(0), dim=1
+                        ).item()
+                    )
+
+                control_reference_cosine = vector_cosine(
+                    control_gradient, reference_gradient
+                )
+                candidate_reference_cosine = vector_cosine(
+                    candidate_gradient, reference_gradient
+                )
+                candidate_control_cosine = vector_cosine(
+                    candidate_gradient, control_gradient
+                )
+                norm_ratio = float(
+                    (norms["candidate"] / norms["control"]).item()
+                )
+                microbatch_reference_cosines = [
+                    vector_cosine(gradient, reference_gradient)
+                    for gradient in microbatch_gradients
+                ]
+                median_microbatch_reference_cosine = float(
+                    middle_pair_mean(
+                        torch.tensor(microbatch_reference_cosines)
+                    ).item()
+                )
+                gates = {
+                    "finite_nonzero": finite_nonzero,
+                    "candidate_reference_absolute": candidate_reference_cosine >= 0.75,
+                    "candidate_reference_gain": (
+                        candidate_reference_cosine - control_reference_cosine >= 0.10
+                    ),
+                    "candidate_control_direction": candidate_control_cosine >= 0.75,
+                    "candidate_control_norm": 0.5 <= norm_ratio <= 1.2,
+                    "not_below_typical_microbatch": (
+                        candidate_reference_cosine
+                        >= median_microbatch_reference_cosine
+                    ),
+                }
+                replica_results.append(
+                    {
+                        "replica": replica,
+                        "num_chunks": replica_size,
+                        "microbatch_size": microbatch_size,
+                        "reference_gradient_norm": float(norms["reference"].item()),
+                        "control_gradient_norm": float(norms["control"].item()),
+                        "candidate_gradient_norm": float(norms["candidate"].item()),
+                        "control_reference_cosine": control_reference_cosine,
+                        "candidate_reference_cosine": candidate_reference_cosine,
+                        "candidate_reference_cosine_gain": (
+                            candidate_reference_cosine - control_reference_cosine
+                        ),
+                        "candidate_control_cosine": candidate_control_cosine,
+                        "candidate_control_norm_ratio": norm_ratio,
+                        "microbatch_reference_cosines": microbatch_reference_cosines,
+                        "median_microbatch_reference_cosine": (
+                            median_microbatch_reference_cosine
+                        ),
+                        "microbatches": microbatch_weight_stats,
+                        "gates": gates,
+                        "passed": all(gates.values()),
+                    }
+                )
+            actor_module.train()
+            if cfg.freeze_vision_encoder:
+                actor_module.model.vision_encoder.eval()
+            audit_result = {
+                "iteration": iteration,
+                "seed": cfg.seed,
+                "num_eligible_chunks": int(eligible_indices.numel()),
+                "num_chunks_audited": required_chunks,
+                "num_replicas": 2,
+                "microbatches_per_replica": 4,
+                "cfm_samples": n_action_samples,
+                "replicas": replica_results,
+                "passed": all(result["passed"] for result in replica_results),
+            }
+            audit_output_path = (
+                Path(cfg.median_microbatch_gradient_audit_output_json)
+                if cfg.median_microbatch_gradient_audit_output_json is not None
+                else run_dir / "median_microbatch_gradient_audit.json"
+            )
+            audit_output_path.parent.mkdir(parents=True, exist_ok=True)
+            audit_output_path.write_text(
+                json.dumps(audit_result, indent=2, sort_keys=True) + "\n"
+            )
+            logger.info(
+                "Median-microbatch gradient audit: %s",
+                json.dumps(audit_result, sort_keys=True),
+            )
 
         if (
             cfg.advantage_sign_pcgrad_audit
