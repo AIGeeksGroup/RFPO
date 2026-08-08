@@ -75,6 +75,12 @@ pooled actor-update success only from 53/604 (8.77%) to 56/604 (9.27%, Fisher `p
 zero/random evaluation was 82%/10% versus 84%/10%. Preserving these additional samples is correct,
 but it does not establish a useful short-budget reward gain.
 
+Increasing GAE lambda from 0.99 to 1.0 also failed to improve sparse-reward learning. Actor-update
+collection success fell from 53/604 (8.77%) to 40/602 (6.64%, Fisher `p=0.195`). Final zero/random
+evaluation was 80%/12% versus 84%/10%, and losses remained finite. Full-lambda GAE therefore did not
+cause collapse, but its higher-variance Monte Carlo credit did not compensate for the scarcity of
+successful random-source trajectories. Estimator-only changes are not the next priority.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -88,6 +94,7 @@ but it does not establish a useful short-budget reward gain.
 - Mixing real and reflow endpoints can retain partial straightening and deterministic gains, but does not reliably preserve random-source exploration.
 - Doubling CFM samples does not create more reward information; in this pilot it added compute while pooled early success fell by 1.17 points.
 - CFM invalid-step state must be reset between independent rollouts, but the resulting 2.3-point increase in valid samples by iteration 5 was not enough to improve Can reward materially.
+- Propagating the same sparse terminal rewards farther with lambda 1.0 reduced rather than improved early collection success; the bottleneck is reward-information acquisition, not lambda decay alone.
 
 ## Lessons and Constraints
 
@@ -105,4 +112,4 @@ but it does not establish a useful short-budget reward gain.
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased Monte Carlo sampling, and validity-mask reset screening are closed. Pure conditional reflow is supported as a geometry and sampling-efficiency method but refuted as a five-point Can reward improvement. The next direction must strengthen long-horizon sparse credit assignment rather than add BC distillation, sample reuse, or Monte Carlo compute.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased Monte Carlo sampling, validity-mask reset, and full-lambda GAE screening are closed. Pure conditional reflow is supported as a geometry and sampling-efficiency method but refuted as a five-point Can reward improvement. The next direction should increase the supply of useful successful trajectories while separately measuring random-source policy improvement, rather than only changing how existing sparse rewards are estimated.

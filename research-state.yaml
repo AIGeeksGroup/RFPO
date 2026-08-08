@@ -86,7 +86,7 @@ hypotheses:
     priority: high
   - id: H7
     statement: "Using GAE lambda 1.0 instead of 0.99 propagates sparse terminal success farther and improves early Can FPO++ reward learning."
-    status: pending
+    status: refuted
     motivation: "At the 300-step Can horizon, the official gamma-lambda product almost eliminates terminal credit for early actions."
     parent: H2
     priority: high
@@ -105,7 +105,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 65
+  total_runs: 66
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -368,11 +368,25 @@ experiments:
       metric: success_rate
       value: 0.10
       episodes: 50
+    - run: can_gae1_5iter_seed0
+      metric: pooled_collection_success
+      value: 0.0664
+      successes: 40
+      episodes: 602
+      iterations: "2-5"
+    - run: can_gae1_5iter_seed0_zero_final
+      metric: success_rate
+      value: 0.80
+      episodes: 50
+    - run: can_gae1_5iter_seed0_random_final
+      metric: success_rate
+      value: 0.12
+      episodes: 50
 
 outer_loop:
   cycle: 1
-  last_direction: "Run a five-update Can pilot with GAE lambda 1.0, holding gamma and all policy settings fixed, to test stronger long-horizon sparse credit."
-  last_reflection: "Resetting the CFM validity mask fixed a real cumulative data-loss defect (98.07% valid at iteration 5 versus 95.81%), but pooled actor-update success improved only 0.50 points and final zero/random evaluation was 82%/10% versus 84%/10%. H6 is refuted as a reward-improvement claim."
+  last_direction: "Pivot from estimator-only changes to acquiring more informative successful trajectories while retaining a held-out random-sampling signal."
+  last_reflection: "Full-lambda GAE reduced pooled actor-update collection success from 8.77% to 6.64%, while final zero/random evaluation was 80%/12% versus 84%/10%. H7 is refuted: propagating existing sparse rewards farther does not create enough useful policy signal and adds estimator variance."
 
 workspace:
   findings: "findings.md"
