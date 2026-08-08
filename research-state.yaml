@@ -27,6 +27,10 @@ literature:
       title: "Direct Advantage Estimation"
       year: 2023
       relevance: "Motivates learning action effects directly; FPO++ requires a Monte Carlo centering approximation for continuous implicit actions."
+    - id: wortsman2022_wise_ft
+      title: "Robust Fine-Tuning of Zero-Shot Models"
+      year: 2022
+      relevance: "Motivates fixed weight-space interpolation between pretrained and finetuned policies to retain robustness while preserving adaptation."
   open_problems:
     - "FPO++ uses many Euler steps; it is unknown whether conditional reflow improves control return or only sampling efficiency."
     - "The relation between flow curvature, CFM ratio variance, and policy-update stability is not established."
@@ -195,6 +199,12 @@ hypotheses:
     status: refuted
     motivation: "H23 reduced surrogate movement without preserving gradient direction, suggesting that sequential Adam steps on shuffled minibatches, rather than global learning rate alone, drive the update path away from the pre-update gradient."
     parent: H2
+    priority: high
+  - id: H25
+    statement: "A fixed midpoint interpolation between the step-6000 BC actor and its FPO++-finetuned actor improves deterministic Can stability while retaining stochastic-source gains."
+    status: active
+    motivation: "The existing five-update FPO++ run improves random-source success but degrades zero-source success; WiSE-FT-style interpolation can recover pretrained robustness without another unstable policy-gradient update."
+    parent: null
     priority: high
 
 experiments:
@@ -725,9 +735,9 @@ experiments:
       gradient_accumulation_steps: 8
 
 outer_loop:
-  cycle: 11
-  last_direction: "Investigate sign-stratified minibatches that keep positive/negative GAE composition representative without changing total sample weights."
-  last_reflection: "H24 retained surrogate gains but improved only one held-out batch and reduced the active positive ratio. Aggregating minibatches is insufficient; composition-dependent advantage normalization remains a narrower, testable source of update disagreement."
+  cycle: 12
+  last_direction: "Screen a fixed WiSE-FT midpoint between the exact step-6000 actor anchor and its four-update FPO++ endpoint."
+  last_reflection: "Sign-stratified minibatches overlap the already refuted rollout-normalization intervention. Existing matched checkpoints instead permit a no-training test of whether weight interpolation recovers zero-source robustness while retaining online random-source gains."
 
 workspace:
   findings: "findings.md"
