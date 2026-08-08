@@ -130,6 +130,13 @@ within-mode gradient cosine improved. However, IID-versus-antithetic average-gra
 only 0.964 and 0.955, below the preregistered 0.99 requirement in both batches. This does not justify
 an online update, and paired or quasi-Monte Carlo sampling variants are stopped without tuning.
 
+Successful standard-Gaussian replay also failed before integration. A formal audit found 1,608
+success-linked valid chunks, but after one official actor update only 40.82% of their positive ratios
+remained below the PPO upper clip. Ratio ESS stayed high at 99.56%, so weight degeneracy was not the
+problem. Pre/post replay-gradient cosine was 0.614, and the success-only gradient was nearly
+orthogonal to the same-rollout fresh positive-advantage gradient (cosine 0.049). Selecting success
+episodes introduces a conflicting update rather than simply reusing more on-policy information.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -152,6 +159,7 @@ an online update, and paired or quasi-Monte Carlo sampling variants are stopped 
 - Can step 6000 faithfully reproduces the high-quality 96% zero / roughly 64% random base-policy regime in Appendix D.4, enabling more informative short-budget optimizer experiments without conflating initialization and algorithm effects.
 - Freezing advantage moments over a complete rollout does not improve FPO++; simple rescaling changes are now closed alongside reward-weighting changes.
 - Joint antithetic time/noise pairs reduce finite-MC gradient dispersion, but the locked audit could not establish sufficiently invariant average update direction.
+- One-update-old successful chunks retain high ratio ESS but are mostly positive-clipped, and success-only selection produces a strongly biased gradient direction.
 
 ## Lessons and Constraints
 
@@ -166,8 +174,8 @@ an online update, and paired or quasi-Monte Carlo sampling variants are stopped 
 - Is curvature correlated with FPO ratio variance or gradient disagreement?
 - Should reflow be an offline post-training stage, an auxiliary online loss, or both?
 - Which reward-aware FPO++ mechanism can improve Can success without relying on unstable BC-source exploration changes?
-- Can recent successful standard-Gaussian trajectories be replayed while keeping stale-policy CFM ratios and gradient bias controlled?
+- Can terminal outcome labels replace a noisy early critic only where their fresh on-policy gradient agrees with the official advantage direction?
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, and antithetic CFM sampling are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The verified step-6000 Can policy supplies a high-signal short-budget screen; the next candidate is successful standard-Gaussian on-policy replay, beginning with a stale-ratio and bias audit before any online integration.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, and successful replay are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The verified step-6000 Can policy supplies a high-signal short-budget screen; the next candidate is critic-free terminal outcome weighting, beginning with an offline label and gradient-agreement audit.

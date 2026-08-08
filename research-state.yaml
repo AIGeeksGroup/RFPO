@@ -134,7 +134,7 @@ hypotheses:
     priority: high
   - id: H15
     statement: "Reusing recent successful standard-Gaussian on-policy trajectories can increase useful FPO++ update information without unacceptable stale-policy ratio error."
-    status: active
+    status: refuted
     motivation: "H8-H11 show that reward supply and reweighting alone are insufficient; replay may reuse rare valid successes, but only if short-horizon policy staleness is measurable and controlled."
     parent: H2
     priority: high
@@ -153,7 +153,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 85
+  total_runs: 86
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -556,11 +556,19 @@ experiments:
       cross_mode_average_gradient_cosine: 0.95465
       cfm_samples: 8
       repeats: 8
+    - run: can_step6000_successreplay_audit_seed20260814
+      metric: active_positive_ratio_fraction
+      value: 0.40820
+      ratio_ess_fraction: 0.99564
+      pre_post_gradient_cosine: 0.61384
+      success_fresh_positive_gradient_cosine: 0.04877
+      audited_chunks: 64
+      available_successful_chunks: 1608
 
 outer_loop:
   cycle: 3
-  last_direction: "Stop antithetic and quasi-Monte Carlo variants under the locked no-shift failure; audit successful on-policy replay for stale-ratio error and update bias before training."
-  last_reflection: "Joint antithetic MC8 reduced normalized gradient MSE by 35.8% and 23.8%, but cross-mode average-gradient cosine was only 0.964 and 0.955 versus the locked 0.99 gate. H14 is refuted without online training."
+  last_direction: "Stop successful replay before integration; audit whether critic-free terminal outcome labels agree with useful fresh on-policy gradients before changing the advantage estimator."
+  last_reflection: "Successful replay retained 99.56% ratio ESS, but only 40.82% of positive ratios stayed active, pre/post gradient cosine was 0.614, and selection-versus-fresh gradient cosine was 0.049. H15 is refuted."
 
 workspace:
   findings: "findings.md"
