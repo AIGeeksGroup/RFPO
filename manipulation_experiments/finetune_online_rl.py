@@ -56,7 +56,7 @@ from src.advantage_weighting import (
     normalize_advantages_from_moments,
 )
 from src.bc_anchor_pcgrad import (
-    gradient_cosine,
+    gradient_cosine as list_gradient_cosine,
     gradient_norm,
     project_conflicting_gradient,
 )
@@ -2981,7 +2981,7 @@ def main(cfg: FlowPPOConfig):
                     project_conflicting_gradient(pre_rl_gradient, pre_bc_gradient)
                 )
                 rl_bc_cosine = float(
-                    gradient_cosine(pre_rl_gradient, pre_bc_gradient).item()
+                    list_gradient_cosine(pre_rl_gradient, pre_bc_gradient).item()
                 )
                 rl_norm = float(gradient_norm(pre_rl_gradient).item())
                 bc_norm = float(gradient_norm(pre_bc_gradient).item())
@@ -2994,7 +2994,7 @@ def main(cfg: FlowPPOConfig):
                 control_bc_loss = anchor_objective()
                 _, control_post_gradient = autograd_list(fixed_rl_objective())
                 control_gradient_cosine = float(
-                    gradient_cosine(control_post_gradient, pre_rl_gradient).item()
+                    list_gradient_cosine(control_post_gradient, pre_rl_gradient).item()
                 )
 
                 restore_parameters(parameters, common_values)
@@ -3005,7 +3005,7 @@ def main(cfg: FlowPPOConfig):
                 candidate_bc_loss = anchor_objective()
                 _, candidate_post_gradient = autograd_list(fixed_rl_objective())
                 candidate_gradient_cosine = float(
-                    gradient_cosine(candidate_post_gradient, pre_rl_gradient).item()
+                    list_gradient_cosine(candidate_post_gradient, pre_rl_gradient).item()
                 )
                 restore_parameters(parameters, base_values)
 

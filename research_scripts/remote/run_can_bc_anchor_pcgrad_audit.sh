@@ -17,7 +17,7 @@ export MUJOCO_GL=osmesa
 export PYOPENGL_PLATFORM=osmesa
 
 CHECKPOINT_ROOT="${CHECKPOINT_ROOT:-$PROJECT_ROOT/manipulation_experiments/downloaded_checkpoints}"
-RUN_NAME="${RUN_NAME:-can_step6000_bc_anchor_pcgrad_audit_osmesa_formal_seed20260827}"
+RUN_NAME="${RUN_NAME:-can_step6000_bc_anchor_pcgrad_audit_osmesa_formal2_seed20260827}"
 OUTPUT_DIR="${OUTPUT_DIR:-$RUNTIME_ROOT/results/$RUN_NAME}"
 LOG_PATH="${LOG_PATH:-$RUNTIME_ROOT/logs/$RUN_NAME.log}"
 
