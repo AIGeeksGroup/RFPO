@@ -208,7 +208,7 @@ hypotheses:
     priority: high
   - id: H26
     statement: "Averaging action chunks generated from one antithetic Gaussian source pair improves released step-1000 Can success over official zero-source inference."
-    status: active
+    status: refuted
     motivation: "Symmetric source evaluation can cancel odd endpoint variation while retaining even nonlinear corrections, potentially reducing inference variance without changing training or checkpoint weights."
     parent: null
     priority: high
@@ -227,7 +227,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 96
+  total_runs: 101
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -755,11 +755,27 @@ experiments:
       random_success: 0.60
       episodes_per_mode: 20
       interpolation_alpha: 0.5
+    - run: can_step1000_antithetic_screen_seed20260824_zero
+      metric: success_rate
+      value: 0.75
+      episodes: 20
+    - run: can_step1000_antithetic_screen_seed20260824_antithetic_average
+      metric: success_rate
+      value: 0.90
+      episodes: 20
+    - run: can_step1000_antithetic_confirm_seed20260825_zero
+      metric: success_rate
+      value: 0.74
+      episodes: 50
+    - run: can_step1000_antithetic_confirm_seed20260825_antithetic_average
+      metric: success_rate
+      value: 0.68
+      episodes: 50
 
 outer_loop:
   cycle: 14
-  last_direction: "Screen inference-only antithetic action-chunk averaging on the released Can step-1000 checkpoint against official zero-source inference."
-  last_reflection: "Reject the proposed Gaussian-bridge distillation before implementation: H8 already trains zero-source rollout actions with freshly sampled Gaussian CFM variables, while H15 found success-only gradients nearly orthogonal to fresh positive-GAE gradients. A new bridge would substantially repeat both negative tests."
+  last_direction: "Select a new training-time hypothesis that is distinct from the closed source-mixture, CFM-estimator, optimizer-step, critic, interpolation, and inference-averaging routes."
+  last_reflection: "H26's 15-point 20-episode screen reversed to a 6-point loss on the locked 50-episode confirmation. Pooled over both seeds, zero and antithetic inference tied exactly at 52/70; source-symmetric endpoint averaging is not a stable benchmark improvement."
 
 workspace:
   findings: "findings.md"

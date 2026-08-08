@@ -230,6 +230,7 @@ weight interpolation to retain.
 - Full-batch gradient accumulation retains surrogate progress but does not consistently preserve held-out direction, so sequential minibatch Adam steps are not the sole source of rotation.
 - Midpoint weight interpolation can partially recover deterministic BC behavior, but here it degraded random-source success and cannot manufacture an online gain absent at the finetuned endpoint.
 - Explicit Gaussian-bridge distillation is closed before implementation because H8 already resamples Gaussian CFM variables for zero-source rollout actions, and H15 rejects success-only gradient selection as a faithful proxy for positive GAE.
+- Antithetic action-chunk averaging produced a 15-point small-screen gain but a 6-point loss on the independent confirmation; its pooled 52/70 success exactly ties zero-source inference, so source symmetry is not a stable inference improvement.
 
 ## Lessons and Constraints
 
@@ -244,8 +245,8 @@ weight interpolation to retain.
 - Is curvature correlated with FPO ratio variance or gradient disagreement?
 - Should reflow be an offline post-training stage, an auxiliary online loss, or both?
 - Which reward-aware FPO++ mechanism can improve Can success without relying on unstable BC-source exploration changes?
-- Can one antithetic Gaussian source pair reduce endpoint variance enough for its averaged action chunk to outperform official zero-source inference?
+- Which training-time intervention remains distinct from the closed source, estimator, critic, optimizer, interpolation, and inference-averaging routes?
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, rank-based GAE weighting, fixed lower actor learning rate, full-batch gradient accumulation, BC/FPO++ midpoint interpolation, and explicit Gaussian-bridge distillation are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. H26 now tests whether inference-only averaging of action chunks from one antithetic Gaussian source pair can outperform official zero-source inference.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, rank-based GAE weighting, fixed lower actor learning rate, full-batch gradient accumulation, BC/FPO++ midpoint interpolation, explicit Gaussian-bridge distillation, and inference-time antithetic endpoint averaging are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The next candidate must introduce a distinct training signal rather than another source or estimator variant.

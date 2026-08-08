@@ -1,0 +1,31 @@
+{
+  "hypothesis": "H26",
+  "checkpoint": "95j3noe4_step_1000",
+  "load_ema": true,
+  "sampling_steps": 10,
+  "screen": {
+    "seed": 20260824,
+    "episodes_per_condition": 20,
+    "zero_successes": 15,
+    "antithetic_successes": 18,
+    "zero_fps": 105.2,
+    "antithetic_fps": 100.2,
+    "gate_passed": true
+  },
+  "confirmation": {
+    "seed": 20260825,
+    "episodes_per_condition": 50,
+    "zero_successes": 37,
+    "antithetic_successes": 34,
+    "zero_fps": 93.8,
+    "antithetic_fps": 96.3,
+    "gate_passed": false
+  },
+  "pooled": {
+    "episodes_per_condition": 70,
+    "zero_successes": 52,
+    "antithetic_successes": 52,
+    "success_rate_each": 0.7428571428571429
+  },
+  "decision": "refuted"
+}

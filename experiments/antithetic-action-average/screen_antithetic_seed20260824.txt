@@ -1,0 +1,11 @@
+Evaluation Summary
+================================================================================
+Environment: Can
+Checkpoint: latest
+Run ID: None
+Episodes: 20
+Sampling Mode: antithetic_average
+Success Rate: 90.00% +/- 33.07%
+Average Return: 0.900 +/- 0.300
+FPS: 100.2
+================================================================================
