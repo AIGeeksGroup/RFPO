@@ -290,6 +290,7 @@ class FlowMatchingPolicy(PreTrainedPolicy):
         sde_sampling: bool = False,
         previous_actions: Tensor | None = None,
         has_previous_actions: Tensor | None = None,
+        source_noise: Tensor | None = None,
     ) -> Tensor:
         """Predict a chunk of actions using flow matching with Euler integration."""
         self.eval()
@@ -302,7 +303,16 @@ class FlowMatchingPolicy(PreTrainedPolicy):
 
         # Initialize from the configured source distribution.
         B = obs_cond.shape[0]
-        if zero_sampling:
+        expected_source_shape = (B, self.config.horizon, self.model.action_dim)
+        if source_noise is not None:
+            if zero_sampling:
+                raise ValueError("source_noise and zero_sampling cannot be used together")
+            if source_noise.shape != expected_source_shape:
+                raise ValueError(
+                    f"source_noise must have shape {expected_source_shape}, got {tuple(source_noise.shape)}"
+                )
+            x_t = source_noise.to(device=obs_cond.device).clone()
+        elif zero_sampling:
             x_t = torch.zeros((B, self.config.horizon, self.model.action_dim), device=obs_cond.device)
         else:
             x_t = torch.randn((B, self.config.horizon, self.model.action_dim), device=obs_cond.device)

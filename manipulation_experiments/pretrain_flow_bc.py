@@ -146,6 +146,12 @@ class TrainFlowBCConfig:
     """Recommend to be False so that wandb logs are refreshed. If True, resume the actual wandb run (requires resume_run_id). If False, only download checkpoint but start fresh wandb run."""
     load_ema: bool = False
     """If True, load EMA weights from checkpoint (if available) instead of regular weights."""
+    restart_training_state: bool = False
+    """Load checkpoint weights and EMA but start at step zero with a fresh optimizer."""
+    reflow_teacher_ckpt: Optional[str] = None
+    """Frozen teacher checkpoint used to generate paired reflow endpoints online."""
+    reflow_teacher_sampling_steps: int = 64
+    """Euler steps used by the frozen reflow teacher."""
     
     # Model parameters
     vision_backbone: str = "resnet18" # clip
@@ -421,7 +427,14 @@ def save_checkpoint(checkpoint_dir: Path, step: int, policy: PreTrainedPolicy, o
     torch.save(checkpoint_data, checkpoint_dir / "optimizer.pt")
 
 
-def load_checkpoint(checkpoint_dir: Path, policy: PreTrainedPolicy, optimizer, load_ema: bool = False, device: str = "cuda"):
+def load_checkpoint(
+    checkpoint_dir: Path,
+    policy: PreTrainedPolicy,
+    optimizer,
+    load_ema: bool = False,
+    device: str = "cuda",
+    restart_training_state: bool = False,
+):
     """Load checkpoint with model and optimizer state.
 
     Args:
@@ -442,14 +455,15 @@ def load_checkpoint(checkpoint_dir: Path, policy: PreTrainedPolicy, optimizer, l
     optimizer_path = checkpoint_dir / "optimizer.pt"
     if optimizer_path.exists():
         checkpoint = torch.load(optimizer_path, map_location='cpu')
-        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        if not restart_training_state:
+            optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 
-        # Move optimizer state to the correct device
-        # This is crucial to avoid device mismatch errors when resuming training
-        for state in optimizer.state.values():
-            for k, v in state.items():
-                if isinstance(v, torch.Tensor):
-                    state[k] = v.to(device)
+            # Move optimizer state to the correct device
+            # This is crucial to avoid device mismatch errors when resuming training
+            for state in optimizer.state.values():
+                for k, v in state.items():
+                    if isinstance(v, torch.Tensor):
+                        state[k] = v.to(device)
 
         # Load EMA state if available and policy has EMA
         if hasattr(policy, 'ema_model') and policy.ema_model is not None:
@@ -462,7 +476,8 @@ def load_checkpoint(checkpoint_dir: Path, policy: PreTrainedPolicy, optimizer, l
                     policy.ema_model.copy_to(policy.model.parameters())
                     logger.info("Copied EMA weights to model for inference")
 
-        return checkpoint['step'] + 1, policy, optimizer
+        start_step = 0 if restart_training_state else checkpoint['step'] + 1
+        return start_step, policy, optimizer
 
     return 0, policy, optimizer
 
@@ -927,12 +942,53 @@ def main(cfg: TrainFlowBCConfig):
 
     if resume_checkpoint_path is not None:
         logger.info(colored(f"Loading checkpoint weights from {resume_checkpoint_path}...", "cyan"))
-        start_step, policy, optimizer = load_checkpoint(resume_checkpoint_path, policy, optimizer, load_ema=cfg.load_ema, device=device)
+        start_step, policy, optimizer = load_checkpoint(
+            resume_checkpoint_path,
+            policy,
+            optimizer,
+            load_ema=cfg.load_ema,
+            device=device,
+            restart_training_state=cfg.restart_training_state,
+        )
         logger.info(colored(f"✓ Loaded checkpoint from step {start_step}", "green"))
 
     policy.to(device)
     if getattr(policy_cfg, "ema_power", 0.0) > 0:
         policy.ema_model.to(device)
+
+    reflow_teacher = None
+    if cfg.reflow_teacher_ckpt is not None:
+        if policy_cfg.source_prior_mode != "gaussian":
+            raise ValueError("reflow teacher mode currently requires a Gaussian source prior")
+        teacher_checkpoint = Path(cfg.reflow_teacher_ckpt)
+        if not (teacher_checkpoint / "policy" / "model.safetensors").is_file():
+            raise ValueError(f"Invalid reflow teacher checkpoint: {teacher_checkpoint}")
+
+        teacher_cfg = copy.deepcopy(policy_cfg)
+        teacher_cfg.sampling_steps = cfg.reflow_teacher_sampling_steps
+        reflow_teacher = FlowMatchingPolicy(teacher_cfg, dataset_stats=ds_meta.stats)
+        teacher_optimizer = torch.optim.AdamW(
+            reflow_teacher.get_optim_params(), lr=lr_default, weight_decay=wd_default
+        )
+        _, reflow_teacher, _ = load_checkpoint(
+            teacher_checkpoint,
+            reflow_teacher,
+            teacher_optimizer,
+            load_ema=True,
+            device=device,
+            restart_training_state=True,
+        )
+        del teacher_optimizer
+        reflow_teacher.to(device)
+        if reflow_teacher.ema_model is not None:
+            reflow_teacher.ema_model.to(device)
+        reflow_teacher.eval()
+        reflow_teacher.requires_grad_(False)
+        logger.info(
+            "Reflow teacher loaded from %s with %d Euler steps",
+            teacher_checkpoint,
+            cfg.reflow_teacher_sampling_steps,
+        )
 
     if is_ddp:
         policy = DDP(policy, device_ids=[local_rank], find_unused_parameters=True)
@@ -1118,6 +1174,24 @@ def main(cfg: TrainFlowBCConfig):
                 valid_history_count += has_previous_actions.sum()
                 history_sample_count += has_previous_actions.numel()
 
+            reflow_source = None
+            reflow_t = None
+            if reflow_teacher is not None:
+                batch_size = batch[ACTION].shape[0]
+                reflow_source = torch.randn(
+                    (batch_size, policy_cfg.horizon, reflow_teacher.model.action_dim),
+                    device=device,
+                )
+                with torch.no_grad():
+                    teacher_actions, _ = reflow_teacher.predict_action_chunk(
+                        batch, source_noise=reflow_source
+                    )
+                batch[ACTION] = teacher_actions
+                batch[f"{ACTION}_is_pad"] = torch.zeros(
+                    teacher_actions.shape[:2], dtype=torch.bool, device=device
+                )
+                reflow_t = torch.rand((batch_size, 1, 1), device=device)
+
             # Save sample images for inspection (only once at step 0)
             if cfg.debug and step == 0 and rank == 0:
                 save_dir = run_dir / "debug_images"
@@ -1146,13 +1220,17 @@ def main(cfg: TrainFlowBCConfig):
             is_last_accumulation_step = (i + 1) == cfg.gradient_accumulation_steps
             if is_ddp and not is_last_accumulation_step:
                 with policy.no_sync():  # type: ignore
-                    loss, loss_dict = policy.get_cfm_loss(batch)  # type: ignore
+                    loss, loss_dict = policy.get_cfm_loss(
+                        batch, cfm_loss_eps=reflow_source, cfm_loss_t=reflow_t
+                    )  # type: ignore
 
                     # Average loss over accumulation steps
                     loss = loss / cfg.gradient_accumulation_steps
                     loss.backward()
             else:
-                loss, loss_dict = policy.get_cfm_loss(batch)  # type: ignore
+                loss, loss_dict = policy.get_cfm_loss(
+                    batch, cfm_loss_eps=reflow_source, cfm_loss_t=reflow_t
+                )  # type: ignore
                 # Average loss over accumulation steps
                 loss = loss / cfg.gradient_accumulation_steps
                 loss.backward()

@@ -69,6 +69,8 @@ class EvalCheckpointConfig:
     """Optional checkpoint override: 'gaussian' or exploratory 'previous_action'."""
     source_prior_sigma: float = 0.5
     """Residual noise scale for previous_action source positions."""
+    sampling_steps: Optional[int] = None
+    """Optional Euler-step override for low-NFE checkpoint evaluation."""
     # image_observation_keys: Optional[str] = None # "agentview_image robot0_eye_in_hand_image"
     # """Image observation keys to use for policy input (e.g., --image_observation_keys "robot0_eye_in_hand_image shouldercamera1_image"."""
     eval_num_episodes: int = 50
@@ -469,6 +471,12 @@ def load_policy(checkpoint_dir: Path, device: str = "cuda", load_ema: bool = Fal
 
     logger.info(colored(f"Policy loaded successfully", "green"))
     logger.info(f"Policy config: horizon={policy.config.horizon}, n_action_steps={policy.config.n_action_steps}, sampling_steps={policy.config.sampling_steps}")
+
+    if cfg.sampling_steps is not None:
+        if cfg.sampling_steps < 1:
+            raise ValueError("sampling_steps must be at least 1")
+        policy.config.sampling_steps = cfg.sampling_steps
+        logger.info("Overriding Euler sampling steps: %d", cfg.sampling_steps)
 
     return policy
 
