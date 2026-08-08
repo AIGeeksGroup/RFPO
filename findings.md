@@ -41,6 +41,13 @@ result was tied at 29/40. Random success remained comparable at 8/80 versus 7/80
 therefore supports lower integration error and four-step performance preservation, while its apparent
 official-step reward gain still needs a second training seed.
 
+The independent training seed repeated both parts of the result. Reflow reduced normalized
+straightness error by 22.4% and four-step endpoint MSE by 24.5%, with unchanged diversity. Its matched
+rollout gained one 10-step zero success and three four-step zero successes. Across three comparisons
+from two training seeds, reflow/control zero success was 47/60 versus 40/60 at 10 steps and 46/60
+versus 43/60 at four steps; random success was tied at 13/120. This is sufficient evidence to move
+from screening to one official-scale confirmation, but not yet to claim final benchmark improvement.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -63,8 +70,8 @@ official-step reward gain still needs a second training seed.
 - Does conditional reflow preserve the multimodal exploration that gives flow policies their advantage?
 - Is curvature correlated with FPO ratio variance or gradient disagreement?
 - Should reflow be an offline post-training stage, an auxiliary online loss, or both?
-- Does the 10-step success gain replicate when the matched control and reflow students are trained with an independent seed?
+- Does the cross-training-seed 10-step success gain survive a 200-episode official-scale confirmation?
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior screening is closed after two negative variants. Conditional reflow passed its geometry gate, preserved four-step success, and improved 10-step success across two environment seeds; one independent training seed is the next gate.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior screening is closed after two negative variants. Conditional reflow now passes geometry and rollout gates across two training seeds; one official-scale Can confirmation is in scope before considering online FPO++ integration.

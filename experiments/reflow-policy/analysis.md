@@ -58,6 +58,29 @@ direction replicated within this trained checkpoint, while the claimed four-step
 not; the defensible low-step conclusion is preservation, not improvement. A second matched training
 seed is the next gate for a stable benchmark-improvement claim.
 
+## Independent training-seed confirmation
+
+A second matched control/reflow pair used training seed 20260809 with all other training settings
+unchanged. Reflow again passed the 128-pair geometry gate: 64-step normalized straightness error
+fell from 0.00282171 to 0.00219042 (-22.4%), path-length ratio fell from 1.010476 to 1.008058, and
+four-step endpoint MSE fell from 0.00058784 to 0.00044354 (-24.5%). The 64-step mean element
+standard deviation was 0.288502 for the control and 0.288833 for reflow.
+
+One matched rollout seed (20260808) produced:
+
+| Euler steps | Sampling mode | CFM control | Reflow | Difference |
+|---:|---|---:|---:|---:|
+| 10 | zero | 15/20 (75%) | 16/20 (80%) | +1 success |
+| 10 | random | 5/20 (25%) | 3/20 (15%) | -2 successes |
+| 4 | zero | 14/20 (70%) | 17/20 (85%) | +3 successes |
+| 4 | random | 1/20 (5%) | 2/20 (10%) | +1 success |
+
+Across all three matched rollout comparisons from two training seeds, 10-step zero success was 40/60
+for controls and 47/60 for reflow; four-step zero success was 43/60 and 46/60. Random success pooled
+over both step counts was exactly 13/120 for each method. The geometry mechanism and zero-sampling
+task advantage now both replicate across training seeds. The next experiment is an official-scale
+200-episode, 50-environment, 10-step confirmation using a new environment seed.
+
 Remote evidence:
 
 - `~/workspace/outputs/fpo-control/results/can_reflow_control100_seed20260808/geometry.json`
@@ -66,3 +89,7 @@ Remote evidence:
 - `~/workspace/outputs/fpo-control/logs/can_reflow_stage1_100_eval_driver_retry.log`
 - `~/workspace/outputs/fpo-control/logs/can_reflow_control100_confirm_seed20260809_driver.log`
 - `~/workspace/outputs/fpo-control/logs/can_reflow_stage1_100_confirm_seed20260809_driver.log`
+- `~/workspace/outputs/fpo-control/results/can_reflow_control100_trainseed20260809/geometry.json`
+- `~/workspace/outputs/fpo-control/results/can_reflow_stage1_100_trainseed20260809/geometry.json`
+- `~/workspace/outputs/fpo-control/logs/can_reflow_control100_trainseed20260809_eval20260808_driver.log`
+- `~/workspace/outputs/fpo-control/logs/can_reflow_stage1_100_trainseed20260809_eval20260808_driver.log`
