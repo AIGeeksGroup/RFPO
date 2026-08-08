@@ -41,6 +41,12 @@ hypotheses:
     motivation: "Straighter conditional flows may reduce Monte Carlo gradient disagreement, a documented FPO++ failure mode."
     parent: H1
     priority: medium
+  - id: H3
+    statement: "A recent-action WarmPrior improves random-sampling success and FPO++ fine-tuning efficiency on chunked manipulation tasks."
+    status: pending
+    motivation: "A temporally grounded source can straighten conditional flows while centering exploration near plausible actions."
+    parent: null
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."

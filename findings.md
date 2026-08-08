@@ -17,6 +17,7 @@ No new experiments have completed yet.
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
 - The transferable mechanism from arXiv:2209.03003 is recursive reflow using model-induced endpoint coupling.
 - A reflow method that only improves inference speed is still useful, but it must not be presented as an RL performance gain.
+- WarmPrior (arXiv:2605.13959) offers a more direct reward-improvement hypothesis for chunked manipulation: center the flow source on recent actions and retain residual Gaussian noise for exploration.
 
 ## Lessons and Constraints
 
@@ -29,8 +30,8 @@ No new experiments have completed yet.
 - Does conditional reflow preserve the multimodal exploration that gives flow policies their advantage?
 - Is curvature correlated with FPO ratio variance or gradient disagreement?
 - Should reflow be an offline post-training stage, an auxiliary online loss, or both?
+- Can WP-Past close the large gap between zero-sampling and random-sampling success of the released Can base policy?
 
 ## Optimization Trajectory
 
 Pending baseline measurements.
-
