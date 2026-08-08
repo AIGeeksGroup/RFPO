@@ -472,12 +472,6 @@ def load_policy(checkpoint_dir: Path, device: str = "cuda", load_ema: bool = Fal
     logger.info(colored(f"Policy loaded successfully", "green"))
     logger.info(f"Policy config: horizon={policy.config.horizon}, n_action_steps={policy.config.n_action_steps}, sampling_steps={policy.config.sampling_steps}")
 
-    if cfg.sampling_steps is not None:
-        if cfg.sampling_steps < 1:
-            raise ValueError("sampling_steps must be at least 1")
-        policy.config.sampling_steps = cfg.sampling_steps
-        logger.info("Overriding Euler sampling steps: %d", cfg.sampling_steps)
-
     return policy
 
 
@@ -533,6 +527,12 @@ def main(cfg: EvalCheckpointConfig):
 
     # Load policy
     policy = load_policy(checkpoint_dir, device=cfg.device, load_ema=cfg.load_ema)
+    if cfg.sampling_steps is not None:
+        if cfg.sampling_steps < 1:
+            raise ValueError("sampling_steps must be at least 1")
+        policy.config.sampling_steps = cfg.sampling_steps
+        logger.info("Overriding Euler sampling steps: %d", cfg.sampling_steps)
+
     if cfg.source_prior_mode is not None:
         if cfg.source_prior_mode not in ["gaussian", "previous_action"]:
             raise ValueError("--source-prior-mode must be 'gaussian' or 'previous_action'")
