@@ -158,7 +158,7 @@ hypotheses:
     priority: high
   - id: H19
     statement: "A bounded critic trained on uncensored discounted binary-success returns improves next-rollout value accuracy and aligns the first FPO++ actor gradient with Monte Carlo outcomes."
-    status: active
+    status: refuted
     motivation: "H18 shows that gradient rotation is already severe after one actor epoch, so later trust-region controls cannot fix the first-step learning signal; Can rewards are binary and bounded but the official critic uses an unbounded scalar MSE target."
     parent: H2
     priority: high
@@ -183,7 +183,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 93
+  total_runs: 94
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -634,11 +634,22 @@ experiments:
       selected_surrogate_gain: 0.00196
       epoch10_surrogate_gain: 0.03597
       chunks: 32
+    - run: can_step6000_successcritic_audit_osmesa_formal_seed20260818
+      metric: candidate_value_mse_relative_change
+      value: -0.12182
+      control_value_mse: 0.11796
+      candidate_value_mse: 0.10359
+      control_value_spearman: 0.34416
+      candidate_value_spearman: 0.21107
+      batch0_gradient_cosine_gain: -0.07315
+      batch1_gradient_cosine_gain: 0.16816
+      audited_chunks: 64
+      value_targets: 1837
 
 outer_loop:
-  cycle: 6
-  last_direction: "Resume the locked discounted-success critic audit after ruling out the scheduler false alarm."
-  last_reflection: "The actual constant scheduler keeps critic LR at 1e-4 from initialization; paired critics had identical 1.10998 parameter displacement. H20 is invalidated, while H19 remains a valid comparison of bounded BCE and official MSE critics."
+  cycle: 7
+  last_direction: "Stop discounted-success critic integration and return to mechanism-guided ideation for the first actor update."
+  last_reflection: "H19 improved next-rollout value MSE by 12.18% but reduced Spearman correlation and worsened one of two outcome-reference gradient cosines. Better scalar calibration alone is insufficient; the next candidate must preserve advantage ranking and improve gradient direction consistently."
 
 workspace:
   findings: "findings.md"

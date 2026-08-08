@@ -157,6 +157,13 @@ in the wrong direction, and the other retained only 5.4% of the epoch-10 gain. R
 drift, but the first actor step is already unreliable; threshold tuning or a fixed smaller epoch count
 cannot address the underlying learning-signal problem.
 
+The bounded discounted-success critic improved value calibration but not the learning signal needed
+by the actor. On 1,837 fresh iteration-2 targets, BCE training reduced MSE by 12.18%, from 0.11796 to
+0.10359, but Spearman correlation fell from 0.344 to 0.211. Gradient cosine to a Monte Carlo outcome
+reference worsened by 0.073 in one 32-chunk batch and improved by 0.168 in the other. Because rank
+quality and per-batch gradient improvement were preregistered requirements, H19 is stopped without
+online integration or post-hoc tuning.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -183,6 +190,7 @@ cannot address the underlying learning-signal problem.
 - Independent MC8 draws are modestly less shifted than stored draws, but do not retain enough active positive terms or gradient alignment to justify epoch-level behavior-loss resampling.
 - Absolute-advantage 12/4 allocation improves fixed-budget estimator accuracy, but both it and antithetic sampling fail the locked cross-estimator direction gate; CFM sampling tricks are not the next reward-improvement route.
 - Positive active-ratio fraction does not reliably diagnose gradient quality: it remained 85.5% after one epoch while one held-out gradient had rotated to cosine 0.263. Actor early stopping is closed without threshold tuning.
+- Lower value MSE does not imply a better policy gradient: the discounted-success critic improved calibration while degrading value ranking and one batch's outcome-reference gradient alignment.
 
 ## Lessons and Constraints
 
@@ -197,8 +205,8 @@ cannot address the underlying learning-signal problem.
 - Is curvature correlated with FPO ratio variance or gradient disagreement?
 - Should reflow be an offline post-training stage, an auxiliary online loss, or both?
 - Which reward-aware FPO++ mechanism can improve Can success without relying on unstable BC-source exploration changes?
-- Can terminal outcome labels replace a noisy early critic only where their fresh on-policy gradient agrees with the official advantage direction?
+- Which advantage estimator can preserve return ordering while improving first-update gradient alignment across independent rollout subsets?
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, and active-ratio actor stopping are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The verified step-6000 Can policy supplies a high-signal short-budget screen; the next direction must improve the first-step learning signal through a new advantage, critic, or objective mechanism.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, and bounded discounted-success critics are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The verified step-6000 Can policy supplies a high-signal short-budget screen; the next direction must preserve advantage ranking while improving the first-step gradient signal.
