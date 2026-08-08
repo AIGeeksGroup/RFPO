@@ -7,7 +7,7 @@ cd "$PROJECT_ROOT/manipulation_experiments"
 source source_env.sh
 
 CHECKPOINT_ROOT="${CHECKPOINT_ROOT:-$PROJECT_ROOT/manipulation_experiments/downloaded_checkpoints}"
-CAN_CHECKPOINT="$CHECKPOINT_ROOT/95j3noe4_step_1000"
+CAN_CHECKPOINT="${CAN_CHECKPOINT:-$CHECKPOINT_ROOT/95j3noe4_step_1000}"
 NUM_ENVS="${NUM_ENVS:-30}"
 DATA_COLLECTION_STEPS="${DATA_COLLECTION_STEPS:-1600}"
 TOTAL_TIMESTEPS="${TOTAL_TIMESTEPS:-$((NUM_ENVS * DATA_COLLECTION_STEPS))}"
@@ -21,6 +21,7 @@ ROLLOUT_TEMPERED_SCALE="${ROLLOUT_TEMPERED_SCALE:-0.5}"
 GAE_LAMBDA="${GAE_LAMBDA:-0.99}"
 ADVANTAGE_WEIGHTING="${ADVANTAGE_WEIGHTING:-signed}"
 ADVANTAGE_WEIGHT_ESS_FRACTION="${ADVANTAGE_WEIGHT_ESS_FRACTION:-0.5}"
+ADVANTAGE_NORMALIZATION_SCOPE="${ADVANTAGE_NORMALIZATION_SCOPE:-minibatch}"
 MASTER_PORT="${MASTER_PORT:-29500}"
 SEED="${SEED:-0}"
 RUN_NAME="${RUN_NAME:-can_fpopp_smoke_seed${SEED}_$(timestamp)}"
@@ -55,6 +56,7 @@ torchrun --nproc_per_node=1 --master_port "$MASTER_PORT" finetune_online_rl.py \
   --gae-lambda "$GAE_LAMBDA" \
   --advantage-weighting "$ADVANTAGE_WEIGHTING" \
   --advantage-weight-ess-fraction "$ADVANTAGE_WEIGHT_ESS_FRACTION" \
+  --advantage-normalization-scope "$ADVANTAGE_NORMALIZATION_SCOPE" \
   --n-action-samples "$N_ACTION_SAMPLES" \
   --n-action-steps 16 \
   --num-envs "$NUM_ENVS" \
