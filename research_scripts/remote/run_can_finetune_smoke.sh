@@ -14,6 +14,8 @@ TOTAL_TIMESTEPS="${TOTAL_TIMESTEPS:-$((NUM_ENVS * DATA_COLLECTION_STEPS))}"
 EVAL_EPISODES="${EVAL_EPISODES:-20}"
 N_ACTION_SAMPLES="${N_ACTION_SAMPLES:-8}"
 LEARNING_RATE_ACTOR="${LEARNING_RATE_ACTOR:-1e-5}"
+TRUST_REGION_MODE="${TRUST_REGION_MODE:-ppo}"
+ROLLBACK_ALPHA="${ROLLBACK_ALPHA:-0.3}"
 GRADIENT_ACCUMULATION_STEPS="${GRADIENT_ACCUMULATION_STEPS:-1}"
 ROLLOUT_FREQ="${ROLLOUT_FREQ:-1}"
 RESET_CFM_INVALID_MASK_EACH_ITERATION="${RESET_CFM_INVALID_MASK_EACH_ITERATION:-False}"
@@ -183,5 +185,6 @@ torchrun --nproc_per_node=1 --master_port "$MASTER_PORT" finetune_online_rl.py \
   --max-grad-norm 5 \
   --clamp-logratio 5 \
   --clamp-old-cfm-loss 4 \
-  --trust-region-mode ppo \
+  --trust-region-mode "$TRUST_REGION_MODE" \
+  --rollback-alpha "$ROLLBACK_ALPHA" \
   --seed "$SEED"

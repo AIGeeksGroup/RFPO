@@ -69,6 +69,7 @@ from src.median_microbatch_gradient import (
     middle_pair_mean,
 )
 from src.terminal_consistency_filter import terminal_consistent_weights
+from src.ratio_rollback import rollback_clipped_ratio_loss
 
 # ---- Multiprocessing start method (CUDA compat) ------------------------------
 try:
@@ -130,7 +131,8 @@ class FlowPPOConfig:
     n_action_samples: int = 16
     clamp_old_cfm_loss: Optional[float] = None
     cfm_loss_average_group_size: int = 1
-    trust_region_mode: Literal["ppo", "spo", "aspo"] = "ppo"
+    trust_region_mode: Literal["ppo", "spo", "aspo", "rollback"] = "ppo"
+    rollback_alpha: float = 0.3
     clamp_logratio: Optional[float] = None
     cfm_loss_weight_from_t: str = "constant"
     advantage_weighting: Literal["signed", "ess_softmax"] = "signed"
@@ -692,6 +694,12 @@ def main(cfg: FlowPPOConfig):
         device = torch.device(cfg.device)
 
     logger.info(colored(f"[{rank}/{world_size}] Using device: {device}", "green"))
+
+    if cfg.trust_region_mode == "rollback":
+        if cfg.loss_mode != "fpo" or not cfg.do_chunk_level_ppo:
+            raise ValueError("ratio rollback requires chunk-level FPO")
+        if cfg.rollback_alpha <= 0.0:
+            raise ValueError("rollback alpha must be positive")
 
     if cfg.success_replay_audit:
         if cfg.loss_mode != "fpo" or not cfg.do_chunk_level_ppo:
@@ -3588,6 +3596,7 @@ def main(cfg: FlowPPOConfig):
         early_stop_audit_tensors = None
         early_stop_pre_gradients = None
         early_stop_pre_surrogates = None
+        early_stop_pre_results = None
         early_stop_epoch_results = []
         early_stop_positive_chunks_available = None
         if (
@@ -3674,6 +3683,7 @@ def main(cfg: FlowPPOConfig):
             batch_size = audit_count // 2
             early_stop_pre_gradients = []
             early_stop_pre_surrogates = []
+            early_stop_pre_results = []
             for audit_batch in range(2):
                 batch_slice = slice(
                     audit_batch * batch_size, (audit_batch + 1) * batch_size
@@ -3692,8 +3702,20 @@ def main(cfg: FlowPPOConfig):
                     b_obs_state=early_stop_states,
                 )
                 early_stop_pre_gradients.append(pre_gradient)
-                early_stop_pre_surrogates.append(
-                    float((batch_weights[:, None] * pre_ratios).mean().item())
+                pre_surrogate = float(
+                    (batch_weights[:, None] * pre_ratios).mean().item()
+                )
+                early_stop_pre_surrogates.append(pre_surrogate)
+                early_stop_pre_results.append(
+                    {
+                        "batch": audit_batch,
+                        "gradient_norm": float(pre_gradient.norm().item()),
+                        "ratio_mean": float(pre_ratios.mean().item()),
+                        "ratio_std": float(pre_ratios.std(unbiased=False).item()),
+                        "ratio_min": float(pre_ratios.min().item()),
+                        "ratio_max": float(pre_ratios.max().item()),
+                        "surrogate": pre_surrogate,
+                    }
                 )
             logger.info(
                 "Held-out ratio early-stop audit prepared: chunks=%d positive_available=%d",
@@ -4120,6 +4142,8 @@ def main(cfg: FlowPPOConfig):
         b_inds = np.arange(local_batch_size)
         clipfracs = []
         endpoint_pcgrad_step_metrics = []
+        rollback_active_elements = 0
+        rollback_total_elements = 0
         actor.train(); critic.train()
         if cfg.freeze_vision_encoder:
             actor_module.model.vision_encoder.eval()
@@ -4335,6 +4359,17 @@ def main(cfg: FlowPPOConfig):
                     else:
                         clipfracs += [((ratio - 1.0).abs() > cfg.clip_coef)[positive_mask].float().mean().item()]
                     pg_loss = torch.where(mb_advantages > 0, ppo_obj, spo_obj).mean()
+                elif cfg.trust_region_mode == "rollback":
+                    clipfracs += [((ratio - 1.0).abs() > cfg.clip_coef).float().mean().item()]
+                    pg_loss, rollback_active = rollback_clipped_ratio_loss(
+                        ratio,
+                        mb_advantages,
+                        cfg.clip_coef,
+                        cfg.rollback_alpha,
+                    )
+                    if iteration > cfg.n_iterations_train_only_value:
+                        rollback_active_elements += int(rollback_active.sum().item())
+                        rollback_total_elements += rollback_active.numel()
                 else:
                     clipfracs += [((ratio - 1.0).abs() > cfg.clip_coef).float().mean().item()]
                     pg_loss1 = -mb_advantages * ratio
@@ -4672,6 +4707,16 @@ def main(cfg: FlowPPOConfig):
                 "num_batches": 2,
                 "cfm_samples": n_action_samples,
                 "active_ratio_threshold": cfg.heldout_ratio_early_stop_threshold,
+                "trust_region_mode": cfg.trust_region_mode,
+                "rollback_alpha": cfg.rollback_alpha,
+                "rollback_active_elements": rollback_active_elements,
+                "rollback_total_elements": rollback_total_elements,
+                "rollback_active_fraction": (
+                    rollback_active_elements / rollback_total_elements
+                    if rollback_total_elements
+                    else 0.0
+                ),
+                "preupdate_batches": early_stop_pre_results,
                 "selected_epoch": selected_epoch,
                 "epochs": early_stop_epoch_results,
             }
