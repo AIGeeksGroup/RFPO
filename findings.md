@@ -219,6 +219,12 @@ only in the first batch, where it changed outcome-reference cosine from 0.94806 
 second batch the candidate was identical to control at 0.73389. The negative branch does not
 materially cancel the positive branch, so sign-level PCGrad cannot address the observed actor drift.
 
+Temporal per-timestep ratio clipping preserved the official on-policy gradient exactly but was
+inactive at the first actor-step scale. Both fixed batches retained 100% positive active ratios under
+the official chunk ratio and the temporal candidate, while post-step gradient-cosine gains were only
+0.0000010 and 0.0000013. Finer clipping may differ after larger accumulated drift, but it cannot fix
+the first-step direction problem identified by H18 and is stopped under the locked audit.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -259,6 +265,7 @@ materially cancel the positive branch, so sign-level PCGrad cannot address the o
 - Matching each source marginal is insufficient for inference compatibility; the policy also depends on the episode-level joint source process created by repeated replanning.
 - Small asynchronous screens must use equal per-environment episode quotas because successful Can episodes terminate earlier than failures.
 - Positive- and negative-GAE FPO++ gradients are nearly orthogonal or weakly aligned on the audited step-6000 batches; their direct cancellation is not the source of unstable policy updates.
+- Finer trust-region clipping cannot improve an update before any ratios reach the clipping boundary; at the official first-step scale, both chunk and temporal ratios remained fully active.
 
 ## Lessons and Constraints
 
@@ -280,4 +287,4 @@ materially cancel the positive branch, so sign-level PCGrad cannot address the o
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, rank-based GAE weighting, fixed lower actor learning rate, full-batch gradient accumulation, BC/FPO++ midpoint interpolation, explicit Gaussian-bridge distillation, antithetic endpoint averaging, shorter receding-horizon execution, temporally correlated Gaussian inference, and advantage-sign gradient surgery are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The next candidate must introduce a distinct training signal rather than another inference or estimator variant.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, rank-based GAE weighting, fixed lower actor learning rate, full-batch gradient accumulation, BC/FPO++ midpoint interpolation, explicit Gaussian-bridge distillation, antithetic endpoint averaging, shorter receding-horizon execution, temporally correlated Gaussian inference, advantage-sign gradient surgery, and temporal per-timestep clipping are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The next candidate must improve the first actor-step learning signal rather than activate only after policy drift.

@@ -1,0 +1,46 @@
+{
+  "action_timesteps": 16,
+  "batches": [
+    {
+      "batch": 0,
+      "candidate_control_post_norm_ratio": 1.0017943548909818,
+      "candidate_positive_active_fraction": 1.0,
+      "candidate_positive_active_gain": 0.0,
+      "candidate_post_cosine_gain": 9.5367431640625e-07,
+      "candidate_post_gradient_cosine": 0.9999995827674866,
+      "candidate_post_loss": -0.0006816387176513672,
+      "candidate_pre_loss": -4.76837158203125e-07,
+      "control_positive_active_fraction": 1.0,
+      "control_post_gradient_cosine": 0.9999986290931702,
+      "control_post_loss": -0.0006810575723648071,
+      "control_pre_loss": -7.450580596923828e-08,
+      "num_chunks": 32,
+      "pre_candidate_control_norm_ratio": 1.0000002798304115,
+      "pre_gradient_cosine": 1.0,
+      "virtual_step_scale": 3.6677931706268737e-06
+    },
+    {
+      "batch": 1,
+      "candidate_control_post_norm_ratio": 0.9985461120948383,
+      "candidate_positive_active_fraction": 1.0,
+      "candidate_positive_active_gain": 0.0,
+      "candidate_post_cosine_gain": 1.3113021850585938e-06,
+      "candidate_post_gradient_cosine": 0.9999997615814209,
+      "candidate_post_loss": -0.0008240342140197754,
+      "candidate_pre_loss": 2.384185791015625e-07,
+      "control_positive_active_fraction": 1.0,
+      "control_post_gradient_cosine": 0.9999984502792358,
+      "control_post_loss": -0.0008246861398220062,
+      "control_pre_loss": 7.078051567077637e-08,
+      "num_chunks": 32,
+      "pre_candidate_control_norm_ratio": 1.000000231396288,
+      "pre_gradient_cosine": 1.0,
+      "virtual_step_scale": 3.032957426206856e-06
+    }
+  ],
+  "cfm_samples": 8,
+  "iteration": 2,
+  "num_batches": 2,
+  "num_chunks_audited": 64,
+  "num_eligible_chunks": 225
+}

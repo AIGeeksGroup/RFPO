@@ -258,7 +258,7 @@ hypotheses:
     priority: high
   - id: H33
     statement: "Clipping FPO++ ratios independently across action-chunk timesteps preserves the initially useful policy-gradient direction better than clipping one ratio formed from the summed chunk loss."
-    status: active
+    status: refuted
     motivation: "The paper extends clipping from per-action to per-CFM-sample, but manipulation still sums 16 timestep losses before clipping. A single shifted timestep can therefore suppress the entire chunk update; temporal per-sample clipping can localize that trust-region decision while preserving the on-policy gradient scale."
     parent: H2
     priority: high
@@ -277,7 +277,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 111
+  total_runs: 112
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -873,11 +873,20 @@ experiments:
       projection_active: [true, false]
       audited_chunks: 64
       eligible_chunks: 208
+    - run: can_step6000_temporal_ratio_clipping_audit_osmesa_seed20260903
+      metric: post_gradient_cosine_gain
+      values: [0.0000010, 0.0000013]
+      control_positive_active_fraction: [1.0, 1.0]
+      candidate_positive_active_fraction: [1.0, 1.0]
+      pre_gradient_cosines: [1.0, 1.0]
+      pre_norm_ratios: [1.0000003, 1.0000002]
+      audited_chunks: 64
+      eligible_chunks: 225
 
 outer_loop:
-  cycle: 19
-  last_direction: "Audit temporally factorized FPO++ clipping as H33, preserving exact on-policy gradient scale before testing post-update direction retention."
-  last_reflection: "H32 found negligible sign conflict in one fixed batch and no conflict in the other. Projection changed outcome-reference cosine by -0.00009 and 0.00000, so negative-GAE cancellation is not the update bottleneck and advantage-sign gradient surgery is closed."
+  cycle: 20
+  last_direction: "Stop post-clipping refinements and search for an H34 intervention that improves the first actor-step learning signal."
+  last_reflection: "H33 exactly preserved the on-policy gradient, but the official-size virtual actor step left 100% of positive ratios active for both chunk and temporal clipping. Their post-step direction differed by only about 1e-6, so finer clipping cannot affect the already-problematic first update and is closed without larger-step or grouping variants."
 
 workspace:
   findings: "findings.md"
