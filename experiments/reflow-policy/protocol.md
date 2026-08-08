@@ -26,6 +26,14 @@ higher four-step endpoint MSE than the equal-budget control. Then run 20-episode
 matched seeds. Reflow must preserve official-step zero success within 15 percentage points and beat
 the control by at least one success at four steps before any longer run or online RL experiment.
 
+## Training-seed confirmation
+
+After the first training seed passes its geometry gate and two environment-seed rollout screens, run
+one independent matched pair with training seed 20260809. Keep the released EMA initialization,
+fresh optimizers, batch size 64, 100 updates, and 64-step teacher unchanged. Apply the same 128-pair
+geometry gate before rollout evaluation. This confirmation tests training stability; do not extend
+the original checkpoint or tune hyperparameters first.
+
 ## Stop Conditions
 
 - Stop if normalized straightness error does not improve by at least 20% over the control.
