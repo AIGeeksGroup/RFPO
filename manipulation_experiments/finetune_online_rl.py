@@ -68,6 +68,7 @@ from src.median_microbatch_gradient import (
     aggregate_microbatch_gradients,
     middle_pair_mean,
 )
+from src.terminal_consistency_filter import terminal_consistent_weights
 
 # ---- Multiprocessing start method (CUDA compat) ------------------------------
 try:
@@ -193,6 +194,10 @@ class FlowPPOConfig:
     median_microbatch_gradient_audit_iteration: int = 2
     median_microbatch_gradient_audit_chunks: int = 192
     median_microbatch_gradient_audit_output_json: Optional[str] = None
+    terminal_consistency_filter_audit: bool = False
+    terminal_consistency_filter_audit_iteration: int = 2
+    terminal_consistency_filter_audit_chunks: int = 128
+    terminal_consistency_filter_audit_output_json: Optional[str] = None
     bc_anchor_pcgrad_audit: bool = False
     bc_anchor_pcgrad_audit_iteration: int = 2
     bc_anchor_pcgrad_audit_chunks: int = 64
@@ -824,6 +829,7 @@ def main(cfg: FlowPPOConfig):
                 cfg.direct_advantage_audit,
                 cfg.rank_advantage_audit,
                 cfg.bc_anchor_pcgrad_audit,
+                cfg.terminal_consistency_filter_audit,
             )
         ):
             raise ValueError("advantage-sign PCGrad and side audits are mutually exclusive")
@@ -853,6 +859,7 @@ def main(cfg: FlowPPOConfig):
                 cfg.rank_advantage_audit,
                 cfg.advantage_sign_pcgrad_audit,
                 cfg.bc_anchor_pcgrad_audit,
+                cfg.terminal_consistency_filter_audit,
                 cfg.median_microbatch_gradient_audit,
             )
         ):
@@ -889,6 +896,28 @@ def main(cfg: FlowPPOConfig):
             raise ValueError("median-microbatch gradient audit iteration must be positive")
         if cfg.median_microbatch_gradient_audit_chunks != 192:
             raise ValueError("median-microbatch gradient audit requires exactly 192 chunks")
+    if cfg.terminal_consistency_filter_audit:
+        if any(
+            (
+                cfg.discounted_success_critic_audit,
+                cfg.critic_warmup_scheduler_audit,
+                cfg.direct_advantage_audit,
+                cfg.rank_advantage_audit,
+                cfg.advantage_sign_pcgrad_audit,
+                cfg.temporal_ratio_clipping_audit,
+                cfg.median_microbatch_gradient_audit,
+                cfg.bc_anchor_pcgrad_audit,
+            )
+        ):
+            raise ValueError("terminal-consistency filter and side audits are mutually exclusive")
+        if cfg.loss_mode != "fpo" or not cfg.do_chunk_level_ppo:
+            raise ValueError("terminal-consistency filter audit requires chunk-level FPO")
+        if world_size != 1:
+            raise ValueError("terminal-consistency filter audit currently requires one process")
+        if cfg.terminal_consistency_filter_audit_iteration < 1:
+            raise ValueError("terminal-consistency filter audit iteration must be positive")
+        if cfg.terminal_consistency_filter_audit_chunks != 128:
+            raise ValueError("terminal-consistency filter audit requires exactly 128 chunks")
     if cfg.bc_anchor_pcgrad_audit:
         if cfg.loss_mode != "fpo" or not cfg.do_chunk_level_ppo:
             raise ValueError("BC-anchor PCGrad audit requires chunk-level FPO")
@@ -2128,6 +2157,186 @@ def main(cfg: FlowPPOConfig):
                     rollout_advantage_std.item(),
                     int(moment_sums[2].item()),
                 )
+
+        if (
+            cfg.terminal_consistency_filter_audit
+            and iteration == cfg.terminal_consistency_filter_audit_iteration
+        ):
+            eligible_mask = b_mc_valid[:, 0].bool() & (
+                b_cfm_value_invalid.sum(dim=1) == 0
+            )
+            eligible_indices = torch.where(eligible_mask)[0]
+            required_chunks = cfg.terminal_consistency_filter_audit_chunks
+            if eligible_indices.numel() < required_chunks:
+                raise RuntimeError(
+                    "terminal-consistency filter audit requires "
+                    f"{required_chunks} fully valid labeled chunks, "
+                    f"found {eligible_indices.numel()}"
+                )
+            audit_generator = torch.Generator().manual_seed(
+                cfg.seed + iteration * 11003
+            )
+            audit_indices = eligible_indices[
+                torch.randperm(
+                    eligible_indices.numel(), generator=audit_generator
+                )[:required_chunks]
+            ]
+            replica_size = required_chunks // 2
+            replica_results = []
+            actor_module.eval()
+            for replica in range(2):
+                replica_indices = audit_indices[
+                    replica * replica_size : (replica + 1) * replica_size
+                ]
+                control_weights = b_advantages[replica_indices, 0].float()
+                control_std = control_weights.std()
+                if not torch.isfinite(control_std) or control_std <= 0:
+                    raise RuntimeError(
+                        f"terminal-consistency replica {replica} has degenerate GAE weights"
+                    )
+                control_weights = (
+                    control_weights - control_weights.mean()
+                ) / (control_std + 1e-8)
+                reference_weights = b_mc_returns[replica_indices, 0].float()
+                reference_weights = reference_weights - reference_weights.mean()
+                candidate_weights, retained_mask = terminal_consistent_weights(
+                    control_weights, reference_weights
+                )
+                positive_retained = int((candidate_weights > 0).sum().item())
+                negative_retained = int((candidate_weights < 0).sum().item())
+                retained_fraction = float(retained_mask.float().mean().item())
+
+                _, reference_gradient = replay_audit_gradient(
+                    replica_indices,
+                    reference_weights,
+                    b_actions=b_actions,
+                    b_cfm_losses=b_cfm_losses,
+                    b_cfm_loss_ts=b_cfm_loss_ts,
+                    b_cfm_loss_epsilons=b_cfm_loss_epsilons,
+                    b_cfm_value_invalid=b_cfm_value_invalid,
+                    b_obs_images=b_obs_images,
+                    b_obs_state=b_obs_state,
+                )
+                _, control_gradient = replay_audit_gradient(
+                    replica_indices,
+                    control_weights,
+                    b_actions=b_actions,
+                    b_cfm_losses=b_cfm_losses,
+                    b_cfm_loss_ts=b_cfm_loss_ts,
+                    b_cfm_loss_epsilons=b_cfm_loss_epsilons,
+                    b_cfm_value_invalid=b_cfm_value_invalid,
+                    b_obs_images=b_obs_images,
+                    b_obs_state=b_obs_state,
+                )
+                _, candidate_gradient = replay_audit_gradient(
+                    replica_indices,
+                    candidate_weights,
+                    b_actions=b_actions,
+                    b_cfm_losses=b_cfm_losses,
+                    b_cfm_loss_ts=b_cfm_loss_ts,
+                    b_cfm_loss_epsilons=b_cfm_loss_epsilons,
+                    b_cfm_value_invalid=b_cfm_value_invalid,
+                    b_obs_images=b_obs_images,
+                    b_obs_state=b_obs_state,
+                )
+                vectors = {
+                    "reference": reference_gradient,
+                    "control": control_gradient,
+                    "candidate": candidate_gradient,
+                }
+                norms = {name: vector.norm() for name, vector in vectors.items()}
+                finite_nonzero = all(
+                    torch.isfinite(vector).all().item()
+                    and torch.isfinite(norms[name]).item()
+                    and norms[name].item() > 0
+                    for name, vector in vectors.items()
+                )
+                if not finite_nonzero:
+                    raise RuntimeError(
+                        "terminal-consistency audit produced a non-finite or zero gradient"
+                    )
+
+                def vector_cosine(first: torch.Tensor, second: torch.Tensor) -> float:
+                    return float(
+                        torch.nn.functional.cosine_similarity(
+                            first.unsqueeze(0), second.unsqueeze(0), dim=1
+                        ).item()
+                    )
+
+                control_reference_cosine = vector_cosine(
+                    control_gradient, reference_gradient
+                )
+                candidate_reference_cosine = vector_cosine(
+                    candidate_gradient, reference_gradient
+                )
+                candidate_control_cosine = vector_cosine(
+                    candidate_gradient, control_gradient
+                )
+                norm_ratio = float(
+                    (norms["candidate"] / norms["control"]).item()
+                )
+                gates = {
+                    "finite_nonzero_and_sign_support": (
+                        finite_nonzero
+                        and positive_retained >= 8
+                        and negative_retained >= 8
+                    ),
+                    "candidate_reference_absolute": candidate_reference_cosine >= 0.75,
+                    "candidate_reference_gain": (
+                        candidate_reference_cosine - control_reference_cosine >= 0.10
+                    ),
+                    "candidate_control_direction": candidate_control_cosine >= 0.75,
+                    "candidate_control_norm": 0.5 <= norm_ratio <= 1.2,
+                    "active_nonsparse_filter": 0.4 <= retained_fraction <= 0.9,
+                }
+                replica_results.append(
+                    {
+                        "replica": replica,
+                        "num_chunks": replica_size,
+                        "retained_chunks": int(retained_mask.sum().item()),
+                        "retained_fraction": retained_fraction,
+                        "positive_retained": positive_retained,
+                        "negative_retained": negative_retained,
+                        "reference_gradient_norm": float(norms["reference"].item()),
+                        "control_gradient_norm": float(norms["control"].item()),
+                        "candidate_gradient_norm": float(norms["candidate"].item()),
+                        "control_reference_cosine": control_reference_cosine,
+                        "candidate_reference_cosine": candidate_reference_cosine,
+                        "candidate_reference_cosine_gain": (
+                            candidate_reference_cosine - control_reference_cosine
+                        ),
+                        "candidate_control_cosine": candidate_control_cosine,
+                        "candidate_control_norm_ratio": norm_ratio,
+                        "gates": gates,
+                        "passed": all(gates.values()),
+                    }
+                )
+            actor_module.train()
+            if cfg.freeze_vision_encoder:
+                actor_module.model.vision_encoder.eval()
+            audit_result = {
+                "iteration": iteration,
+                "seed": cfg.seed,
+                "num_eligible_chunks": int(eligible_indices.numel()),
+                "num_chunks_audited": required_chunks,
+                "num_replicas": 2,
+                "cfm_samples": n_action_samples,
+                "replicas": replica_results,
+                "passed": all(result["passed"] for result in replica_results),
+            }
+            audit_output_path = (
+                Path(cfg.terminal_consistency_filter_audit_output_json)
+                if cfg.terminal_consistency_filter_audit_output_json is not None
+                else run_dir / "terminal_consistency_filter_audit.json"
+            )
+            audit_output_path.parent.mkdir(parents=True, exist_ok=True)
+            audit_output_path.write_text(
+                json.dumps(audit_result, indent=2, sort_keys=True) + "\n"
+            )
+            logger.info(
+                "Terminal-consistency filter audit: %s",
+                json.dumps(audit_result, sort_keys=True),
+            )
 
         if (
             cfg.median_microbatch_gradient_audit
