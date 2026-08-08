@@ -306,6 +306,12 @@ hypotheses:
     motivation: "Conditional reflow established that endpoint discretization error is measurable, while recent update-path and robust-gradient interventions failed. A second-order solver is a distinct inference-only route that can improve endpoint fidelity without training or extra NFE."
     parent: H1
     priority: high
+  - id: H38b
+    statement: "Equal-NFE midpoint-5 improves balanced Can success over official Euler-10 without materially degrading either zero- or Gaussian-source behavior."
+    status: proposed
+    motivation: "H38 reduced source-matched Euler-64 endpoint error by more than 98% under both source regimes at unchanged measured NFE and diversity; closed-loop reward transfer is the remaining question."
+    parent: H38
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
