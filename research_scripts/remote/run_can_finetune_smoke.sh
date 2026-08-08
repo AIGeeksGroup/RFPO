@@ -16,6 +16,8 @@ N_ACTION_SAMPLES="${N_ACTION_SAMPLES:-8}"
 ROLLOUT_FREQ="${ROLLOUT_FREQ:-1}"
 RESET_CFM_INVALID_MASK_EACH_ITERATION="${RESET_CFM_INVALID_MASK_EACH_ITERATION:-False}"
 ROLLOUT_ZERO_FRACTION="${ROLLOUT_ZERO_FRACTION:-0.0}"
+ROLLOUT_TEMPERED_FRACTION="${ROLLOUT_TEMPERED_FRACTION:-0.0}"
+ROLLOUT_TEMPERED_SCALE="${ROLLOUT_TEMPERED_SCALE:-0.5}"
 GAE_LAMBDA="${GAE_LAMBDA:-0.99}"
 MASTER_PORT="${MASTER_PORT:-29500}"
 SEED="${SEED:-0}"
@@ -60,6 +62,8 @@ torchrun --nproc_per_node=1 --master_port "$MASTER_PORT" finetune_online_rl.py \
   --cfm-loss-average-group-size 1 \
   --reset-cfm-invalid-mask-each-iteration "$RESET_CFM_INVALID_MASK_EACH_ITERATION" \
   --rollout-zero-fraction "$ROLLOUT_ZERO_FRACTION" \
+  --rollout-tempered-fraction "$ROLLOUT_TEMPERED_FRACTION" \
+  --rollout-tempered-scale "$ROLLOUT_TEMPERED_SCALE" \
   --cfm-loss-use-huber True \
   --cfm-loss-huber-delta 0.5 \
   --clip-coef 0.02 \

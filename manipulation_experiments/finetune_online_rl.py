@@ -99,6 +99,8 @@ class FlowPPOConfig:
     cfm_loss_weight_from_t: str = "constant"
     reset_cfm_invalid_mask_each_iteration: bool = False
     rollout_zero_fraction: float = 0.0
+    rollout_tempered_fraction: float = 0.0
+    rollout_tempered_scale: float = 0.5
     exploration_noise_std: Optional[float] = None
     zero_sampling: bool = True  # deprecated. now we evaluate with both zero and non zero sampling
     save_non_zero_sampling_video: bool = False
@@ -842,17 +844,30 @@ def main(cfg: FlowPPOConfig):
     )
     # Init action buffers
     actor_module.init_action_buffers(num_envs_per_process)
-    rollout_zero_sampling_mask = build_rollout_zero_sampling_mask(
+    if cfg.rollout_zero_fraction > 0 and cfg.rollout_tempered_fraction > 0:
+        raise ValueError("rollout_zero_fraction and rollout_tempered_fraction cannot both be enabled")
+    if cfg.rollout_tempered_scale < 0:
+        raise ValueError("rollout_tempered_scale must be non-negative")
+
+    guided_fraction = max(cfg.rollout_zero_fraction, cfg.rollout_tempered_fraction)
+    rollout_guided_mask = build_rollout_zero_sampling_mask(
         num_envs_per_process,
-        cfg.rollout_zero_fraction,
+        guided_fraction,
         global_num_envs=cfg.num_envs,
         global_offset=global_env_offset,
         device=device,
     )
-    zero_rollout_env_ids = set(torch.where(rollout_zero_sampling_mask.cpu())[0].tolist())
+    rollout_zero_sampling_mask = rollout_guided_mask if cfg.rollout_zero_fraction > 0 else None
+    rollout_source_sampling_scale = None
+    source_group_name = "zero-source"
+    if cfg.rollout_tempered_fraction > 0:
+        rollout_source_sampling_scale = torch.ones(num_envs_per_process, device=device)
+        rollout_source_sampling_scale[rollout_guided_mask] = cfg.rollout_tempered_scale
+        source_group_name = f"scale-{cfg.rollout_tempered_scale:g}"
+    guided_rollout_env_ids = set(torch.where(rollout_guided_mask.cpu())[0].tolist())
     logger.info(
-        f"[Rank {rank}] Mixed-source rollout: {len(zero_rollout_env_ids)} zero-source and "
-        f"{num_envs_per_process - len(zero_rollout_env_ids)} Gaussian-source environments"
+        f"[Rank {rank}] Mixed-source rollout: {len(guided_rollout_env_ids)} {source_group_name} and "
+        f"{num_envs_per_process - len(guided_rollout_env_ids)} scale-1 Gaussian environments"
     )
     logger.info(colored(f"[Rank {rank}] Initialized action buffers for {num_envs_per_process} environments", "green"))
 
@@ -958,6 +973,7 @@ def main(cfg: FlowPPOConfig):
             obs,
             sde_sampling=sde_sampling,
             zero_sampling_mask=rollout_zero_sampling_mask,
+            source_sampling_scale=rollout_source_sampling_scale,
         )
         obs_copy = actor_module.normalize_inputs(obs_copy)
         obs_cond = actor_module.model.encode_observations(obs_copy)
@@ -985,8 +1001,8 @@ def main(cfg: FlowPPOConfig):
 
         done_episodes = 0
         successes = 0
-        zero_done_episodes = 0
-        zero_successes = 0
+        guided_done_episodes = 0
+        guided_successes = 0
         random_done_episodes = 0
         random_successes = 0
         step = 0
@@ -1034,9 +1050,9 @@ def main(cfg: FlowPPOConfig):
                         for env_idx_tensor in done_env_ids:
                             env_idx = int(env_idx_tensor.item())
                             success = int(reward[env_idx].item() == 1.0)
-                            if env_idx in zero_rollout_env_ids:
-                                zero_done_episodes += 1
-                                zero_successes += success
+                            if env_idx in guided_rollout_env_ids:
+                                guided_done_episodes += 1
+                                guided_successes += success
                             else:
                                 random_done_episodes += 1
                                 random_successes += success
@@ -1104,8 +1120,8 @@ def main(cfg: FlowPPOConfig):
                 [
                     successes,
                     done_episodes,
-                    zero_successes,
-                    zero_done_episodes,
+                    guided_successes,
+                    guided_done_episodes,
                     random_successes,
                     random_done_episodes,
                 ],
@@ -1116,8 +1132,8 @@ def main(cfg: FlowPPOConfig):
             (
                 successes_global,
                 episodes_global,
-                zero_successes_global,
-                zero_episodes_global,
+                guided_successes_global,
+                guided_episodes_global,
                 random_successes_global,
                 random_episodes_global,
             ) = t.tolist()
@@ -1126,13 +1142,13 @@ def main(cfg: FlowPPOConfig):
             success_rate_global = success_rate_local
             successes_global = successes
             episodes_global = done_episodes
-            zero_successes_global = zero_successes
-            zero_episodes_global = zero_done_episodes
+            guided_successes_global = guided_successes
+            guided_episodes_global = guided_done_episodes
             random_successes_global = random_successes
             random_episodes_global = random_done_episodes
 
-        zero_success_rate_global = (
-            zero_successes_global / zero_episodes_global if zero_episodes_global > 0 else 0.0
+        guided_success_rate_global = (
+            guided_successes_global / guided_episodes_global if guided_episodes_global > 0 else 0.0
         )
         random_success_rate_global = (
             random_successes_global / random_episodes_global if random_episodes_global > 0 else 0.0
@@ -1143,8 +1159,8 @@ def main(cfg: FlowPPOConfig):
                 f"[Rank {rank}] SR: {success_rate_global:.2%} from {int(episodes_global)} episodes | SPS_local(rank0 est): {sps_local_total:.2f}"
             )
             logger.info(
-                f"[Rank {rank}] Source SR: zero={zero_success_rate_global:.2%} "
-                f"({int(zero_successes_global)}/{int(zero_episodes_global)}) | "
+                f"[Rank {rank}] Source SR: guided={guided_success_rate_global:.2%} "
+                f"({int(guided_successes_global)}/{int(guided_episodes_global)}) | "
                 f"random={random_success_rate_global:.2%} "
                 f"({int(random_successes_global)}/{int(random_episodes_global)})"
             )
@@ -1532,7 +1548,7 @@ def main(cfg: FlowPPOConfig):
                     "training/critic_grad_norm_after_clip": float(critic_grad_norm_after),
                     "charts/rewards": b_rewards.sum().item(),
                     "charts/success_rate": success_rate_global,
-                    "charts/success_rate_zero_source": zero_success_rate_global,
+                    "charts/success_rate_guided_source": guided_success_rate_global,
                     "charts/success_rate_random_source": random_success_rate_global,
                     "charts/valid_cfm_action_fraction": valid_cfm_action_fraction,
                     "charts/action_norm_mean": action_norms.mean(),

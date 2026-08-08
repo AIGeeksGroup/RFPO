@@ -2,6 +2,7 @@ import torch
 
 from src.rollout_bookkeeping import (
     apply_zero_sampling_mask,
+    apply_source_sampling_scale,
     build_rollout_zero_sampling_mask,
     prepare_invalid_step_mask,
 )
@@ -59,3 +60,14 @@ def test_rollout_zero_sampling_fraction_must_be_valid():
         assert "zero_fraction" in str(exc)
     else:
         raise AssertionError("invalid zero fraction should raise ValueError")
+
+
+def test_apply_source_sampling_scale_scales_each_batch_row():
+    source = torch.ones(3, 2, 4)
+
+    scaled = apply_source_sampling_scale(source, torch.tensor([0.5, 1.0, 0.0]))
+
+    torch.testing.assert_close(scaled[0], torch.full_like(scaled[0], 0.5))
+    torch.testing.assert_close(scaled[1], torch.ones_like(scaled[1]))
+    torch.testing.assert_close(scaled[2], torch.zeros_like(scaled[2]))
+    torch.testing.assert_close(source, torch.ones_like(source))

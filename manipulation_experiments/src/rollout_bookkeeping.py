@@ -41,6 +41,20 @@ def apply_zero_sampling_mask(source_noise: torch.Tensor, zero_sampling_mask: tor
     return mixed_source
 
 
+def apply_source_sampling_scale(source_noise: torch.Tensor, source_sampling_scale: torch.Tensor) -> torch.Tensor:
+    """Scale each batch element's source noise without mutating the input."""
+    if source_sampling_scale.ndim != 1 or source_sampling_scale.shape[0] != source_noise.shape[0]:
+        raise ValueError(
+            "source_sampling_scale must have shape "
+            f"({source_noise.shape[0]},), got {tuple(source_sampling_scale.shape)}"
+        )
+    if (source_sampling_scale < 0).any():
+        raise ValueError("source_sampling_scale values must be non-negative")
+
+    scale = source_sampling_scale.to(device=source_noise.device, dtype=source_noise.dtype)
+    return source_noise * scale.reshape(-1, *([1] * (source_noise.ndim - 1)))
+
+
 def prepare_invalid_step_mask(
     invalid_steps: torch.Tensor,
     *,
