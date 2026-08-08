@@ -95,6 +95,12 @@ the control at 84%, while random success fell to 6%. The scale-0.5 subset itself
 episodes, confirming the reward-supply mechanism. Its extra episode boundaries drove cumulative valid
 CFM actions down to 93.91%, making mask contamination a stronger interaction than in the baseline.
 
+Resetting the validity mask removed that interaction but did not unlock reward transfer. Valid CFM
+actions stayed near 98% in every iteration, yet official full-noise collection was 41/481 (8.52%),
+slightly below the control's 53/604 (8.77%) and the no-reset mixture's 44/484 (9.09%). Final
+zero/random evaluation was 86%/6%. The bookkeeping defect therefore explains lost training samples,
+but not why abundant tempered-source successes fail to improve the Gaussian-source policy.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -111,6 +117,7 @@ CFM actions down to 93.91%, making mask contamination a stronger interaction tha
 - Propagating the same sparse terminal rewards farther with lambda 1.0 reduced rather than improved early collection success; the bottleneck is reward-information acquisition, not lambda decay alone.
 - Zero-source collection tripled the number of successes without final-policy collapse, but the disjoint delta source did not transfer into better Gaussian-source collection; source overlap is now the key constraint.
 - Tempered Gaussian overlap recovered the delta-source deficit but not a useful gain; high-success source mixtures also amplify the cumulative invalid-mask defect by creating more episode boundaries.
+- Correcting that amplified mask defect restored about 98% valid CFM actions but left full-noise success unchanged; failed transfer is an update/objective problem rather than a sample-retention problem.
 
 ## Lessons and Constraints
 
@@ -128,4 +135,4 @@ CFM actions down to 93.91%, making mask contamination a stronger interaction tha
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased Monte Carlo sampling, full-lambda GAE, and both delta-zero and tempered mixed rollout screens are closed as standalone reward improvements. Pure conditional reflow is supported as a geometry and sampling-efficiency method. The next candidate is one targeted interaction: combine the overlapping tempered source with the already verified per-rollout validity-mask reset, because the mixture amplifies that bookkeeping defect.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased Monte Carlo sampling, full-lambda GAE, and both delta-zero and tempered mixed rollout screens are closed as standalone reward improvements. Pure conditional reflow is supported as a geometry and sampling-efficiency method. The tempered-source plus mask-reset interaction is also closed: correcting sample retention did not improve full-noise reward. The project now returns to an outer-loop literature and mechanism review rather than sweeping the exhausted source-mixture and estimator settings.

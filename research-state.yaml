@@ -104,7 +104,7 @@ hypotheses:
     priority: high
   - id: H10
     statement: "Resetting the validity mask unlocks tempered-source Can learning by preserving samples lost after its more frequent successful episode boundaries."
-    status: pending
+    status: refuted
     motivation: "The tempered mixture ended with only 93.91% valid CFM actions, so the bookkeeping defect is materially larger than in the official control."
     parent: H9
     priority: high
@@ -123,7 +123,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 70
+  total_runs: 73
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -440,11 +440,31 @@ experiments:
       metric: success_rate
       value: 0.06
       episodes: 50
+    - run: can_tempered05_maskreset_5iter_seed0_random_collection
+      metric: pooled_collection_success
+      value: 0.0852
+      successes: 41
+      episodes: 481
+      iterations: "2-5"
+    - run: can_tempered05_maskreset_5iter_seed0_guided_collection
+      metric: pooled_collection_success
+      value: 0.4638
+      successes: 64
+      episodes: 138
+      iterations: "2-5"
+    - run: can_tempered05_maskreset_5iter_seed0_zero_final
+      metric: success_rate
+      value: 0.86
+      episodes: 50
+    - run: can_tempered05_maskreset_5iter_seed0_random_final
+      metric: success_rate
+      value: 0.06
+      episodes: 50
 
 outer_loop:
-  cycle: 1
-  last_direction: "Run one fixed tempered-source plus per-rollout mask-reset interaction pilot, with no source or optimizer sweep."
-  last_reflection: "A 20% scale-0.5 source subset recovered full-noise collection from H8's 7.08% to 9.09%, but gained only 0.32 points over control and reduced final random success to 6%. H9 is refuted without a source sweep; its 93.91% final valid-CFM fraction motivates one interaction test with mask reset."
+  cycle: 2
+  last_direction: "Stop source-mixture and estimator combinations; return to literature and select a mechanism that changes how successful trajectories update the full-noise policy."
+  last_reflection: "Mask reset held valid CFM samples near 98%, but tempered-source full-noise collection fell to 41/481 (8.52%) and final random success remained 6%. Invalid-mask loss is not the cause of failed transfer, so H10 is refuted and scale/fraction/lambda/mask sweeps are closed."
 
 workspace:
   findings: "findings.md"
