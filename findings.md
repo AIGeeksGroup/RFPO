@@ -107,6 +107,12 @@ finite losses, but pooled actor-update success was 52/607 (8.57%) versus 53/604 
 official signed-advantage control. Final zero/random evaluation was 82%/16%. The random point
 estimate is non-degraded, but the preregistered collection metric establishes no learning gain.
 
+The pending reflow variance mechanism also failed a paired audit. Across two independently trained
+control/reflow pairs, mean CFM gradient-to-average cosine changed from 0.5027 to 0.5066 and from
+0.4973 to 0.5125, far below the required +0.05. Gradient-norm CV improved only 2.9% in one pair and
+worsened 12.3% in the other. Straighter flows slightly reduced scalar CFM-loss variation, but did
+not materially align the gradients that drive FPO++ updates.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -125,6 +131,7 @@ estimate is non-degraded, but the preregistered collection metric establishes no
 - Tempered Gaussian overlap recovered the delta-source deficit but not a useful gain; high-success source mixtures also amplify the cumulative invalid-mask defect by creating more episode boundaries.
 - Correcting that amplified mask defect restored about 98% valid CFM actions but left full-noise success unchanged; failed transfer is an update/objective problem rather than a sample-retention problem.
 - Soft positive mirror weights preserved stability and random evaluation but did not outperform signed FPO++ advantages; simple reward reweighting is not enough to improve early Can learning.
+- Reflow's 22% curvature reduction does not translate into lower CFM gradient disagreement, so an online reflow auxiliary lacks its proposed stabilization mechanism.
 
 ## Lessons and Constraints
 
@@ -142,4 +149,4 @@ estimate is non-degraded, but the preregistered collection metric establishes no
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, and ESS-weighted mirror updates are closed as standalone reward improvements. Pure conditional reflow is supported as a geometry and sampling-efficiency method. The next low-cost decision is the pending H2 mechanism audit: measure whether the replicated straightening effect reduces CFM sample-gradient disagreement before attempting an online reflow auxiliary.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, and online reflow stabilization are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The next outer loop reassesses initialization quality because the paper itself reports that a Can base policy with 64.06% random success removes the early sparse-reward failure regime.
