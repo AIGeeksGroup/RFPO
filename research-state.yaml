@@ -70,7 +70,7 @@ hypotheses:
     priority: high
   - id: H5
     statement: "Using 16 instead of 8 CFM samples per action reduces early Can FPO++ gradient noise and improves reward learning."
-    status: pending
+    status: refuted
     motivation: "The paper identifies sparse random-sampling successes as a source of high gradient variance, and lists 16 samples as an in-scope setting."
     parent: H2
     priority: high
@@ -89,7 +89,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 53
+  total_runs: 59
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -296,11 +296,39 @@ experiments:
       metric: success_rate
       value: 0.0
       episodes: 20
+    - run: can_fpopp_mc8_5iter_seed0
+      metric: pooled_collection_success
+      value: 0.0912
+      successes: 55
+      episodes: 603
+      iterations: "2-5"
+    - run: can_fpopp_mc16_5iter_seed0
+      metric: pooled_collection_success
+      value: 0.0795
+      successes: 48
+      episodes: 604
+      iterations: "2-5"
+    - run: can_fpopp_mc8_5iter_seed0_zero_final
+      metric: success_rate
+      value: 0.80
+      episodes: 50
+    - run: can_fpopp_mc8_5iter_seed0_random_final
+      metric: success_rate
+      value: 0.14
+      episodes: 50
+    - run: can_fpopp_mc16_5iter_seed0_zero_final
+      metric: success_rate
+      value: 0.78
+      episodes: 50
+    - run: can_fpopp_mc16_5iter_seed0_random_final
+      metric: success_rate
+      value: 0.12
+      episodes: 50
 
 outer_loop:
   cycle: 1
-  last_direction: "Run a matched five-update Can FPO++ pilot comparing 8 versus 16 CFM samples per action; stop before 5M steps unless early reward learning improves."
-  last_reflection: "A 50/50 dataset/reflow mixture retained an 11% straightness reduction and improved zero success in two small screens, but random success collapsed to 0/20 on the confirmation seed versus 3/20 control. H4 is refuted under its exploration gate, so no probability sweep or large evaluation is justified."
+  last_direction: "Select a reward-aware intervention that changes the sparse-success signal rather than spending more Monte Carlo compute on the same signal."
+  last_reflection: "Doubling per-action CFM samples from 8 to 16 reduced pooled actor-update collection success from 9.12% to 7.95%; final zero/random evaluation was also slightly lower at 78%/12% versus 80%/14%. H5 is refuted, so no 32-sample or 5M-step extension is justified."
 
 workspace:
   findings: "findings.md"

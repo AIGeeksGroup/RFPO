@@ -61,6 +61,13 @@ screens, but random success changed from 5/20 versus 1/20 on the first seed to 0
 the confirmation seed. The deterministic signal is interesting, but unstable exploration violates
 the online-policy requirement. The mixed-endpoint direction is stopped without a probability sweep.
 
+Increasing FPO++ Monte Carlo compute did not solve the sparse-reward problem. In matched five-update
+Can runs, 16 CFM samples per action produced 48/604 (7.95%) pooled collection success over actor
+updates, compared with 55/603 (9.12%) for the official 8-sample control. Final 50-episode zero/random
+evaluation was also slightly lower at 78%/12% versus 80%/14%. The candidate failed both the primary
++2-point improvement gate and random-sampling non-degradation gate, so larger sample counts are not
+being pursued.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -72,6 +79,7 @@ the online-policy requirement. The mixed-endpoint direction is stopped without a
 - Conditional reflow's lower integration error transferred to a positive low-step rollout screen; this is the first improvement candidate to pass both mechanism and task gates.
 - Small 20-episode screens overestimated pure reflow's reward effect; the 200-episode result retained only +1.5 points while confirming non-degradation.
 - Mixing real and reflow endpoints can retain partial straightening and deterministic gains, but does not reliably preserve random-source exploration.
+- Doubling CFM samples does not create more reward information; in this pilot it added compute while pooled early success fell by 1.17 points.
 
 ## Lessons and Constraints
 
@@ -89,4 +97,4 @@ the online-policy requirement. The mixed-endpoint direction is stopped without a
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior and mixed-endpoint screening are closed. Pure conditional reflow is supported as a geometry and sampling-efficiency method but refuted as a five-point Can reward improvement. The next direction must be reward-aware rather than another BC distillation variant.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, and increased-Monte-Carlo screening are closed. Pure conditional reflow is supported as a geometry and sampling-efficiency method but refuted as a five-point Can reward improvement. The next direction must alter the sparse reward signal or credit assignment rather than add BC distillation or Monte Carlo compute.
