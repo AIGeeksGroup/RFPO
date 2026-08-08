@@ -14,6 +14,7 @@ from lerobot.common.policies.pretrained import PreTrainedPolicy
 from lerobot.configs.types import FeatureType, PolicyFeature
 from torch import Tensor, nn
 
+from src.antithetic_inference import average_antithetic_predictions, build_antithetic_sources
 from src.rollout_bookkeeping import apply_source_sampling_scale, apply_zero_sampling_mask
 
 from .flow_model_config import FlowMatchingConfig
@@ -212,6 +213,7 @@ class FlowMatchingPolicy(PreTrainedPolicy):
         batch: dict[str, Tensor],
         zero_sampling: bool = False,
         sde_sampling: bool = False,
+        antithetic_sampling: bool = False,
         zero_sampling_mask: Tensor | None = None,
         source_sampling_scale: Tensor | None = None,
     ) -> Tensor:
@@ -227,6 +229,11 @@ class FlowMatchingPolicy(PreTrainedPolicy):
         
         if self.num_envs is None and self.action_buffers is None:
             raise ValueError("Action buffers not initialized. Call init_action_buffers first.")
+        if antithetic_sampling:
+            if zero_sampling or sde_sampling or zero_sampling_mask is not None or source_sampling_scale is not None:
+                raise ValueError("antithetic sampling cannot be combined with other source or SDE options")
+            if self.config.source_prior_mode != "gaussian":
+                raise ValueError("antithetic sampling requires the Gaussian source prior")
         if zero_sampling_mask is not None:
             if zero_sampling or source_sampling_scale is not None:
                 raise ValueError("zero sampling options and source_sampling_scale cannot be combined")
@@ -271,24 +278,40 @@ class FlowMatchingPolicy(PreTrainedPolicy):
                         previous_actions[i] = torch.stack(list(history))
                         has_previous_actions[i] = True
 
-            # Predict action chunks for these environments
-            action_chunks, mdp_x_t_path = self.predict_action_chunk(
-                sub_batch,
-                zero_sampling=zero_sampling,
-                sde_sampling=sde_sampling,
-                zero_sampling_mask=(
-                    zero_sampling_mask[envs_needing_actions]
-                    if zero_sampling_mask is not None
-                    else None
-                ),
-                source_sampling_scale=(
-                    source_sampling_scale[envs_needing_actions]
-                    if source_sampling_scale is not None
-                    else None
-                ),
-                previous_actions=previous_actions,
-                has_previous_actions=has_previous_actions,
-            )
+            if antithetic_sampling:
+                source_noise = torch.randn(
+                    len(envs_needing_actions),
+                    self.config.horizon,
+                    self.model.action_dim,
+                    device=next(iter(sub_batch.values())).device,
+                )
+                positive_source, negative_source = build_antithetic_sources(source_noise)
+                positive_actions, positive_path = self.predict_action_chunk(
+                    dict(sub_batch), source_noise=positive_source
+                )
+                negative_actions, negative_path = self.predict_action_chunk(
+                    dict(sub_batch), source_noise=negative_source
+                )
+                action_chunks = average_antithetic_predictions(positive_actions, negative_actions)
+                mdp_x_t_path = average_antithetic_predictions(positive_path, negative_path)
+            else:
+                action_chunks, mdp_x_t_path = self.predict_action_chunk(
+                    sub_batch,
+                    zero_sampling=zero_sampling,
+                    sde_sampling=sde_sampling,
+                    zero_sampling_mask=(
+                        zero_sampling_mask[envs_needing_actions]
+                        if zero_sampling_mask is not None
+                        else None
+                    ),
+                    source_sampling_scale=(
+                        source_sampling_scale[envs_needing_actions]
+                        if source_sampling_scale is not None
+                        else None
+                    ),
+                    previous_actions=previous_actions,
+                    has_previous_actions=has_previous_actions,
+                )
             action_chunks = action_chunks[:, :self.config.n_action_steps, :] # in future, the n_action_steps can be different from prediction horizon
             mdp_x_t_path = mdp_x_t_path[:, :, :self.config.n_action_steps, :] # in future, the n_action_steps can be different from prediction horizon
             assert mdp_x_t_path.shape[1] == self.config.sampling_steps, "mdp_x_t_path second axis should be the flow sampling steps"

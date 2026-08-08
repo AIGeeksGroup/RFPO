@@ -8,7 +8,7 @@ import time
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Literal, Optional
 
 import json
 import imageio
@@ -64,7 +64,9 @@ class EvalCheckpointConfig:
     eval_env: str = "Lift"    
     """Environment name for evaluation."""
     zero_sampling: bool = True
-    """If True, use zero sampling for evaluation."""
+    """Legacy source selector used when sampling_mode is unset."""
+    sampling_mode: Optional[Literal["zero", "random", "antithetic_average"]] = None
+    """Explicit evaluation source mode; overrides zero_sampling when set."""
     source_prior_mode: Optional[str] = None
     """Optional checkpoint override: 'gaussian' or exploratory 'previous_action'."""
     source_prior_sigma: float = 0.5
@@ -148,7 +150,7 @@ def _run_rollouts(
     num_episodes: int,
     task: str,
     save_video: bool = True,
-    zero_sampling: bool = False,
+    sampling_mode: Literal["zero", "random", "antithetic_average"] = "random",
     annotate_video: bool = True,
 ):
     """Run *num_episodes* episodes with *policy* in vectorized *env* and compute success-rate."""
@@ -198,7 +200,13 @@ def _run_rollouts(
 
     while done_episodes < num_episodes:
         with torch.inference_mode():
-            action, _ = policy.select_action(obs, zero_sampling=zero_sampling)
+            action, _ = policy.select_action(
+                obs,
+                zero_sampling=sampling_mode == "zero",
+                antithetic_sampling=sampling_mode == "antithetic_average",
+            )
+            if not torch.isfinite(action).all():
+                raise FloatingPointError(f"non-finite action produced in {sampling_mode} mode")
 
         obs, reward, terminated, truncated, _ = env.step(action)
 
@@ -482,6 +490,11 @@ def load_policy(checkpoint_dir: Path, device: str = "cuda", load_ema: bool = Fal
 def main(cfg: EvalCheckpointConfig):
 
     logger.info(colored("=" * 80, "cyan"))
+
+    sampling_mode = cfg.sampling_mode
+    if sampling_mode is None:
+        sampling_mode = "zero" if cfg.zero_sampling else "random"
+    logger.info("Evaluation sampling mode: %s", sampling_mode)
     logger.info(colored("Checkpoint Evaluation", "cyan", attrs=["bold"]))
     logger.info(colored("=" * 80, "cyan"))
 
@@ -596,7 +609,7 @@ def main(cfg: EvalCheckpointConfig):
         num_episodes=cfg.eval_num_episodes,
         task=cfg.eval_env,
         save_video=cfg.save_video,
-        zero_sampling=cfg.zero_sampling,
+        sampling_mode=sampling_mode,
         annotate_video=cfg.annotate_video,
     )
 
@@ -647,7 +660,7 @@ def main(cfg: EvalCheckpointConfig):
         wandb.finish()
 
     # Save summary to file
-    summary_path = run_dir / f"eval_summary_{cfg.eval_env}_{cfg.checkpoint_step}_zero_sampling_{cfg.zero_sampling}.txt"
+    summary_path = run_dir / f"eval_summary_{cfg.eval_env}_{cfg.checkpoint_step}_{sampling_mode}.txt"
     with open(summary_path, "w") as f:
         f.write(f"Evaluation Summary\n")
         f.write(f"=" * 80 + "\n")
@@ -655,6 +668,7 @@ def main(cfg: EvalCheckpointConfig):
         f.write(f"Checkpoint: {cfg.checkpoint_step}\n")
         f.write(f"Run ID: {cfg.wandb_run_id}\n")
         f.write(f"Episodes: {cfg.eval_num_episodes}\n")
+        f.write(f"Sampling Mode: {sampling_mode}\n")
         f.write(f"Success Rate: {mean_success_rate * 100:.2f}% +/- {std_success_rate * 100:.2f}%\n")
         f.write(f"Average Return: {avg_return:.3f} +/- {std_return:.3f}\n")
         f.write(f"FPS: {final_fps:.1f}\n")
