@@ -62,6 +62,12 @@ hypotheses:
     motivation: "Tests whether the inexpensive inference-only intervention is viable before retraining."
     parent: H3
     priority: low
+  - id: H4
+    statement: "Mixing dataset and reflow endpoints restores action grounding while retaining enough straightening to improve Can success."
+    status: pending
+    motivation: "Pure reflow improved geometry but not official-scale reward, suggesting endpoint grounding rather than curvature is now the bottleneck."
+    parent: H1
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -271,7 +277,7 @@ experiments:
 
 outer_loop:
   cycle: 1
-  last_direction: "Stop pure reflow as a reward-improvement path; select one lightweight candidate that preserves data-action grounding while retaining the verified straightening effect."
+  last_direction: "Test one 50/50 mixed dataset/reflow endpoint pilot; stop without a probability sweep if its geometry or 20-episode rollout gate fails."
   last_reflection: "Official-scale Can evaluation gave 150/200 reflow versus 147/200 control at 10-step zero and 23/200 versus 24/200 random. Pure reflow preserves performance and improves geometry, but misses the preregistered +5 pp reward gate. H1 is supported for straightening and low-step preservation; H1b is refuted."
 
 workspace:
