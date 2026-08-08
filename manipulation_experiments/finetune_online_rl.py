@@ -33,6 +33,7 @@ from src.dexmg_env import VectorizedEnvWrapper, create_vectorized_env
 from src.flow_model import FlowMatchingPolicy
 from src.flow_model_config import FlowMatchingConfig
 from src.rollout_bookkeeping import build_rollout_zero_sampling_mask, prepare_invalid_step_mask
+from src.advantage_weighting import clipped_mirror_ratio_loss, ess_softmax_weights
 
 # ---- Multiprocessing start method (CUDA compat) ------------------------------
 try:
@@ -97,6 +98,8 @@ class FlowPPOConfig:
     trust_region_mode: Literal["ppo", "spo", "aspo"] = "ppo"
     clamp_logratio: Optional[float] = None
     cfm_loss_weight_from_t: str = "constant"
+    advantage_weighting: Literal["signed", "ess_softmax"] = "signed"
+    advantage_weight_ess_fraction: float = 0.5
     reset_cfm_invalid_mask_each_iteration: bool = False
     rollout_zero_fraction: float = 0.0
     rollout_tempered_fraction: float = 0.0
@@ -740,6 +743,11 @@ def main(cfg: FlowPPOConfig):
         logger.info(f"[Rank {rank}] Overriding exploration_noise_std to {cfg.exploration_noise_std} "
                     f"from base policy {getattr(actor, 'exploration_noise_std', None)}")
         actor.exploration_noise_std = cfg.exploration_noise_std
+    if cfg.advantage_weighting == "ess_softmax":
+        if cfg.loss_mode != "fpo":
+            raise ValueError("ess_softmax advantage weighting is only supported for FPO")
+        if cfg.trust_region_mode != "ppo":
+            raise ValueError("ess_softmax advantage weighting requires the PPO trust region")
 
     if cfg.sde_sigma is not None:
         logger.info(f"[Rank {rank}] Overriding sde_sigma to {cfg.sde_sigma} in actor config "
@@ -1399,7 +1407,17 @@ def main(cfg: FlowPPOConfig):
                         mb_advantages = (mb_advantages - mb_advantages.mean()) / (mb_advantages.std() + 1e-8)
 
                 # Policy loss
-                if cfg.trust_region_mode == "spo":
+                advantage_weight_temperature = torch.tensor(float("nan"), device=device)
+                advantage_weight_ess_fraction = torch.tensor(1.0, device=device)
+                if cfg.advantage_weighting == "ess_softmax":
+                    mirror_weights, advantage_weight_temperature, advantage_weight_ess_fraction = (
+                        ess_softmax_weights(mb_advantages, cfg.advantage_weight_ess_fraction)
+                    )
+                    clipfracs += [((ratio - 1.0).abs() > cfg.clip_coef).float().mean().item()]
+                    pg_loss = clipped_mirror_ratio_loss(
+                        ratio, mirror_weights, cfg.clip_coef
+                    )
+                elif cfg.trust_region_mode == "spo":
                     clipfracs += [0.0]
                     spo_obj = mb_advantages * ratio - mb_advantages.abs() / (2.0 * cfg.spo_clip_coef) * (ratio - 1.0) ** 2
                     pg_loss = (-spo_obj).mean()
@@ -1494,6 +1512,13 @@ def main(cfg: FlowPPOConfig):
                 "cfm/old_cfm_loss_hist": wandb.Histogram(old_cfm_loss.detach().cpu().numpy().flatten()),
                 "cfm/curr_cfm_loss_hist": wandb.Histogram(curr_cfm_loss.detach().cpu().numpy().flatten()),
             }
+            if cfg.advantage_weighting == "ess_softmax":
+                cfm_metrics.update({
+                    "cfm/advantage_weight_temperature": float(advantage_weight_temperature.item()),
+                    "cfm/advantage_weight_ess_fraction": float(advantage_weight_ess_fraction.item()),
+                    "cfm/advantage_weight_min": float(mirror_weights.min().item()),
+                    "cfm/advantage_weight_max": float(mirror_weights.max().item()),
+                })
         else:  # dppo
             cfm_metrics = {
                 "dppo/log_prob_chunk_mean": float(log_prob_chunk.mean().item()),
@@ -1536,6 +1561,11 @@ def main(cfg: FlowPPOConfig):
                 f" | total_loss: {float(loss):.4f}"
                 f" | valid_cfm: {valid_cfm_action_fraction:.2%}"
             )
+            if cfg.advantage_weighting == "ess_softmax":
+                msg += (
+                    f" | adv_tau: {float(advantage_weight_temperature):.4f}"
+                    f" | adv_ess: {float(advantage_weight_ess_fraction):.2%}"
+                )
             logger.info(colored(msg, "green"))
             if cfg.wandb_enable:
                 log_dict = {

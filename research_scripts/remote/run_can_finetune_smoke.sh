@@ -19,6 +19,8 @@ ROLLOUT_ZERO_FRACTION="${ROLLOUT_ZERO_FRACTION:-0.0}"
 ROLLOUT_TEMPERED_FRACTION="${ROLLOUT_TEMPERED_FRACTION:-0.0}"
 ROLLOUT_TEMPERED_SCALE="${ROLLOUT_TEMPERED_SCALE:-0.5}"
 GAE_LAMBDA="${GAE_LAMBDA:-0.99}"
+ADVANTAGE_WEIGHTING="${ADVANTAGE_WEIGHTING:-signed}"
+ADVANTAGE_WEIGHT_ESS_FRACTION="${ADVANTAGE_WEIGHT_ESS_FRACTION:-0.5}"
 MASTER_PORT="${MASTER_PORT:-29500}"
 SEED="${SEED:-0}"
 RUN_NAME="${RUN_NAME:-can_fpopp_smoke_seed${SEED}_$(timestamp)}"
@@ -51,6 +53,8 @@ torchrun --nproc_per_node=1 --master_port "$MASTER_PORT" finetune_online_rl.py \
   --exploration-noise-std None \
   --freeze-vision-encoder True \
   --gae-lambda "$GAE_LAMBDA" \
+  --advantage-weighting "$ADVANTAGE_WEIGHTING" \
+  --advantage-weight-ess-fraction "$ADVANTAGE_WEIGHT_ESS_FRACTION" \
   --n-action-samples "$N_ACTION_SAMPLES" \
   --n-action-steps 16 \
   --num-envs "$NUM_ENVS" \
