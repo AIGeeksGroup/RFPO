@@ -178,6 +178,12 @@ hypotheses:
     motivation: "H19 lowered value MSE but degraded rank and one gradient batch; DAE targets action effects directly instead of relying on absolute value calibration."
     parent: H2
     priority: high
+  - id: H22
+    statement: "Centered empirical-rank weights preserve GAE outcome ordering while improving first-step FPO++ gradient alignment."
+    status: active
+    motivation: "H21 found that official GAE already has 0.817 outcome Spearman correlation, while learned replacement advantages reverse ordering; a rank transform retains the useful signal and removes unreliable magnitude information."
+    parent: H2
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
