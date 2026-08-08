@@ -34,7 +34,7 @@ hypotheses:
     priority: high
   - id: H1
     statement: "Conditional reflow reduces policy trajectory curvature and preserves return when the Euler sampling steps are reduced."
-    status: screening_supported
+    status: evaluation_supported
     motivation: "Rectified Flow predicts straighter paths and lower numerical integration error after reflow."
     parent: null
     priority: high
@@ -66,11 +66,12 @@ experiments:
     can_baseline200_random_success: 0.14
     can_two_run_random_pooled_success: 0.1175
   best_value:
-    run: can_reflow_stage1_100_nfe4_zero_seed20260808
+    run: can_reflow_stage1_100_nfe10_zero_pooled_eval_seeds
     metric: success_rate
-    value: 0.75
-    matched_control: 0.70
-  total_runs: 29
+    value: 0.775
+    matched_control: 0.625
+    episodes_per_method: 40
+  total_runs: 37
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -181,11 +182,43 @@ experiments:
       metric: success_rate
       value: 0.05
       episodes: 20
+    - run: can_reflow_control100_nfe10_zero_seed20260809
+      metric: success_rate
+      value: 0.70
+      episodes: 20
+    - run: can_reflow_stage1_100_nfe10_zero_seed20260809
+      metric: success_rate
+      value: 0.85
+      episodes: 20
+    - run: can_reflow_control100_nfe10_random_seed20260809
+      metric: success_rate
+      value: 0.15
+      episodes: 20
+    - run: can_reflow_stage1_100_nfe10_random_seed20260809
+      metric: success_rate
+      value: 0.15
+      episodes: 20
+    - run: can_reflow_control100_nfe4_zero_seed20260809
+      metric: success_rate
+      value: 0.75
+      episodes: 20
+    - run: can_reflow_stage1_100_nfe4_zero_seed20260809
+      metric: success_rate
+      value: 0.70
+      episodes: 20
+    - run: can_reflow_control100_nfe4_random_seed20260809
+      metric: success_rate
+      value: 0.05
+      episodes: 20
+    - run: can_reflow_stage1_100_nfe4_random_seed20260809
+      metric: success_rate
+      value: 0.10
+      episodes: 20
 
 outer_loop:
   cycle: 1
-  last_direction: "Confirm the positive one-stage conditional reflow screen with one independent evaluation seed before extending training."
-  last_reflection: "H1 passed its geometry and first rollout gates: straightness error fell 22.9%, four-step endpoint MSE fell 27.8%, and four-step zero success improved from 14/20 to 15/20 without pooled random-success collapse. The rollout sample is small, so H1 remains screening-supported pending confirmation."
+  last_direction: "Run one matched 100-update control/reflow pair with an independent training seed before considering longer training or online FPO++ integration."
+  last_reflection: "Across two environment seeds, reflow improved 10-step zero success from 25/40 to 31/40, preserved four-step zero success at 29/40, and did not reduce pooled random success. H1 is supported for straightening and low-step preservation; stable reward improvement still requires an independent training seed."
 
 workspace:
   findings: "findings.md"

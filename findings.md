@@ -34,6 +34,13 @@ success pooled across the two step counts was 3/40 for both methods. These resul
 straightening and provide an initial task-level improvement signal, but the rollout sample is not yet
 large enough to establish a stable benchmark gain.
 
+An independent environment-seed evaluation narrowed this conclusion. Reflow again gained three
+10-step zero-sampling successes (17/20 versus 14/20), yielding 31/40 versus 25/40 pooled over two
+seeds. At four steps, however, the second seed reversed the one-success pilot advantage; the pooled
+result was tied at 29/40. Random success remained comparable at 8/80 versus 7/80. Conditional reflow
+therefore supports lower integration error and four-step performance preservation, while its apparent
+official-step reward gain still needs a second training seed.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -56,8 +63,8 @@ large enough to establish a stable benchmark gain.
 - Does conditional reflow preserve the multimodal exploration that gives flow policies their advantage?
 - Is curvature correlated with FPO ratio variance or gradient disagreement?
 - Should reflow be an offline post-training stage, an auxiliary online loss, or both?
-- Does the positive one-stage conditional-reflow rollout screen replicate under an independent evaluation seed?
+- Does the 10-step success gain replicate when the matched control and reflow students are trained with an independent seed?
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior screening is closed after two negative variants. Conditional reflow passed its geometry and first rollout screens and is awaiting one independent-seed confirmation before any larger experiment.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior screening is closed after two negative variants. Conditional reflow passed its geometry gate, preserved four-step success, and improved 10-step success across two environment seeds; one independent training seed is the next gate.
