@@ -92,7 +92,7 @@ hypotheses:
     priority: high
   - id: H8
     statement: "A minority of zero-source rollout environments supplies successful trajectories that improve the shared Gaussian-source Can policy."
-    status: pending
+    status: refuted
     motivation: "Can's zero-source policy succeeds far more often than its random-source policy, so mixed collection can add reward information without discarding Gaussian exploration."
     parent: null
     priority: high
@@ -111,7 +111,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 66
+  total_runs: 68
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -388,11 +388,31 @@ experiments:
       metric: success_rate
       value: 0.12
       episodes: 50
+    - run: can_mixedsource20_5iter_seed0_random_collection
+      metric: pooled_collection_success
+      value: 0.0708
+      successes: 34
+      episodes: 480
+      iterations: "2-5"
+    - run: can_mixedsource20_5iter_seed0_overall_collection
+      metric: pooled_collection_success
+      value: 0.2561
+      successes: 167
+      episodes: 652
+      iterations: "2-5"
+    - run: can_mixedsource20_5iter_seed0_zero_final
+      metric: success_rate
+      value: 0.84
+      episodes: 50
+    - run: can_mixedsource20_5iter_seed0_random_final
+      metric: success_rate
+      value: 0.12
+      episodes: 50
 
 outer_loop:
   cycle: 1
-  last_direction: "Test a fixed 20% zero-source and 80% Gaussian-source Can rollout mixture, judging improvement only on the Gaussian subset and standard final evaluations."
-  last_reflection: "Full-lambda GAE reduced pooled actor-update collection success from 8.77% to 6.64%, while final zero/random evaluation was 80%/12% versus 84%/10%. H7 is refuted: propagating existing sparse rewards farther does not create enough useful policy signal and adds estimator variance."
+  last_direction: "Replace the delta-zero exploitation source with a continuously overlapping tempered Gaussian source, while retaining official full-noise environments as the primary metric."
+  last_reflection: "A 20% zero-source mixture tripled successful trajectories but its held-out Gaussian subset fell from 8.77% to 7.08%; final zero/random remained 84%/12%. H8 is refuted because delta-zero successes did not transfer into a stable Gaussian collection gain."
 
 workspace:
   findings: "findings.md"

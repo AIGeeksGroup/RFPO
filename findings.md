@@ -81,6 +81,13 @@ evaluation was 80%/12% versus 84%/10%, and losses remained finite. Full-lambda G
 cause collapse, but its higher-variance Monte Carlo credit did not compensate for the scarcity of
 successful random-source trajectories. Estimator-only changes are not the next priority.
 
+A fixed 20% zero-source rollout subset tested whether the strong deterministic policy could supply
+reward information to the weak Gaussian policy. It increased actor-update successes from 53 to 167,
+while final zero/random evaluation remained 84%/12% versus 84%/10%. However, the separately measured
+Gaussian subset fell to 34/480 (7.08%) from the control's 53/604 (8.77%). Delta-zero exploitation can
+provide successful trajectories without collapse, but those trajectories did not improve the
+full-noise behavior distribution under the preregistered short-budget metric.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -95,6 +102,7 @@ successful random-source trajectories. Estimator-only changes are not the next p
 - Doubling CFM samples does not create more reward information; in this pilot it added compute while pooled early success fell by 1.17 points.
 - CFM invalid-step state must be reset between independent rollouts, but the resulting 2.3-point increase in valid samples by iteration 5 was not enough to improve Can reward materially.
 - Propagating the same sparse terminal rewards farther with lambda 1.0 reduced rather than improved early collection success; the bottleneck is reward-information acquisition, not lambda decay alone.
+- Zero-source collection tripled the number of successes without final-policy collapse, but the disjoint delta source did not transfer into better Gaussian-source collection; source overlap is now the key constraint.
 
 ## Lessons and Constraints
 
@@ -112,4 +120,4 @@ successful random-source trajectories. Estimator-only changes are not the next p
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased Monte Carlo sampling, validity-mask reset, and full-lambda GAE screening are closed. Pure conditional reflow is supported as a geometry and sampling-efficiency method but refuted as a five-point Can reward improvement. The next direction should increase the supply of useful successful trajectories while separately measuring random-source policy improvement, rather than only changing how existing sparse rewards are estimated.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased Monte Carlo sampling, validity-mask reset, full-lambda GAE, and delta-zero mixed rollout screening are closed. Pure conditional reflow is supported as a geometry and sampling-efficiency method but refuted as a five-point Can reward improvement. The next candidate should preserve the successful-trajectory supply of mixed collection while using a source with continuous overlap to the official Gaussian distribution.
