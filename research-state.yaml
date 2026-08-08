@@ -212,6 +212,12 @@ hypotheses:
     motivation: "Symmetric source evaluation can cancel odd endpoint variation while retaining even nonlinear corrections, potentially reducing inference variance without changing training or checkpoint weights."
     parent: null
     priority: high
+  - id: H27
+    statement: "Executing four rather than eight actions from each predicted Can chunk improves success by incorporating visual feedback more frequently."
+    status: active
+    motivation: "The released policy predicts 16 actions but executes eight open loop; shorter receding-horizon execution can correct grasp and placement errors before they accumulate without changing weights or source sampling."
+    parent: null
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -773,9 +779,9 @@ experiments:
       episodes: 50
 
 outer_loop:
-  cycle: 14
-  last_direction: "Select a new training-time hypothesis that is distinct from the closed source-mixture, CFM-estimator, optimizer-step, critic, interpolation, and inference-averaging routes."
-  last_reflection: "H26's 15-point 20-episode screen reversed to a 6-point loss on the locked 50-episode confirmation. Pooled over both seeds, zero and antithetic inference tied exactly at 52/70; source-symmetric endpoint averaging is not a stable benchmark improvement."
+  cycle: 15
+  last_direction: "Screen four-step receding-horizon execution against the official eight-action chunk on the released Can step-1000 checkpoint."
+  last_reflection: "H26's exact pooled tie closes source-symmetric inference averaging. H27 instead targets open-loop control error by increasing observation-feedback frequency while preserving checkpoint weights, zero-source inference, and the 10-step flow solver."
 
 workspace:
   findings: "findings.md"
