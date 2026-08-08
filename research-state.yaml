@@ -31,6 +31,14 @@ literature:
       title: "Robust Fine-Tuning of Zero-Shot Models"
       year: 2022
       relevance: "Motivates fixed weight-space interpolation between pretrained and finetuned policies to retain robustness while preserving adaptation."
+    - id: yu2020_pcgrad
+      title: "Gradient Surgery for Multi-Task Learning"
+      year: 2020
+      relevance: "Motivates coefficient-free projection when an RL gradient conflicts with a behavior-anchor gradient."
+    - id: schmitt2018_kickstarting
+      title: "Kickstarting Deep Reinforcement Learning"
+      year: 2018
+      relevance: "Motivates retaining a fixed pretrained teacher as an auxiliary behavior objective during RL."
   open_problems:
     - "FPO++ uses many Euler steps; it is unknown whether conditional reflow improves control return or only sampling efficiency."
     - "The relation between flow curvature, CFM ratio variance, and policy-update stability is not established."
@@ -217,6 +225,12 @@ hypotheses:
     status: refuted
     motivation: "The released policy predicts 16 actions but executes eight open loop; shorter receding-horizon execution can correct grasp and placement errors before they accumulate without changing weights or source sampling."
     parent: null
+    priority: high
+  - id: H28
+    statement: "Conflict projection against a frozen BC velocity-field gradient preserves initial Can behavior while retaining most useful FPO++ surrogate improvement."
+    status: active
+    motivation: "H18 and H23 show destructive gradient rotation that a smaller step does not fix; H25 shows post-hoc interpolation cannot recover an absent reward gain."
+    parent: H18
     priority: high
 
 experiments:
