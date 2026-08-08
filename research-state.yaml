@@ -114,6 +114,12 @@ hypotheses:
     motivation: "H8-H10 show that reward supply is abundant but guided-source transfer is invalid or ineffective; mirror weights prioritize the rare successful on-policy samples without source mismatch."
     parent: H2
     priority: high
+  - id: H12
+    statement: "The Can step-6000 base checkpoint provides substantially denser Gaussian-source successes than the official step-1000 initialization."
+    status: active
+    motivation: "Appendix D.4 reports 64.06% random success for a higher-quality Can base policy, which could provide a higher-signal small-budget method-screening regime."
+    parent: H0
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
