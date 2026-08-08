@@ -150,6 +150,12 @@ hypotheses:
     motivation: "Uniform MC8 spends equal estimator compute on chunks with very different policy-gradient coefficients; reallocating rather than increasing samples may improve information efficiency without changing total forward cost."
     parent: H2
     priority: high
+  - id: H18
+    statement: "Rolling back the first actor epoch that drives independent positive CFM ratios below 80% active preserves useful surrogate improvement while preventing FPO++ gradient rotation."
+    status: active
+    motivation: "H16 found that the official ten-epoch update leaves only 54.7% of held-out positive ratios active and rotates the held-out gradient to cosine 0.743; PPO clipping does not itself stop repeated-epoch drift."
+    parent: H2
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -603,8 +609,8 @@ experiments:
 
 outer_loop:
   cycle: 6
-  last_direction: "Move beyond fixed-draw Monte Carlo allocation after H17 failed its update-direction gate."
-  last_reflection: "H17 reduced gradient MSE by 32-36% in both batches but changed the average update direction too much. Along with H14, this closes fixed-budget CFM sampling tricks as an online reward-improvement route."
+  last_direction: "Audit held-out positive-ratio early stopping before changing the online actor update."
+  last_reflection: "H14 and H17 close fixed-budget CFM sampling tricks. H18 targets the separate repeated-epoch drift measured by H16 using a locked rollback rule rather than a fixed epoch-count sweep."
 
 workspace:
   findings: "findings.md"
