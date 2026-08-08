@@ -9,7 +9,7 @@ held-out direction across ten actor epochs without discarding most official surr
 ## Locked Method
 
 - Keep the official CFM ratio, chunk aggregation, normalized GAE, optimizer, actor learning rate,
-  minibatches, ten epochs, and `clip_coef=0.01` unchanged.
+  minibatches, ten epochs, and the established step-6000 audit `clip_coef=0.02` unchanged.
 - For each ratio `r`, use the Truly PPO paper's PPO-RB function
   `F_RB(r) = -alpha*r + (1+alpha)*(1 +/- epsilon)` outside the clip interval and `r` inside it.
 - Minimize `max(-A*r, -A*F_RB(r))`, exactly matching the paper's `min(A*r, A*F_RB(r))` objective.
