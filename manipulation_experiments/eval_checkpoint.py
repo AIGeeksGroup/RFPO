@@ -21,7 +21,10 @@ from safetensors.torch import load_file
 from termcolor import colored
 
 from src.dexmg_env import VectorizedEnvWrapper, create_vectorized_env
-from src.evaluation_overrides import validate_action_steps
+from src.evaluation_overrides import (
+    completed_environment_success_rates,
+    validate_action_steps,
+)
 from src.flow_model import FlowMatchingPolicy
 from src.flow_model_config import FlowMatchingConfig
 
@@ -304,9 +307,11 @@ def _run_rollouts(
     # Compute mean and std of successes_list across environments
     successes_per_env = [sum(successes_list[env_idx]) for env_idx in range(num_parallel_envs)]
     done_episodes_per_env = [sum(dones_list[env_idx]) for env_idx in range(num_parallel_envs)]
-    success_rates_per_env = [successes_per_env[env_idx] / done_episodes_per_env[env_idx] for env_idx in range(num_parallel_envs)]
-    mean_success_rate = np.mean(success_rates_per_env)
-    std_success_rate = np.std(success_rates_per_env)
+    success_rates_per_env = completed_environment_success_rates(
+        successes_per_env, done_episodes_per_env
+    )
+    mean_success_rate = np.mean(success_rates_per_env) if success_rates_per_env else 0.0
+    std_success_rate = np.std(success_rates_per_env) if success_rates_per_env else 0.0
 
     avg_episode_length = np.mean(all_episode_lengths) if all_episode_lengths else 0.0
     std_episode_length = np.std(all_episode_lengths) if all_episode_lengths else 0.0
