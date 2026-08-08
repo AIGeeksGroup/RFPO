@@ -55,6 +55,11 @@ from src.advantage_weighting import (
     ess_softmax_weights,
     normalize_advantages_from_moments,
 )
+from src.bc_anchor_pcgrad import (
+    gradient_cosine,
+    gradient_norm,
+    project_conflicting_gradient,
+)
 
 # ---- Multiprocessing start method (CUDA compat) ------------------------------
 try:
@@ -167,6 +172,10 @@ class FlowPPOConfig:
     rank_advantage_audit_iteration: int = 2
     rank_advantage_audit_chunks: int = 64
     rank_advantage_audit_output_json: Optional[str] = None
+    bc_anchor_pcgrad_audit: bool = False
+    bc_anchor_pcgrad_audit_iteration: int = 2
+    bc_anchor_pcgrad_audit_chunks: int = 64
+    bc_anchor_pcgrad_audit_output_json: Optional[str] = None
     rollout_zero_fraction: float = 0.0
     rollout_tempered_fraction: float = 0.0
     rollout_tempered_scale: float = 0.5
@@ -784,6 +793,18 @@ def main(cfg: FlowPPOConfig):
             raise ValueError("rank-advantage audit settings must be positive")
         if cfg.rank_advantage_audit_chunks % 2:
             raise ValueError("rank-advantage audit requires an even chunk count")
+    if cfg.bc_anchor_pcgrad_audit:
+        if cfg.loss_mode != "fpo" or not cfg.do_chunk_level_ppo:
+            raise ValueError("BC-anchor PCGrad audit requires chunk-level FPO")
+        if world_size != 1:
+            raise ValueError("BC-anchor PCGrad audit currently requires one process")
+        if min(
+            cfg.bc_anchor_pcgrad_audit_iteration,
+            cfg.bc_anchor_pcgrad_audit_chunks,
+        ) < 1:
+            raise ValueError("BC-anchor PCGrad audit settings must be positive")
+        if cfg.bc_anchor_pcgrad_audit_chunks % 2:
+            raise ValueError("BC-anchor PCGrad audit requires an even chunk count")
 
     # Run dir on all ranks (avoid races)
     run_start_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -1215,7 +1236,7 @@ def main(cfg: FlowPPOConfig):
         )
         return cfm_loss, cfm_loss_t, cfm_loss_eps
 
-    def replay_audit_gradient(
+    def replay_audit_objective(
         chunk_indices: torch.Tensor,
         chunk_weights: torch.Tensor,
         *,
@@ -1227,7 +1248,7 @@ def main(cfg: FlowPPOConfig):
         b_obs_images: dict[str, torch.Tensor],
         b_obs_state: torch.Tensor,
     ) -> tuple[torch.Tensor, torch.Tensor]:
-        """Compute a diagnostic chunk-level PPO gradient without populating .grad."""
+        """Build a fixed-variable diagnostic chunk-level PPO objective."""
         audit_actions = b_actions[chunk_indices].to(device)
         audit_old_losses = b_cfm_losses[chunk_indices].to(device)
         audit_times = b_cfm_loss_ts[chunk_indices].to(device)
@@ -1283,6 +1304,32 @@ def main(cfg: FlowPPOConfig):
         loss_unclipped = -weights * ratios
         loss_clipped = -weights * ratios.clamp(1 - cfg.clip_coef, 1 + cfg.clip_coef)
         audit_loss = torch.maximum(loss_unclipped, loss_clipped).mean()
+        return ratios, audit_loss
+
+    def replay_audit_gradient(
+        chunk_indices: torch.Tensor,
+        chunk_weights: torch.Tensor,
+        *,
+        b_actions: torch.Tensor,
+        b_cfm_losses: torch.Tensor,
+        b_cfm_loss_ts: torch.Tensor,
+        b_cfm_loss_epsilons: torch.Tensor,
+        b_cfm_value_invalid: torch.Tensor,
+        b_obs_images: dict[str, torch.Tensor],
+        b_obs_state: torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """Compute a diagnostic chunk-level PPO gradient without populating .grad."""
+        ratios, audit_loss = replay_audit_objective(
+            chunk_indices,
+            chunk_weights,
+            b_actions=b_actions,
+            b_cfm_losses=b_cfm_losses,
+            b_cfm_loss_ts=b_cfm_loss_ts,
+            b_cfm_loss_epsilons=b_cfm_loss_epsilons,
+            b_cfm_value_invalid=b_cfm_value_invalid,
+            b_obs_images=b_obs_images,
+            b_obs_state=b_obs_state,
+        )
         parameters = [parameter for parameter in actor_module.parameters() if parameter.requires_grad]
         gradients = torch.autograd.grad(audit_loss, parameters, allow_unused=True)
         vector = torch.cat(
@@ -1297,6 +1344,53 @@ def main(cfg: FlowPPOConfig):
         if not torch.isfinite(ratios).all() or not torch.isfinite(vector).all():
             raise RuntimeError("success replay audit produced non-finite ratios or gradients")
         return ratios.detach().cpu(), vector
+
+    def actor_velocity_field(
+        observation_conditioning: torch.Tensor,
+        query_points: torch.Tensor,
+        query_times: torch.Tensor,
+    ) -> torch.Tensor:
+        """Evaluate the actor velocity field at fixed normalized flow-space queries."""
+        time_embedding = actor_module.model.diffusion_step_encoder(query_times)
+        time_embedding = time_embedding.reshape(query_points.shape[0], -1)
+        network_output = actor_module.model(
+            query_points, time_embedding, observation_conditioning
+        )
+        network_output = actor_module.config.mlp_output_scale * network_output
+        if actor_module.config.transported_clip_value is not None:
+            network_output = network_output.clamp(
+                -actor_module.config.transported_clip_value,
+                actor_module.config.transported_clip_value,
+            )
+        if actor_module.config.flow_network_output_param == "u":
+            return network_output
+        return (query_points - network_output) / query_times.clamp_min(1e-5)
+
+    def autograd_list(loss: torch.Tensor) -> tuple[list[torch.Tensor], list[torch.Tensor | None]]:
+        parameters = [
+            parameter for parameter in actor_module.parameters() if parameter.requires_grad
+        ]
+        gradients = list(torch.autograd.grad(loss, parameters, allow_unused=True))
+        return parameters, gradients
+
+    @torch.no_grad()
+    def restore_parameters(
+        parameters: list[torch.Tensor], values: list[torch.Tensor]
+    ) -> None:
+        for parameter, value in zip(parameters, values, strict=True):
+            parameter.copy_(value)
+
+    @torch.no_grad()
+    def apply_virtual_actor_step(
+        parameters: list[torch.Tensor], gradients: list[torch.Tensor | None]
+    ) -> float:
+        norm = gradient_norm(gradients)
+        clip_scale = min(1.0, cfg.max_grad_norm / max(float(norm.item()), 1e-12))
+        step_scale = cfg.learning_rate_actor * clip_scale
+        for parameter, gradient in zip(parameters, gradients, strict=True):
+            if gradient is not None:
+                parameter.add_(gradient, alpha=-step_scale)
+        return step_scale
 
     @torch.no_grad()
     def direct_advantage_inputs(
@@ -2739,6 +2833,250 @@ def main(cfg: FlowPPOConfig):
                 json.dumps(stratified_result, sort_keys=True),
             )
             actor_module.train()
+
+        if (
+            cfg.bc_anchor_pcgrad_audit
+            and iteration == cfg.bc_anchor_pcgrad_audit_iteration
+        ):
+            valid_positive = (b_cfm_value_invalid.sum(dim=1) == 0) & (
+                b_advantages[:, 0] > 0
+            )
+            eligible_indices = torch.where(valid_positive)[0]
+            audit_count = cfg.bc_anchor_pcgrad_audit_chunks
+            if eligible_indices.numel() < audit_count:
+                raise RuntimeError(
+                    "BC-anchor PCGrad audit requires "
+                    f"{audit_count} positive fully valid chunks, found "
+                    f"{eligible_indices.numel()}"
+                )
+            selection_generator = torch.Generator().manual_seed(
+                cfg.seed + iteration * 4001
+            )
+            selected_indices = eligible_indices[
+                torch.randperm(
+                    eligible_indices.numel(), generator=selection_generator
+                )[:audit_count]
+            ]
+            audit_actions = b_actions[selected_indices]
+            audit_images = {
+                key: value[selected_indices] for key, value in b_obs_images.items()
+            }
+            audit_states = b_obs_state[selected_indices]
+            audit_invalid = b_cfm_value_invalid[selected_indices]
+            audit_weights = b_advantages[selected_indices, 0].float()
+            audit_times, audit_noises = sample_cfm_variables(
+                batch_size=audit_count,
+                num_samples=n_action_samples,
+                horizon=n_action_steps,
+                action_dim=action_dim,
+                mode="iid",
+                time_generator=torch.Generator(device=device).manual_seed(
+                    cfg.seed + 810_001
+                ),
+                noise_generator=torch.Generator(device=device).manual_seed(
+                    cfg.seed + 810_002
+                ),
+                device=device,
+                dtype=audit_actions.dtype,
+            )
+            behavior_obs = {
+                key: value[:, 0].to(device) for key, value in audit_images.items()
+            }
+            behavior_obs["observation.state"] = audit_states[:, 0].to(device)
+            behavior_obs["action"] = audit_actions.to(device)
+            actor_module.eval()
+            with torch.no_grad():
+                audit_old_losses, returned_times, returned_noises = get_cfm_values(
+                    actor_module,
+                    behavior_obs,
+                    n_action_samples,
+                    audit_times,
+                    audit_noises,
+                )
+            audit_old_losses = audit_old_losses.permute(1, 0, 2).cpu()
+            audit_times_stored = returned_times.permute(1, 0, 2).cpu()
+            audit_noises_stored = returned_noises.permute(1, 0, 2, 3).cpu()
+            local_indices = torch.arange(audit_count)
+            pcgrad_batch_size = audit_count // 2
+            batch_results = []
+
+            for audit_batch in range(2):
+                batch_slice = slice(
+                    audit_batch * pcgrad_batch_size,
+                    (audit_batch + 1) * pcgrad_batch_size,
+                )
+                batch_indices = local_indices[batch_slice]
+                batch_weights = audit_weights[batch_slice]
+                batch_observations = {
+                    key: value[batch_slice, 0].to(device)
+                    for key, value in audit_images.items()
+                }
+                batch_observations["observation.state"] = audit_states[
+                    batch_slice, 0
+                ].to(device)
+                normalized_observations = actor_module.normalize_inputs(
+                    copy.deepcopy(batch_observations)
+                )
+                with torch.no_grad():
+                    observation_conditioning = actor_module.model.encode_observations(
+                        normalized_observations
+                    ).detach()
+                query_generator = torch.Generator(device=device).manual_seed(
+                    cfg.seed + 820_000 + audit_batch
+                )
+                query_points = torch.randn(
+                    (pcgrad_batch_size, n_action_steps, action_dim),
+                    generator=query_generator,
+                    device=device,
+                    dtype=audit_actions.dtype,
+                )
+                query_times = torch.rand(
+                    (pcgrad_batch_size, 1, 1),
+                    generator=query_generator,
+                    device=device,
+                    dtype=audit_actions.dtype,
+                )
+                with torch.no_grad():
+                    anchor_velocity = actor_velocity_field(
+                        observation_conditioning, query_points, query_times
+                    ).detach()
+
+                def fixed_rl_objective() -> torch.Tensor:
+                    _, objective = replay_audit_objective(
+                        batch_indices,
+                        batch_weights,
+                        b_actions=audit_actions,
+                        b_cfm_losses=audit_old_losses,
+                        b_cfm_loss_ts=audit_times_stored,
+                        b_cfm_loss_epsilons=audit_noises_stored,
+                        b_cfm_value_invalid=audit_invalid,
+                        b_obs_images=audit_images,
+                        b_obs_state=audit_states,
+                    )
+                    return objective
+
+                def anchor_objective() -> torch.Tensor:
+                    velocity = actor_velocity_field(
+                        observation_conditioning, query_points, query_times
+                    )
+                    return (velocity - anchor_velocity).square().mean()
+
+                parameters = [
+                    parameter
+                    for parameter in actor_module.parameters()
+                    if parameter.requires_grad
+                ]
+                base_values = [parameter.detach().clone() for parameter in parameters]
+
+                first_loss = fixed_rl_objective()
+                _, first_gradient = autograd_list(first_loss)
+                first_step_scale = apply_virtual_actor_step(parameters, first_gradient)
+                common_values = [parameter.detach().clone() for parameter in parameters]
+
+                pre_rl_loss = fixed_rl_objective()
+                _, pre_rl_gradient = autograd_list(pre_rl_loss)
+                pre_bc_loss = anchor_objective()
+                _, pre_bc_gradient = autograd_list(pre_bc_loss)
+                candidate_gradient, gradient_dot_value, conflict = (
+                    project_conflicting_gradient(pre_rl_gradient, pre_bc_gradient)
+                )
+                rl_bc_cosine = float(
+                    gradient_cosine(pre_rl_gradient, pre_bc_gradient).item()
+                )
+                rl_norm = float(gradient_norm(pre_rl_gradient).item())
+                bc_norm = float(gradient_norm(pre_bc_gradient).item())
+                candidate_norm = float(gradient_norm(candidate_gradient).item())
+
+                control_step_scale = apply_virtual_actor_step(
+                    parameters, pre_rl_gradient
+                )
+                control_rl_loss = fixed_rl_objective()
+                control_bc_loss = anchor_objective()
+                _, control_post_gradient = autograd_list(fixed_rl_objective())
+                control_gradient_cosine = float(
+                    gradient_cosine(control_post_gradient, pre_rl_gradient).item()
+                )
+
+                restore_parameters(parameters, common_values)
+                candidate_step_scale = apply_virtual_actor_step(
+                    parameters, candidate_gradient
+                )
+                candidate_rl_loss = fixed_rl_objective()
+                candidate_bc_loss = anchor_objective()
+                _, candidate_post_gradient = autograd_list(fixed_rl_objective())
+                candidate_gradient_cosine = float(
+                    gradient_cosine(candidate_post_gradient, pre_rl_gradient).item()
+                )
+                restore_parameters(parameters, base_values)
+
+                batch_results.append(
+                    {
+                        "batch": audit_batch,
+                        "num_chunks": pcgrad_batch_size,
+                        "first_step_scale": first_step_scale,
+                        "control_step_scale": control_step_scale,
+                        "candidate_step_scale": candidate_step_scale,
+                        "pre_rl_gradient_norm": rl_norm,
+                        "pre_bc_gradient_norm": bc_norm,
+                        "candidate_gradient_norm": candidate_norm,
+                        "candidate_gradient_norm_retention": candidate_norm
+                        / max(rl_norm, 1e-12),
+                        "rl_bc_gradient_dot": float(gradient_dot_value.item()),
+                        "rl_bc_gradient_cosine": rl_bc_cosine,
+                        "projection_active": conflict,
+                        "pre_rl_loss": float(pre_rl_loss.detach().item()),
+                        "control_rl_loss": float(control_rl_loss.detach().item()),
+                        "candidate_rl_loss": float(candidate_rl_loss.detach().item()),
+                        "control_rl_surrogate_gain": float(
+                            (pre_rl_loss - control_rl_loss).detach().item()
+                        ),
+                        "candidate_rl_surrogate_gain": float(
+                            (pre_rl_loss - candidate_rl_loss).detach().item()
+                        ),
+                        "pre_bc_velocity_mse": float(pre_bc_loss.detach().item()),
+                        "control_bc_velocity_mse": float(
+                            control_bc_loss.detach().item()
+                        ),
+                        "candidate_bc_velocity_mse": float(
+                            candidate_bc_loss.detach().item()
+                        ),
+                        "control_bc_mse_increase": float(
+                            (control_bc_loss - pre_bc_loss).detach().item()
+                        ),
+                        "candidate_bc_mse_increase": float(
+                            (candidate_bc_loss - pre_bc_loss).detach().item()
+                        ),
+                        "control_post_rl_gradient_cosine": control_gradient_cosine,
+                        "candidate_post_rl_gradient_cosine": candidate_gradient_cosine,
+                    }
+                )
+
+            audit_result = {
+                "iteration": iteration,
+                "num_eligible_chunks": int(eligible_indices.numel()),
+                "num_chunks_audited": audit_count,
+                "num_batches": 2,
+                "cfm_samples": n_action_samples,
+                "virtual_learning_rate": cfg.learning_rate_actor,
+                "max_grad_norm": cfg.max_grad_norm,
+                "batches": batch_results,
+            }
+            audit_output_path = (
+                Path(cfg.bc_anchor_pcgrad_audit_output_json)
+                if cfg.bc_anchor_pcgrad_audit_output_json is not None
+                else run_dir / "bc_anchor_pcgrad_audit.json"
+            )
+            audit_output_path.parent.mkdir(parents=True, exist_ok=True)
+            audit_output_path.write_text(
+                json.dumps(audit_result, indent=2, sort_keys=True) + "\n"
+            )
+            logger.info(
+                "BC-anchor PCGrad audit: %s",
+                json.dumps(audit_result, sort_keys=True),
+            )
+            actor_module.train()
+            if cfg.freeze_vision_encoder:
+                actor_module.model.vision_encoder.eval()
 
         # ---------- Policy update ----------
         b_inds = np.arange(local_batch_size)

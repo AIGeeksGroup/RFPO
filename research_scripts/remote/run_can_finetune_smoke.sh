@@ -53,6 +53,10 @@ DIRECT_ADVANTAGE_CENTER_BATCH_SIZE="${DIRECT_ADVANTAGE_CENTER_BATCH_SIZE:-16}"
 RANK_ADVANTAGE_AUDIT="${RANK_ADVANTAGE_AUDIT:-False}"
 RANK_ADVANTAGE_AUDIT_ITERATION="${RANK_ADVANTAGE_AUDIT_ITERATION:-2}"
 RANK_ADVANTAGE_AUDIT_CHUNKS="${RANK_ADVANTAGE_AUDIT_CHUNKS:-64}"
+BC_ANCHOR_PCGRAD_AUDIT="${BC_ANCHOR_PCGRAD_AUDIT:-False}"
+BC_ANCHOR_PCGRAD_AUDIT_ITERATION="${BC_ANCHOR_PCGRAD_AUDIT_ITERATION:-2}"
+BC_ANCHOR_PCGRAD_AUDIT_CHUNKS="${BC_ANCHOR_PCGRAD_AUDIT_CHUNKS:-64}"
+BC_ANCHOR_PCGRAD_AUDIT_OUTPUT_JSON="${BC_ANCHOR_PCGRAD_AUDIT_OUTPUT_JSON:-None}"
 MASTER_PORT="${MASTER_PORT:-29500}"
 SEED="${SEED:-0}"
 RUN_NAME="${RUN_NAME:-can_fpopp_smoke_seed${SEED}_$(timestamp)}"
@@ -117,6 +121,10 @@ torchrun --nproc_per_node=1 --master_port "$MASTER_PORT" finetune_online_rl.py \
   --rank-advantage-audit "$RANK_ADVANTAGE_AUDIT" \
   --rank-advantage-audit-iteration "$RANK_ADVANTAGE_AUDIT_ITERATION" \
   --rank-advantage-audit-chunks "$RANK_ADVANTAGE_AUDIT_CHUNKS" \
+  --bc-anchor-pcgrad-audit "$BC_ANCHOR_PCGRAD_AUDIT" \
+  --bc-anchor-pcgrad-audit-iteration "$BC_ANCHOR_PCGRAD_AUDIT_ITERATION" \
+  --bc-anchor-pcgrad-audit-chunks "$BC_ANCHOR_PCGRAD_AUDIT_CHUNKS" \
+  --bc-anchor-pcgrad-audit-output-json "$BC_ANCHOR_PCGRAD_AUDIT_OUTPUT_JSON" \
   --n-action-samples "$N_ACTION_SAMPLES" \
   --learning-rate-actor "$LEARNING_RATE_ACTOR" \
   --n-action-steps 16 \
