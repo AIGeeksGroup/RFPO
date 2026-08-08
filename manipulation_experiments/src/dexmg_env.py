@@ -160,6 +160,7 @@ class RobosuiteGymWrapper:
             "horizon": self.horizon,
             "renderer": "mujoco",
             "render_gpu_device_id": self.render_gpu_device_id,
+            "seed": seed,
         }
 
         os.environ["MUJOCO_EGL_DEVICE_ID"] = str(self.render_gpu_device_id)

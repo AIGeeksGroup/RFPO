@@ -24,7 +24,7 @@ case "$CONDITION" in
 esac
 
 CHECKPOINT_ROOT="${CHECKPOINT_ROOT:-$PROJECT_ROOT/manipulation_experiments/downloaded_checkpoints}"
-RUN_NAME="${RUN_NAME:-can_step6000_ratio_rollback_${CONDITION}_seed20260907}"
+RUN_NAME="${RUN_NAME:-can_step6000_ratio_rollback_${CONDITION}_seeded_seed20260907}"
 OUTPUT_DIR="${OUTPUT_DIR:-$RUNTIME_ROOT/results/$RUN_NAME}"
 LOG_PATH="${LOG_PATH:-$RUNTIME_ROOT/logs/$RUN_NAME.log}"
 

@@ -1228,6 +1228,10 @@ def main(cfg: FlowPPOConfig):
         video_key="agentview",
         debug=cfg.debug,
         expected_image_keys=cfg.image_observation_keys,
+        seeds=[
+            cfg.seed + global_env_offset + env_id
+            for env_id in range(num_envs_per_process)
+        ],
     )
     # Init action buffers
     actor_module.init_action_buffers(num_envs_per_process)
