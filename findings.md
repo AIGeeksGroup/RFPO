@@ -184,6 +184,12 @@ batches, missing both the 0.60 absolute and +0.20 relative gates. Its surrogate 
 but retained only about 30% of control. Simple global step-size reduction therefore sacrifices
 progress without resolving update-direction drift.
 
+Accumulating all eight minibatch gradients before one Adam step per epoch did not resolve the drift
+either. It retained 78.1% and 50.1% of the control surrogate gains, but epoch-10 gradient cosine
+improved only in one batch (`0.291` to `0.409`) and worsened in the other (`0.280` to `0.212`). The
+pooled active positive ratio fell from 0.537 to 0.424. Minibatch update order contributes at most
+part of the instability; simply reducing optimizer-step frequency is not a viable improvement.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -214,6 +220,7 @@ progress without resolving update-direction drift.
 - Continuous-action Monte Carlo centering does not transfer DAE's discrete-action benefit here; it reversed an already strong GAE outcome ranking and both audited gradient directions.
 - Exact GAE rank preservation is insufficient: discarding advantage magnitudes reduced outcome-gradient cosine in both formal batches.
 - A fourfold actor learning-rate reduction scales down surrogate improvement but does not materially preserve held-out gradient direction; global Adam step size is not the dominant failure mechanism.
+- Full-batch gradient accumulation retains surrogate progress but does not consistently preserve held-out direction, so sequential minibatch Adam steps are not the sole source of rotation.
 
 ## Lessons and Constraints
 
@@ -228,8 +235,8 @@ progress without resolving update-direction drift.
 - Is curvature correlated with FPO ratio variance or gradient disagreement?
 - Should reflow be an offline post-training stage, an auxiliary online loss, or both?
 - Which reward-aware FPO++ mechanism can improve Can success without relying on unstable BC-source exploration changes?
-- Does accumulating all eight minibatch gradients before each actor optimizer step reduce order-dependent gradient rotation without changing the FPO++ objective?
+- Can sign-stratified minibatches reduce composition-dependent advantage-normalization variance without changing total sample weights?
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, rank-based GAE weighting, and fixed lower actor learning rate are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The verified step-6000 Can policy supplies a high-signal short-budget screen; the next direction retains the official objective but accumulates all minibatch gradients before each actor step to test order-dependent drift.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, rank-based GAE weighting, fixed lower actor learning rate, and full-batch gradient accumulation are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The verified step-6000 Can policy supplies a high-signal short-budget screen; the next direction is a weight-preserving stratified minibatch schedule that targets composition variance rather than optimizer-step size.

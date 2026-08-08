@@ -192,7 +192,7 @@ hypotheses:
     priority: high
   - id: H24
     statement: "Accumulating all eight minibatch gradients before each actor optimizer step preserves the initially aligned GAE gradient through ten FPO++ epochs."
-    status: active
+    status: refuted
     motivation: "H23 reduced surrogate movement without preserving gradient direction, suggesting that sequential Adam steps on shuffled minibatches, rather than global learning rate alone, drive the update path away from the pre-update gradient."
     parent: H2
     priority: high
@@ -713,11 +713,21 @@ experiments:
       audited_chunks: 64
       eligible_chunks: 177
       actor_learning_rate: 0.0000025
+    - run: can_step6000_fullbatchaccum8_16_osmesa_seed20260822
+      metric: epoch10_pooled_active_positive_ratio
+      value: 0.42383
+      batch0_gradient_cosine: 0.40900
+      batch1_gradient_cosine: 0.21164
+      batch0_surrogate_gain: 0.01226
+      batch1_surrogate_gain: 0.01147
+      audited_chunks: 64
+      eligible_chunks: 162
+      gradient_accumulation_steps: 8
 
 outer_loop:
-  cycle: 10
-  last_direction: "Audit one accumulated actor optimizer step per epoch so all eight minibatches contribute before Adam changes the policy."
-  last_reflection: "H23 reduced surrogate movement to about 30% of control but left held-out gradient rotation essentially unchanged. Global learning-rate scaling is not the missing trust region; minibatch-order path dependence is the next narrow mechanism to test."
+  cycle: 11
+  last_direction: "Investigate sign-stratified minibatches that keep positive/negative GAE composition representative without changing total sample weights."
+  last_reflection: "H24 retained surrogate gains but improved only one held-out batch and reduced the active positive ratio. Aggregating minibatches is insufficient; composition-dependent advantage normalization remains a narrower, testable source of update disagreement."
 
 workspace:
   findings: "findings.md"
