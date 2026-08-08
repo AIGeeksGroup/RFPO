@@ -286,7 +286,7 @@ hypotheses:
     priority: high
   - id: H36
     statement: "Replacing FPO++ flat clipping with paper-default PPO-RB rollback preserves the pre-update held-out gradient direction across ten actor epochs without sacrificing most surrogate progress."
-    status: proposed
+    status: refuted
     motivation: "H18 isolates severe repeated-epoch ratio drift and gradient rotation, while H23-H24 show that smaller steps and full-batch accumulation do not fix it. Rollback adds inward pressure exactly when improving CFM ratios cross the existing bound while preserving the on-policy gradient."
     parent: H18
     priority: high
@@ -305,7 +305,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 112
+  total_runs: 114
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -942,11 +942,29 @@ experiments:
       balanced_episodes_per_env: true
       pooled_success_gain: 0.05
       random_success_count_gain: 1
+    - run: can_step6000_ratio_rollback_control_seeded_seed20260907
+      metric: epoch10_heldout_gradient_cosine
+      values: [0.4536283, 0.4633113]
+      positive_active_fractions: [0.2578125, 0.2460938]
+      surrogate_gains: [0.0207873, 0.0382239]
+      positive_chunks: 85
+      paired_preupdate: true
+    - run: can_step6000_ratio_rollback_rollback_seeded_seed20260907
+      metric: epoch10_heldout_gradient_cosine
+      values: [0.4305399, 0.5706614]
+      cosine_gains: [-0.0230884, 0.1073502]
+      positive_active_fractions: [0.4414062, 0.3984375]
+      active_fraction_gains: [0.1835938, 0.1523438]
+      surrogate_gains: [0.0074788, 0.0111168]
+      surrogate_gain_retention: [0.3597766, 0.2908326]
+      rollback_active_fraction: 0.6642188
+      positive_chunks: 85
+      paired_preupdate: true
 
 outer_loop:
   cycle: 23
-  last_direction: "Audit H36 paper-default PPO-RB on the repeated FPO++ update path; run no reward experiment unless both held-out replicas pass the locked mechanism gates."
-  last_reflection: "H21-H22-H35 retain official GAE, H18 locates harmful rotation after optimization begins, and H23-H24 rule out simple step-size and accumulation fixes. PPO-RB is selected because it changes only improving out-of-bound gradients and is compatible with FPO++ CFM ratios without inventing a flow-policy KL."
+  last_direction: "H36 PPO-RB is closed without reward training; select a genuinely distinct H37 rather than tuning rollback."
+  last_reflection: "Rollback retained substantially more active positive ratios, but one held-out gradient direction worsened and surrogate progress fell below 36% of control in both batches. Boundary activity alone is not a sufficient update-quality target."
 
 workspace:
   findings: "findings.md"

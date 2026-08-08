@@ -242,6 +242,14 @@ and 10/20. The candidate improved pooled success by 2/40 without deterministic d
 random gain was only 1/20 rather than the locked 2/20 required for confirmation. This is suggestive,
 not benchmark-improvement evidence.
 
+Paper-default PPO-RB ratio rollback also failed before reward integration. The corrected paired audit
+matched all pre-update held-out statistics exactly and used 85 positive chunks. Rollback increased
+epoch-10 active positive ratios from 25.8%/24.6% to 44.1%/39.8%, but gradient cosine changed from
+0.454/0.463 to 0.431/0.571, failing the required gain in one batch. More decisively, surrogate gains
+retained only 36.0% and 29.1% of control, below the locked 50% gate in both batches. A 66.42% rollback
+activity rate confirms that the mechanism was active rather than vacuous; it exerted too much inward
+pressure to preserve useful progress.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -286,6 +294,7 @@ not benchmark-improvement evidence.
 - Coordinate-wise robust aggregation can preserve global gradient scale while deleting task-relevant cross-coordinate structure; closeness to the mean is not evidence of improved outcome alignment.
 - At the step-6000 checkpoint, official GAE gets the broad outcome sign right on more than 93% of labeled chunks; further sign filtering is inactive and does not improve gradient alignment.
 - Balanced per-environment accounting rescued H30 from invalid censoring, but zero-endpoint PCGrad's +1/20 random and +2/40 pooled gains remain below the preregistered confirmation threshold.
+- PPO-RB demonstrates that retaining more unclipped positive ratios does not by itself preserve the useful update: its strong boundary activity traded away roughly two thirds of surrogate progress and improved held-out direction in only one batch.
 
 ## Lessons and Constraints
 
@@ -307,4 +316,4 @@ not benchmark-improvement evidence.
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, rank-based GAE weighting, terminal-sign filtering, fixed lower actor learning rate, full-batch gradient accumulation, BC/FPO++ midpoint interpolation, explicit Gaussian-bridge distillation, antithetic endpoint averaging, shorter receding-horizon execution, temporally correlated Gaussian inference, advantage-sign gradient surgery, temporal per-timestep clipping, and coordinate-wise median gradient aggregation are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The next candidate must preserve the useful initial GAE signal while changing the subsequent update path.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, rank-based GAE weighting, terminal-sign filtering, fixed lower actor learning rate, full-batch gradient accumulation, BC/FPO++ midpoint interpolation, explicit Gaussian-bridge distillation, antithetic endpoint averaging, shorter receding-horizon execution, temporally correlated Gaussian inference, advantage-sign gradient surgery, temporal per-timestep clipping, coordinate-wise median gradient aggregation, and PPO-RB ratio rollback are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The next candidate must preserve useful surrogate progress while improving both held-out update directions, rather than optimizing clipping activity alone.
