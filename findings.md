@@ -213,6 +213,12 @@ The intervention preserves every single-time `N(0,I)` marginal but changes the e
 source distribution; the resulting persistence suppresses useful replanning and adaptation. H31 is
 closed without a confirmation run or correlation sweep.
 
+Advantage-sign conflict projection also failed before online integration. On two fixed 32-chunk
+batches, positive- versus negative-GAE gradient cosine was -0.0052 and +0.0549. Projection was active
+only in the first batch, where it changed outcome-reference cosine from 0.94806 to 0.94797; in the
+second batch the candidate was identical to control at 0.73389. The negative branch does not
+materially cancel the positive branch, so sign-level PCGrad cannot address the observed actor drift.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -252,6 +258,7 @@ closed without a confirmation run or correlation sweep.
 - Smooth action chunks are not intrinsically better control: H31 reduced adjacent chunk change by 68% but collapsed balanced random-source success from 65% to 0%.
 - Matching each source marginal is insufficient for inference compatibility; the policy also depends on the episode-level joint source process created by repeated replanning.
 - Small asynchronous screens must use equal per-environment episode quotas because successful Can episodes terminate earlier than failures.
+- Positive- and negative-GAE FPO++ gradients are nearly orthogonal or weakly aligned on the audited step-6000 batches; their direct cancellation is not the source of unstable policy updates.
 
 ## Lessons and Constraints
 
@@ -273,4 +280,4 @@ closed without a confirmation run or correlation sweep.
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, rank-based GAE weighting, fixed lower actor learning rate, full-batch gradient accumulation, BC/FPO++ midpoint interpolation, explicit Gaussian-bridge distillation, antithetic endpoint averaging, shorter receding-horizon execution, and temporally correlated Gaussian inference are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The next candidate must introduce a distinct training signal rather than another inference or estimator variant.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, rank-based GAE weighting, fixed lower actor learning rate, full-batch gradient accumulation, BC/FPO++ midpoint interpolation, explicit Gaussian-bridge distillation, antithetic endpoint averaging, shorter receding-horizon execution, temporally correlated Gaussian inference, and advantage-sign gradient surgery are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The next candidate must introduce a distinct training signal rather than another inference or estimator variant.

@@ -1,0 +1,50 @@
+{
+  "batches": [
+    {
+      "batch": 0,
+      "candidate_control_cosine": 1.002634882926941,
+      "candidate_control_norm_ratio": 1.0026116371154785,
+      "candidate_gradient_norm": 13.051167488098145,
+      "candidate_reference_cosine": 0.9479743242263794,
+      "candidate_reference_cosine_gain": -8.755922317504883e-05,
+      "control_decomposition_cosine": 1.002638578414917,
+      "control_gradient_norm": 13.017170906066895,
+      "control_reference_cosine": 0.9480618834495544,
+      "negative_chunks": 20,
+      "negative_gradient_norm": 8.90673828125,
+      "num_chunks": 32,
+      "positive_chunks": 12,
+      "positive_gradient_norm": 9.53753662109375,
+      "positive_negative_gradient_cosine": -0.005241937004029751,
+      "positive_negative_gradient_dot": -0.4452935457229614,
+      "projection_active": true,
+      "reference_gradient_norm": 2.8217756748199463
+    },
+    {
+      "batch": 1,
+      "candidate_control_cosine": 1.002813458442688,
+      "candidate_control_norm_ratio": 1.0,
+      "candidate_gradient_norm": 14.528383255004883,
+      "candidate_reference_cosine": 0.7338865399360657,
+      "candidate_reference_cosine_gain": 0.0,
+      "control_decomposition_cosine": 1.002813458442688,
+      "control_gradient_norm": 14.528383255004883,
+      "control_reference_cosine": 0.7338865399360657,
+      "negative_chunks": 20,
+      "negative_gradient_norm": 7.392112731933594,
+      "num_chunks": 32,
+      "positive_chunks": 12,
+      "positive_gradient_norm": 12.111281394958496,
+      "positive_negative_gradient_cosine": 0.054874125868082047,
+      "positive_negative_gradient_dot": 4.912768363952637,
+      "projection_active": false,
+      "reference_gradient_norm": 3.6924192905426025
+    }
+  ],
+  "cfm_samples": 8,
+  "iteration": 2,
+  "min_per_sign": 8,
+  "num_batches": 2,
+  "num_chunks_audited": 64,
+  "num_eligible_chunks": 208
+}

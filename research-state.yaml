@@ -252,7 +252,7 @@ hypotheses:
     priority: high
   - id: H32
     statement: "Projecting only the negative-advantage FPO++ gradient when it conflicts with the positive-advantage gradient improves alignment to observed Monte Carlo outcomes without discarding negative on-policy information."
-    status: active
+    status: refuted
     motivation: "FPO++ uses positive and negative advantages to move CFM losses in opposite directions; sparse-reward minibatches may let the abundant negative branch cancel useful positive updates. Sign-conflict projection preserves both branches except for their directly opposing component and requires no loss coefficient."
     parent: H2
     priority: high
@@ -271,7 +271,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 110
+  total_runs: 111
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -858,11 +858,20 @@ experiments:
       episodes: 20
       balanced_episodes_per_env: true
       source_temporal_correlation: 0.9
+    - run: can_step6000_advantage_sign_pcgrad_audit_osmesa_seed20260902
+      metric: outcome_reference_cosine_gain
+      values: [-0.0000876, 0.0]
+      control_reference_cosines: [0.9480619, 0.7338865]
+      candidate_reference_cosines: [0.9479743, 0.7338865]
+      positive_negative_gradient_cosines: [-0.0052419, 0.0548741]
+      projection_active: [true, false]
+      audited_chunks: 64
+      eligible_chunks: 208
 
 outer_loop:
-  cycle: 18
-  last_direction: "Audit advantage-sign conflict projection as H32 before any online training; require replicated improvement to an observed-outcome gradient reference."
-  last_reflection: "H31 passed every marginal and action-coherence gate but collapsed balanced random-source Can success from 13/20 to 0/20. Preserving one-step Gaussian marginals does not preserve the episode-level source process required by the policy; strong temporal smoothness suppresses adaptive replanning rather than improving control."
+  cycle: 19
+  last_direction: "Stop advantage-sign gradient surgery and select a distinct H33 mechanism; do not implement online H32 training."
+  last_reflection: "H32 found negligible sign conflict in one fixed batch and no conflict in the other. Projection changed outcome-reference cosine by -0.00009 and 0.00000, so negative-GAE cancellation is not the update bottleneck and advantage-sign gradient surgery is closed."
 
 workspace:
   findings: "findings.md"
