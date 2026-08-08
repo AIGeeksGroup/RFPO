@@ -244,6 +244,12 @@ hypotheses:
     motivation: "H29 passed both fixed-batch mechanism gates while retaining over 72% of surrogate progress and removing over 66% of deterministic endpoint drift."
     parent: H29
     priority: high
+  - id: H31
+    statement: "A marginal-preserving AR(1) Gaussian flow source improves random-source Can success by reducing action-chunk boundary jitter without source distribution shift."
+    status: active
+    motivation: "Independent Gaussian sources change abruptly at every replan; temporal correlation preserves the exact N(0,I) marginal unlike the failed previous-action prior, while making neighboring action chunks more coherent."
+    parent: null
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -828,8 +834,8 @@ experiments:
 
 outer_loop:
   cycle: 17
-  last_direction: "Redesign the next reward screen so the matched control has measurable headroom before testing another training intervention."
-  last_reflection: "H29's narrow endpoint projection passed its mechanism audit, but H30's four-update control saturated both locked 20-episode modes at 20/20. The strict +2 random gate became mathematically impossible, so H30 stopped before candidate evaluation. This does not establish reward harm; it shows that the current short step-6000 screen is no longer discriminative."
+  last_direction: "Test marginal-preserving temporal correlation of the Gaussian flow source as a distinct inference mechanism on the non-saturated released step-6000 random-source benchmark."
+  last_reflection: "H29's narrow endpoint projection passed its mechanism audit, but H30's trained control saturated the short screen. H31 returns to the released step-6000 checkpoint and targets cross-chunk source jitter: unlike WarmPrior, AR(1) correlation preserves the standard-Gaussian marginal and needs no retraining."
 
 workspace:
   findings: "findings.md"
