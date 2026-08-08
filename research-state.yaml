@@ -302,7 +302,7 @@ hypotheses:
     priority: high
   - id: H38
     statement: "Five explicit-midpoint flow steps reduce Can action-endpoint integration error relative to ten Euler steps at the same ten network evaluations, without reducing source-conditioned diversity."
-    status: proposed
+    status: supported
     motivation: "Conditional reflow established that endpoint discretization error is measurable, while recent update-path and robust-gradient interventions failed. A second-order solver is a distinct inference-only route that can improve endpoint fidelity without training or extra NFE."
     parent: H1
     priority: high
@@ -321,7 +321,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 115
+  total_runs: 116
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -986,11 +986,19 @@ experiments:
       solver_converged: [true, true]
       audited_chunks: 192
       eligible_chunks: 250
+    - run: can_step1000_equal_nfe_midpoint_audit_seed20260909
+      metric: candidate_to_control_endpoint_mse_ratio
+      gaussian_value: 0.0145651
+      zero_value: 0.0112373
+      diversity_retention: [1.0034819, 1.0025159]
+      control_nfe: 10
+      candidate_nfe: 10
+      audited_observations: 128
 
 outer_loop:
   cycle: 25
-  last_direction: "Audit H38 midpoint-5 against Euler-10 at equal NFE on fixed Gaussian and zero-source endpoints before any rollout."
-  last_reflection: "Full-vector GMOM preserved the mean but did not improve outcome alignment. Before paying for another optimizer mechanism, test whether a second-order sampler can exploit the already-measured flow integration error through a cheap inference-only intervention."
+  last_direction: "Run the separately locked balanced H38 reward screen for midpoint-5 versus Euler-10 under zero and Gaussian sources."
+  last_reflection: "H38 passed all fixed-endpoint gates with roughly 98.5-98.9% lower error at equal measured NFE and unchanged diversity. Test whether this numerical fidelity transfers to closed-loop Can success before any solver variants or larger evaluation."
 
 workspace:
   findings: "findings.md"

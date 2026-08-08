@@ -1,0 +1,88 @@
+[ViT Init] Inferred image size from dataset: 84x84
+/home/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/miniconda3/envs/fpo_manipulation/lib/python3.10/contextlib.py:103: FutureWarning: `torch.backends.cuda.sdp_kernel()` is deprecated. In the future, this context manager will be removed. Please see `torch.nn.attention.sdpa_kernel()` for the new context manager, with updated signature.
+  self.gen = func(*args, **kwds)
+{
+  "checkpoint_path": "/mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/downloaded_checkpoints/95j3noe4_step_1000",
+  "dataset": "ankile/robomimic-mh-can-image",
+  "equal_nfe_candidate": {
+    "candidate": {
+      "method": "midpoint",
+      "steps": 5
+    },
+    "control": {
+      "method": "euler",
+      "steps": 10
+    },
+    "endpoint_metrics": {
+      "gaussian": {
+        "candidate_endpoint_mse": 1.4462524404734722e-06,
+        "candidate_to_control_mse_ratio": 0.014565077731762384,
+        "control_endpoint_mse": 9.929589577950537e-05
+      },
+      "zero": {
+        "candidate_endpoint_mse": 7.293720329926145e-07,
+        "candidate_to_control_mse_ratio": 0.011237312180866866,
+        "control_endpoint_mse": 6.490627129096538e-05
+      }
+    },
+    "finite_actions": {
+      "candidate": true,
+      "control": true,
+      "reference": true
+    },
+    "gaussian_diversity": {
+      "candidate": {
+        "mean_element_std": 0.26225751638412476,
+        "mean_pairwise_distance": 5.360934734344482
+      },
+      "candidate_to_control_ratio": {
+        "mean_element_std": 1.0034818928798517,
+        "mean_pairwise_distance": 1.0025158542780535
+      },
+      "control": {
+        "mean_element_std": 0.26134753227233887,
+        "mean_pairwise_distance": 5.3474812507629395
+      }
+    },
+    "observed_network_evaluations": {
+      "candidate": [
+        10
+      ],
+      "control": [
+        10
+      ],
+      "reference": [
+        64
+      ]
+    },
+    "reference": {
+      "method": "euler",
+      "steps": 64
+    }
+  },
+  "metrics": {
+    "10": {
+      "endpoint_mse": 9.929589577950537e-05,
+      "path_length_ratio": 1.0106536746025085,
+      "straightness_error": 0.0028894286369904876
+    },
+    "64": {
+      "endpoint_mse": 0.0,
+      "path_length_ratio": 1.0106428861618042,
+      "straightness_error": 0.0029475316405296326
+    }
+  },
+  "num_pairs": 128,
+  "reference_steps": 64,
+  "seed": 20260909,
+  "source_conditioned_diversity": {
+    "10": {
+      "mean_element_std": 0.26134753227233887,
+      "mean_pairwise_distance": 5.3474812507629395
+    },
+    "64": {
+      "mean_element_std": 0.2620786130428314,
+      "mean_pairwise_distance": 5.3577680587768555
+    }
+  }
+}

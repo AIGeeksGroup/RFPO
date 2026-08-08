@@ -257,6 +257,13 @@ from 0.741 to 0.736 and from 0.688 to 0.678. H34 and H37 together distinguish tw
 coordinate-wise median damages joint structure, while geometric median preserves that structure but
 finds no superior robust center in the four FPO++ block gradients.
 
+Equal-NFE explicit midpoint integration passed a strong fixed-endpoint audit. Against source-matched
+Euler-64 actions on 128 Can observations, midpoint-5 reduced endpoint MSE by 98.54% for Gaussian
+sources and 98.88% for zero sources relative to Euler-10. Mean element standard deviation and mean
+pairwise action distance were retained at 100.35% and 100.25%, all outputs were finite, and forward
+hooks measured exactly ten velocity evaluations for both methods. This establishes a large numerical
+fidelity gain at unchanged network-evaluation cost, but closed-loop reward remains untested.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -303,6 +310,7 @@ finds no superior robust center in the four FPO++ block gradients.
 - Balanced per-environment accounting rescued H30 from invalid censoring, but zero-endpoint PCGrad's +1/20 random and +2/40 pooled gains remain below the preregistered confirmation threshold.
 - PPO-RB demonstrates that retaining more unclipped positive ratios does not by itself preserve the useful update: its strong boundary activity traded away roughly two thirds of surrogate progress and improved held-out direction in only one batch.
 - Robust microbatch aggregation is closed at this scale: coordinate median damages useful cross-coordinate structure, while full-vector GMOM stays near the ordinary mean and slightly worsens outcome alignment in both replicas.
+- A second-order sampler can exploit the existing flow field without retraining: midpoint-5 nearly matches the Euler-64 endpoint at the same NFE as Euler-10 and preserves Gaussian-source diversity. Reward transfer must still be established independently.
 
 ## Lessons and Constraints
 
@@ -324,4 +332,4 @@ finds no superior robust center in the four FPO++ block gradients.
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, rank-based GAE weighting, terminal-sign filtering, fixed lower actor learning rate, full-batch gradient accumulation, BC/FPO++ midpoint interpolation, explicit Gaussian-bridge distillation, antithetic endpoint averaging, shorter receding-horizon execution, temporally correlated Gaussian inference, advantage-sign gradient surgery, temporal per-timestep clipping, coordinate-wise median and geometric-median gradient aggregation, and PPO-RB ratio rollback are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The next candidate must change how useful gradients are estimated or applied, rather than robustly re-aggregating the same microbatches or optimizing clipping activity alone.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, rank-based GAE weighting, terminal-sign filtering, fixed lower actor learning rate, full-batch gradient accumulation, BC/FPO++ midpoint interpolation, explicit Gaussian-bridge distillation, antithetic endpoint averaging, shorter receding-horizon execution, temporally correlated Gaussian inference, advantage-sign gradient surgery, temporal per-timestep clipping, coordinate-wise median and geometric-median gradient aggregation, and PPO-RB ratio rollback are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. Equal-NFE midpoint sampling is the active reward-screen candidate after passing all fixed-endpoint gates.
