@@ -171,6 +171,12 @@ four-sample centered DAE head achieved -0.041. Its actor-gradient cosine was neg
 fell only 2.96% against the 20% gate. Learned replacement advantages are therefore stopped; the
 useful signal to preserve is GAE ordering, not a new action-effect predictor.
 
+A centered empirical-rank transform then preserved GAE ordering exactly but still reduced actor
+gradient alignment. On two formal 32-chunk batches, control cosine was 0.855 and 0.887; rank-weight
+cosine fell to 0.815 and 0.618. The transform's positive 16-chunk smoke did not survive the locked
+seed and sample size. GAE magnitudes therefore contain useful information alongside their strong
+ordering, and advantage replacement or nonlinear reweighting is no longer the next route.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -199,6 +205,7 @@ useful signal to preserve is GAE ordering, not a new action-effect predictor.
 - Positive active-ratio fraction does not reliably diagnose gradient quality: it remained 85.5% after one epoch while one held-out gradient had rotated to cosine 0.263. Actor early stopping is closed without threshold tuning.
 - Lower value MSE does not imply a better policy gradient: the discounted-success critic improved calibration while degrading value ranking and one batch's outcome-reference gradient alignment.
 - Continuous-action Monte Carlo centering does not transfer DAE's discrete-action benefit here; it reversed an already strong GAE outcome ranking and both audited gradient directions.
+- Exact GAE rank preservation is insufficient: discarding advantage magnitudes reduced outcome-gradient cosine in both formal batches.
 
 ## Lessons and Constraints
 
@@ -213,8 +220,8 @@ useful signal to preserve is GAE ordering, not a new action-effect predictor.
 - Is curvature correlated with FPO ratio variance or gradient disagreement?
 - Should reflow be an offline post-training stage, an auxiliary online loss, or both?
 - Which reward-aware FPO++ mechanism can improve Can success without relying on unstable BC-source exploration changes?
-- Can a deterministic rank-preserving transform retain GAE's strong return ordering while reducing magnitude-driven actor-gradient distortion?
+- Can a smaller actor parameter step preserve the well-aligned pre-update GAE gradient through the first optimizer epoch?
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, and continuous-action DAE are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The verified step-6000 Can policy supplies a high-signal short-budget screen; the next direction must preserve GAE's strong advantage ranking while improving the first-step gradient signal.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, and rank-based GAE weighting are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The verified step-6000 Can policy supplies a high-signal short-budget screen; the next direction retains official GAE and constrains the actor parameter step that follows it.

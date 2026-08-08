@@ -180,7 +180,7 @@ hypotheses:
     priority: high
   - id: H22
     statement: "Centered empirical-rank weights preserve GAE outcome ordering while improving first-step FPO++ gradient alignment."
-    status: active
+    status: refuted
     motivation: "H21 found that official GAE already has 0.817 outcome Spearman correlation, while learned replacement advantages reverse ordering; a rank transform retains the useful signal and removes unreliable magnitude information."
     parent: H2
     priority: high
@@ -199,7 +199,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 95
+  total_runs: 96
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -671,11 +671,21 @@ experiments:
       training_loss_relative_change: -0.02960
       audited_chunks: 64
       rank_targets: 129
+    - run: can_step6000_rankadv_audit_osmesa_formal_seed20260820
+      metric: batch_gradient_cosine_gain
+      value: -0.03961
+      batch0_control_cosine: 0.85488
+      batch0_candidate_cosine: 0.81527
+      batch1_gradient_cosine_gain: -0.26927
+      batch1_control_cosine: 0.88728
+      batch1_candidate_cosine: 0.61801
+      audited_chunks: 64
+      eligible_chunks: 124
 
 outer_loop:
-  cycle: 8
-  last_direction: "Preserve the official GAE ordering and audit a deterministic rank-based weight transform before any online integration."
-  last_reflection: "H21 reversed a strong control ranking and both actor gradients. Learned replacement advantages are stopped; the next candidate must retain GAE ordering and only change the influence of unreliable magnitudes."
+  cycle: 9
+  last_direction: "Retain official GAE and audit a fixed fourfold lower actor learning rate against first-epoch gradient rotation."
+  last_reflection: "H21 and H22 show that both GAE ordering and magnitude carry useful signal before the update. H18 shows that the official first optimizer epoch can still rotate that signal severely, motivating a smaller parameter step rather than another weight transform."
 
 workspace:
   findings: "findings.md"

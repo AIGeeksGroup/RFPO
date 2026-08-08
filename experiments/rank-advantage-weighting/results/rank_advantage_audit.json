@@ -1,0 +1,26 @@
+{
+  "batches": [
+    {
+      "batch": 0,
+      "candidate_cosine_gain": -0.03961026668548584,
+      "candidate_gradient_cosine_to_reference": 0.8152707815170288,
+      "control_gradient_cosine_to_reference": 0.8548810482025146,
+      "num_chunks": 32,
+      "reference_gradient_norm": 4.043035507202148
+    },
+    {
+      "batch": 1,
+      "candidate_cosine_gain": -0.26926785707473755,
+      "candidate_gradient_cosine_to_reference": 0.6180140972137451,
+      "control_gradient_cosine_to_reference": 0.8872819542884827,
+      "num_chunks": 32,
+      "reference_gradient_norm": 2.6309053897857666
+    }
+  ],
+  "candidate_weight_mean": -6.729556467632847e-09,
+  "candidate_weight_std": 0.5820252299308777,
+  "control_candidate_spearman": 1.0000000000000002,
+  "iteration": 2,
+  "num_eligible_chunks": 124,
+  "num_gradient_chunks_audited": 64
+}
