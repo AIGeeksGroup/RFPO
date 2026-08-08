@@ -23,13 +23,12 @@ literature:
     - "FPO++ uses many Euler steps; it is unknown whether conditional reflow improves control return or only sampling efficiency."
     - "The relation between flow curvature, CFM ratio variance, and policy-update stability is not established."
   evidence_gaps:
-    - "Final Go2 official-seed metrics have not yet been extracted."
     - "Reflow has not yet been tested in online flow-policy optimization on these benchmarks."
 
 hypotheses:
   - id: H0
     statement: "The official Go2 and Can baselines reproduce the authors' learning trends and final metrics within a predeclared tolerance."
-    status: active
+    status: supported
     motivation: "Algorithm improvements are uninterpretable until the released baseline is validated."
     parent: null
     priority: high
@@ -47,7 +46,7 @@ hypotheses:
     priority: medium
   - id: H3
     statement: "A recent-action WarmPrior improves random-sampling success and FPO++ fine-tuning efficiency on chunked manipulation tasks."
-    status: active
+    status: refuted
     motivation: "A temporally grounded source can straighten conditional flows while centering exploration near plausible actions."
     parent: null
     priority: high
@@ -67,7 +66,7 @@ experiments:
     can_baseline200_random_success: 0.14
     can_two_run_random_pooled_success: 0.1175
   best_value: null
-  total_runs: 13
+  total_runs: 21
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -118,11 +117,39 @@ experiments:
       metric: success_rate
       value: 0.0
       episodes: 20
+    - run: go2_official_seed42_train_final
+      metric: mean_reward
+      value: 40.619747
+      iterations: 1500
+    - run: go2_official_seed42_zero_final
+      metric: mean_reward
+      value: 41.529404
+      episodes: 10
+    - run: go2_official_seed42_random_final
+      metric: mean_reward
+      value: 40.523373
+      episodes: 10
+    - run: can_h3b_gaussian_zero
+      metric: success_rate
+      value: 0.70
+      episodes: 20
+    - run: can_h3b_gaussian_random
+      metric: success_rate
+      value: 0.0
+      episodes: 20
+    - run: can_h3b_previous_action_zero
+      metric: success_rate
+      value: 0.0
+      episodes: 20
+    - run: can_h3b_previous_action_random
+      metric: success_rate
+      value: 0.0
+      episodes: 20
 
 outer_loop:
   cycle: 1
-  last_direction: "Baseline infrastructure and representative released-checkpoint reproduction."
-  last_reflection: "Inference-only WP-Past is refuted on Can. Test a short matched BC continuation with the altered source; retain reflow as the independent next direction."
+  last_direction: "Stop WarmPrior after matched training-time adaptation fails; begin one-stage conditional reflow."
+  last_reflection: "H0 is supported on Can and Go2. Both inference-only and short training-time WP-Past fail on Can, so H3 is refuted at the screening budget. H1 is now the highest-priority improvement hypothesis."
 
 workspace:
   findings: "findings.md"
