@@ -15,11 +15,15 @@ literature:
       title: "Flow Straight and Fast: Learning to Generate and Transfer Data with Rectified Flow"
       year: 2022
       relevance: "Motivates reflow to straighten conditional noise-to-action trajectories."
+    - id: kang2026_warmprior
+      title: "WarmPrior: Straightening Flow-Matching Policies with Temporal Priors"
+      year: 2026
+      relevance: "Motivates training the source distribution around the previous executed action chunk."
   open_problems:
     - "FPO++ uses many Euler steps; it is unknown whether conditional reflow improves control return or only sampling efficiency."
     - "The relation between flow curvature, CFM ratio variance, and policy-update stability is not established."
   evidence_gaps:
-    - "Official baseline reproduction on H200 is not yet measured."
+    - "Final Go2 official-seed metrics have not yet been extracted."
     - "Reflow has not yet been tested in online flow-policy optimization on these benchmarks."
 
 hypotheses:
@@ -43,10 +47,16 @@ hypotheses:
     priority: medium
   - id: H3
     statement: "A recent-action WarmPrior improves random-sampling success and FPO++ fine-tuning efficiency on chunked manipulation tasks."
-    status: pending
+    status: active
     motivation: "A temporally grounded source can straighten conditional flows while centering exploration near plausible actions."
     parent: null
     priority: high
+  - id: H3a
+    statement: "A previous-action source can improve the released Gaussian-trained checkpoint without behavior-cloning adaptation."
+    status: refuted
+    motivation: "Tests whether the inexpensive inference-only intervention is viable before retraining."
+    parent: H3
+    priority: low
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -57,7 +67,7 @@ experiments:
     can_baseline200_random_success: 0.14
     can_two_run_random_pooled_success: 0.1175
   best_value: null
-  total_runs: 9
+  total_runs: 13
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -92,11 +102,27 @@ experiments:
     - run: can_fpopp_one_update_seed0
       metric: completed_updates
       value: 1
+    - run: can_h3a_gaussian_zero
+      metric: success_rate
+      value: 0.85
+      episodes: 20
+    - run: can_h3a_gaussian_random
+      metric: success_rate
+      value: 0.10
+      episodes: 20
+    - run: can_h3a_previous_action_zero
+      metric: success_rate
+      value: 0.0
+      episodes: 20
+    - run: can_h3a_previous_action_random
+      metric: success_rate
+      value: 0.0
+      episodes: 20
 
 outer_loop:
   cycle: 1
   last_direction: "Baseline infrastructure and representative released-checkpoint reproduction."
-  last_reflection: "Can checkpoint behavior reproduces and both training pipelines pass. Proceed to matched improvement pilots while the official Go2 seed completes."
+  last_reflection: "Inference-only WP-Past is refuted on Can. Test a short matched BC continuation with the altered source; retain reflow as the independent next direction."
 
 workspace:
   findings: "findings.md"

@@ -16,18 +16,26 @@ The Isaac Go2 training pipeline also passed a 64-environment, 5-iteration smoke 
 
 A 256-environment, 50-iteration Go2 validation then completed with episode length increasing from 17.3 to 905.8 and value loss decreasing from 0.0252 to 0.0121. The official 4096-environment, 1500-iteration seed is running. Separately, one official-budget Can FPO++ update completed from the released checkpoint, including collection, policy/value updates, checkpointing, and both evaluation modes. Its 20-episode post-update scores are treated only as pipeline evidence.
 
+An exploratory inference-only WP-Past intervention failed decisively on Can. Under a matched seed,
+the Gaussian source achieved 17/20 zero-sampling and 2/20 random-sampling successes, while replacing
+the source prefix with the previous action chunk produced 0/20 in both modes. This is expected input-
+distribution shift for a model trained exclusively on Gaussian sources. It rules out the inexpensive
+checkpoint-only intervention, not the published method, which changes the source during BC training.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
 - The transferable mechanism from arXiv:2209.03003 is recursive reflow using model-induced endpoint coupling.
 - A reflow method that only improves inference speed is still useful, but it must not be presented as an RL performance gain.
 - WarmPrior (arXiv:2605.13959) offers a more direct reward-improvement hypothesis for chunked manipulation: center the flow source on recent actions and retain residual Gaussian noise for exploration.
+- WarmPrior cannot be grafted onto a Gaussian-trained FPO checkpoint at inference time; training-time source adaptation is necessary on Can.
 
 ## Lessons and Constraints
 
 - Reproduce released baselines before changing objectives.
 - Use short validation runs before full 1500-iteration or multi-seed jobs.
 - Stop a candidate when it degrades the primary metric beyond seed noise or fails to improve its claimed mechanism.
+- Keep inference-only warm starts separate from faithful WarmPrior training in claims and experiment labels.
 
 ## Open Questions
 
