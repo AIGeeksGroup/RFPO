@@ -39,6 +39,7 @@ from src.stratified_mc_audit import (
     advantage_stratified_sample_counts,
     gradient_estimator_metrics,
 )
+from src.heldout_ratio_early_stop import select_epoch_before_ratio_violation
 from src.advantage_weighting import (
     clipped_mirror_ratio_loss,
     ess_softmax_weights,
@@ -132,6 +133,11 @@ class FlowPPOConfig:
     advantage_stratified_mc_audit_low_samples: int = 4
     advantage_stratified_mc_audit_high_samples: int = 12
     advantage_stratified_mc_audit_output_json: Optional[str] = None
+    heldout_ratio_early_stop_audit: bool = False
+    heldout_ratio_early_stop_audit_iteration: int = 2
+    heldout_ratio_early_stop_audit_chunks: int = 64
+    heldout_ratio_early_stop_threshold: float = 0.8
+    heldout_ratio_early_stop_audit_output_json: Optional[str] = None
     rollout_zero_fraction: float = 0.0
     rollout_tempered_fraction: float = 0.0
     rollout_tempered_scale: float = 0.5
@@ -671,6 +677,20 @@ def main(cfg: FlowPPOConfig):
             <= cfg.advantage_stratified_mc_audit_high_samples
         ):
             raise ValueError("reference MC count must exceed the high allocation")
+    if cfg.heldout_ratio_early_stop_audit:
+        if cfg.loss_mode != "fpo" or not cfg.do_chunk_level_ppo:
+            raise ValueError("held-out ratio early-stop audit requires chunk-level FPO")
+        if world_size != 1:
+            raise ValueError("held-out ratio early-stop audit currently requires one process")
+        if min(
+            cfg.heldout_ratio_early_stop_audit_iteration,
+            cfg.heldout_ratio_early_stop_audit_chunks,
+        ) < 1:
+            raise ValueError("held-out ratio early-stop audit settings must be positive")
+        if cfg.heldout_ratio_early_stop_audit_chunks % 2:
+            raise ValueError("held-out ratio early-stop audit requires an even chunk count")
+        if not 0.0 < cfg.heldout_ratio_early_stop_threshold <= 1.0:
+            raise ValueError("held-out ratio early-stop threshold must be in (0, 1]")
 
     # Run dir on all ranks (avoid races)
     run_start_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -1718,6 +1738,123 @@ def main(cfg: FlowPPOConfig):
                 heldout_pre_ratios.std(unbiased=False).item(),
             )
 
+        early_stop_audit_tensors = None
+        early_stop_pre_gradients = None
+        early_stop_pre_surrogates = None
+        early_stop_epoch_results = []
+        early_stop_positive_chunks_available = None
+        if (
+            cfg.heldout_ratio_early_stop_audit
+            and iteration == cfg.heldout_ratio_early_stop_audit_iteration
+        ):
+            fully_valid_chunk_mask = b_cfm_value_invalid.sum(dim=1) == 0
+            early_stop_positive_indices = torch.where(
+                (b_advantages[:, 0] > 0) & fully_valid_chunk_mask
+            )[0]
+            early_stop_positive_chunks_available = int(
+                early_stop_positive_indices.numel()
+            )
+            if (
+                early_stop_positive_indices.numel()
+                < cfg.heldout_ratio_early_stop_audit_chunks
+            ):
+                raise RuntimeError(
+                    "held-out ratio early-stop audit requires "
+                    f"{cfg.heldout_ratio_early_stop_audit_chunks} positive valid chunks, "
+                    f"found {early_stop_positive_indices.numel()}"
+                )
+            early_stop_generator = torch.Generator().manual_seed(
+                cfg.seed + iteration * 4013
+            )
+            early_stop_indices = early_stop_positive_indices[
+                torch.randperm(
+                    early_stop_positive_indices.numel(),
+                    generator=early_stop_generator,
+                )[: cfg.heldout_ratio_early_stop_audit_chunks]
+            ]
+            early_stop_weights = b_advantages[early_stop_indices, 0].float()
+            early_stop_actions = b_actions[early_stop_indices]
+            early_stop_images = {
+                key: value[early_stop_indices] for key, value in b_obs_images.items()
+            }
+            early_stop_states = b_obs_state[early_stop_indices]
+            early_stop_invalid = b_cfm_value_invalid[early_stop_indices]
+            audit_count = early_stop_indices.numel()
+            early_stop_times, early_stop_noises = sample_cfm_variables(
+                batch_size=audit_count,
+                num_samples=n_action_samples,
+                horizon=n_action_steps,
+                action_dim=action_dim,
+                mode="iid",
+                time_generator=torch.Generator(device=device).manual_seed(
+                    cfg.seed + 525_242
+                ),
+                noise_generator=torch.Generator(device=device).manual_seed(
+                    cfg.seed + 525_243
+                ),
+                device=device,
+                dtype=early_stop_actions.dtype,
+            )
+            early_stop_obs = {
+                key: value[:, 0].to(device) for key, value in early_stop_images.items()
+            }
+            early_stop_obs["observation.state"] = early_stop_states[:, 0].to(device)
+            early_stop_obs["action"] = early_stop_actions.to(device)
+            actor_module.eval()
+            with torch.no_grad():
+                early_stop_losses, returned_times, returned_noises = get_cfm_values(
+                    actor_module,
+                    early_stop_obs,
+                    n_action_samples,
+                    early_stop_times,
+                    early_stop_noises,
+                )
+            early_stop_losses = early_stop_losses.permute(1, 0, 2).cpu()
+            early_stop_times_stored = returned_times.permute(1, 0, 2).cpu()
+            early_stop_noises_stored = returned_noises.permute(1, 0, 2, 3).cpu()
+            early_stop_local_indices = torch.arange(audit_count)
+            early_stop_audit_tensors = (
+                early_stop_local_indices,
+                early_stop_weights,
+                early_stop_actions,
+                early_stop_losses,
+                early_stop_times_stored,
+                early_stop_noises_stored,
+                early_stop_invalid,
+                early_stop_images,
+                early_stop_states,
+            )
+            batch_size = audit_count // 2
+            early_stop_pre_gradients = []
+            early_stop_pre_surrogates = []
+            for audit_batch in range(2):
+                batch_slice = slice(
+                    audit_batch * batch_size, (audit_batch + 1) * batch_size
+                )
+                batch_indices = early_stop_local_indices[batch_slice]
+                batch_weights = early_stop_weights[batch_slice]
+                pre_ratios, pre_gradient = replay_audit_gradient(
+                    batch_indices,
+                    batch_weights,
+                    b_actions=early_stop_actions,
+                    b_cfm_losses=early_stop_losses,
+                    b_cfm_loss_ts=early_stop_times_stored,
+                    b_cfm_loss_epsilons=early_stop_noises_stored,
+                    b_cfm_value_invalid=early_stop_invalid,
+                    b_obs_images=early_stop_images,
+                    b_obs_state=early_stop_states,
+                )
+                early_stop_pre_gradients.append(pre_gradient)
+                early_stop_pre_surrogates.append(
+                    float((batch_weights[:, None] * pre_ratios).mean().item())
+                )
+            logger.info(
+                "Held-out ratio early-stop audit prepared: chunks=%d positive_available=%d",
+                audit_count,
+                early_stop_positive_chunks_available,
+            )
+            actor_module.train()
+
         if (
             cfg.advantage_stratified_mc_audit
             and iteration == cfg.advantage_stratified_mc_audit_iteration
@@ -2094,8 +2231,114 @@ def main(cfg: FlowPPOConfig):
                 optimizer_actor.zero_grad(set_to_none=True)
                 optimizer_critic.zero_grad(set_to_none=True)
 
+            if early_stop_audit_tensors is not None:
+                (
+                    early_stop_local_indices,
+                    early_stop_weights,
+                    early_stop_actions,
+                    early_stop_losses,
+                    early_stop_times_stored,
+                    early_stop_noises_stored,
+                    early_stop_invalid,
+                    early_stop_images,
+                    early_stop_states,
+                ) = early_stop_audit_tensors
+                actor_module.eval()
+                epoch_batch_results = []
+                epoch_ratios = []
+                audit_batch_size = early_stop_local_indices.numel() // 2
+                for audit_batch in range(2):
+                    batch_slice = slice(
+                        audit_batch * audit_batch_size,
+                        (audit_batch + 1) * audit_batch_size,
+                    )
+                    batch_indices = early_stop_local_indices[batch_slice]
+                    batch_weights = early_stop_weights[batch_slice]
+                    post_ratios, post_gradient = replay_audit_gradient(
+                        batch_indices,
+                        batch_weights,
+                        b_actions=early_stop_actions,
+                        b_cfm_losses=early_stop_losses,
+                        b_cfm_loss_ts=early_stop_times_stored,
+                        b_cfm_loss_epsilons=early_stop_noises_stored,
+                        b_cfm_value_invalid=early_stop_invalid,
+                        b_obs_images=early_stop_images,
+                        b_obs_state=early_stop_states,
+                    )
+                    surrogate = float(
+                        (batch_weights[:, None] * post_ratios).mean().item()
+                    )
+                    gradient_cosine = torch.nn.functional.cosine_similarity(
+                        early_stop_pre_gradients[audit_batch].unsqueeze(0),
+                        post_gradient.unsqueeze(0),
+                        dim=1,
+                    ).item()
+                    epoch_batch_results.append(
+                        {
+                            "batch": audit_batch,
+                            "active_positive_ratio_fraction": float(
+                                (post_ratios <= 1 + cfg.clip_coef).float().mean().item()
+                            ),
+                            "gradient_cosine_to_preupdate": gradient_cosine,
+                            "gradient_norm": float(post_gradient.norm().item()),
+                            "ratio_mean": float(post_ratios.mean().item()),
+                            "surrogate": surrogate,
+                            "surrogate_gain": (
+                                surrogate
+                                - early_stop_pre_surrogates[audit_batch]
+                            ),
+                        }
+                    )
+                    epoch_ratios.append(post_ratios)
+                pooled_ratios = torch.cat(epoch_ratios)
+                early_stop_epoch_results.append(
+                    {
+                        "epoch": epoch + 1,
+                        "pooled_active_positive_ratio_fraction": float(
+                            (pooled_ratios <= 1 + cfg.clip_coef).float().mean().item()
+                        ),
+                        "batches": epoch_batch_results,
+                    }
+                )
+                actor_module.train()
+                if cfg.freeze_vision_encoder:
+                    actor_module.model.vision_encoder.eval()
+
             if early_stop:
                 break
+
+        if early_stop_audit_tensors is not None:
+            active_fractions = [
+                result["pooled_active_positive_ratio_fraction"]
+                for result in early_stop_epoch_results
+            ]
+            selected_epoch = select_epoch_before_ratio_violation(
+                active_fractions,
+                cfg.heldout_ratio_early_stop_threshold,
+            )
+            early_stop_result = {
+                "iteration": iteration,
+                "num_positive_chunks_available": early_stop_positive_chunks_available,
+                "num_chunks_audited": int(early_stop_audit_tensors[0].numel()),
+                "num_batches": 2,
+                "cfm_samples": n_action_samples,
+                "active_ratio_threshold": cfg.heldout_ratio_early_stop_threshold,
+                "selected_epoch": selected_epoch,
+                "epochs": early_stop_epoch_results,
+            }
+            early_stop_output_path = (
+                Path(cfg.heldout_ratio_early_stop_audit_output_json)
+                if cfg.heldout_ratio_early_stop_audit_output_json is not None
+                else run_dir / "heldout_ratio_early_stop_audit.json"
+            )
+            early_stop_output_path.parent.mkdir(parents=True, exist_ok=True)
+            early_stop_output_path.write_text(
+                json.dumps(early_stop_result, indent=2, sort_keys=True) + "\n"
+            )
+            logger.info(
+                "Held-out ratio early-stop audit: %s",
+                json.dumps(early_stop_result, sort_keys=True),
+            )
 
         if replay_audit_indices is not None:
             actor_module.eval()
