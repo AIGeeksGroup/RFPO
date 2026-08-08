@@ -96,6 +96,12 @@ hypotheses:
     motivation: "Can's zero-source policy succeeds far more often than its random-source policy, so mixed collection can add reward information without discarding Gaussian exploration."
     parent: null
     priority: high
+  - id: H9
+    statement: "A minority tempered-Gaussian rollout subset transfers successful near-modal Can trajectories into the official full-noise policy."
+    status: pending
+    motivation: "Unlike a delta-zero source, N(0, 0.5^2 I) continuously overlaps the official N(0, I) source while concentrating samples near the successful deterministic mode."
+    parent: H8
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -411,7 +417,7 @@ experiments:
 
 outer_loop:
   cycle: 1
-  last_direction: "Replace the delta-zero exploitation source with a continuously overlapping tempered Gaussian source, while retaining official full-noise environments as the primary metric."
+  last_direction: "Test a fixed 20% N(0, 0.5^2 I) and 80% N(0, I) rollout mixture, judging improvement only on the official full-noise subset and final evaluations."
   last_reflection: "A 20% zero-source mixture tripled successful trajectories but its held-out Gaussian subset fell from 8.77% to 7.08%; final zero/random remained 84%/12%. H8 is refuted because delta-zero successes did not transfer into a stable Gaussian collection gain."
 
 workspace:
