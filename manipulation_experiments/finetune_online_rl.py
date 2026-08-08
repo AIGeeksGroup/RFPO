@@ -1175,23 +1175,44 @@ def main(cfg: FlowPPOConfig):
                 device=device,
                 dtype=group_actions.dtype,
             )
+            if (
+                actor_module.config.cfm_loss_mode != "u"
+                or actor_module.config.flow_network_output_param != "u"
+            ):
+                raise ValueError("stratified MC audit is locked to velocity prediction")
             with torch.no_grad():
-                old_losses, fixed_times, fixed_noises = get_cfm_values(
-                    actor_module,
-                    group_obs,
-                    sample_count,
-                    times,
-                    noises,
-                )
-            current_losses, _, _ = get_cfm_values(
-                actor_module,
-                group_obs,
-                sample_count,
-                fixed_times,
-                fixed_noises,
+                normalized_obs = actor_module.normalize_inputs(group_obs)
+                obs_cond = actor_module.model.encode_observations(normalized_obs)
+                normalized_actions = actor_module.normalize_targets(
+                    {"action": group_actions}
+                )["action"]
+            batch_count, horizon, action_dimensions = normalized_actions.shape
+            expanded_actions = normalized_actions.unsqueeze(1).expand(
+                -1, sample_count, -1, -1
+            ).reshape(-1, horizon, action_dimensions)
+            expanded_obs_cond = obs_cond.unsqueeze(1).expand(
+                -1, sample_count, -1
+            ).reshape(batch_count * sample_count, -1)
+            x_t = (1 - times) * expanded_actions + times * noises
+            time_embedding = actor_module.model.diffusion_step_encoder(times).reshape(
+                batch_count * sample_count, -1
             )
-            old_chunk_losses = old_losses.sum(dim=-1).permute(1, 0)
-            current_chunk_losses = current_losses.sum(dim=-1).permute(1, 0)
+            network_output = actor_module.model(x_t, time_embedding, expanded_obs_cond)
+            network_output = actor_module.config.mlp_output_scale * network_output
+            if actor_module.config.transported_clip_value is not None:
+                network_output = network_output.clamp(
+                    -actor_module.config.transported_clip_value,
+                    actor_module.config.transported_clip_value,
+                )
+            target_velocity = noises - expanded_actions
+            current_losses = actor_module._compute_squared_error(
+                network_output, target_velocity
+            )
+            current_losses = current_losses * actor_module._compute_cfm_loss_weight(times)
+            current_chunk_losses = current_losses.mean(dim=-1).reshape(
+                batch_count, sample_count, horizon
+            ).sum(dim=-1)
+            old_chunk_losses = current_chunk_losses.detach()
             logratio = old_chunk_losses - current_chunk_losses
             if cfg.clamp_logratio is not None:
                 logratio = clamp_ste(
