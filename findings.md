@@ -113,6 +113,12 @@ control/reflow pairs, mean CFM gradient-to-average cosine changed from 0.5027 to
 worsened 12.3% in the other. Straighter flows slightly reduced scalar CFM-loss variation, but did
 not materially align the gradients that drive FPO++ updates.
 
+The paper's higher-quality Can initialization was identified as the same `95j3noe4` base-policy
+run at step 6000. A locked 50-episode audit reproduced Figure A.8: Gaussian-random success was
+34/50 (68%) and zero-source success was 48/50 (96%), compared with the figure's 64.36% and 96.11%.
+This checkpoint removes the early sparse-reward bottleneck and is suitable for inexpensive method
+screening, but its gain over step 1000 is attributable to behavior-cloning initialization quality.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -132,6 +138,7 @@ not materially align the gradients that drive FPO++ updates.
 - Correcting that amplified mask defect restored about 98% valid CFM actions but left full-noise success unchanged; failed transfer is an update/objective problem rather than a sample-retention problem.
 - Soft positive mirror weights preserved stability and random evaluation but did not outperform signed FPO++ advantages; simple reward reweighting is not enough to improve early Can learning.
 - Reflow's 22% curvature reduction does not translate into lower CFM gradient disagreement, so an online reflow auxiliary lacks its proposed stabilization mechanism.
+- Can step 6000 faithfully reproduces the high-quality 96% zero / roughly 64% random base-policy regime in Appendix D.4, enabling more informative short-budget optimizer experiments without conflating initialization and algorithm effects.
 
 ## Lessons and Constraints
 
@@ -149,4 +156,4 @@ not materially align the gradients that drive FPO++ updates.
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, and online reflow stabilization are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The next outer loop reassesses initialization quality because the paper itself reports that a Can base policy with 64.06% random success removes the early sparse-reward failure regime.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, and online reflow stabilization are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The verified step-6000 Can policy now supplies a high-signal short-budget screen; improvements must be paired against FPO++ there and then transferred back to the official step-1000 initialization.

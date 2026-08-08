@@ -116,7 +116,7 @@ hypotheses:
     priority: high
   - id: H12
     statement: "The Can step-6000 base checkpoint provides substantially denser Gaussian-source successes than the official step-1000 initialization."
-    status: active
+    status: supported
     motivation: "Appendix D.4 reports 64.06% random success for a higher-quality Can base policy, which could provide a higher-signal small-budget method-screening regime."
     parent: H0
     priority: high
@@ -135,7 +135,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 80
+  total_runs: 82
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -506,11 +506,21 @@ experiments:
       value: 0.51247
       cfm_samples: 8
       dataset_pairs: 32
+    - run: can_step6000_random_seed20260811
+      metric: success_rate
+      value: 0.68
+      episodes: 50
+      successes: 34
+    - run: can_step6000_zero_seed20260811
+      metric: success_rate
+      value: 0.96
+      episodes: 50
+      successes: 48
 
 outer_loop:
   cycle: 3
-  last_direction: "Close online reflow and reassess the benchmark initialization bottleneck, including the paper's high-random-success Can base-policy checkpoint evidence."
-  last_reflection: "Across two matched training seeds, reflow improved CFM gradient cosine by only 0.004 and 0.015; gradient-norm CV improved only 2.9% once and worsened 12.3% once. H2 is refuted before online training because straightening does not materially reduce FPO++ gradient disagreement."
+  last_direction: "Use the verified high-quality step-6000 Can initialization for paired, short-budget algorithm screening; retain step-1000 as the final benchmark gate."
+  last_reflection: "The step-6000 checkpoint reproduced Figure A.8 with 34/50 random and 48/50 zero successes. This removes reward scarcity for low-cost screening while remaining explicitly separate from an algorithmic gain."
 
 workspace:
   findings: "findings.md"
