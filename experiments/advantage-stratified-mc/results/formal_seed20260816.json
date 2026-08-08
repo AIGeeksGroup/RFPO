@@ -1,0 +1,53 @@
+{
+  "batch_size": 32,
+  "batches": [
+    {
+      "advantage_abs_median": 0.017488235607743263,
+      "batch": 0,
+      "candidate": {
+        "mean_gradient_cosine_to_reference": 0.8925723433494568,
+        "mean_normalized_gradient_mse": 0.2482902854681015,
+        "median_normalized_gradient_mse": 0.24926598370075226,
+        "repeat_average_gradient_norm": 1.0434579849243164
+      },
+      "candidate_mean_mse_relative_change": -0.3551940217345455,
+      "num_chunks": 32,
+      "reference_gradient_norm": 1.0512810945510864,
+      "repeat_average_gradient_cosine": 0.9768346548080444,
+      "uniform": {
+        "mean_gradient_cosine_to_reference": 0.8360025882720947,
+        "mean_normalized_gradient_mse": 0.38506200909614563,
+        "median_normalized_gradient_mse": 0.3413108289241791,
+        "repeat_average_gradient_norm": 1.0124990940093994
+      }
+    },
+    {
+      "advantage_abs_median": 0.026900075376033783,
+      "batch": 1,
+      "candidate": {
+        "mean_gradient_cosine_to_reference": 0.8745429515838623,
+        "mean_normalized_gradient_mse": 0.285540908575058,
+        "median_normalized_gradient_mse": 0.2768285572528839,
+        "repeat_average_gradient_norm": 1.4578351974487305
+      },
+      "candidate_mean_mse_relative_change": -0.32039500260140796,
+      "num_chunks": 32,
+      "reference_gradient_norm": 1.4893444776535034,
+      "repeat_average_gradient_cosine": 0.9737323522567749,
+      "uniform": {
+        "mean_gradient_cosine_to_reference": 0.8197079300880432,
+        "mean_normalized_gradient_mse": 0.42015716433525085,
+        "median_normalized_gradient_mse": 0.3888476490974426,
+        "repeat_average_gradient_norm": 1.4257817268371582
+      }
+    }
+  ],
+  "high_samples": 12,
+  "iteration": 2,
+  "low_samples": 4,
+  "num_batches": 2,
+  "num_repeats": 8,
+  "num_valid_chunks_available": 147,
+  "reference_samples": 64,
+  "uniform_samples": 8
+}

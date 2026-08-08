@@ -146,7 +146,7 @@ hypotheses:
     priority: high
   - id: H17
     statement: "A fixed-budget 12/4 CFM sample allocation to high/low absolute-advantage chunks estimates the signed FPO++ policy gradient more accurately than uniform MC8."
-    status: active
+    status: refuted
     motivation: "Uniform MC8 spends equal estimator compute on chunks with very different policy-gradient coefficients; reallocating rather than increasing samples may improve information efficiency without changing total forward cost."
     parent: H2
     priority: high
@@ -165,7 +165,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 88
+  total_runs: 89
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -584,11 +584,27 @@ experiments:
       heldout_pre_post_gradient_cosine: 0.74273
       audited_chunks: 64
       available_positive_chunks: 1754
+    - run: can_step6000_stratifiedmc_audit_osmesa_seed20260816_batch0
+      metric: normalized_gradient_mse_relative_change
+      value: -0.35519
+      uniform_gradient_cosine_to_reference: 0.83600
+      candidate_gradient_cosine_to_reference: 0.89257
+      cross_method_average_gradient_cosine: 0.97683
+      chunks: 32
+      repeats: 8
+    - run: can_step6000_stratifiedmc_audit_osmesa_seed20260816_batch1
+      metric: normalized_gradient_mse_relative_change
+      value: -0.32040
+      uniform_gradient_cosine_to_reference: 0.81971
+      candidate_gradient_cosine_to_reference: 0.87454
+      cross_method_average_gradient_cosine: 0.97373
+      chunks: 32
+      repeats: 8
 
 outer_loop:
-  cycle: 5
-  last_direction: "Audit a fixed-budget advantage-stratified CFM sample allocation before changing online training."
-  last_reflection: "H16 closes fixed-draw resampling. H17 tests information allocation rather than adding total MC compute, changing source distributions, or applying another advantage transform."
+  cycle: 6
+  last_direction: "Move beyond fixed-draw Monte Carlo allocation after H17 failed its update-direction gate."
+  last_reflection: "H17 reduced gradient MSE by 32-36% in both batches but changed the average update direction too much. Along with H14, this closes fixed-budget CFM sampling tricks as an online reward-improvement route."
 
 workspace:
   findings: "findings.md"

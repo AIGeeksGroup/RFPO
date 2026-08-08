@@ -143,6 +143,13 @@ of only 6.45 points against the 15-point gate. Their median absolute log-ratio w
 value and ESS was 99.63%, but the held-out pre/post gradient cosine was only 0.743. Fixed-draw
 overfitting is measurable but not dominant, so behavior-loss resampling per PPO epoch is stopped.
 
+Advantage-stratified CFM sampling reduced normalized gradient MSE at fixed compute by 35.5% and
+32.0% in two locked batches, while improving mean cosine to an independent MC64 reference. However,
+the stratified and uniform repeat-average gradients had cosine only 0.977 and 0.974, below the 0.99
+direction-preservation gate. Like antithetic sampling, this is genuine variance reduction without
+sufficient evidence that the online update remains invariant, so fixed-budget sampling allocation is
+closed without training or post-hoc tuning.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -167,6 +174,7 @@ overfitting is measurable but not dominant, so behavior-loss resampling per PPO 
 - Joint antithetic time/noise pairs reduce finite-MC gradient dispersion, but the locked audit could not establish sufficiently invariant average update direction.
 - One-update-old successful chunks retain high ratio ESS but are mostly positive-clipped, and success-only selection produces a strongly biased gradient direction.
 - Independent MC8 draws are modestly less shifted than stored draws, but do not retain enough active positive terms or gradient alignment to justify epoch-level behavior-loss resampling.
+- Absolute-advantage 12/4 allocation improves fixed-budget estimator accuracy, but both it and antithetic sampling fail the locked cross-estimator direction gate; CFM sampling tricks are not the next reward-improvement route.
 
 ## Lessons and Constraints
 
@@ -185,4 +193,4 @@ overfitting is measurable but not dominant, so behavior-loss resampling per PPO 
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, and epoch-resampled CFM losses are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The verified step-6000 Can policy supplies a high-signal short-budget screen; the next direction must begin with a new mechanism audit rather than another scalar, source, or fixed-draw schedule variant.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, and epoch-resampled CFM losses are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The verified step-6000 Can policy supplies a high-signal short-budget screen; the next direction must begin with a new learning-signal or objective mechanism audit rather than another scalar, source, or fixed-draw schedule variant.
