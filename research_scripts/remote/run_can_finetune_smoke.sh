@@ -12,6 +12,8 @@ NUM_ENVS="${NUM_ENVS:-30}"
 DATA_COLLECTION_STEPS="${DATA_COLLECTION_STEPS:-1600}"
 TOTAL_TIMESTEPS="${TOTAL_TIMESTEPS:-$((NUM_ENVS * DATA_COLLECTION_STEPS))}"
 EVAL_EPISODES="${EVAL_EPISODES:-20}"
+N_ACTION_SAMPLES="${N_ACTION_SAMPLES:-8}"
+ROLLOUT_FREQ="${ROLLOUT_FREQ:-1}"
 SEED="${SEED:-0}"
 RUN_NAME="${RUN_NAME:-can_fpopp_smoke_seed${SEED}_$(timestamp)}"
 OUTPUT_DIR="${OUTPUT_DIR:-$RUNTIME_ROOT/results/$RUN_NAME}"
@@ -33,7 +35,7 @@ torchrun --nproc_per_node=1 finetune_online_rl.py \
   --num-minibatches 8 \
   --log-freq 1 \
   --save-freq 1 \
-  --rollout-freq 1 \
+  --rollout-freq "$ROLLOUT_FREQ" \
   --task Can \
   --eval-env Can \
   --eval-num-episodes "$EVAL_EPISODES" \
@@ -43,7 +45,7 @@ torchrun --nproc_per_node=1 finetune_online_rl.py \
   --exploration-noise-std None \
   --freeze-vision-encoder True \
   --gae-lambda 0.99 \
-  --n-action-samples 8 \
+  --n-action-samples "$N_ACTION_SAMPLES" \
   --n-action-steps 16 \
   --num-envs "$NUM_ENVS" \
   --sampling-steps 10 \

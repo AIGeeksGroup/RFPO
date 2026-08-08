@@ -68,6 +68,12 @@ hypotheses:
     motivation: "Pure reflow improved geometry but not official-scale reward, suggesting endpoint grounding rather than curvature is now the bottleneck."
     parent: H1
     priority: high
+  - id: H5
+    statement: "Using 16 instead of 8 CFM samples per action reduces early Can FPO++ gradient noise and improves reward learning."
+    status: pending
+    motivation: "The paper identifies sparse random-sampling successes as a source of high gradient variance, and lists 16 samples as an in-scope setting."
+    parent: H2
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -293,7 +299,7 @@ experiments:
 
 outer_loop:
   cycle: 1
-  last_direction: "Stop BC-distillation variants and return to reward-aware FPO++ mechanisms; inspect official Can training cost and metrics before selecting the next small pilot."
+  last_direction: "Run a matched five-update Can FPO++ pilot comparing 8 versus 16 CFM samples per action; stop before 5M steps unless early reward learning improves."
   last_reflection: "A 50/50 dataset/reflow mixture retained an 11% straightness reduction and improved zero success in two small screens, but random success collapsed to 0/20 on the confirmation seed versus 3/20 control. H4 is refuted under its exploration gate, so no probability sweep or large evaluation is justified."
 
 workspace:
