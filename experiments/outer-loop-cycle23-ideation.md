@@ -21,7 +21,7 @@ the on-policy gradient, reward, source distribution, and advantage weights uncha
 
 H36 implements the ratio-rollback component of Truly PPO directly on FPO++'s existing CFM ratios.
 It is exactly equal to official clipping at the behavior policy and differs only on improving ratios
-outside the existing `epsilon=0.01` bound. The coefficient `alpha=0.3` is fixed from the paper's
+outside the established step-6000 audit `epsilon=0.02` bound. The coefficient `alpha=0.3` is fixed from the paper's
 continuous-control experiments. A paired step-6000 audit can reject the mechanism before online
 reward evaluation if rollback merely suppresses surrogate progress or fails to preserve the held-out
 gradient direction.
