@@ -205,6 +205,14 @@ Can episodes terminate earlier than failures, the apparent 20/20 control scores 
 censored and invalid. Candidate evaluation was never run. H30 thus supports only the endpoint-
 projection mechanism, not a reward conclusion.
 
+Marginal-preserving temporal Gaussian sources failed despite an unusually strong mechanism result.
+With `rho=0.9`, the measured source correlation was 0.8999, predicted action-chunk change fell by
+68.03%, and 75.25% of IID action diversity remained. Yet the corrected balanced Can screen scored
+0/20 for AR(1) versus 13/20 for IID, and all correlated-source episodes reached the 299-step horizon.
+The intervention preserves every single-time `N(0,I)` marginal but changes the episode-level joint
+source distribution; the resulting persistence suppresses useful replanning and adaptation. H31 is
+closed without a confirmation run or correlation sweep.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -241,6 +249,9 @@ projection mechanism, not a reward conclusion.
 - Antithetic action-chunk averaging produced a 15-point small-screen gain but a 6-point loss on the independent confirmation; its pooled 52/70 success exactly ties zero-source inference, so source symmetry is not a stable inference improvement.
 - Doubling visual replanning frequency by executing four rather than eight actions reduced the locked Can screen from 70% to 60%; the released checkpoint does not benefit from a shorter execution horizon without retraining.
 - A mechanism-positive intervention is still not reward evidence: H29 passed its endpoint-drift audit, while H30's reward protocol was invalidated by first-completion censoring before candidate evaluation.
+- Smooth action chunks are not intrinsically better control: H31 reduced adjacent chunk change by 68% but collapsed balanced random-source success from 65% to 0%.
+- Matching each source marginal is insufficient for inference compatibility; the policy also depends on the episode-level joint source process created by repeated replanning.
+- Small asynchronous screens must use equal per-environment episode quotas because successful Can episodes terminate earlier than failures.
 
 ## Lessons and Constraints
 
@@ -262,4 +273,4 @@ projection mechanism, not a reward conclusion.
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, rank-based GAE weighting, fixed lower actor learning rate, full-batch gradient accumulation, BC/FPO++ midpoint interpolation, explicit Gaussian-bridge distillation, antithetic endpoint averaging, and shorter receding-horizon execution are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The next candidate must introduce a distinct training signal rather than another inference or estimator variant.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, rank-based GAE weighting, fixed lower actor learning rate, full-batch gradient accumulation, BC/FPO++ midpoint interpolation, explicit Gaussian-bridge distillation, antithetic endpoint averaging, shorter receding-horizon execution, and temporally correlated Gaussian inference are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The next candidate must introduce a distinct training signal rather than another inference or estimator variant.

@@ -1,0 +1,31 @@
+{
+  "config": {
+    "checkpoint": "/home/haoyu/workspace/code/fpo-control/manipulation_experiments/downloaded_checkpoints/95j3noe4_step_6000",
+    "output_json": "/home/haoyu/workspace/outputs/fpo-control/results/can_step6000_temporal_source_audit_osmesa_seed20260830/results.json",
+    "device": "cuda",
+    "seed": 20260830,
+    "correlation": 0.9,
+    "num_envs": 16,
+    "observation_batches": 4,
+    "sequence_steps": 33,
+    "sampling_steps": 10,
+    "scalar_samples": 16384
+  },
+  "source": {
+    "mean": 0.004049573093652725,
+    "std": 0.9989476799964905,
+    "lag_one_correlation": 0.8998643159866333,
+    "finite": true
+  },
+  "actions": {
+    "fixed_observations": 64,
+    "transitions_per_observation": 32,
+    "iid_mean_chunk_change_l2": 2.5575428009033203,
+    "correlated_mean_chunk_change_l2": 0.817650556564331,
+    "relative_chunk_change": 0.319701611995697,
+    "iid_diversity": 0.1404636651277542,
+    "correlated_diversity": 0.10570379346609116,
+    "diversity_retention": 0.752534806728363,
+    "finite": true
+  }
+}

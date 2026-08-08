@@ -1,0 +1,14 @@
+Evaluation Summary
+================================================================================
+Environment: Can
+Checkpoint: latest
+Run ID: None
+Episodes: 20
+Balanced Episodes Per Env: True
+Sampling Mode: correlated_random
+Source Temporal Correlation: 0.9
+Action Steps: 8
+Success Rate: 0.00% +/- 0.00%
+Average Return: 0.000 +/- 0.000
+FPS: 164.6
+================================================================================
