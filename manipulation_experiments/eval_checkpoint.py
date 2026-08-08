@@ -65,6 +65,10 @@ class EvalCheckpointConfig:
     """Environment name for evaluation."""
     zero_sampling: bool = True
     """If True, use zero sampling for evaluation."""
+    source_prior_mode: Optional[str] = None
+    """Optional checkpoint override: 'gaussian' or exploratory 'previous_action'."""
+    source_prior_sigma: float = 0.5
+    """Residual noise scale for previous_action source positions."""
     # image_observation_keys: Optional[str] = None # "agentview_image robot0_eye_in_hand_image"
     # """Image observation keys to use for policy input (e.g., --image_observation_keys "robot0_eye_in_hand_image shouldercamera1_image"."""
     eval_num_episodes: int = 50
@@ -521,6 +525,18 @@ def main(cfg: EvalCheckpointConfig):
 
     # Load policy
     policy = load_policy(checkpoint_dir, device=cfg.device, load_ema=cfg.load_ema)
+    if cfg.source_prior_mode is not None:
+        if cfg.source_prior_mode not in ["gaussian", "previous_action"]:
+            raise ValueError("--source-prior-mode must be 'gaussian' or 'previous_action'")
+        if cfg.source_prior_sigma < 0:
+            raise ValueError("--source-prior-sigma must be non-negative")
+        policy.config.source_prior_mode = cfg.source_prior_mode
+        policy.config.source_prior_sigma = cfg.source_prior_sigma
+        logger.info(
+            "Overriding source prior: mode=%s sigma=%.3f",
+            cfg.source_prior_mode,
+            cfg.source_prior_sigma,
+        )
 
     # Create evaluation environment
     logger.info(colored(f"Creating evaluation environment: {cfg.eval_env}", "cyan"))

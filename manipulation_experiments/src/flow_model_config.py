@@ -78,6 +78,8 @@ class FlowMatchingConfig(PreTrainedConfig):
     actor_scale: float = 1.0  # Scale final actions
     exploration_noise_std: float = 0.0  # Exploration noise (training only)
     transported_clip_value: float | None = None  # Clip transported predictions (x0 or u) to [-value, value]. None means no clipping
+    source_prior_mode: str = "gaussian"  # "gaussian" or "previous_action"
+    source_prior_sigma: float = 0.5  # Residual noise scale on warm source positions
 
     # Architecture selection
     network_architecture: str = "unet"  # "unet" or "mlp"
@@ -154,6 +156,15 @@ class FlowMatchingConfig(PreTrainedConfig):
 
         if self.cfm_loss_mode not in ["x0", "u", "eps"]:
             raise ValueError(f"cfm_loss_mode must be 'x0', 'u', or 'eps'. Got {self.cfm_loss_mode}")
+
+        if self.source_prior_mode not in ["gaussian", "previous_action"]:
+            raise ValueError(
+                "source_prior_mode must be 'gaussian' or 'previous_action'. "
+                f"Got {self.source_prior_mode}"
+            )
+
+        if self.source_prior_sigma < 0:
+            raise ValueError(f"source_prior_sigma must be non-negative. Got {self.source_prior_sigma}")
 
         if self.network_architecture not in ["unet", "mlp", "residual_mlp"]:
             raise ValueError(f"network_architecture must be 'unet', 'mlp', or 'residual_mlp'. Got {self.network_architecture}")

@@ -19,6 +19,7 @@ from .flow_net_mlp import FlowMatchingMLPModel
 from .flow_net_unet import FlowMatchingUnetModel
 from .flow_net_residual_mlp import FlowMatchingResidualMLPModel
 from .noise_injection_network import NoiseInjectionNetwork
+from .source_priors import apply_previous_action_prior
 
 
 # Helper functions for vision encoder
@@ -127,6 +128,9 @@ class FlowMatchingPolicy(PreTrainedPolicy):
         self.action_buffers = {
             env_id: deque([], maxlen=self.config.n_action_steps) for env_id in range(self.num_envs)
         }
+        self.previous_action_buffers = {
+            env_id: deque([], maxlen=self.config.n_action_steps) for env_id in range(self.num_envs)
+        }
         self.mdp_x_t_path_buffers = {
             env_id: deque([], maxlen=self.config.n_action_steps) for env_id in range(self.num_envs)
         }
@@ -159,12 +163,14 @@ class FlowMatchingPolicy(PreTrainedPolicy):
             if self.num_envs is None:
                 self.action_buffers = {}
                 self.mdp_x_t_path_buffers = {}
+                self.previous_action_buffers = {}
 
             else:
                 # Reset all buffers
                 for env_id in range(self.num_envs):
                     self.action_buffers[env_id] = deque([], maxlen=self.config.n_action_steps)
                     self.mdp_x_t_path_buffers[env_id] = deque([], maxlen=self.config.n_action_steps)
+                    self.previous_action_buffers[env_id] = deque([], maxlen=self.config.n_action_steps)
         else:
             # Reset only specified environment buffers
             if not isinstance(env_ids, torch.Tensor):
@@ -174,6 +180,7 @@ class FlowMatchingPolicy(PreTrainedPolicy):
                 if env_id in self.action_buffers:
                     self.action_buffers[env_id] = deque([], maxlen=self.config.n_action_steps)
                     self.mdp_x_t_path_buffers[env_id] = deque([], maxlen=self.config.n_action_steps)
+                    self.previous_action_buffers[env_id] = deque([], maxlen=self.config.n_action_steps)
     def step_ema(self):
         """Update the EMA model with current model parameters."""
         if self.ema_model is not None:
@@ -225,8 +232,31 @@ class FlowMatchingPolicy(PreTrainedPolicy):
             for key, value in batch.items():
                 sub_batch[key] = value[envs_needing_actions]
 
+            previous_actions = None
+            has_previous_actions = None
+            if self.config.source_prior_mode == "previous_action":
+                action_dim = self.model.action_dim
+                previous_actions = torch.zeros(
+                    (len(envs_needing_actions), self.config.n_action_steps, action_dim),
+                    device=next(iter(sub_batch.values())).device,
+                )
+                has_previous_actions = torch.zeros(
+                    len(envs_needing_actions), dtype=torch.bool, device=previous_actions.device
+                )
+                for i, env_id in enumerate(envs_needing_actions):
+                    history = self.previous_action_buffers[env_id]
+                    if len(history) == self.config.n_action_steps:
+                        previous_actions[i] = torch.stack(list(history))
+                        has_previous_actions[i] = True
+
             # Predict action chunks for these environments
-            action_chunks, mdp_x_t_path = self.predict_action_chunk(sub_batch, zero_sampling=zero_sampling, sde_sampling=sde_sampling)
+            action_chunks, mdp_x_t_path = self.predict_action_chunk(
+                sub_batch,
+                zero_sampling=zero_sampling,
+                sde_sampling=sde_sampling,
+                previous_actions=previous_actions,
+                has_previous_actions=has_previous_actions,
+            )
             action_chunks = action_chunks[:, :self.config.n_action_steps, :] # in future, the n_action_steps can be different from prediction horizon
             mdp_x_t_path = mdp_x_t_path[:, :, :self.config.n_action_steps, :] # in future, the n_action_steps can be different from prediction horizon
             assert mdp_x_t_path.shape[1] == self.config.sampling_steps, "mdp_x_t_path second axis should be the flow sampling steps"
@@ -242,7 +272,9 @@ class FlowMatchingPolicy(PreTrainedPolicy):
         actions = []
         mdp_x_t_paths = []
         for env_id in range(self.num_envs):
-            actions.append(self.action_buffers[env_id].popleft())
+            action = self.action_buffers[env_id].popleft()
+            actions.append(action)
+            self.previous_action_buffers[env_id].append(action)
             mdp_x_t_paths.append(self.mdp_x_t_path_buffers[env_id].popleft())
 
         assert len(actions) == self.num_envs, "actions length should be the number of environments"
@@ -251,7 +283,14 @@ class FlowMatchingPolicy(PreTrainedPolicy):
         return torch.stack(actions), torch.stack(mdp_x_t_paths)
 
     @torch.no_grad
-    def predict_action_chunk(self, batch: dict[str, Tensor], zero_sampling: bool = False, sde_sampling: bool = False) -> Tensor:
+    def predict_action_chunk(
+        self,
+        batch: dict[str, Tensor],
+        zero_sampling: bool = False,
+        sde_sampling: bool = False,
+        previous_actions: Tensor | None = None,
+        has_previous_actions: Tensor | None = None,
+    ) -> Tensor:
         """Predict a chunk of actions using flow matching with Euler integration."""
         self.eval()
 
@@ -261,12 +300,23 @@ class FlowMatchingPolicy(PreTrainedPolicy):
         # Get observation conditioning
         obs_cond = self.model.encode_observations(batch)
 
-        # Initialize from Gaussian noise
+        # Initialize from the configured source distribution.
         B = obs_cond.shape[0]
         if zero_sampling:
             x_t = torch.zeros((B, self.config.horizon, self.model.action_dim), device=obs_cond.device)
         else:
             x_t = torch.randn((B, self.config.horizon, self.model.action_dim), device=obs_cond.device)
+
+        if self.config.source_prior_mode == "previous_action":
+            if previous_actions is None or has_previous_actions is None:
+                raise ValueError("previous_action source prior requires action history and its availability mask")
+            normalized_previous_actions = self.normalize_targets({ACTION: previous_actions})[ACTION]
+            x_t = apply_previous_action_prior(
+                source_noise=x_t,
+                previous_actions=normalized_previous_actions,
+                has_previous_actions=has_previous_actions,
+                sigma=self.config.source_prior_sigma,
+            )
 
         # Flow schedule for Euler integration
         flow_steps = self.config.sampling_steps
@@ -679,4 +729,3 @@ class FlowMatchingPolicy(PreTrainedPolicy):
             return huber_loss
         else:
             return F.mse_loss(predictions, targets, reduction="none")
-
