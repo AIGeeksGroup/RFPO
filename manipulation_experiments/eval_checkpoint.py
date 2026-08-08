@@ -21,6 +21,7 @@ from safetensors.torch import load_file
 from termcolor import colored
 
 from src.dexmg_env import VectorizedEnvWrapper, create_vectorized_env
+from src.evaluation_overrides import validate_action_steps
 from src.flow_model import FlowMatchingPolicy
 from src.flow_model_config import FlowMatchingConfig
 
@@ -73,6 +74,8 @@ class EvalCheckpointConfig:
     """Residual noise scale for previous_action source positions."""
     sampling_steps: Optional[int] = None
     """Optional Euler-step override for low-NFE checkpoint evaluation."""
+    action_steps: Optional[int] = None
+    """Optional number of predicted actions to execute before replanning."""
     # image_observation_keys: Optional[str] = None # "agentview_image robot0_eye_in_hand_image"
     # """Image observation keys to use for policy input (e.g., --image_observation_keys "robot0_eye_in_hand_image shouldercamera1_image"."""
     eval_num_episodes: int = 50
@@ -545,6 +548,11 @@ def main(cfg: EvalCheckpointConfig):
             raise ValueError("sampling_steps must be at least 1")
         policy.config.sampling_steps = cfg.sampling_steps
         logger.info("Overriding Euler sampling steps: %d", cfg.sampling_steps)
+    if cfg.action_steps is not None:
+        policy.config.n_action_steps = validate_action_steps(
+            cfg.action_steps, policy.config.horizon
+        )
+        logger.info("Overriding executed action steps: %d", cfg.action_steps)
 
     if cfg.source_prior_mode is not None:
         if cfg.source_prior_mode not in ["gaussian", "previous_action"]:
@@ -669,6 +677,7 @@ def main(cfg: EvalCheckpointConfig):
         f.write(f"Run ID: {cfg.wandb_run_id}\n")
         f.write(f"Episodes: {cfg.eval_num_episodes}\n")
         f.write(f"Sampling Mode: {sampling_mode}\n")
+        f.write(f"Action Steps: {policy.config.n_action_steps}\n")
         f.write(f"Success Rate: {mean_success_rate * 100:.2f}% +/- {std_success_rate * 100:.2f}%\n")
         f.write(f"Average Return: {avg_return:.3f} +/- {std_return:.3f}\n")
         f.write(f"FPS: {final_fps:.1f}\n")
