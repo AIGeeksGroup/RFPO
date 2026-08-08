@@ -66,6 +66,7 @@ from src.temporal_ratio_clipping import (
 )
 from src.median_microbatch_gradient import (
     aggregate_microbatch_gradients,
+    geometric_median,
     middle_pair_mean,
 )
 from src.terminal_consistency_filter import terminal_consistent_weights
@@ -195,6 +196,7 @@ class FlowPPOConfig:
     median_microbatch_gradient_audit: bool = False
     median_microbatch_gradient_audit_iteration: int = 2
     median_microbatch_gradient_audit_chunks: int = 192
+    median_microbatch_gradient_method: Literal["coordinate", "geometric"] = "coordinate"
     median_microbatch_gradient_audit_output_json: Optional[str] = None
     terminal_consistency_filter_audit: bool = False
     terminal_consistency_filter_audit_iteration: int = 2
@@ -2433,9 +2435,18 @@ def main(cfg: FlowPPOConfig):
                         }
                     )
 
-                control_gradient, candidate_gradient = aggregate_microbatch_gradients(
-                    microbatch_gradients
-                )
+                if cfg.median_microbatch_gradient_method == "coordinate":
+                    control_gradient, candidate_gradient = aggregate_microbatch_gradients(
+                        microbatch_gradients
+                    )
+                    candidate_iterations = 0
+                    candidate_converged = True
+                else:
+                    control_gradient = torch.stack(microbatch_gradients).mean(dim=0)
+                    geometric_result = geometric_median(microbatch_gradients)
+                    candidate_gradient = geometric_result.value
+                    candidate_iterations = geometric_result.iterations
+                    candidate_converged = geometric_result.converged
                 vectors = {
                     "reference": reference_gradient,
                     "control": control_gradient,
@@ -2487,6 +2498,7 @@ def main(cfg: FlowPPOConfig):
                 )
                 gates = {
                     "finite_nonzero": finite_nonzero,
+                    "candidate_converged": candidate_converged,
                     "candidate_reference_absolute": candidate_reference_cosine >= 0.75,
                     "candidate_reference_gain": (
                         candidate_reference_cosine - control_reference_cosine >= 0.10
@@ -2506,6 +2518,8 @@ def main(cfg: FlowPPOConfig):
                         "reference_gradient_norm": float(norms["reference"].item()),
                         "control_gradient_norm": float(norms["control"].item()),
                         "candidate_gradient_norm": float(norms["candidate"].item()),
+                        "candidate_solver_iterations": candidate_iterations,
+                        "candidate_solver_converged": candidate_converged,
                         "control_reference_cosine": control_reference_cosine,
                         "candidate_reference_cosine": candidate_reference_cosine,
                         "candidate_reference_cosine_gain": (
@@ -2533,6 +2547,7 @@ def main(cfg: FlowPPOConfig):
                 "num_replicas": 2,
                 "microbatches_per_replica": 4,
                 "cfm_samples": n_action_samples,
+                "aggregation_method": cfg.median_microbatch_gradient_method,
                 "replicas": replica_results,
                 "passed": all(result["passed"] for result in replica_results),
             }
