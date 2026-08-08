@@ -1,0 +1,63 @@
+project:
+  title: "Reproducing and Improving FPO++ for Robot Control"
+  question: "Can the official FPO++ benchmark results be reproduced, and can straighter conditional policy flows improve return or sampling efficiency?"
+  status: active
+  started: "2026-08-08"
+  domain: "robot reinforcement learning and flow policies"
+
+literature:
+  key_papers:
+    - id: yi2026fpo_control
+      title: "Flow Policy Gradients for Robot Control"
+      year: 2026
+      relevance: "Target method and benchmark."
+    - id: liu2022rectified_flow
+      title: "Flow Straight and Fast: Learning to Generate and Transfer Data with Rectified Flow"
+      year: 2022
+      relevance: "Motivates reflow to straighten conditional noise-to-action trajectories."
+  open_problems:
+    - "FPO++ uses many Euler steps; it is unknown whether conditional reflow improves control return or only sampling efficiency."
+    - "The relation between flow curvature, CFM ratio variance, and policy-update stability is not established."
+  evidence_gaps:
+    - "Official baseline reproduction on H200 is not yet measured."
+    - "Reflow has not yet been tested in online flow-policy optimization on these benchmarks."
+
+hypotheses:
+  - id: H0
+    statement: "The official Go2 and Can baselines reproduce the authors' learning trends and final metrics within a predeclared tolerance."
+    status: active
+    motivation: "Algorithm improvements are uninterpretable until the released baseline is validated."
+    parent: null
+    priority: high
+  - id: H1
+    statement: "Conditional reflow reduces policy trajectory curvature and preserves return when the Euler sampling steps are reduced."
+    status: pending
+    motivation: "Rectified Flow predicts straighter paths and lower numerical integration error after reflow."
+    parent: null
+    priority: high
+  - id: H2
+    statement: "Using reflow regularization during FPO++ training reduces CFM-ratio dispersion and improves training stability or final return."
+    status: pending
+    motivation: "Straighter conditional flows may reduce Monte Carlo gradient disagreement, a documented FPO++ failure mode."
+    parent: H1
+    priority: medium
+
+experiments:
+  proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
+  baseline_value: null
+  best_value: null
+  total_runs: 0
+  trajectory: []
+
+outer_loop:
+  cycle: 0
+  last_direction: null
+  last_reflection: ""
+
+workspace:
+  findings: "findings.md"
+  log: "research-log.md"
+  literature_dir: "literature/"
+  experiments_dir: "experiments/"
+  to_human_dir: "to_human/"
+  paper_dir: "paper/"
