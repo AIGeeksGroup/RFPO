@@ -158,13 +158,13 @@ hypotheses:
     priority: high
   - id: H19
     statement: "A bounded critic trained on uncensored discounted binary-success returns improves next-rollout value accuracy and aligns the first FPO++ actor gradient with Monte Carlo outcomes."
-    status: invalidated
+    status: active
     motivation: "H18 shows that gradient rotation is already severe after one actor epoch, so later trust-region controls cannot fix the first-step learning signal; Can rewards are binary and bounded but the official critic uses an unbounded scalar MSE target."
     parent: H2
     priority: high
   - id: H20
     statement: "Restoring a nonzero critic learning rate during the released critic-only warmup improves next-rollout value accuracy and first-step actor-gradient alignment."
-    status: active
+    status: invalidated
     motivation: "The released scheduler sets critic LR to zero for all ten iteration-1 optimizer epochs, so the first actor update uses a random, untrained critic despite the explicit critic-only warmup."
     parent: H2
     priority: high
@@ -183,7 +183,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 91
+  total_runs: 93
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -637,8 +637,8 @@ experiments:
 
 outer_loop:
   cycle: 6
-  last_direction: "Audit the released zero-learning-rate critic warmup before changing critic objectives."
-  last_reflection: "H19 exposed that both control and candidate critic optimizers run iteration 1 at LR zero because the scheduler advances only after the iteration. H20 isolates this implementation defect using the unchanged official MSE objective."
+  last_direction: "Resume the locked discounted-success critic audit after ruling out the scheduler false alarm."
+  last_reflection: "The actual constant scheduler keeps critic LR at 1e-4 from initialization; paired critics had identical 1.10998 parameter displacement. H20 is invalidated, while H19 remains a valid comparison of bounded BCE and official MSE critics."
 
 workspace:
   findings: "findings.md"

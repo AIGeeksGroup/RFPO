@@ -1,0 +1,34 @@
+{
+  "batches": [
+    {
+      "batch": 0,
+      "candidate_cosine_gain": 1.1920928955078125e-07,
+      "candidate_gradient_cosine_to_reference": 0.9085415005683899,
+      "control_gradient_cosine_to_reference": 0.9085413813591003,
+      "num_chunks": 32,
+      "reference_gradient_norm": 2.187185525894165
+    },
+    {
+      "batch": 1,
+      "candidate_cosine_gain": 3.5762786865234375e-07,
+      "candidate_gradient_cosine_to_reference": 0.7950278520584106,
+      "control_gradient_cosine_to_reference": 0.795027494430542,
+      "num_chunks": 32,
+      "reference_gradient_norm": 2.120267868041992
+    }
+  ],
+  "candidate_control_parameter_distance": 0.0,
+  "candidate_iteration1_learning_rate": 0.0001,
+  "candidate_parameter_delta_norm": 1.10997662501668,
+  "candidate_value_mse": 0.014961767941713333,
+  "candidate_value_mse_relative_change": 0.0,
+  "candidate_value_spearman": 0.21573735398533458,
+  "control_iteration1_learning_rate": 0.0,
+  "control_parameter_delta_norm": 1.10997662501668,
+  "control_value_mse": 0.014961767941713333,
+  "control_value_spearman": 0.21573735398533458,
+  "iteration": 2,
+  "num_gradient_chunks_audited": 64,
+  "num_gradient_chunks_available": 136,
+  "num_value_targets": 2325
+}
