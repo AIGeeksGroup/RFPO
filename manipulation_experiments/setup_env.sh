@@ -11,6 +11,23 @@ SENTINEL_FILE=.env_setup_finish
 
 mkdir -p $WORKSPACE_DIR
 
+# The vendored robosuite 1.5.1 tree omits its binary texture directory.
+# Fetch only those pinned upstream assets while preserving local robot additions.
+ROBOSUITE_TEXTURE_SENTINEL=$WORKSPACE_DIR/robosuite/robosuite/models/assets/textures/light-gray-floor-tile.png
+if [[ ! -f $ROBOSUITE_TEXTURE_SENTINEL ]]; then
+  ROBOSUITE_ASSET_TMP=$(mktemp -d)
+  trap 'rm -rf "$ROBOSUITE_ASSET_TMP"' EXIT
+  curl --fail --location \
+    https://github.com/ARISE-Initiative/robosuite/archive/refs/tags/v1.5.1.tar.gz \
+    -o "$ROBOSUITE_ASSET_TMP/robosuite-v1.5.1.tar.gz"
+  tar -xzf "$ROBOSUITE_ASSET_TMP/robosuite-v1.5.1.tar.gz" \
+    -C "$ROBOSUITE_ASSET_TMP"
+  cp -a "$ROBOSUITE_ASSET_TMP/robosuite-1.5.1/robosuite/models/assets/textures" \
+    "$WORKSPACE_DIR/robosuite/robosuite/models/assets/"
+  rm -rf "$ROBOSUITE_ASSET_TMP"
+  trap - EXIT
+fi
+
 if [[ ! -f $SENTINEL_FILE ]]; then
   # Install miniconda
   if [[ ! -d $CONDA_ROOT ]]; then

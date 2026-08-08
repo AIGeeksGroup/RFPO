@@ -10,7 +10,7 @@ FPO++ stabilizes likelihood-free policy gradients through per-CFM-sample ratios 
 
 ## Key Results
 
-No new experiments have completed yet.
+The released Can step-1000 checkpoint completed an early 20-episode validation in each sampling mode. Zero sampling succeeded on 16/20 episodes (80%), while random sampling succeeded on 2/20 episodes (10%). The latter exactly matches the low stochastic-success regime described in the paper; the zero-sampling estimate is compatible with the reported 73.76% base-policy success but remains too small for a final reproduction claim. A 200-episode evaluation is in progress.
 
 ## Patterns and Insights
 

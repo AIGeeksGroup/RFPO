@@ -50,10 +50,20 @@ hypotheses:
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
-  baseline_value: null
+  baseline_value:
+    can_validation20_zero_success: 0.80
+    can_validation20_random_success: 0.10
   best_value: null
-  total_runs: 0
-  trajectory: []
+  total_runs: 2
+  trajectory:
+    - run: can_validation20_zero
+      metric: success_rate
+      value: 0.80
+      episodes: 20
+    - run: can_validation20_random
+      metric: success_rate
+      value: 0.10
+      episodes: 20
 
 outer_loop:
   cycle: 0
@@ -74,4 +84,4 @@ infrastructure:
   remote_outputs: "~/workspace/outputs/fpo-control"
   manipulation_environment: verified
   isaac_environment: installing
-  checkpoints: downloading
+  checkpoints: verified
