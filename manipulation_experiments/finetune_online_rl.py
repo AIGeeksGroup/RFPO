@@ -44,6 +44,11 @@ from src.discounted_success_critic import (
     discounted_returns_to_observed_terminal,
     spearman_rank_correlation,
 )
+from src.direct_advantage import (
+    DirectAdvantageHead,
+    direct_advantage_residuals,
+    discounted_macro_rewards,
+)
 from src.advantage_weighting import (
     clipped_mirror_ratio_loss,
     ess_softmax_weights,
@@ -150,6 +155,13 @@ class FlowPPOConfig:
     critic_warmup_scheduler_audit_iteration: int = 2
     critic_warmup_scheduler_audit_chunks: int = 64
     critic_warmup_scheduler_audit_output_json: Optional[str] = None
+    direct_advantage_audit: bool = False
+    direct_advantage_audit_iteration: int = 2
+    direct_advantage_audit_chunks: int = 64
+    direct_advantage_center_samples: int = 4
+    direct_advantage_horizon_chunks: int = 4
+    direct_advantage_center_batch_size: int = 16
+    direct_advantage_audit_output_json: Optional[str] = None
     rollout_zero_fraction: float = 0.0
     rollout_tempered_fraction: float = 0.0
     rollout_tempered_scale: float = 0.5
@@ -718,7 +730,7 @@ def main(cfg: FlowPPOConfig):
         if cfg.discounted_success_critic_audit_chunks % 2:
             raise ValueError("discounted-success critic audit requires an even chunk count")
     if cfg.critic_warmup_scheduler_audit:
-        if cfg.discounted_success_critic_audit:
+        if cfg.discounted_success_critic_audit or cfg.direct_advantage_audit:
             raise ValueError("critic side audits are mutually exclusive")
         if cfg.loss_mode != "fpo" or not cfg.do_chunk_level_ppo:
             raise ValueError("critic warmup scheduler audit requires chunk-level FPO")
@@ -733,6 +745,23 @@ def main(cfg: FlowPPOConfig):
             raise ValueError("critic warmup scheduler audit settings must be positive")
         if cfg.critic_warmup_scheduler_audit_chunks % 2:
             raise ValueError("critic warmup scheduler audit requires an even chunk count")
+    if cfg.direct_advantage_audit:
+        if cfg.discounted_success_critic_audit:
+            raise ValueError("critic and direct-advantage side audits are mutually exclusive")
+        if cfg.loss_mode != "fpo" or not cfg.do_chunk_level_ppo:
+            raise ValueError("direct-advantage audit requires chunk-level FPO")
+        if world_size != 1:
+            raise ValueError("direct-advantage audit currently requires one process")
+        if min(
+            cfg.direct_advantage_audit_iteration,
+            cfg.direct_advantage_audit_chunks,
+            cfg.direct_advantage_center_samples,
+            cfg.direct_advantage_horizon_chunks,
+            cfg.direct_advantage_center_batch_size,
+        ) < 1:
+            raise ValueError("direct-advantage audit settings must be positive")
+        if cfg.direct_advantage_audit_chunks % 2:
+            raise ValueError("direct-advantage audit requires an even chunk count")
 
     # Run dir on all ranks (avoid races)
     run_start_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -916,6 +945,14 @@ def main(cfg: FlowPPOConfig):
         if cfg.discounted_success_critic_audit or cfg.critic_warmup_scheduler_audit
         else None
     )
+    direct_advantage_head = (
+        DirectAdvantageHead(
+            observation_dim=actor.model.global_cond_dim,
+            action_size=cfg.n_action_steps * actor.model.action_dim,
+        )
+        if cfg.direct_advantage_audit
+        else None
+    )
 
     # Move to device BEFORE DDP
     actor.to(device)
@@ -924,6 +961,8 @@ def main(cfg: FlowPPOConfig):
     critic.to(device)
     if success_critic is not None:
         success_critic.to(device)
+    if direct_advantage_head is not None:
+        direct_advantage_head.to(device)
 
     # Freeze vision encoder AFTER wrapping with DDP (same on all ranks)
     if cfg.freeze_vision_encoder:
@@ -1084,6 +1123,13 @@ def main(cfg: FlowPPOConfig):
                 parameter.detach().cpu().clone()
                 for parameter in success_critic.parameters()
             ]
+    optimizer_direct_advantage = None
+    if direct_advantage_head is not None:
+        optimizer_direct_advantage = optim.Adam(
+            direct_advantage_head.parameters(),
+            lr=cfg.learning_rate_critic,
+            eps=1e-5,
+        )
     logger.info(f"[Rank {rank}] Total timesteps: {cfg.total_timesteps}, batch size: {batch_size} | "
                 f"MB: {minibatch_size}, iterations: {num_iterations}")
 
@@ -1115,6 +1161,7 @@ def main(cfg: FlowPPOConfig):
     iteration = 0
     best_eval_success_rate = 0.0
     training_cum_time = 0.0
+    direct_advantage_training_losses: list[float] = []
 
     obs_state_stored = torch.zeros((steps_per_iteration, num_envs_per_process, joint_pos_dim))
     actions_stored = torch.zeros((steps_per_iteration, num_envs_per_process, action_dim))
@@ -1228,6 +1275,73 @@ def main(cfg: FlowPPOConfig):
         if not torch.isfinite(ratios).all() or not torch.isfinite(vector).all():
             raise RuntimeError("success replay audit produced non-finite ratios or gradients")
         return ratios.detach().cpu(), vector
+
+    @torch.no_grad()
+    def direct_advantage_inputs(
+        *,
+        b_actions: torch.Tensor,
+        b_obs_images: dict[str, torch.Tensor],
+        b_obs_state: torch.Tensor,
+        seed_offset: int,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Encode chunk starts and sample fixed same-state actions for centering."""
+        observation_batches = []
+        behavior_batches = []
+        center_batches = []
+        center_samples = cfg.direct_advantage_center_samples
+        generator = torch.Generator(device=device).manual_seed(cfg.seed + seed_offset)
+        for start in range(0, b_actions.shape[0], cfg.direct_advantage_center_batch_size):
+            end = min(start + cfg.direct_advantage_center_batch_size, b_actions.shape[0])
+            observations = {
+                key: value[start:end, 0].to(device)
+                for key, value in b_obs_images.items()
+            }
+            observations["observation.state"] = b_obs_state[start:end, 0].to(device)
+            normalized_observations = actor_module.normalize_inputs(copy.deepcopy(observations))
+            observation_batches.append(
+                actor_module.model.encode_observations(normalized_observations).detach()
+            )
+
+            behavior_actions = b_actions[start:end].to(device)
+            behavior_batches.append(
+                actor_module.normalize_targets({"action": behavior_actions})["action"].detach()
+            )
+
+            repeated_observations = {
+                key: value.repeat_interleave(center_samples, dim=0)
+                for key, value in observations.items()
+            }
+            source_noise = torch.randn(
+                (
+                    (end - start) * center_samples,
+                    actor_module.config.horizon,
+                    action_dim,
+                ),
+                generator=generator,
+                device=device,
+                dtype=behavior_actions.dtype,
+            )
+            sampled_actions, _ = actor_module.predict_action_chunk(
+                repeated_observations,
+                source_noise=source_noise,
+            )
+            sampled_actions = sampled_actions[:, :n_action_steps]
+            sampled_actions = actor_module.normalize_targets(
+                {"action": sampled_actions}
+            )["action"]
+            center_batches.append(
+                sampled_actions.reshape(
+                    end - start,
+                    center_samples,
+                    n_action_steps,
+                    action_dim,
+                ).detach()
+            )
+        return (
+            torch.cat(observation_batches),
+            torch.cat(behavior_batches),
+            torch.cat(center_batches),
+        )
 
     def stratified_mc_audit_gradient(
         chunk_indices: torch.Tensor,
@@ -1580,6 +1694,10 @@ def main(cfg: FlowPPOConfig):
         b_rewards = rewards_stored.reshape(-1, n_action_steps, num_envs_per_process)
         b_rewards = b_rewards.permute(0, 2, 1).reshape(-1, n_action_steps)
 
+        b_terminals = terminals_stored.reshape(
+            -1, n_action_steps, num_envs_per_process
+        ).permute(0, 2, 1).reshape(-1, n_action_steps)
+
         b_obs_images = {
             k: obs_images_stored_list[k].reshape(-1, n_action_steps, num_envs_per_process, 3, img_h, img_w)
             for k in obs_images_stored_list.keys()
@@ -1618,6 +1736,30 @@ def main(cfg: FlowPPOConfig):
         b_mc_valid = mc_valid_stored.reshape(
             -1, n_action_steps, num_envs_per_process
         ).permute(0, 2, 1).reshape(-1, n_action_steps)
+
+        direct_advantage_values = None
+        if (
+            direct_advantage_head is not None
+            and iteration == cfg.direct_advantage_audit_iteration
+        ):
+            actor_module.eval()
+            direct_advantage_head.eval()
+            (
+                direct_observations,
+                direct_behavior_actions,
+                direct_center_actions,
+            ) = direct_advantage_inputs(
+                b_actions=b_actions,
+                b_obs_images=b_obs_images,
+                b_obs_state=b_obs_state,
+                seed_offset=iteration * 7919,
+            )
+            with torch.no_grad():
+                direct_advantage_values = direct_advantage_head(
+                    direct_observations,
+                    direct_behavior_actions,
+                    direct_center_actions,
+                ).cpu()
 
         candidate_b_values = None
         candidate_advantages = None
@@ -1898,6 +2040,138 @@ def main(cfg: FlowPPOConfig):
             logger.info(
                 "Discounted-success critic audit: %s",
                 json.dumps(success_critic_result, sort_keys=True),
+            )
+
+        if (
+            direct_advantage_head is not None
+            and iteration == cfg.direct_advantage_audit_iteration
+        ):
+            if direct_advantage_values is None or not direct_advantage_training_losses:
+                raise RuntimeError("direct-advantage audit has no trained candidate weights")
+            direct_candidate_mask = b_mc_valid[:, 0].bool() & (
+                b_cfm_value_invalid.sum(dim=1) == 0
+            )
+            direct_candidate_indices = torch.where(direct_candidate_mask)[0]
+            required_chunks = cfg.direct_advantage_audit_chunks
+            if direct_candidate_indices.numel() < required_chunks:
+                raise RuntimeError(
+                    "direct-advantage audit requires "
+                    f"{required_chunks} fully valid labeled chunks, "
+                    f"found {direct_candidate_indices.numel()}"
+                )
+            rank_targets = b_mc_returns[direct_candidate_indices, 0].float()
+            rank_control = b_advantages[direct_candidate_indices, 0].float()
+            rank_candidate = direct_advantage_values[direct_candidate_indices].float()
+            if not torch.isfinite(rank_candidate).all() or rank_candidate.std() <= 0:
+                raise RuntimeError("direct-advantage audit produced invalid candidate weights")
+            control_spearman = spearman_rank_correlation(rank_control, rank_targets)
+            candidate_spearman = spearman_rank_correlation(rank_candidate, rank_targets)
+
+            gradient_generator = torch.Generator().manual_seed(
+                cfg.seed + iteration * 6151
+            )
+            gradient_indices = direct_candidate_indices[
+                torch.randperm(
+                    direct_candidate_indices.numel(), generator=gradient_generator
+                )[:required_chunks]
+            ]
+            control_weights = b_advantages[gradient_indices, 0].float()
+            candidate_weights = direct_advantage_values[gradient_indices].float()
+            reference_weights = b_mc_returns[gradient_indices, 0].float()
+            reference_weights = reference_weights - reference_weights.mean()
+            audit_batch_size = required_chunks // 2
+            gradient_batch_results = []
+            actor_module.eval()
+            for audit_batch in range(2):
+                batch_slice = slice(
+                    audit_batch * audit_batch_size,
+                    (audit_batch + 1) * audit_batch_size,
+                )
+                batch_indices = gradient_indices[batch_slice]
+                _, reference_gradient = replay_audit_gradient(
+                    batch_indices,
+                    reference_weights[batch_slice],
+                    b_actions=b_actions,
+                    b_cfm_losses=b_cfm_losses,
+                    b_cfm_loss_ts=b_cfm_loss_ts,
+                    b_cfm_loss_epsilons=b_cfm_loss_epsilons,
+                    b_cfm_value_invalid=b_cfm_value_invalid,
+                    b_obs_images=b_obs_images,
+                    b_obs_state=b_obs_state,
+                )
+                _, control_gradient = replay_audit_gradient(
+                    batch_indices,
+                    control_weights[batch_slice],
+                    b_actions=b_actions,
+                    b_cfm_losses=b_cfm_losses,
+                    b_cfm_loss_ts=b_cfm_loss_ts,
+                    b_cfm_loss_epsilons=b_cfm_loss_epsilons,
+                    b_cfm_value_invalid=b_cfm_value_invalid,
+                    b_obs_images=b_obs_images,
+                    b_obs_state=b_obs_state,
+                )
+                _, candidate_gradient = replay_audit_gradient(
+                    batch_indices,
+                    candidate_weights[batch_slice],
+                    b_actions=b_actions,
+                    b_cfm_losses=b_cfm_losses,
+                    b_cfm_loss_ts=b_cfm_loss_ts,
+                    b_cfm_loss_epsilons=b_cfm_loss_epsilons,
+                    b_cfm_value_invalid=b_cfm_value_invalid,
+                    b_obs_images=b_obs_images,
+                    b_obs_state=b_obs_state,
+                )
+                reference_norm = reference_gradient.norm().item()
+                if reference_norm <= 0 or not torch.isfinite(reference_gradient).all():
+                    raise RuntimeError("direct-advantage audit produced an invalid reference gradient")
+                control_cosine = torch.nn.functional.cosine_similarity(
+                    control_gradient.unsqueeze(0), reference_gradient.unsqueeze(0), dim=1
+                ).item()
+                candidate_cosine = torch.nn.functional.cosine_similarity(
+                    candidate_gradient.unsqueeze(0), reference_gradient.unsqueeze(0), dim=1
+                ).item()
+                gradient_batch_results.append(
+                    {
+                        "batch": audit_batch,
+                        "num_chunks": audit_batch_size,
+                        "reference_gradient_norm": reference_norm,
+                        "control_gradient_cosine_to_reference": control_cosine,
+                        "candidate_gradient_cosine_to_reference": candidate_cosine,
+                        "candidate_cosine_gain": candidate_cosine - control_cosine,
+                    }
+                )
+            actor_module.train()
+            if cfg.freeze_vision_encoder:
+                actor_module.model.vision_encoder.eval()
+            first_loss = direct_advantage_training_losses[0]
+            final_loss = direct_advantage_training_losses[-1]
+            direct_advantage_result = {
+                "iteration": iteration,
+                "num_rank_chunks": int(direct_candidate_indices.numel()),
+                "num_gradient_chunks_audited": required_chunks,
+                "center_samples": cfg.direct_advantage_center_samples,
+                "horizon_chunks": cfg.direct_advantage_horizon_chunks,
+                "control_advantage_spearman": control_spearman,
+                "candidate_advantage_spearman": candidate_spearman,
+                "candidate_spearman_gain": candidate_spearman - control_spearman,
+                "candidate_weight_mean": float(rank_candidate.mean().item()),
+                "candidate_weight_std": float(rank_candidate.std(unbiased=False).item()),
+                "training_losses": direct_advantage_training_losses,
+                "training_loss_relative_change": final_loss / max(first_loss, 1e-12) - 1.0,
+                "batches": gradient_batch_results,
+            }
+            direct_advantage_output_path = (
+                Path(cfg.direct_advantage_audit_output_json)
+                if cfg.direct_advantage_audit_output_json is not None
+                else run_dir / "direct_advantage_audit.json"
+            )
+            direct_advantage_output_path.parent.mkdir(parents=True, exist_ok=True)
+            direct_advantage_output_path.write_text(
+                json.dumps(direct_advantage_result, indent=2, sort_keys=True) + "\n"
+            )
+            logger.info(
+                "Direct-advantage audit: %s",
+                json.dumps(direct_advantage_result, sort_keys=True),
             )
 
         replay_audit_indices = None
@@ -2662,6 +2936,78 @@ def main(cfg: FlowPPOConfig):
 
             if early_stop:
                 break
+
+        if (
+            direct_advantage_head is not None
+            and iteration == cfg.direct_advantage_audit_iteration - 1
+        ):
+            actor_module.eval()
+            critic.eval()
+            direct_advantage_head.train()
+            (
+                direct_train_observations,
+                direct_train_behavior_actions,
+                direct_train_center_actions,
+            ) = direct_advantage_inputs(
+                b_actions=b_actions,
+                b_obs_images=b_obs_images,
+                b_obs_state=b_obs_state,
+                seed_offset=iteration * 7919 + 1,
+            )
+            chunks_per_rollout = steps_per_iteration // n_action_steps
+            with torch.no_grad():
+                fixed_baseline_values = critic(direct_train_observations).reshape(
+                    chunks_per_rollout, num_envs_per_process
+                )
+                final_observations = actor_module.normalize_inputs(copy.deepcopy(next_obs))
+                final_observation_cond = actor_module.model.encode_observations(
+                    final_observations
+                )
+                final_baseline_values = critic(final_observation_cond).reshape(-1)
+                macro_rewards, macro_terminals = discounted_macro_rewards(
+                    rewards_stored.to(device),
+                    terminals_stored.to(device),
+                    n_action_steps,
+                    cfg.discount,
+                )
+                valid_chunks = (
+                    b_cfm_value_invalid.sum(dim=1) == 0
+                ).reshape(chunks_per_rollout, num_envs_per_process).to(device)
+            direct_advantage_training_losses = []
+            for _ in range(10):
+                optimizer_direct_advantage.zero_grad(set_to_none=True)
+                direct_train_advantages = direct_advantage_head(
+                    direct_train_observations,
+                    direct_train_behavior_actions,
+                    direct_train_center_actions,
+                ).reshape(chunks_per_rollout, num_envs_per_process)
+                direct_residuals = direct_advantage_residuals(
+                    direct_train_advantages,
+                    macro_rewards,
+                    macro_terminals,
+                    fixed_baseline_values,
+                    final_baseline_values,
+                    valid_chunks,
+                    cfg.discount**n_action_steps,
+                    cfg.direct_advantage_horizon_chunks,
+                )
+                direct_loss = direct_residuals.square().mean()
+                if not torch.isfinite(direct_loss):
+                    raise RuntimeError("direct-advantage training produced a non-finite loss")
+                direct_loss.backward()
+                nn.utils.clip_grad_norm_(direct_advantage_head.parameters(), cfg.max_grad_norm)
+                optimizer_direct_advantage.step()
+                direct_advantage_training_losses.append(float(direct_loss.item()))
+            logger.info(
+                "Direct-advantage side training: windows=%d first_loss=%.6f final_loss=%.6f",
+                direct_residuals.numel(),
+                direct_advantage_training_losses[0],
+                direct_advantage_training_losses[-1],
+            )
+            actor_module.train()
+            critic.train()
+            if cfg.freeze_vision_encoder:
+                actor_module.model.vision_encoder.eval()
 
         if early_stop_audit_tensors is not None:
             active_fractions = [
