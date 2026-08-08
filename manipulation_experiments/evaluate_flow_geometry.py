@@ -42,6 +42,10 @@ def _load_policy(cfg: GeometryConfig, metadata: LeRobotDatasetMetadata) -> FlowM
     config_dict.pop("type", None)
     config_dict.pop("normalization_mapping", None)
     policy_cfg = FlowMatchingConfig(**config_dict)
+    policy_cfg.image_features = [key for key in policy_cfg.input_features if "image" in key]
+    policy_cfg.state_features = [
+        key for key in policy_cfg.input_features if "state" in key or "pos" in key
+    ]
     policy = FlowMatchingPolicy(policy_cfg, dataset_stats=metadata.stats)
     policy.load_state_dict(load_file(checkpoint_path / "policy" / "model.safetensors", device="cpu"))
 
@@ -181,4 +185,3 @@ def main(cfg: GeometryConfig) -> None:
 
 if __name__ == "__main__":
     main(tyro.cli(GeometryConfig))
-
