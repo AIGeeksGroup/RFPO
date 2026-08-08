@@ -10,14 +10,17 @@ optimizer epochs.
 ## Locked Paired Audit
 
 - Initialization: `95j3noe4_step_6000`, EMA weights and Huber CFM loss
-- Can rollout seed: 20260821; official scale-1 Gaussian source
-- Budget per condition: 8 environments, 320 collection steps, and two iterations
+- Can rollout seed: 20260822; official scale-1 Gaussian source
+- Budget per condition: 16 environments, 320 collection steps, and two iterations. The original
+  8-environment audit was rejected before candidate-gradient computation because it produced only
+  54 positive valid chunks against the locked requirement of 64.
 - Control actor learning rate: `1e-5`
 - Candidate actor learning rate: `2.5e-6`
 - Unchanged settings: ten update epochs, critic learning rate and updates, GAE, optimizer, clipping,
   minibatches, MC8 CFM sampling, and all rollout settings
-- Audit data: the same seeded 64 positive-advantage fully valid iteration-2 chunks in each condition,
-  split into two batches of 32
+- Audit data: 64 seeded positive-advantage fully valid iteration-2 chunks in each condition, split
+  into two batches of 32. Separate asynchronous MuJoCo processes are not assumed to have identical
+  episode boundaries even with the same seed.
 - Held-out anchor: one independent MC8 set drawn before the actor update and fixed across epochs
 - Measurements after every epoch: active positive-ratio fraction, gradient cosine to the pre-update
   held-out gradient, and held-out surrogate gain
@@ -25,8 +28,8 @@ optimizer epochs.
 
 ## Gates
 
-Require identical eligible/audited chunk counts across paired conditions and finite nonzero
-gradients. At epoch 10, all gates must pass:
+Require at least 64 eligible chunks and exactly 64 audited chunks in each condition, plus finite
+nonzero gradients. At epoch 10, all gates must pass:
 
 1. candidate pooled active positive-ratio fraction is at least 0.80;
 2. in each batch, candidate gradient cosine is at least 0.60 and at least 0.20 higher than control;
