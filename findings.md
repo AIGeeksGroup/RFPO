@@ -124,6 +124,12 @@ improve the high-signal step-6000 screen. Actor-update collection was 426/734 (5
 425/725 (58.62%) for control, and final random evaluation was 64% versus 72%. The hypothesis that
 minibatch normalization drift materially destabilizes the update is therefore unsupported.
 
+Joint antithetic CFM sampling produced a real variance reduction but failed its no-shift gate. On
+two fixed Can batches, normalized MC8 gradient MSE fell by 35.8% and 23.8%, scalar-loss CV fell, and
+within-mode gradient cosine improved. However, IID-versus-antithetic average-gradient cosine was
+only 0.964 and 0.955, below the preregistered 0.99 requirement in both batches. This does not justify
+an online update, and paired or quasi-Monte Carlo sampling variants are stopped without tuning.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -145,6 +151,7 @@ minibatch normalization drift materially destabilizes the update is therefore un
 - Reflow's 22% curvature reduction does not translate into lower CFM gradient disagreement, so an online reflow auxiliary lacks its proposed stabilization mechanism.
 - Can step 6000 faithfully reproduces the high-quality 96% zero / roughly 64% random base-policy regime in Appendix D.4, enabling more informative short-budget optimizer experiments without conflating initialization and algorithm effects.
 - Freezing advantage moments over a complete rollout does not improve FPO++; simple rescaling changes are now closed alongside reward-weighting changes.
+- Joint antithetic time/noise pairs reduce finite-MC gradient dispersion, but the locked audit could not establish sufficiently invariant average update direction.
 
 ## Lessons and Constraints
 
@@ -159,7 +166,8 @@ minibatch normalization drift materially destabilizes the update is therefore un
 - Is curvature correlated with FPO ratio variance or gradient disagreement?
 - Should reflow be an offline post-training stage, an auxiliary online loss, or both?
 - Which reward-aware FPO++ mechanism can improve Can success without relying on unstable BC-source exploration changes?
+- Can recent successful standard-Gaussian trajectories be replayed while keeping stale-policy CFM ratios and gradient bias controlled?
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, and rollout-level advantage normalization are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The verified step-6000 Can policy supplies a high-signal short-budget screen; the next intervention must add useful update information rather than rescale the same advantages, then transfer back to the official step-1000 initialization if supported.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, and antithetic CFM sampling are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The verified step-6000 Can policy supplies a high-signal short-budget screen; the next candidate is successful standard-Gaussian on-policy replay, beginning with a stale-ratio and bias audit before any online integration.

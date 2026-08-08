@@ -128,8 +128,14 @@ hypotheses:
     priority: high
   - id: H14
     statement: "Joint antithetic time/noise pairs reduce MC8 CFM policy-gradient estimator variance at unchanged compute."
-    status: active
+    status: refuted
     motivation: "FPO++ ratios depend on Monte Carlo CFM samples; symmetric pairing can improve estimator information efficiency without changing the objective or exploration distribution."
+    parent: H2
+    priority: high
+  - id: H15
+    statement: "Reusing recent successful standard-Gaussian on-policy trajectories can increase useful FPO++ update information without unacceptable stale-policy ratio error."
+    status: active
+    motivation: "H8-H11 show that reward supply and reweighting alone are insufficient; replay may reuse rare valid successes, but only if short-horizon policy staleness is measurable and controlled."
     parent: H2
     priority: high
 
@@ -147,7 +153,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 84
+  total_runs: 85
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -538,11 +544,23 @@ experiments:
       value: 0.58038
       episodes: 734
       successes: 426
+    - run: antithetic_cfm_audit_seed20260813_batch0
+      metric: normalized_gradient_mse_relative_change
+      value: -0.35840
+      cross_mode_average_gradient_cosine: 0.96366
+      cfm_samples: 8
+      repeats: 8
+    - run: antithetic_cfm_audit_seed20260813_batch1
+      metric: normalized_gradient_mse_relative_change
+      value: -0.23835
+      cross_mode_average_gradient_cosine: 0.95465
+      cfm_samples: 8
+      repeats: 8
 
 outer_loop:
   cycle: 3
-  last_direction: "Stop normalization-scope changes; use the high-signal step-6000 screen to test an intervention that changes the information in the policy update rather than only its rescaling."
-  last_reflection: "Fixed rollout-level advantage moments produced 426/734 collection successes versus 425/725 for minibatch normalization (p=0.832) and lower final random evaluation (64% versus 72%). H13 is refuted."
+  last_direction: "Stop antithetic and quasi-Monte Carlo variants under the locked no-shift failure; audit successful on-policy replay for stale-ratio error and update bias before training."
+  last_reflection: "Joint antithetic MC8 reduced normalized gradient MSE by 35.8% and 23.8%, but cross-mode average-gradient cosine was only 0.964 and 0.955 versus the locked 0.99 gate. H14 is refuted without online training."
 
 workspace:
   findings: "findings.md"
