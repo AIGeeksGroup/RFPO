@@ -250,6 +250,12 @@ hypotheses:
     motivation: "Independent Gaussian sources change abruptly at every replan; temporal correlation preserves the exact N(0,I) marginal unlike the failed previous-action prior, while making neighboring action chunks more coherent."
     parent: null
     priority: high
+  - id: H32
+    statement: "Projecting only the negative-advantage FPO++ gradient when it conflicts with the positive-advantage gradient improves alignment to observed Monte Carlo outcomes without discarding negative on-policy information."
+    status: active
+    motivation: "FPO++ uses positive and negative advantages to move CFM losses in opposite directions; sparse-reward minibatches may let the abundant negative branch cancel useful positive updates. Sign-conflict projection preserves both branches except for their directly opposing component and requires no loss coefficient."
+    parent: H2
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -855,7 +861,7 @@ experiments:
 
 outer_loop:
   cycle: 18
-  last_direction: "Stop temporal-source interventions and select a distinct H32 training signal using the balanced step-6000 screen."
+  last_direction: "Audit advantage-sign conflict projection as H32 before any online training; require replicated improvement to an observed-outcome gradient reference."
   last_reflection: "H31 passed every marginal and action-coherence gate but collapsed balanced random-source Can success from 13/20 to 0/20. Preserving one-step Gaussian marginals does not preserve the episode-level source process required by the policy; strong temporal smoothness suppresses adaptive replanning rather than improving control."
 
 workspace:
