@@ -240,7 +240,7 @@ hypotheses:
     priority: high
   - id: H30
     statement: "Training-time zero-endpoint conflict projection improves full-Gaussian Can success without materially degrading zero-source success."
-    status: refuted
+    status: invalidated
     motivation: "H29 passed both fixed-batch mechanism gates while retaining over 72% of surrogate progress and removing over 66% of deterministic endpoint drift."
     parent: H29
     priority: high
@@ -835,7 +835,7 @@ experiments:
 outer_loop:
   cycle: 17
   last_direction: "Test marginal-preserving temporal correlation of the Gaussian flow source as a distinct inference mechanism on the non-saturated released step-6000 random-source benchmark."
-  last_reflection: "H29's narrow endpoint projection passed its mechanism audit, but H30's trained control saturated the short screen. H31 returns to the released step-6000 checkpoint and targets cross-chunk source jitter: unlike WarmPrior, AR(1) correlation preserves the standard-Gaussian marginal and needs no retraining."
+  last_reflection: "H30's 20-episode/50-environment screen was invalidated by first-completion censoring. H31 passed its source and action-coherence audit; its paired reward screen now uses an equal one-episode quota across 20 environments so fast successful terminations cannot crowd out failures."
 
 workspace:
   findings: "findings.md"

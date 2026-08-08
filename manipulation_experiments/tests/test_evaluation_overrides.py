@@ -1,6 +1,7 @@
 import pytest
 
 from src.evaluation_overrides import (
+    balanced_episode_quota,
     completed_environment_success_rates,
     validate_action_steps,
 )
@@ -28,3 +29,10 @@ def test_success_rates_skip_environments_without_completed_episodes():
 def test_success_rates_reject_mismatched_environment_counts():
     with pytest.raises(ValueError, match="same length"):
         completed_environment_success_rates([1], [1, 0])
+
+
+def test_balanced_episode_quota_requires_equal_integer_allocation():
+    assert balanced_episode_quota(20, 20) == 1
+    assert balanced_episode_quota(100, 20) == 5
+    with pytest.raises(ValueError, match="divisible"):
+        balanced_episode_quota(20, 16)

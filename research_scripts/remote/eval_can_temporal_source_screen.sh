@@ -22,7 +22,8 @@ for sampling_mode in random correlated_random; do
     --load-ema True \
     --eval-env Can \
     --eval-num-episodes 20 \
-    --eval-num-envs 50 \
+    --eval-num-envs 20 \
+    --balanced-episodes-per-env True \
     --sampling-mode "$sampling_mode" \
     --source-temporal-correlation 0.9 \
     --sampling-steps 10 \

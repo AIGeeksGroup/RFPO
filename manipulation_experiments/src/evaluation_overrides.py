@@ -24,3 +24,12 @@ def completed_environment_success_rates(
         for successes, done_episodes in zip(successes_per_env, done_episodes_per_env)
         if done_episodes > 0
     ]
+
+
+def balanced_episode_quota(num_episodes: int, num_envs: int) -> int:
+    """Return an equal per-environment episode quota for unbiased small screens."""
+    if num_episodes < 1 or num_envs < 1:
+        raise ValueError("episode and environment counts must be positive")
+    if num_episodes % num_envs != 0:
+        raise ValueError("balanced evaluation requires episodes divisible by environments")
+    return num_episodes // num_envs

@@ -31,7 +31,8 @@ where the first source and every post-reset source are independently standard Ga
 - Checkpoint: exact released Can `95j3noe4_step_6000` EMA actor; no training.
 - Conditions: official IID random source versus AR(1) random source with `rho = 0.9`.
 - Shared evaluation seed: 20260831.
-- Sampling: 10 Euler steps, 16 executed actions per chunk, 20 episodes, 50 OSMesa environments.
+- Sampling: 10 Euler steps, 8 executed actions per chunk, 20 episodes, 20 OSMesa environments.
+- Use balanced episode accounting: each environment contributes exactly its first completed episode.
 - Primary gate: AR(1) must exceed IID by at least 2/20 successes. All actions must be finite.
 - Zero-source evaluation is omitted because H31 does not alter zero sampling.
 - Stop without tuning or confirmation on failure. On success only, run a 50-episode independent
@@ -40,3 +41,12 @@ where the first source and every post-reset source are independently standard Ga
 
 OSMesa is accepted only for the paired mechanism and reward screens. Final benchmark claims still
 require healthy EGL or an explicitly authorized rendering GPU.
+
+## Pre-Candidate Infrastructure Correction
+
+The initial IID control used 20 episodes with 50 environments. It selected the first 20 completions,
+which favors early successful terminations over horizon-length failures and yielded an invalid 20/20.
+No correlated-source rollout had started when this was detected. Correct the paired screen to 20
+environments with one recorded episode per environment, retain seed 20260831, rho, checkpoint,
+sampling steps, action steps, and every gate unchanged. The invalid control summary is archived but
+must not be used as evidence.

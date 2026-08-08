@@ -22,6 +22,7 @@ from termcolor import colored
 
 from src.dexmg_env import VectorizedEnvWrapper, create_vectorized_env
 from src.evaluation_overrides import (
+    balanced_episode_quota,
     completed_environment_success_rates,
     validate_action_steps,
 )
@@ -89,6 +90,8 @@ class EvalCheckpointConfig:
     """Number of episodes for evaluation."""
     eval_num_envs: int = 2
     """Number of parallel environments for evaluation."""
+    balanced_episodes_per_env: bool = False
+    """Require each environment to contribute an equal number of completed episodes."""
     eval_camera_size: int = 84
     """Camera size for evaluation."""
     camera_name: str = "agentview"
@@ -164,6 +167,7 @@ def _run_rollouts(
         "zero", "random", "antithetic_average", "correlated_random"
     ] = "random",
     source_temporal_correlation: float = 0.9,
+    balanced_episodes_per_env: bool = False,
     annotate_video: bool = True,
 ):
     """Run *num_episodes* episodes with *policy* in vectorized *env* and compute success-rate."""
@@ -178,6 +182,11 @@ def _run_rollouts(
     successes_list = [[] for _ in range(num_parallel_envs)]
     dones_list = [[] for _ in range(num_parallel_envs)]
     done_episodes = sum(sum(dones_list[env_idx]) for env_idx in range(num_parallel_envs))
+    episode_quota = (
+        balanced_episode_quota(num_episodes, num_parallel_envs)
+        if balanced_episodes_per_env
+        else None
+    )
     total_steps = 0
     start_time = time.perf_counter()
 
@@ -251,8 +260,13 @@ def _run_rollouts(
             for env_idx_tensor in terminated_envs:
                 env_idx = int(env_idx_tensor.item())
                 is_success = env_idx_tensor in success_envs
-                dones_list[env_idx].append(1)
-                successes_list[env_idx].append(int(is_success))
+                record_episode = (
+                    episode_quota is None
+                    or len(dones_list[env_idx]) < episode_quota
+                )
+                if record_episode:
+                    dones_list[env_idx].append(1)
+                    successes_list[env_idx].append(int(is_success))
 
                 # discard the frames from the terminated environments since it is a new observation on the reseted new environment
                 if save_video:
@@ -260,12 +274,13 @@ def _run_rollouts(
                 episode_steps[env_idx] -= 1
 
                 # Record per-episode stats
-                all_episode_returns.append(episode_returns[env_idx])
-                all_episode_lengths.append(episode_steps[env_idx])
-                all_episode_successes.append(int(is_success))
+                if record_episode:
+                    all_episode_returns.append(episode_returns[env_idx])
+                    all_episode_lengths.append(episode_steps[env_idx])
+                    all_episode_successes.append(int(is_success))
                 episode_returns[env_idx] = 0.0
 
-                if save_video and video_writer is not None:
+                if record_episode and save_video and video_writer is not None:
                     for step_idx, frame in enumerate(episode_frames[env_idx]):
                         if annotate_video:
                             frame = _annotate_frame(
@@ -643,6 +658,7 @@ def main(cfg: EvalCheckpointConfig):
         save_video=cfg.save_video,
         sampling_mode=sampling_mode,
         source_temporal_correlation=cfg.source_temporal_correlation,
+        balanced_episodes_per_env=cfg.balanced_episodes_per_env,
         annotate_video=cfg.annotate_video,
     )
 
@@ -701,6 +717,7 @@ def main(cfg: EvalCheckpointConfig):
         f.write(f"Checkpoint: {cfg.checkpoint_step}\n")
         f.write(f"Run ID: {cfg.wandb_run_id}\n")
         f.write(f"Episodes: {cfg.eval_num_episodes}\n")
+        f.write(f"Balanced Episodes Per Env: {cfg.balanced_episodes_per_env}\n")
         f.write(f"Sampling Mode: {sampling_mode}\n")
         if sampling_mode == "correlated_random":
             f.write(f"Source Temporal Correlation: {cfg.source_temporal_correlation}\n")
