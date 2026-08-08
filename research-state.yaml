@@ -240,7 +240,7 @@ hypotheses:
     priority: high
   - id: H30
     statement: "Training-time zero-endpoint conflict projection improves full-Gaussian Can success without materially degrading zero-source success."
-    status: active
+    status: refuted
     motivation: "H29 passed both fixed-batch mechanism gates while retaining over 72% of surrogate progress and removing over 66% of deterministic endpoint drift."
     parent: H29
     priority: high
@@ -259,7 +259,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 103
+  total_runs: 107
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -811,11 +811,25 @@ experiments:
       metric: success_rate
       value: 0.60
       episodes: 20
+    - run: can_step6000_h30_candidate_osmesa_seed20260828
+      metric: projection_active_fraction
+      value: 0.1125
+      actor_optimizer_steps: 320
+      mean_gradient_cosine: 0.20239
+      mean_gradient_norm_retention: 0.99954
+    - run: can_step6000_h30_control_zero_eval_seed20260829
+      metric: success_rate
+      value: 1.0
+      episodes: 20
+    - run: can_step6000_h30_control_random_eval_seed20260829
+      metric: success_rate
+      value: 1.0
+      episodes: 20
 
 outer_loop:
-  cycle: 16
-  last_direction: "Narrow behavior-preserving gradient projection from generic flow queries to the deterministic action endpoint used by the successful Can policy."
-  last_reflection: "H28 confirmed severe RL/BC gradient conflict and excellent drift protection, but full velocity-field projection retained only 34-46% of surrogate gain. The constraint is active but protects too broad a function."
+  cycle: 17
+  last_direction: "Redesign the next reward screen so the matched control has measurable headroom before testing another training intervention."
+  last_reflection: "H29's narrow endpoint projection passed its mechanism audit, but H30's four-update control saturated both locked 20-episode modes at 20/20. The strict +2 random gate became mathematically impossible, so H30 stopped before candidate evaluation. This does not establish reward harm; it shows that the current short step-6000 screen is no longer discriminative."
 
 workspace:
   findings: "findings.md"

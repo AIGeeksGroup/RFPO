@@ -1,0 +1,3244 @@
+{
+  "iterations": [
+    {
+      "iteration": 2,
+      "mean_anchor_mse": 0.005803588716664448,
+      "mean_gradient_cosine": 0.3000851039963891,
+      "mean_gradient_norm_retention": 0.9997791440935464,
+      "num_actor_steps": 80,
+      "projection_active_fraction": 0.05,
+      "steps": [
+        {
+          "anchor_gradient_norm": 2.5991078018705593e-06,
+          "anchor_mse": 1.5673294368086232e-13,
+          "gradient_cosine": -0.17425820231437683,
+          "gradient_dot": -5.6581752687634435e-06,
+          "gradient_norm_retention": 0.9846999413647247,
+          "projected_gradient_norm": 12.301633834838867,
+          "projection_active": true,
+          "rl_gradient_norm": 12.49277400970459
+        },
+        {
+          "anchor_gradient_norm": 1.1299612522125244,
+          "anchor_mse": 0.003021088195964694,
+          "gradient_cosine": 0.4493561387062073,
+          "gradient_dot": 5.041711330413818,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 9.92941665649414,
+          "projection_active": false,
+          "rl_gradient_norm": 9.92941665649414
+        },
+        {
+          "anchor_gradient_norm": 0.9652450680732727,
+          "anchor_mse": 0.0038619800470769405,
+          "gradient_cosine": 0.4232034683227539,
+          "gradient_dot": 2.986905813217163,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 7.311975002288818,
+          "projection_active": false,
+          "rl_gradient_norm": 7.311975002288818
+        },
+        {
+          "anchor_gradient_norm": 0.9031385779380798,
+          "anchor_mse": 0.0045218938030302525,
+          "gradient_cosine": 0.19978749752044678,
+          "gradient_dot": 1.6527235507965088,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 9.159621238708496,
+          "projection_active": false,
+          "rl_gradient_norm": 9.159621238708496
+        },
+        {
+          "anchor_gradient_norm": 1.076099157333374,
+          "anchor_mse": 0.006070126313716173,
+          "gradient_cosine": 0.3801518976688385,
+          "gradient_dot": 3.8303682804107666,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 9.363346099853516,
+          "projection_active": false,
+          "rl_gradient_norm": 9.363346099853516
+        },
+        {
+          "anchor_gradient_norm": 1.333446979522705,
+          "anchor_mse": 0.007229866459965706,
+          "gradient_cosine": 0.3406047821044922,
+          "gradient_dot": 2.910741090774536,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 6.4088053703308105,
+          "projection_active": false,
+          "rl_gradient_norm": 6.4088053703308105
+        },
+        {
+          "anchor_gradient_norm": 1.4137029647827148,
+          "anchor_mse": 0.007940888404846191,
+          "gradient_cosine": 0.34656164050102234,
+          "gradient_dot": 4.736848831176758,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 9.668316841125488,
+          "projection_active": false,
+          "rl_gradient_norm": 9.668316841125488
+        },
+        {
+          "anchor_gradient_norm": 1.484457015991211,
+          "anchor_mse": 0.0075773922726511955,
+          "gradient_cosine": 0.3425896465778351,
+          "gradient_dot": 3.254485845565796,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 6.399418830871582,
+          "projection_active": false,
+          "rl_gradient_norm": 6.399418830871582
+        },
+        {
+          "anchor_gradient_norm": 1.5808485746383667,
+          "anchor_mse": 0.0084448903799057,
+          "gradient_cosine": 0.5154848098754883,
+          "gradient_dot": 3.963644504547119,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 4.863943576812744,
+          "projection_active": false,
+          "rl_gradient_norm": 4.863943576812744
+        },
+        {
+          "anchor_gradient_norm": 0.9600059390068054,
+          "anchor_mse": 0.004918484948575497,
+          "gradient_cosine": 0.32559219002723694,
+          "gradient_dot": 1.0271389484405518,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 3.2861039638519287,
+          "projection_active": false,
+          "rl_gradient_norm": 3.2861039638519287
+        },
+        {
+          "anchor_gradient_norm": 0.8091235160827637,
+          "anchor_mse": 0.004602032247930765,
+          "gradient_cosine": 0.2652483582496643,
+          "gradient_dot": 0.494992196559906,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.306379795074463,
+          "projection_active": false,
+          "rl_gradient_norm": 2.306379795074463
+        },
+        {
+          "anchor_gradient_norm": 0.9261369109153748,
+          "anchor_mse": 0.006432350259274244,
+          "gradient_cosine": 0.2839983403682709,
+          "gradient_dot": 1.213214635848999,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 4.612608909606934,
+          "projection_active": false,
+          "rl_gradient_norm": 4.612608909606934
+        },
+        {
+          "anchor_gradient_norm": 1.0879766941070557,
+          "anchor_mse": 0.006177583709359169,
+          "gradient_cosine": 0.2999836206436157,
+          "gradient_dot": 1.2792809009552002,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 3.919663667678833,
+          "projection_active": false,
+          "rl_gradient_norm": 3.919663667678833
+        },
+        {
+          "anchor_gradient_norm": 1.1438382863998413,
+          "anchor_mse": 0.006142157129943371,
+          "gradient_cosine": 0.4712654650211334,
+          "gradient_dot": 2.614011287689209,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 4.849279403686523,
+          "projection_active": false,
+          "rl_gradient_norm": 4.849279403686523
+        },
+        {
+          "anchor_gradient_norm": 1.6456875801086426,
+          "anchor_mse": 0.009623601101338863,
+          "gradient_cosine": 0.3582346737384796,
+          "gradient_dot": 1.8376953601837158,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 3.1171557903289795,
+          "projection_active": false,
+          "rl_gradient_norm": 3.1171557903289795
+        },
+        {
+          "anchor_gradient_norm": 1.2064507007598877,
+          "anchor_mse": 0.006093667820096016,
+          "gradient_cosine": 0.4842779040336609,
+          "gradient_dot": 2.2690186500549316,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 3.883594036102295,
+          "projection_active": false,
+          "rl_gradient_norm": 3.883594036102295
+        },
+        {
+          "anchor_gradient_norm": 1.7633272409439087,
+          "anchor_mse": 0.008162455633282661,
+          "gradient_cosine": 0.5294663310050964,
+          "gradient_dot": 1.906567096710205,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.0421178340911865,
+          "projection_active": false,
+          "rl_gradient_norm": 2.0421178340911865
+        },
+        {
+          "anchor_gradient_norm": 1.2719430923461914,
+          "anchor_mse": 0.006831383798271418,
+          "gradient_cosine": 0.5084601640701294,
+          "gradient_dot": 1.6841691732406616,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.6041207313537598,
+          "projection_active": false,
+          "rl_gradient_norm": 2.6041207313537598
+        },
+        {
+          "anchor_gradient_norm": 1.2867239713668823,
+          "anchor_mse": 0.008388791233301163,
+          "gradient_cosine": 0.4443837106227875,
+          "gradient_dot": 1.865973949432373,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 3.263338088989258,
+          "projection_active": false,
+          "rl_gradient_norm": 3.263338088989258
+        },
+        {
+          "anchor_gradient_norm": 0.9614983797073364,
+          "anchor_mse": 0.004589478950947523,
+          "gradient_cosine": 0.3460425138473511,
+          "gradient_dot": 0.9592806696891785,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.883152961730957,
+          "projection_active": false,
+          "rl_gradient_norm": 2.883152961730957
+        },
+        {
+          "anchor_gradient_norm": 0.8190442323684692,
+          "anchor_mse": 0.004867729265242815,
+          "gradient_cosine": 0.3586411476135254,
+          "gradient_dot": 0.6866835951805115,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.3377022743225098,
+          "projection_active": false,
+          "rl_gradient_norm": 2.3377022743225098
+        },
+        {
+          "anchor_gradient_norm": 1.0577582120895386,
+          "anchor_mse": 0.005608686711639166,
+          "gradient_cosine": 0.4017728567123413,
+          "gradient_dot": 1.9847520589828491,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 4.67024040222168,
+          "projection_active": false,
+          "rl_gradient_norm": 4.67024040222168
+        },
+        {
+          "anchor_gradient_norm": 0.9233912825584412,
+          "anchor_mse": 0.005395199172198772,
+          "gradient_cosine": 0.26444360613822937,
+          "gradient_dot": 0.47108641266822815,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.9292198419570923,
+          "projection_active": false,
+          "rl_gradient_norm": 1.9292198419570923
+        },
+        {
+          "anchor_gradient_norm": 0.8534846305847168,
+          "anchor_mse": 0.0058204359374940395,
+          "gradient_cosine": 0.25464871525764465,
+          "gradient_dot": 0.41750046610832214,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.920966386795044,
+          "projection_active": false,
+          "rl_gradient_norm": 1.920966386795044
+        },
+        {
+          "anchor_gradient_norm": 0.9104198217391968,
+          "anchor_mse": 0.004525548312813044,
+          "gradient_cosine": 0.36207568645477295,
+          "gradient_dot": 0.6594122648239136,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.0003957748413086,
+          "projection_active": false,
+          "rl_gradient_norm": 2.0003957748413086
+        },
+        {
+          "anchor_gradient_norm": 1.224452257156372,
+          "anchor_mse": 0.006700995843857527,
+          "gradient_cosine": 0.5624105334281921,
+          "gradient_dot": 1.1574474573135376,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.6807612180709839,
+          "projection_active": false,
+          "rl_gradient_norm": 1.6807612180709839
+        },
+        {
+          "anchor_gradient_norm": 1.0820034742355347,
+          "anchor_mse": 0.0054215677082538605,
+          "gradient_cosine": 0.24790224432945251,
+          "gradient_dot": 0.862797737121582,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 3.216620922088623,
+          "projection_active": false,
+          "rl_gradient_norm": 3.216620922088623
+        },
+        {
+          "anchor_gradient_norm": 1.3139252662658691,
+          "anchor_mse": 0.007848566398024559,
+          "gradient_cosine": 0.42822104692459106,
+          "gradient_dot": 1.008852243423462,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.7930353879928589,
+          "projection_active": false,
+          "rl_gradient_norm": 1.7930353879928589
+        },
+        {
+          "anchor_gradient_norm": 1.029829502105713,
+          "anchor_mse": 0.005319327116012573,
+          "gradient_cosine": 0.3956761956214905,
+          "gradient_dot": 0.5441350936889648,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.33536958694458,
+          "projection_active": false,
+          "rl_gradient_norm": 1.33536958694458
+        },
+        {
+          "anchor_gradient_norm": 1.0000731945037842,
+          "anchor_mse": 0.004320718813687563,
+          "gradient_cosine": 0.4431625008583069,
+          "gradient_dot": 1.9281889200210571,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 4.350656509399414,
+          "projection_active": false,
+          "rl_gradient_norm": 4.350656509399414
+        },
+        {
+          "anchor_gradient_norm": 1.196526288986206,
+          "anchor_mse": 0.00545287411659956,
+          "gradient_cosine": 0.26370784640312195,
+          "gradient_dot": 0.7009813189506531,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.2215757369995117,
+          "projection_active": false,
+          "rl_gradient_norm": 2.2215757369995117
+        },
+        {
+          "anchor_gradient_norm": 1.110518217086792,
+          "anchor_mse": 0.006635423284024,
+          "gradient_cosine": 0.3481965661048889,
+          "gradient_dot": 0.8192576169967651,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.118704080581665,
+          "projection_active": false,
+          "rl_gradient_norm": 2.118704080581665
+        },
+        {
+          "anchor_gradient_norm": 0.8192037343978882,
+          "anchor_mse": 0.004967927001416683,
+          "gradient_cosine": 0.44073089957237244,
+          "gradient_dot": 0.518535852432251,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.436194896697998,
+          "projection_active": false,
+          "rl_gradient_norm": 1.436194896697998
+        },
+        {
+          "anchor_gradient_norm": 1.0783907175064087,
+          "anchor_mse": 0.0061857630498707294,
+          "gradient_cosine": 0.5738959908485413,
+          "gradient_dot": 0.9406284689903259,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.5198781490325928,
+          "projection_active": false,
+          "rl_gradient_norm": 1.5198781490325928
+        },
+        {
+          "anchor_gradient_norm": 0.8700564503669739,
+          "anchor_mse": 0.005174406338483095,
+          "gradient_cosine": 0.3607412278652191,
+          "gradient_dot": 0.299834281206131,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.9552962779998779,
+          "projection_active": false,
+          "rl_gradient_norm": 0.9552962779998779
+        },
+        {
+          "anchor_gradient_norm": 1.26192307472229,
+          "anchor_mse": 0.006986008025705814,
+          "gradient_cosine": 0.5610253214836121,
+          "gradient_dot": 0.9041801691055298,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.2771433591842651,
+          "projection_active": false,
+          "rl_gradient_norm": 1.2771433591842651
+        },
+        {
+          "anchor_gradient_norm": 1.9221614599227905,
+          "anchor_mse": 0.011119014583528042,
+          "gradient_cosine": 0.4252466857433319,
+          "gradient_dot": 1.0787794589996338,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.319780945777893,
+          "projection_active": false,
+          "rl_gradient_norm": 1.319780945777893
+        },
+        {
+          "anchor_gradient_norm": 1.1282768249511719,
+          "anchor_mse": 0.006246643140912056,
+          "gradient_cosine": 0.4762488901615143,
+          "gradient_dot": 0.6261491775512695,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.1652742624282837,
+          "projection_active": false,
+          "rl_gradient_norm": 1.1652742624282837
+        },
+        {
+          "anchor_gradient_norm": 1.9090083837509155,
+          "anchor_mse": 0.01059742085635662,
+          "gradient_cosine": 0.313999742269516,
+          "gradient_dot": 0.8511160612106323,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.4198800325393677,
+          "projection_active": false,
+          "rl_gradient_norm": 1.4198800325393677
+        },
+        {
+          "anchor_gradient_norm": 0.9588164687156677,
+          "anchor_mse": 0.004696676041930914,
+          "gradient_cosine": 0.3423062562942505,
+          "gradient_dot": 0.4186658561229706,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.275607943534851,
+          "projection_active": false,
+          "rl_gradient_norm": 1.275607943534851
+        },
+        {
+          "anchor_gradient_norm": 0.845395028591156,
+          "anchor_mse": 0.00512650515884161,
+          "gradient_cosine": 0.5393437147140503,
+          "gradient_dot": 0.6462383270263672,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.417318344116211,
+          "projection_active": false,
+          "rl_gradient_norm": 1.417318344116211
+        },
+        {
+          "anchor_gradient_norm": 1.1499733924865723,
+          "anchor_mse": 0.007199120707809925,
+          "gradient_cosine": 0.1965300291776657,
+          "gradient_dot": 0.1418432891368866,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.6276132464408875,
+          "projection_active": false,
+          "rl_gradient_norm": 0.6276132464408875
+        },
+        {
+          "anchor_gradient_norm": 0.7331182360649109,
+          "anchor_mse": 0.005097223911434412,
+          "gradient_cosine": 0.1141548827290535,
+          "gradient_dot": 0.0895652249455452,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.0702146291732788,
+          "projection_active": false,
+          "rl_gradient_norm": 1.0702146291732788
+        },
+        {
+          "anchor_gradient_norm": 0.7260666489601135,
+          "anchor_mse": 0.005241784267127514,
+          "gradient_cosine": 0.04737773910164833,
+          "gradient_dot": 0.031062452122569084,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.9029940962791443,
+          "projection_active": false,
+          "rl_gradient_norm": 0.9029940962791443
+        },
+        {
+          "anchor_gradient_norm": 0.9676305651664734,
+          "anchor_mse": 0.007293569389730692,
+          "gradient_cosine": 0.23338823020458221,
+          "gradient_dot": 0.18177497386932373,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.8049067258834839,
+          "projection_active": false,
+          "rl_gradient_norm": 0.8049067258834839
+        },
+        {
+          "anchor_gradient_norm": 0.9895644783973694,
+          "anchor_mse": 0.005888273473829031,
+          "gradient_cosine": 0.2882596254348755,
+          "gradient_dot": 0.19397889077663422,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.6800276637077332,
+          "projection_active": false,
+          "rl_gradient_norm": 0.6800276637077332
+        },
+        {
+          "anchor_gradient_norm": 0.7632454037666321,
+          "anchor_mse": 0.004816628526896238,
+          "gradient_cosine": 0.386752724647522,
+          "gradient_dot": 0.21426922082901,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.7258756160736084,
+          "projection_active": false,
+          "rl_gradient_norm": 0.7258756160736084
+        },
+        {
+          "anchor_gradient_norm": 1.298503041267395,
+          "anchor_mse": 0.007503601722419262,
+          "gradient_cosine": 0.13296076655387878,
+          "gradient_dot": 0.3268521726131439,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.8931493759155273,
+          "projection_active": false,
+          "rl_gradient_norm": 1.8931493759155273
+        },
+        {
+          "anchor_gradient_norm": 1.2757513523101807,
+          "anchor_mse": 0.0063643548637628555,
+          "gradient_cosine": 0.202973410487175,
+          "gradient_dot": 0.1346641331911087,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.5200520157814026,
+          "projection_active": false,
+          "rl_gradient_norm": 0.5200520157814026
+        },
+        {
+          "anchor_gradient_norm": 0.7339392900466919,
+          "anchor_mse": 0.004924962762743235,
+          "gradient_cosine": 0.2759797275066376,
+          "gradient_dot": 0.1263192892074585,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.6236376762390137,
+          "projection_active": false,
+          "rl_gradient_norm": 0.6236376762390137
+        },
+        {
+          "anchor_gradient_norm": 1.0906327962875366,
+          "anchor_mse": 0.007042328827083111,
+          "gradient_cosine": 0.10666511952877045,
+          "gradient_dot": 0.03918631002306938,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.33684754371643066,
+          "projection_active": false,
+          "rl_gradient_norm": 0.33684754371643066
+        },
+        {
+          "anchor_gradient_norm": 1.0944936275482178,
+          "anchor_mse": 0.00619153818115592,
+          "gradient_cosine": 0.20939254760742188,
+          "gradient_dot": 0.2719329297542572,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.1865535974502563,
+          "projection_active": false,
+          "rl_gradient_norm": 1.1865535974502563
+        },
+        {
+          "anchor_gradient_norm": 0.6874740719795227,
+          "anchor_mse": 0.0037162392400205135,
+          "gradient_cosine": 0.3645119071006775,
+          "gradient_dot": 0.1839127391576767,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.7339116334915161,
+          "projection_active": false,
+          "rl_gradient_norm": 0.7339116334915161
+        },
+        {
+          "anchor_gradient_norm": 1.2288110256195068,
+          "anchor_mse": 0.006936962250620127,
+          "gradient_cosine": 0.11258896440267563,
+          "gradient_dot": 0.12832055985927582,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.9275030493736267,
+          "projection_active": false,
+          "rl_gradient_norm": 0.9275030493736267
+        },
+        {
+          "anchor_gradient_norm": 0.9034858345985413,
+          "anchor_mse": 0.005527179688215256,
+          "gradient_cosine": 0.0909353643655777,
+          "gradient_dot": 0.12710827589035034,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.5471045970916748,
+          "projection_active": false,
+          "rl_gradient_norm": 1.5471045970916748
+        },
+        {
+          "anchor_gradient_norm": 0.9835481643676758,
+          "anchor_mse": 0.005811125040054321,
+          "gradient_cosine": 0.20401005446910858,
+          "gradient_dot": 0.1638089418411255,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.8163763284683228,
+          "projection_active": false,
+          "rl_gradient_norm": 0.8163763284683228
+        },
+        {
+          "anchor_gradient_norm": 1.0189757347106934,
+          "anchor_mse": 0.005781950429081917,
+          "gradient_cosine": -0.021049408242106438,
+          "gradient_dot": -0.02627672627568245,
+          "gradient_norm_retention": 0.9997783354098576,
+          "projected_gradient_norm": 1.2248170375823975,
+          "projection_active": true,
+          "rl_gradient_norm": 1.2250885963439941
+        },
+        {
+          "anchor_gradient_norm": 0.7564651966094971,
+          "anchor_mse": 0.004949045833200216,
+          "gradient_cosine": 0.0009928100043907762,
+          "gradient_dot": 0.000784639734774828,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.0447567701339722,
+          "projection_active": false,
+          "rl_gradient_norm": 1.0447567701339722
+        },
+        {
+          "anchor_gradient_norm": 1.3734403848648071,
+          "anchor_mse": 0.007292695809155703,
+          "gradient_cosine": 0.23801791667938232,
+          "gradient_dot": 0.18311044573783875,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.5601361989974976,
+          "projection_active": false,
+          "rl_gradient_norm": 0.5601361989974976
+        },
+        {
+          "anchor_gradient_norm": 0.7096574902534485,
+          "anchor_mse": 0.004361323546618223,
+          "gradient_cosine": 0.5132153630256653,
+          "gradient_dot": 0.3365992307662964,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.9241973161697388,
+          "projection_active": false,
+          "rl_gradient_norm": 0.9241973161697388
+        },
+        {
+          "anchor_gradient_norm": 1.1724529266357422,
+          "anchor_mse": 0.00747758150100708,
+          "gradient_cosine": 0.054348137229681015,
+          "gradient_dot": 0.048673734068870544,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.7638614177703857,
+          "projection_active": false,
+          "rl_gradient_norm": 0.7638614177703857
+        },
+        {
+          "anchor_gradient_norm": 0.7294538021087646,
+          "anchor_mse": 0.005156219936907291,
+          "gradient_cosine": 0.5097859501838684,
+          "gradient_dot": 0.25872111320495605,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.6957387924194336,
+          "projection_active": false,
+          "rl_gradient_norm": 0.6957387924194336
+        },
+        {
+          "anchor_gradient_norm": 0.8250771164894104,
+          "anchor_mse": 0.005359209142625332,
+          "gradient_cosine": 0.3960585594177246,
+          "gradient_dot": 0.3763434886932373,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.1516764163970947,
+          "projection_active": false,
+          "rl_gradient_norm": 1.1516764163970947
+        },
+        {
+          "anchor_gradient_norm": 0.9874645471572876,
+          "anchor_mse": 0.006533837411552668,
+          "gradient_cosine": 0.32159557938575745,
+          "gradient_dot": 0.512768030166626,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.6146907806396484,
+          "projection_active": false,
+          "rl_gradient_norm": 1.6146907806396484
+        },
+        {
+          "anchor_gradient_norm": 1.216232419013977,
+          "anchor_mse": 0.007352670654654503,
+          "gradient_cosine": 0.26218658685684204,
+          "gradient_dot": 0.3685118854045868,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.1556450128555298,
+          "projection_active": false,
+          "rl_gradient_norm": 1.1556450128555298
+        },
+        {
+          "anchor_gradient_norm": 0.6998803019523621,
+          "anchor_mse": 0.004387914668768644,
+          "gradient_cosine": 0.3962147533893585,
+          "gradient_dot": 0.11495907604694366,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.41456139087677,
+          "projection_active": false,
+          "rl_gradient_norm": 0.41456139087677
+        },
+        {
+          "anchor_gradient_norm": 0.6492605805397034,
+          "anchor_mse": 0.0032282695174217224,
+          "gradient_cosine": 0.3088764548301697,
+          "gradient_dot": 0.186930313706398,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.9321287870407104,
+          "projection_active": false,
+          "rl_gradient_norm": 0.9321287870407104
+        },
+        {
+          "anchor_gradient_norm": 1.1136456727981567,
+          "anchor_mse": 0.007178259082138538,
+          "gradient_cosine": 0.17899613082408905,
+          "gradient_dot": 0.08811397850513458,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.44203242659568787,
+          "projection_active": false,
+          "rl_gradient_norm": 0.44203242659568787
+        },
+        {
+          "anchor_gradient_norm": 0.5547760725021362,
+          "anchor_mse": 0.002991624176502228,
+          "gradient_cosine": 0.4873473048210144,
+          "gradient_dot": 0.34209927916526794,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.2653069496154785,
+          "projection_active": false,
+          "rl_gradient_norm": 1.2653069496154785
+        },
+        {
+          "anchor_gradient_norm": 0.6036929488182068,
+          "anchor_mse": 0.004101145081222057,
+          "gradient_cosine": 0.19738122820854187,
+          "gradient_dot": 0.04766815900802612,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.4000427722930908,
+          "projection_active": false,
+          "rl_gradient_norm": 0.4000427722930908
+        },
+        {
+          "anchor_gradient_norm": 0.9784747958183289,
+          "anchor_mse": 0.0062110330909490585,
+          "gradient_cosine": 0.10922139883041382,
+          "gradient_dot": 0.16608591377735138,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.5540872812271118,
+          "projection_active": false,
+          "rl_gradient_norm": 1.5540872812271118
+        },
+        {
+          "anchor_gradient_norm": 0.5711352825164795,
+          "anchor_mse": 0.004171085078269243,
+          "gradient_cosine": 0.12354167550802231,
+          "gradient_dot": 0.01339070126414299,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.18978017568588257,
+          "projection_active": false,
+          "rl_gradient_norm": 0.18978017568588257
+        },
+        {
+          "anchor_gradient_norm": 0.9341633319854736,
+          "anchor_mse": 0.00532474834471941,
+          "gradient_cosine": -0.02898128144443035,
+          "gradient_dot": -0.005854717455804348,
+          "gradient_norm_retention": 0.9995800203230198,
+          "projected_gradient_norm": 0.21616387367248535,
+          "projection_active": true,
+          "rl_gradient_norm": 0.21625469624996185
+        },
+        {
+          "anchor_gradient_norm": 0.48033568263053894,
+          "anchor_mse": 0.003648969577625394,
+          "gradient_cosine": 0.27030709385871887,
+          "gradient_dot": 0.04956471920013428,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.38174235820770264,
+          "projection_active": false,
+          "rl_gradient_norm": 0.38174235820770264
+        },
+        {
+          "anchor_gradient_norm": 0.7707024812698364,
+          "anchor_mse": 0.004890034906566143,
+          "gradient_cosine": 0.1831768900156021,
+          "gradient_dot": 0.05431750416755676,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.3847533166408539,
+          "projection_active": false,
+          "rl_gradient_norm": 0.3847533166408539
+        },
+        {
+          "anchor_gradient_norm": 1.0117316246032715,
+          "anchor_mse": 0.007358091417700052,
+          "gradient_cosine": 0.24809899926185608,
+          "gradient_dot": 0.10887210816144943,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.43373680114746094,
+          "projection_active": false,
+          "rl_gradient_norm": 0.43373680114746094
+        },
+        {
+          "anchor_gradient_norm": 0.9550026655197144,
+          "anchor_mse": 0.0037434811238199472,
+          "gradient_cosine": 0.17166821658611298,
+          "gradient_dot": 0.14404833316802979,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.878645658493042,
+          "projection_active": false,
+          "rl_gradient_norm": 0.878645658493042
+        },
+        {
+          "anchor_gradient_norm": 0.8033856153488159,
+          "anchor_mse": 0.004527565557509661,
+          "gradient_cosine": 0.335979700088501,
+          "gradient_dot": 0.18139982223510742,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.6720471978187561,
+          "projection_active": false,
+          "rl_gradient_norm": 0.6720471978187561
+        },
+        {
+          "anchor_gradient_norm": 1.0497875213623047,
+          "anchor_mse": 0.005950188264250755,
+          "gradient_cosine": 0.3372558355331421,
+          "gradient_dot": 0.15781335532665253,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.44574129581451416,
+          "projection_active": false,
+          "rl_gradient_norm": 0.44574129581451416
+        },
+        {
+          "anchor_gradient_norm": 0.6208933591842651,
+          "anchor_mse": 0.0031077107414603233,
+          "gradient_cosine": -0.05874129384756088,
+          "gradient_dot": -0.03211061283946037,
+          "gradient_norm_retention": 0.9982732303861083,
+          "projected_gradient_norm": 0.8788959980010986,
+          "projection_active": true,
+          "rl_gradient_norm": 0.8804162740707397
+        }
+      ]
+    },
+    {
+      "iteration": 3,
+      "mean_anchor_mse": 0.007040134898852557,
+      "mean_gradient_cosine": 0.18216718467883766,
+      "mean_gradient_norm_retention": 0.9996193023284559,
+      "num_actor_steps": 80,
+      "projection_active_fraction": 0.0875,
+      "steps": [
+        {
+          "anchor_gradient_norm": 0.5929692387580872,
+          "anchor_mse": 0.0028431990649551153,
+          "gradient_cosine": 0.009707347489893436,
+          "gradient_dot": 0.07524991780519485,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 13.072940826416016,
+          "projection_active": false,
+          "rl_gradient_norm": 13.072940826416016
+        },
+        {
+          "anchor_gradient_norm": 0.5967326760292053,
+          "anchor_mse": 0.0031891977414488792,
+          "gradient_cosine": 0.2895733416080475,
+          "gradient_dot": 2.1058366298675537,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 12.1867036819458,
+          "projection_active": false,
+          "rl_gradient_norm": 12.1867036819458
+        },
+        {
+          "anchor_gradient_norm": 0.5728685259819031,
+          "anchor_mse": 0.003598145442083478,
+          "gradient_cosine": 0.09675251692533493,
+          "gradient_dot": 0.7274183034896851,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 13.124022483825684,
+          "projection_active": false,
+          "rl_gradient_norm": 13.124022483825684
+        },
+        {
+          "anchor_gradient_norm": 0.6132018566131592,
+          "anchor_mse": 0.003430022392421961,
+          "gradient_cosine": 0.03668709471821785,
+          "gradient_dot": 0.20595228672027588,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 9.154820442199707,
+          "projection_active": false,
+          "rl_gradient_norm": 9.154820442199707
+        },
+        {
+          "anchor_gradient_norm": 0.627223551273346,
+          "anchor_mse": 0.0033262278884649277,
+          "gradient_cosine": 0.020049963146448135,
+          "gradient_dot": 0.13430078327655792,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 10.679295539855957,
+          "projection_active": false,
+          "rl_gradient_norm": 10.679295539855957
+        },
+        {
+          "anchor_gradient_norm": 0.7862918376922607,
+          "anchor_mse": 0.004556430038064718,
+          "gradient_cosine": 0.23171932995319366,
+          "gradient_dot": 1.7178192138671875,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 9.42825698852539,
+          "projection_active": false,
+          "rl_gradient_norm": 9.42825698852539
+        },
+        {
+          "anchor_gradient_norm": 0.8480093479156494,
+          "anchor_mse": 0.0054031116887927055,
+          "gradient_cosine": 0.12763558328151703,
+          "gradient_dot": 1.096679925918579,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 10.13228702545166,
+          "projection_active": false,
+          "rl_gradient_norm": 10.13228702545166
+        },
+        {
+          "anchor_gradient_norm": 0.8855661153793335,
+          "anchor_mse": 0.006003218702971935,
+          "gradient_cosine": 0.34737953543663025,
+          "gradient_dot": 2.5155205726623535,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 8.177163124084473,
+          "projection_active": false,
+          "rl_gradient_norm": 8.177163124084473
+        },
+        {
+          "anchor_gradient_norm": 0.9719562530517578,
+          "anchor_mse": 0.006328582763671875,
+          "gradient_cosine": 0.41568267345428467,
+          "gradient_dot": 2.2278599739074707,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 5.514158725738525,
+          "projection_active": false,
+          "rl_gradient_norm": 5.514158725738525
+        },
+        {
+          "anchor_gradient_norm": 0.802431046962738,
+          "anchor_mse": 0.005943499505519867,
+          "gradient_cosine": 0.24440446496009827,
+          "gradient_dot": 0.6899237632751465,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 3.5179061889648438,
+          "projection_active": false,
+          "rl_gradient_norm": 3.5179061889648438
+        },
+        {
+          "anchor_gradient_norm": 0.8489289283752441,
+          "anchor_mse": 0.007081049028784037,
+          "gradient_cosine": 0.20221741497516632,
+          "gradient_dot": 0.5236110687255859,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 3.0501341819763184,
+          "projection_active": false,
+          "rl_gradient_norm": 3.0501341819763184
+        },
+        {
+          "anchor_gradient_norm": 0.8770021796226501,
+          "anchor_mse": 0.006826616358011961,
+          "gradient_cosine": 0.31090235710144043,
+          "gradient_dot": 0.5884605646133423,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.158205032348633,
+          "projection_active": false,
+          "rl_gradient_norm": 2.158205032348633
+        },
+        {
+          "anchor_gradient_norm": 1.0095994472503662,
+          "anchor_mse": 0.007149416022002697,
+          "gradient_cosine": 0.305740624666214,
+          "gradient_dot": 1.0045201778411865,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 3.25429105758667,
+          "projection_active": false,
+          "rl_gradient_norm": 3.25429105758667
+        },
+        {
+          "anchor_gradient_norm": 0.8107745051383972,
+          "anchor_mse": 0.006243978627026081,
+          "gradient_cosine": 0.28732773661613464,
+          "gradient_dot": 1.2742704153060913,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 5.4699578285217285,
+          "projection_active": false,
+          "rl_gradient_norm": 5.4699578285217285
+        },
+        {
+          "anchor_gradient_norm": 0.9407609701156616,
+          "anchor_mse": 0.007099711801856756,
+          "gradient_cosine": 0.23217740654945374,
+          "gradient_dot": 0.7220701575279236,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 3.3058271408081055,
+          "projection_active": false,
+          "rl_gradient_norm": 3.3058271408081055
+        },
+        {
+          "anchor_gradient_norm": 0.8778573870658875,
+          "anchor_mse": 0.0073235854506492615,
+          "gradient_cosine": 0.23860183358192444,
+          "gradient_dot": 0.8504557609558105,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 4.060261249542236,
+          "projection_active": false,
+          "rl_gradient_norm": 4.060261249542236
+        },
+        {
+          "anchor_gradient_norm": 0.7470850348472595,
+          "anchor_mse": 0.006354345008730888,
+          "gradient_cosine": 0.15109162032604218,
+          "gradient_dot": 0.251991868019104,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.2324209213256836,
+          "projection_active": false,
+          "rl_gradient_norm": 2.2324209213256836
+        },
+        {
+          "anchor_gradient_norm": 0.8081979155540466,
+          "anchor_mse": 0.0061987596563994884,
+          "gradient_cosine": 0.15232427418231964,
+          "gradient_dot": 0.21633189916610718,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.7572506666183472,
+          "projection_active": false,
+          "rl_gradient_norm": 1.7572506666183472
+        },
+        {
+          "anchor_gradient_norm": 1.1089240312576294,
+          "anchor_mse": 0.007881976664066315,
+          "gradient_cosine": 0.5341022610664368,
+          "gradient_dot": 0.8666311502456665,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.4632148742675781,
+          "projection_active": false,
+          "rl_gradient_norm": 1.4632148742675781
+        },
+        {
+          "anchor_gradient_norm": 1.2478718757629395,
+          "anchor_mse": 0.009432140737771988,
+          "gradient_cosine": 0.49843746423721313,
+          "gradient_dot": 2.19968318939209,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 3.5365474224090576,
+          "projection_active": false,
+          "rl_gradient_norm": 3.5365474224090576
+        },
+        {
+          "anchor_gradient_norm": 0.9979491233825684,
+          "anchor_mse": 0.007604814600199461,
+          "gradient_cosine": 0.29093101620674133,
+          "gradient_dot": 0.6064079403877258,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.088653802871704,
+          "projection_active": false,
+          "rl_gradient_norm": 2.088653802871704
+        },
+        {
+          "anchor_gradient_norm": 1.1570236682891846,
+          "anchor_mse": 0.009523500688374043,
+          "gradient_cosine": 0.1657657027244568,
+          "gradient_dot": 0.3010607361793518,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.569701910018921,
+          "projection_active": false,
+          "rl_gradient_norm": 1.569701910018921
+        },
+        {
+          "anchor_gradient_norm": 1.0929471254348755,
+          "anchor_mse": 0.007571114227175713,
+          "gradient_cosine": 0.23500609397888184,
+          "gradient_dot": 0.36784714460372925,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.4321519136428833,
+          "projection_active": false,
+          "rl_gradient_norm": 1.4321519136428833
+        },
+        {
+          "anchor_gradient_norm": 1.0051355361938477,
+          "anchor_mse": 0.008649488911032677,
+          "gradient_cosine": 0.11936420202255249,
+          "gradient_dot": 0.24693314731121063,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.0581672191619873,
+          "projection_active": false,
+          "rl_gradient_norm": 2.0581672191619873
+        },
+        {
+          "anchor_gradient_norm": 1.3204461336135864,
+          "anchor_mse": 0.010455567389726639,
+          "gradient_cosine": 0.0454377755522728,
+          "gradient_dot": 0.0888296589255333,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.48054039478302,
+          "projection_active": false,
+          "rl_gradient_norm": 1.48054039478302
+        },
+        {
+          "anchor_gradient_norm": 0.9575795531272888,
+          "anchor_mse": 0.008937463164329529,
+          "gradient_cosine": 0.29866623878479004,
+          "gradient_dot": 0.36137455701828003,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.2635620832443237,
+          "projection_active": false,
+          "rl_gradient_norm": 1.2635620832443237
+        },
+        {
+          "anchor_gradient_norm": 0.992066502571106,
+          "anchor_mse": 0.007571060210466385,
+          "gradient_cosine": 0.27424389123916626,
+          "gradient_dot": 0.4125441908836365,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.5163265466690063,
+          "projection_active": false,
+          "rl_gradient_norm": 1.5163265466690063
+        },
+        {
+          "anchor_gradient_norm": 0.9758238196372986,
+          "anchor_mse": 0.007869224064052105,
+          "gradient_cosine": 0.3873237371444702,
+          "gradient_dot": 0.4225613474845886,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.1180063486099243,
+          "projection_active": false,
+          "rl_gradient_norm": 1.1180063486099243
+        },
+        {
+          "anchor_gradient_norm": 1.0086376667022705,
+          "anchor_mse": 0.007869125343859196,
+          "gradient_cosine": 0.29773402214050293,
+          "gradient_dot": 0.6138001680374146,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.043917417526245,
+          "projection_active": false,
+          "rl_gradient_norm": 2.043917417526245
+        },
+        {
+          "anchor_gradient_norm": 0.927749752998352,
+          "anchor_mse": 0.006476506125181913,
+          "gradient_cosine": 0.3536215126514435,
+          "gradient_dot": 0.8379794955253601,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.554252862930298,
+          "projection_active": false,
+          "rl_gradient_norm": 2.554252862930298
+        },
+        {
+          "anchor_gradient_norm": 1.1764512062072754,
+          "anchor_mse": 0.008731096051633358,
+          "gradient_cosine": 0.14484255015850067,
+          "gradient_dot": 0.10538135468959808,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.6184344291687012,
+          "projection_active": false,
+          "rl_gradient_norm": 0.6184344291687012
+        },
+        {
+          "anchor_gradient_norm": 0.8514007329940796,
+          "anchor_mse": 0.007058170158416033,
+          "gradient_cosine": 0.030141280964016914,
+          "gradient_dot": 0.018176453188061714,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.7082937359809875,
+          "projection_active": false,
+          "rl_gradient_norm": 0.7082937359809875
+        },
+        {
+          "anchor_gradient_norm": 0.7803307771682739,
+          "anchor_mse": 0.006825424265116453,
+          "gradient_cosine": -0.13677763938903809,
+          "gradient_dot": -0.05795810744166374,
+          "gradient_norm_retention": 0.9906017907549993,
+          "projected_gradient_norm": 0.537922203540802,
+          "projection_active": true,
+          "rl_gradient_norm": 0.5430256724357605
+        },
+        {
+          "anchor_gradient_norm": 0.7368074059486389,
+          "anchor_mse": 0.0064709363505244255,
+          "gradient_cosine": 0.013714338652789593,
+          "gradient_dot": 0.006861899979412556,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.6790715456008911,
+          "projection_active": false,
+          "rl_gradient_norm": 0.6790715456008911
+        },
+        {
+          "anchor_gradient_norm": 0.9462287425994873,
+          "anchor_mse": 0.007014522794634104,
+          "gradient_cosine": 0.13493962585926056,
+          "gradient_dot": 0.09449765831232071,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.7400915026664734,
+          "projection_active": false,
+          "rl_gradient_norm": 0.7400915026664734
+        },
+        {
+          "anchor_gradient_norm": 0.9714368581771851,
+          "anchor_mse": 0.007049871608614922,
+          "gradient_cosine": 0.18074972927570343,
+          "gradient_dot": 0.1592595875263214,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.9070127010345459,
+          "projection_active": false,
+          "rl_gradient_norm": 0.9070127010345459
+        },
+        {
+          "anchor_gradient_norm": 0.9628687500953674,
+          "anchor_mse": 0.00830444972962141,
+          "gradient_cosine": 0.2912544906139374,
+          "gradient_dot": 0.4099804162979126,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.4619193077087402,
+          "projection_active": false,
+          "rl_gradient_norm": 1.4619193077087402
+        },
+        {
+          "anchor_gradient_norm": 0.7537499070167542,
+          "anchor_mse": 0.005910583771765232,
+          "gradient_cosine": 0.1589047908782959,
+          "gradient_dot": 0.18051743507385254,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.507144570350647,
+          "projection_active": false,
+          "rl_gradient_norm": 1.507144570350647
+        },
+        {
+          "anchor_gradient_norm": 0.9935938715934753,
+          "anchor_mse": 0.009513972327113152,
+          "gradient_cosine": 0.042780064046382904,
+          "gradient_dot": 0.04528261721134186,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.065322756767273,
+          "projection_active": false,
+          "rl_gradient_norm": 1.065322756767273
+        },
+        {
+          "anchor_gradient_norm": 0.7308040857315063,
+          "anchor_mse": 0.00693445885553956,
+          "gradient_cosine": 0.20278027653694153,
+          "gradient_dot": 0.1798902004957199,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.2138941287994385,
+          "projection_active": false,
+          "rl_gradient_norm": 1.2138941287994385
+        },
+        {
+          "anchor_gradient_norm": 0.7663796544075012,
+          "anchor_mse": 0.006368322763592005,
+          "gradient_cosine": 0.10101095587015152,
+          "gradient_dot": 0.0722423791885376,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.9332104325294495,
+          "projection_active": false,
+          "rl_gradient_norm": 0.9332104325294495
+        },
+        {
+          "anchor_gradient_norm": 0.6701897382736206,
+          "anchor_mse": 0.005980086512863636,
+          "gradient_cosine": 0.19387993216514587,
+          "gradient_dot": 0.23408618569374084,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.8015451431274414,
+          "projection_active": false,
+          "rl_gradient_norm": 1.8015451431274414
+        },
+        {
+          "anchor_gradient_norm": 0.8938198089599609,
+          "anchor_mse": 0.008927776478230953,
+          "gradient_cosine": 0.0980600118637085,
+          "gradient_dot": 0.05121120810508728,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.5842828154563904,
+          "projection_active": false,
+          "rl_gradient_norm": 0.5842828154563904
+        },
+        {
+          "anchor_gradient_norm": 0.7113092541694641,
+          "anchor_mse": 0.007022031117230654,
+          "gradient_cosine": 0.2508738338947296,
+          "gradient_dot": 0.10579885542392731,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.5928804874420166,
+          "projection_active": false,
+          "rl_gradient_norm": 0.5928804874420166
+        },
+        {
+          "anchor_gradient_norm": 0.8197371363639832,
+          "anchor_mse": 0.00759455980733037,
+          "gradient_cosine": -0.047010816633701324,
+          "gradient_dot": -0.03428562730550766,
+          "gradient_norm_retention": 0.9988943196273808,
+          "projected_gradient_norm": 0.8887083530426025,
+          "projection_active": true,
+          "rl_gradient_norm": 0.8896920680999756
+        },
+        {
+          "anchor_gradient_norm": 0.9517794847488403,
+          "anchor_mse": 0.00805660616606474,
+          "gradient_cosine": -0.033039651811122894,
+          "gradient_dot": -0.02098580077290535,
+          "gradient_norm_retention": 0.9994540149372867,
+          "projected_gradient_norm": 0.6669857501983643,
+          "projection_active": true,
+          "rl_gradient_norm": 0.6673501133918762
+        },
+        {
+          "anchor_gradient_norm": 0.8669549226760864,
+          "anchor_mse": 0.006808260455727577,
+          "gradient_cosine": 0.2233041524887085,
+          "gradient_dot": 0.14287269115447998,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.7379992008209229,
+          "projection_active": false,
+          "rl_gradient_norm": 0.7379992008209229
+        },
+        {
+          "anchor_gradient_norm": 0.725274384021759,
+          "anchor_mse": 0.0066308388486504555,
+          "gradient_cosine": 0.05731474980711937,
+          "gradient_dot": 0.034999046474695206,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.8419522643089294,
+          "projection_active": false,
+          "rl_gradient_norm": 0.8419522643089294
+        },
+        {
+          "anchor_gradient_norm": 0.9347144365310669,
+          "anchor_mse": 0.00855203066021204,
+          "gradient_cosine": -0.02569245733320713,
+          "gradient_dot": -0.0026617180556058884,
+          "gradient_norm_retention": 0.9996698718207265,
+          "projected_gradient_norm": 0.11079854518175125,
+          "projection_active": true,
+          "rl_gradient_norm": 0.11083513498306274
+        },
+        {
+          "anchor_gradient_norm": 0.9630715250968933,
+          "anchor_mse": 0.007145411800593138,
+          "gradient_cosine": 0.18292377889156342,
+          "gradient_dot": 0.4590267241001129,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.605609178543091,
+          "projection_active": false,
+          "rl_gradient_norm": 2.605609178543091
+        },
+        {
+          "anchor_gradient_norm": 0.9379073977470398,
+          "anchor_mse": 0.009011860936880112,
+          "gradient_cosine": 0.25507572293281555,
+          "gradient_dot": 0.2006935328245163,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.8388886451721191,
+          "projection_active": false,
+          "rl_gradient_norm": 0.8388886451721191
+        },
+        {
+          "anchor_gradient_norm": 0.8446353077888489,
+          "anchor_mse": 0.00690667238086462,
+          "gradient_cosine": 0.2306777834892273,
+          "gradient_dot": 0.14910516142845154,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.7652752995491028,
+          "projection_active": false,
+          "rl_gradient_norm": 0.7652752995491028
+        },
+        {
+          "anchor_gradient_norm": 0.8448954224586487,
+          "anchor_mse": 0.006179658230394125,
+          "gradient_cosine": 0.08484429121017456,
+          "gradient_dot": 0.03544280678033829,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.4944274127483368,
+          "projection_active": false,
+          "rl_gradient_norm": 0.4944274127483368
+        },
+        {
+          "anchor_gradient_norm": 0.8745200634002686,
+          "anchor_mse": 0.0075154672376811504,
+          "gradient_cosine": 0.3131965696811676,
+          "gradient_dot": 0.09644299000501633,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.3521144986152649,
+          "projection_active": false,
+          "rl_gradient_norm": 0.3521144986152649
+        },
+        {
+          "anchor_gradient_norm": 1.0010368824005127,
+          "anchor_mse": 0.007842187769711018,
+          "gradient_cosine": 0.3420673608779907,
+          "gradient_dot": 0.25763803720474243,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.7523990869522095,
+          "projection_active": false,
+          "rl_gradient_norm": 0.7523990869522095
+        },
+        {
+          "anchor_gradient_norm": 0.8391383290290833,
+          "anchor_mse": 0.005481511354446411,
+          "gradient_cosine": 0.4233205318450928,
+          "gradient_dot": 0.39719438552856445,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.1181503534317017,
+          "projection_active": false,
+          "rl_gradient_norm": 1.1181503534317017
+        },
+        {
+          "anchor_gradient_norm": 0.8398348689079285,
+          "anchor_mse": 0.006670369300991297,
+          "gradient_cosine": 0.27908748388290405,
+          "gradient_dot": 0.10345843434333801,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.4413992762565613,
+          "projection_active": false,
+          "rl_gradient_norm": 0.4413992762565613
+        },
+        {
+          "anchor_gradient_norm": 0.745509684085846,
+          "anchor_mse": 0.005633676890283823,
+          "gradient_cosine": 0.22084015607833862,
+          "gradient_dot": 0.3520405888557434,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.1382644176483154,
+          "projection_active": false,
+          "rl_gradient_norm": 2.1382644176483154
+        },
+        {
+          "anchor_gradient_norm": 0.878493070602417,
+          "anchor_mse": 0.006532690022140741,
+          "gradient_cosine": 0.03234182298183441,
+          "gradient_dot": 0.020370833575725555,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.7169781923294067,
+          "projection_active": false,
+          "rl_gradient_norm": 0.7169781923294067
+        },
+        {
+          "anchor_gradient_norm": 0.9407263994216919,
+          "anchor_mse": 0.008041850291192532,
+          "gradient_cosine": 0.12613140046596527,
+          "gradient_dot": 0.1274162083864212,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.0738364458084106,
+          "projection_active": false,
+          "rl_gradient_norm": 1.0738364458084106
+        },
+        {
+          "anchor_gradient_norm": 0.6661239266395569,
+          "anchor_mse": 0.007190191652625799,
+          "gradient_cosine": 0.011305812746286392,
+          "gradient_dot": 0.005037928000092506,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.6689522862434387,
+          "projection_active": false,
+          "rl_gradient_norm": 0.6689522862434387
+        },
+        {
+          "anchor_gradient_norm": 0.655544638633728,
+          "anchor_mse": 0.0057706101797521114,
+          "gradient_cosine": 0.10155846178531647,
+          "gradient_dot": 0.04549861699342728,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.6834076046943665,
+          "projection_active": false,
+          "rl_gradient_norm": 0.6834076046943665
+        },
+        {
+          "anchor_gradient_norm": 0.7196860909461975,
+          "anchor_mse": 0.0062409862875938416,
+          "gradient_cosine": 0.10647778958082199,
+          "gradient_dot": 0.16416673362255096,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.1423134803771973,
+          "projection_active": false,
+          "rl_gradient_norm": 2.1423134803771973
+        },
+        {
+          "anchor_gradient_norm": 0.7645597457885742,
+          "anchor_mse": 0.006085689645260572,
+          "gradient_cosine": 0.1951960325241089,
+          "gradient_dot": 0.21289114654064178,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.4265111684799194,
+          "projection_active": false,
+          "rl_gradient_norm": 1.4265111684799194
+        },
+        {
+          "anchor_gradient_norm": 1.1177946329116821,
+          "anchor_mse": 0.009482930414378643,
+          "gradient_cosine": -0.11409341543912888,
+          "gradient_dot": -0.0890054777264595,
+          "gradient_norm_retention": 0.9934699787613533,
+          "projected_gradient_norm": 0.6933441758155823,
+          "projection_active": true,
+          "rl_gradient_norm": 0.6979014873504639
+        },
+        {
+          "anchor_gradient_norm": 0.6235890984535217,
+          "anchor_mse": 0.005877973511815071,
+          "gradient_cosine": 0.2805632948875427,
+          "gradient_dot": 0.1219676285982132,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.6971323490142822,
+          "projection_active": false,
+          "rl_gradient_norm": 0.6971323490142822
+        },
+        {
+          "anchor_gradient_norm": 0.8301299214363098,
+          "anchor_mse": 0.007310593035072088,
+          "gradient_cosine": 0.1647956669330597,
+          "gradient_dot": 0.10458047688007355,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.7644670009613037,
+          "projection_active": false,
+          "rl_gradient_norm": 0.7644670009613037
+        },
+        {
+          "anchor_gradient_norm": 0.6907884478569031,
+          "anchor_mse": 0.006559609901160002,
+          "gradient_cosine": -0.14353735744953156,
+          "gradient_dot": -0.10824254900217056,
+          "gradient_norm_retention": 0.9896449049912088,
+          "projected_gradient_norm": 1.080357313156128,
+          "projection_active": true,
+          "rl_gradient_norm": 1.0916615724563599
+        },
+        {
+          "anchor_gradient_norm": 0.7206042408943176,
+          "anchor_mse": 0.006067499052733183,
+          "gradient_cosine": 0.2182585746049881,
+          "gradient_dot": 0.0787486806511879,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.5006971955299377,
+          "projection_active": false,
+          "rl_gradient_norm": 0.5006971955299377
+        },
+        {
+          "anchor_gradient_norm": 0.795386552810669,
+          "anchor_mse": 0.0060011157765984535,
+          "gradient_cosine": 0.24678272008895874,
+          "gradient_dot": 0.2329566478729248,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.1868125200271606,
+          "projection_active": false,
+          "rl_gradient_norm": 1.1868125200271606
+        },
+        {
+          "anchor_gradient_norm": 0.796471893787384,
+          "anchor_mse": 0.006772648077458143,
+          "gradient_cosine": 0.07834319025278091,
+          "gradient_dot": 0.03953070566058159,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.63352370262146,
+          "projection_active": false,
+          "rl_gradient_norm": 0.63352370262146
+        },
+        {
+          "anchor_gradient_norm": 0.8740423917770386,
+          "anchor_mse": 0.007891346700489521,
+          "gradient_cosine": -0.066156767308712,
+          "gradient_dot": -0.03185727447271347,
+          "gradient_norm_retention": 0.997809305383522,
+          "projected_gradient_norm": 0.5497299432754517,
+          "projection_active": true,
+          "rl_gradient_norm": 0.5509368777275085
+        },
+        {
+          "anchor_gradient_norm": 0.9179895520210266,
+          "anchor_mse": 0.008361263200640678,
+          "gradient_cosine": 0.15187671780586243,
+          "gradient_dot": 0.05074726417660713,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.363985151052475,
+          "projection_active": false,
+          "rl_gradient_norm": 0.363985151052475
+        },
+        {
+          "anchor_gradient_norm": 1.2075302600860596,
+          "anchor_mse": 0.009982078336179256,
+          "gradient_cosine": 0.15949377417564392,
+          "gradient_dot": 0.0799010843038559,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.41486892104148865,
+          "projection_active": false,
+          "rl_gradient_norm": 0.41486892104148865
+        },
+        {
+          "anchor_gradient_norm": 1.1762819290161133,
+          "anchor_mse": 0.00668883603066206,
+          "gradient_cosine": 0.2948887348175049,
+          "gradient_dot": 0.7833304405212402,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.258267641067505,
+          "projection_active": false,
+          "rl_gradient_norm": 2.258267641067505
+        },
+        {
+          "anchor_gradient_norm": 1.3211777210235596,
+          "anchor_mse": 0.009304867126047611,
+          "gradient_cosine": 0.25665825605392456,
+          "gradient_dot": 0.3808705508708954,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.1232099533081055,
+          "projection_active": false,
+          "rl_gradient_norm": 1.1232099533081055
+        },
+        {
+          "anchor_gradient_norm": 0.9434919357299805,
+          "anchor_mse": 0.007882367819547653,
+          "gradient_cosine": 0.1873338520526886,
+          "gradient_dot": 0.06325486302375793,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.35788166522979736,
+          "projection_active": false,
+          "rl_gradient_norm": 0.35788166522979736
+        },
+        {
+          "anchor_gradient_norm": 0.9058867692947388,
+          "anchor_mse": 0.00797074194997549,
+          "gradient_cosine": 0.29037290811538696,
+          "gradient_dot": 0.21046294271945953,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.8001024723052979,
+          "projection_active": false,
+          "rl_gradient_norm": 0.8001024723052979
+        },
+        {
+          "anchor_gradient_norm": 1.0449321269989014,
+          "anchor_mse": 0.008908571675419807,
+          "gradient_cosine": 0.2866345942020416,
+          "gradient_dot": 0.29326924681663513,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.9791513681411743,
+          "projection_active": false,
+          "rl_gradient_norm": 0.9791513681411743
+        },
+        {
+          "anchor_gradient_norm": 0.8598830699920654,
+          "anchor_mse": 0.00740443728864193,
+          "gradient_cosine": 0.29347577691078186,
+          "gradient_dot": 0.09693257510662079,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.3841121792793274,
+          "projection_active": false,
+          "rl_gradient_norm": 0.3841121792793274
+        }
+      ]
+    },
+    {
+      "iteration": 4,
+      "mean_anchor_mse": 0.011919440515339375,
+      "mean_gradient_cosine": 0.1475121305207722,
+      "mean_gradient_norm_retention": 0.9990551535997042,
+      "num_actor_steps": 80,
+      "projection_active_fraction": 0.2,
+      "steps": [
+        {
+          "anchor_gradient_norm": 1.140197992324829,
+          "anchor_mse": 0.008085892535746098,
+          "gradient_cosine": 0.019404372200369835,
+          "gradient_dot": 0.25479856133461,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 11.516409873962402,
+          "projection_active": false,
+          "rl_gradient_norm": 11.516409873962402
+        },
+        {
+          "anchor_gradient_norm": 0.7809507250785828,
+          "anchor_mse": 0.007113121449947357,
+          "gradient_cosine": 0.14381517469882965,
+          "gradient_dot": 0.9221236705780029,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 8.210333824157715,
+          "projection_active": false,
+          "rl_gradient_norm": 8.210333824157715
+        },
+        {
+          "anchor_gradient_norm": 0.9446167349815369,
+          "anchor_mse": 0.007371294312179089,
+          "gradient_cosine": 0.13360051810741425,
+          "gradient_dot": 1.1671068668365479,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 9.247979164123535,
+          "projection_active": false,
+          "rl_gradient_norm": 9.247979164123535
+        },
+        {
+          "anchor_gradient_norm": 1.0578852891921997,
+          "anchor_mse": 0.00876098033040762,
+          "gradient_cosine": 0.2992507219314575,
+          "gradient_dot": 2.681593894958496,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 8.470698356628418,
+          "projection_active": false,
+          "rl_gradient_norm": 8.470698356628418
+        },
+        {
+          "anchor_gradient_norm": 1.083791971206665,
+          "anchor_mse": 0.008876468986272812,
+          "gradient_cosine": 0.25786277651786804,
+          "gradient_dot": 1.8691539764404297,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 6.68821907043457,
+          "projection_active": false,
+          "rl_gradient_norm": 6.68821907043457
+        },
+        {
+          "anchor_gradient_norm": 1.9556771516799927,
+          "anchor_mse": 0.014120387844741344,
+          "gradient_cosine": 0.20772668719291687,
+          "gradient_dot": 2.9598920345306396,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 7.285953998565674,
+          "projection_active": false,
+          "rl_gradient_norm": 7.285953998565674
+        },
+        {
+          "anchor_gradient_norm": 1.0981884002685547,
+          "anchor_mse": 0.009762398898601532,
+          "gradient_cosine": 0.060099080204963684,
+          "gradient_dot": 0.5316414833068848,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 8.055160522460938,
+          "projection_active": false,
+          "rl_gradient_norm": 8.055160522460938
+        },
+        {
+          "anchor_gradient_norm": 1.1351031064987183,
+          "anchor_mse": 0.009866302832961082,
+          "gradient_cosine": 0.21208466589450836,
+          "gradient_dot": 2.0942091941833496,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 8.69912338256836,
+          "projection_active": false,
+          "rl_gradient_norm": 8.69912338256836
+        },
+        {
+          "anchor_gradient_norm": 0.9095405340194702,
+          "anchor_mse": 0.008680760860443115,
+          "gradient_cosine": 0.29915791749954224,
+          "gradient_dot": 1.476155161857605,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 5.425121307373047,
+          "projection_active": false,
+          "rl_gradient_norm": 5.425121307373047
+        },
+        {
+          "anchor_gradient_norm": 1.2008106708526611,
+          "anchor_mse": 0.01138881966471672,
+          "gradient_cosine": 0.19583052396774292,
+          "gradient_dot": 0.7497677206993103,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 3.1883928775787354,
+          "projection_active": false,
+          "rl_gradient_norm": 3.1883928775787354
+        },
+        {
+          "anchor_gradient_norm": 1.2707369327545166,
+          "anchor_mse": 0.011714230291545391,
+          "gradient_cosine": 0.19701093435287476,
+          "gradient_dot": 1.1405071020126343,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 4.555667400360107,
+          "projection_active": false,
+          "rl_gradient_norm": 4.555667400360107
+        },
+        {
+          "anchor_gradient_norm": 1.2345962524414062,
+          "anchor_mse": 0.01150911208242178,
+          "gradient_cosine": 0.29845407605171204,
+          "gradient_dot": 1.5813767910003662,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 4.29173469543457,
+          "projection_active": false,
+          "rl_gradient_norm": 4.29173469543457
+        },
+        {
+          "anchor_gradient_norm": 1.2221027612686157,
+          "anchor_mse": 0.01103486493229866,
+          "gradient_cosine": 0.28503698110580444,
+          "gradient_dot": 1.508474349975586,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 4.330410003662109,
+          "projection_active": false,
+          "rl_gradient_norm": 4.330410003662109
+        },
+        {
+          "anchor_gradient_norm": 1.2938110828399658,
+          "anchor_mse": 0.012058048509061337,
+          "gradient_cosine": 0.5539465546607971,
+          "gradient_dot": 4.4681196212768555,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 6.234276294708252,
+          "projection_active": false,
+          "rl_gradient_norm": 6.234276294708252
+        },
+        {
+          "anchor_gradient_norm": 1.402241587638855,
+          "anchor_mse": 0.012868443503975868,
+          "gradient_cosine": 0.35194259881973267,
+          "gradient_dot": 1.8317968845367432,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 3.7117836475372314,
+          "projection_active": false,
+          "rl_gradient_norm": 3.7117836475372314
+        },
+        {
+          "anchor_gradient_norm": 1.941156029701233,
+          "anchor_mse": 0.015269326977431774,
+          "gradient_cosine": -0.015437574125826359,
+          "gradient_dot": -0.11230156570672989,
+          "gradient_norm_retention": 0.9998808397053554,
+          "projected_gradient_norm": 3.747093677520752,
+          "projection_active": true,
+          "rl_gradient_norm": 3.747540235519409
+        },
+        {
+          "anchor_gradient_norm": 1.4070794582366943,
+          "anchor_mse": 0.01155314315110445,
+          "gradient_cosine": 0.35018190741539,
+          "gradient_dot": 1.5438878536224365,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 3.133310556411743,
+          "projection_active": false,
+          "rl_gradient_norm": 3.133310556411743
+        },
+        {
+          "anchor_gradient_norm": 1.4234288930892944,
+          "anchor_mse": 0.013234212063252926,
+          "gradient_cosine": 0.3000781238079071,
+          "gradient_dot": 0.8811219334602356,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.0628416538238525,
+          "projection_active": false,
+          "rl_gradient_norm": 2.0628416538238525
+        },
+        {
+          "anchor_gradient_norm": 1.5427560806274414,
+          "anchor_mse": 0.01166443806141615,
+          "gradient_cosine": 0.2583080232143402,
+          "gradient_dot": 1.0849804878234863,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.722618341445923,
+          "projection_active": false,
+          "rl_gradient_norm": 2.722618341445923
+        },
+        {
+          "anchor_gradient_norm": 1.4620885848999023,
+          "anchor_mse": 0.011213020421564579,
+          "gradient_cosine": 0.11857718229293823,
+          "gradient_dot": 0.371806800365448,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.1445813179016113,
+          "projection_active": false,
+          "rl_gradient_norm": 2.1445813179016113
+        },
+        {
+          "anchor_gradient_norm": 1.2841020822525024,
+          "anchor_mse": 0.012752320617437363,
+          "gradient_cosine": 0.2349824160337448,
+          "gradient_dot": 1.1028908491134644,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 3.6550862789154053,
+          "projection_active": false,
+          "rl_gradient_norm": 3.6550862789154053
+        },
+        {
+          "anchor_gradient_norm": 1.2242555618286133,
+          "anchor_mse": 0.009744156152009964,
+          "gradient_cosine": 0.32534506916999817,
+          "gradient_dot": 1.48707914352417,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 3.733513832092285,
+          "projection_active": false,
+          "rl_gradient_norm": 3.733513832092285
+        },
+        {
+          "anchor_gradient_norm": 1.1236947774887085,
+          "anchor_mse": 0.010731068439781666,
+          "gradient_cosine": 0.2529574930667877,
+          "gradient_dot": 0.8121161460876465,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.857078790664673,
+          "projection_active": false,
+          "rl_gradient_norm": 2.857078790664673
+        },
+        {
+          "anchor_gradient_norm": 1.363163948059082,
+          "anchor_mse": 0.013228707946836948,
+          "gradient_cosine": -0.04052793234586716,
+          "gradient_dot": -0.1674473136663437,
+          "gradient_norm_retention": 0.9991783764088543,
+          "projected_gradient_norm": 3.028437852859497,
+          "projection_active": true,
+          "rl_gradient_norm": 3.030928134918213
+        },
+        {
+          "anchor_gradient_norm": 1.0173500776290894,
+          "anchor_mse": 0.010476155206561089,
+          "gradient_cosine": 0.22223921120166779,
+          "gradient_dot": 0.49068307876586914,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.1702511310577393,
+          "projection_active": false,
+          "rl_gradient_norm": 2.1702511310577393
+        },
+        {
+          "anchor_gradient_norm": 2.0903520584106445,
+          "anchor_mse": 0.011731615290045738,
+          "gradient_cosine": 0.13143302500247955,
+          "gradient_dot": 0.41581615805625916,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.513482689857483,
+          "projection_active": false,
+          "rl_gradient_norm": 1.513482689857483
+        },
+        {
+          "anchor_gradient_norm": 1.0337289571762085,
+          "anchor_mse": 0.01054428331553936,
+          "gradient_cosine": 0.2572983503341675,
+          "gradient_dot": 0.6002602577209473,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.256814956665039,
+          "projection_active": false,
+          "rl_gradient_norm": 2.256814956665039
+        },
+        {
+          "anchor_gradient_norm": 1.29831063747406,
+          "anchor_mse": 0.013198171742260456,
+          "gradient_cosine": 0.4720609486103058,
+          "gradient_dot": 2.237910747528076,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 3.651455879211426,
+          "projection_active": false,
+          "rl_gradient_norm": 3.651455879211426
+        },
+        {
+          "anchor_gradient_norm": 1.172791838645935,
+          "anchor_mse": 0.01216825656592846,
+          "gradient_cosine": 0.12141130864620209,
+          "gradient_dot": 0.20554083585739136,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.4435040950775146,
+          "projection_active": false,
+          "rl_gradient_norm": 1.4435040950775146
+        },
+        {
+          "anchor_gradient_norm": 1.3278297185897827,
+          "anchor_mse": 0.013100654818117619,
+          "gradient_cosine": -0.02779010497033596,
+          "gradient_dot": -0.06471667438745499,
+          "gradient_norm_retention": 0.9996138542383695,
+          "projected_gradient_norm": 1.7531371116638184,
+          "projection_active": true,
+          "rl_gradient_norm": 1.7538143396377563
+        },
+        {
+          "anchor_gradient_norm": 1.2443361282348633,
+          "anchor_mse": 0.012368946336209774,
+          "gradient_cosine": 0.2934587001800537,
+          "gradient_dot": 0.5878850221633911,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.6099326610565186,
+          "projection_active": false,
+          "rl_gradient_norm": 1.6099326610565186
+        },
+        {
+          "anchor_gradient_norm": 1.4413729906082153,
+          "anchor_mse": 0.015467817895114422,
+          "gradient_cosine": 0.3916235864162445,
+          "gradient_dot": 1.298018455505371,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.2995119094848633,
+          "projection_active": false,
+          "rl_gradient_norm": 2.2995119094848633
+        },
+        {
+          "anchor_gradient_norm": 1.128360390663147,
+          "anchor_mse": 0.010712744668126106,
+          "gradient_cosine": 0.24088381230831146,
+          "gradient_dot": 0.3657758831977844,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.3457351922988892,
+          "projection_active": false,
+          "rl_gradient_norm": 1.3457351922988892
+        },
+        {
+          "anchor_gradient_norm": 2.0276925563812256,
+          "anchor_mse": 0.015155619941651821,
+          "gradient_cosine": 0.11663742363452911,
+          "gradient_dot": 0.36091387271881104,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.526031732559204,
+          "projection_active": false,
+          "rl_gradient_norm": 1.526031732559204
+        },
+        {
+          "anchor_gradient_norm": 1.262704849243164,
+          "anchor_mse": 0.013105860911309719,
+          "gradient_cosine": 0.17870068550109863,
+          "gradient_dot": 0.35085657238960266,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.5548967123031616,
+          "projection_active": false,
+          "rl_gradient_norm": 1.5548967123031616
+        },
+        {
+          "anchor_gradient_norm": 1.3257908821105957,
+          "anchor_mse": 0.013243330642580986,
+          "gradient_cosine": 0.1997537910938263,
+          "gradient_dot": 0.332722544670105,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.2563544511795044,
+          "projection_active": false,
+          "rl_gradient_norm": 1.2563544511795044
+        },
+        {
+          "anchor_gradient_norm": 1.399521827697754,
+          "anchor_mse": 0.013261928223073483,
+          "gradient_cosine": 0.0905311107635498,
+          "gradient_dot": 0.11333932727575302,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.8945468664169312,
+          "projection_active": false,
+          "rl_gradient_norm": 0.8945468664169312
+        },
+        {
+          "anchor_gradient_norm": 1.4860175848007202,
+          "anchor_mse": 0.014807273633778095,
+          "gradient_cosine": 0.38747990131378174,
+          "gradient_dot": 1.2193539142608643,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.117661952972412,
+          "projection_active": false,
+          "rl_gradient_norm": 2.117661952972412
+        },
+        {
+          "anchor_gradient_norm": 1.122937798500061,
+          "anchor_mse": 0.011914069764316082,
+          "gradient_cosine": 0.36661240458488464,
+          "gradient_dot": 0.9199209809303284,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.2345376014709473,
+          "projection_active": false,
+          "rl_gradient_norm": 2.2345376014709473
+        },
+        {
+          "anchor_gradient_norm": 1.0058767795562744,
+          "anchor_mse": 0.013452915474772453,
+          "gradient_cosine": 0.15638288855552673,
+          "gradient_dot": 0.14510050415992737,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.9224331974983215,
+          "projection_active": false,
+          "rl_gradient_norm": 0.9224331974983215
+        },
+        {
+          "anchor_gradient_norm": 1.1553338766098022,
+          "anchor_mse": 0.013348063454031944,
+          "gradient_cosine": -0.04023179039359093,
+          "gradient_dot": -0.0702173113822937,
+          "gradient_norm_retention": 0.9991903633989965,
+          "projected_gradient_norm": 1.5094389915466309,
+          "projection_active": true,
+          "rl_gradient_norm": 1.5106620788574219
+        },
+        {
+          "anchor_gradient_norm": 1.2908962965011597,
+          "anchor_mse": 0.01235985103994608,
+          "gradient_cosine": 0.2510911524295807,
+          "gradient_dot": 0.3258782625198364,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.0053855180740356,
+          "projection_active": false,
+          "rl_gradient_norm": 1.0053855180740356
+        },
+        {
+          "anchor_gradient_norm": 1.1233782768249512,
+          "anchor_mse": 0.010530894622206688,
+          "gradient_cosine": 0.22079193592071533,
+          "gradient_dot": 0.13540607690811157,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.5459198951721191,
+          "projection_active": false,
+          "rl_gradient_norm": 0.5459198951721191
+        },
+        {
+          "anchor_gradient_norm": 1.1074509620666504,
+          "anchor_mse": 0.011443158611655235,
+          "gradient_cosine": 0.1099814772605896,
+          "gradient_dot": 0.1764792799949646,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.4489375352859497,
+          "projection_active": false,
+          "rl_gradient_norm": 1.4489375352859497
+        },
+        {
+          "anchor_gradient_norm": 1.38751220703125,
+          "anchor_mse": 0.01155732199549675,
+          "gradient_cosine": 0.43923619389533997,
+          "gradient_dot": 0.6963104605674744,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.142530918121338,
+          "projection_active": false,
+          "rl_gradient_norm": 1.142530918121338
+        },
+        {
+          "anchor_gradient_norm": 1.2350674867630005,
+          "anchor_mse": 0.011361422017216682,
+          "gradient_cosine": 0.09396322816610336,
+          "gradient_dot": 0.11158111691474915,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.9614841341972351,
+          "projection_active": false,
+          "rl_gradient_norm": 0.9614841341972351
+        },
+        {
+          "anchor_gradient_norm": 1.417212963104248,
+          "anchor_mse": 0.01453025545924902,
+          "gradient_cosine": 0.13849103450775146,
+          "gradient_dot": 0.20164577662944794,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.0273829698562622,
+          "projection_active": false,
+          "rl_gradient_norm": 1.0273829698562622
+        },
+        {
+          "anchor_gradient_norm": 4.068788051605225,
+          "anchor_mse": 0.016206620261073112,
+          "gradient_cosine": -0.06116320937871933,
+          "gradient_dot": -0.2626439034938812,
+          "gradient_norm_retention": 0.9981276896247958,
+          "projected_gradient_norm": 1.053411602973938,
+          "projection_active": true,
+          "rl_gradient_norm": 1.0553876161575317
+        },
+        {
+          "anchor_gradient_norm": 1.258922815322876,
+          "anchor_mse": 0.011074460111558437,
+          "gradient_cosine": 0.15659449994564056,
+          "gradient_dot": 0.15535366535186768,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.7880356907844543,
+          "projection_active": false,
+          "rl_gradient_norm": 0.7880356907844543
+        },
+        {
+          "anchor_gradient_norm": 4.416746139526367,
+          "anchor_mse": 0.01874680444598198,
+          "gradient_cosine": 0.09940806031227112,
+          "gradient_dot": 0.3843017816543579,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.8752827644348145,
+          "projection_active": false,
+          "rl_gradient_norm": 0.8752827644348145
+        },
+        {
+          "anchor_gradient_norm": 1.3168809413909912,
+          "anchor_mse": 0.013176798820495605,
+          "gradient_cosine": 0.3030722737312317,
+          "gradient_dot": 0.4037744998931885,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.0116870403289795,
+          "projection_active": false,
+          "rl_gradient_norm": 1.0116870403289795
+        },
+        {
+          "anchor_gradient_norm": 1.3506238460540771,
+          "anchor_mse": 0.012574022635817528,
+          "gradient_cosine": 0.18183059990406036,
+          "gradient_dot": 0.1490406095981598,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.6068806052207947,
+          "projection_active": false,
+          "rl_gradient_norm": 0.6068806052207947
+        },
+        {
+          "anchor_gradient_norm": 1.3524937629699707,
+          "anchor_mse": 0.011031792499125004,
+          "gradient_cosine": 0.057867493480443954,
+          "gradient_dot": 0.08365733176469803,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.0688925981521606,
+          "projection_active": false,
+          "rl_gradient_norm": 1.0688925981521606
+        },
+        {
+          "anchor_gradient_norm": 1.095151662826538,
+          "anchor_mse": 0.011748058721423149,
+          "gradient_cosine": 0.009490502066910267,
+          "gradient_dot": 0.007236482109874487,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.6962481141090393,
+          "projection_active": false,
+          "rl_gradient_norm": 0.6962481141090393
+        },
+        {
+          "anchor_gradient_norm": 1.0718320608139038,
+          "anchor_mse": 0.012474688701331615,
+          "gradient_cosine": 0.3096386790275574,
+          "gradient_dot": 0.31311652064323425,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.9434611201286316,
+          "projection_active": false,
+          "rl_gradient_norm": 0.9434611201286316
+        },
+        {
+          "anchor_gradient_norm": 0.874664843082428,
+          "anchor_mse": 0.009341752156615257,
+          "gradient_cosine": -0.04120596870779991,
+          "gradient_dot": -0.0498700812458992,
+          "gradient_norm_retention": 0.9991507008828472,
+          "projected_gradient_norm": 1.3825130462646484,
+          "projection_active": true,
+          "rl_gradient_norm": 1.38368821144104
+        },
+        {
+          "anchor_gradient_norm": 1.2105072736740112,
+          "anchor_mse": 0.011621261946856976,
+          "gradient_cosine": -0.2509143650531769,
+          "gradient_dot": -0.25607171654701233,
+          "gradient_norm_retention": 0.96800933392494,
+          "projected_gradient_norm": 0.8161091208457947,
+          "projection_active": true,
+          "rl_gradient_norm": 0.8430798053741455
+        },
+        {
+          "anchor_gradient_norm": 1.0752938985824585,
+          "anchor_mse": 0.011168797500431538,
+          "gradient_cosine": -0.16471219062805176,
+          "gradient_dot": -0.08239179849624634,
+          "gradient_norm_retention": 0.9863416551713181,
+          "projected_gradient_norm": 0.45883703231811523,
+          "projection_active": true,
+          "rl_gradient_norm": 0.4651907682418823
+        },
+        {
+          "anchor_gradient_norm": 1.0539467334747314,
+          "anchor_mse": 0.011833702214062214,
+          "gradient_cosine": -0.04832784831523895,
+          "gradient_dot": -0.029569819569587708,
+          "gradient_norm_retention": 0.9988316046626572,
+          "projected_gradient_norm": 0.5798622369766235,
+          "projection_active": true,
+          "rl_gradient_norm": 0.5805405378341675
+        },
+        {
+          "anchor_gradient_norm": 1.1089106798171997,
+          "anchor_mse": 0.0121392123401165,
+          "gradient_cosine": 0.14727772772312164,
+          "gradient_dot": 0.04286282882094383,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.26245036721229553,
+          "projection_active": false,
+          "rl_gradient_norm": 0.26245036721229553
+        },
+        {
+          "anchor_gradient_norm": 1.3404126167297363,
+          "anchor_mse": 0.010112795978784561,
+          "gradient_cosine": -0.18808244168758392,
+          "gradient_dot": -0.20259995758533478,
+          "gradient_norm_retention": 0.982153246222306,
+          "projected_gradient_norm": 0.7892813682556152,
+          "projection_active": true,
+          "rl_gradient_norm": 0.8036234378814697
+        },
+        {
+          "anchor_gradient_norm": 1.025446891784668,
+          "anchor_mse": 0.011395638808608055,
+          "gradient_cosine": -0.0372023805975914,
+          "gradient_dot": -0.021588189527392387,
+          "gradient_norm_retention": 0.9993076728137343,
+          "projected_gradient_norm": 0.5654986500740051,
+          "projection_active": true,
+          "rl_gradient_norm": 0.5658904314041138
+        },
+        {
+          "anchor_gradient_norm": 2.5776445865631104,
+          "anchor_mse": 0.013010906055569649,
+          "gradient_cosine": 0.028650891035795212,
+          "gradient_dot": 0.04810661822557449,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.6513938903808594,
+          "projection_active": false,
+          "rl_gradient_norm": 0.6513938903808594
+        },
+        {
+          "anchor_gradient_norm": 0.9329725503921509,
+          "anchor_mse": 0.012190941721200943,
+          "gradient_cosine": 0.30347147583961487,
+          "gradient_dot": 0.20886188745498657,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.7376875877380371,
+          "projection_active": false,
+          "rl_gradient_norm": 0.7376875877380371
+        },
+        {
+          "anchor_gradient_norm": 2.525775194168091,
+          "anchor_mse": 0.01336900144815445,
+          "gradient_cosine": 0.00522585166618228,
+          "gradient_dot": 0.0078104278072714806,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.5917292833328247,
+          "projection_active": false,
+          "rl_gradient_norm": 0.5917292833328247
+        },
+        {
+          "anchor_gradient_norm": 1.1429396867752075,
+          "anchor_mse": 0.014434181153774261,
+          "gradient_cosine": 0.007664883974939585,
+          "gradient_dot": 0.00393160805106163,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.4487880766391754,
+          "projection_active": false,
+          "rl_gradient_norm": 0.4487880766391754
+        },
+        {
+          "anchor_gradient_norm": 1.6714568138122559,
+          "anchor_mse": 0.01214291900396347,
+          "gradient_cosine": 0.041643839329481125,
+          "gradient_dot": 0.08462809026241302,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.2158180475234985,
+          "projection_active": false,
+          "rl_gradient_norm": 1.2158180475234985
+        },
+        {
+          "anchor_gradient_norm": 1.0344849824905396,
+          "anchor_mse": 0.010252397507429123,
+          "gradient_cosine": 0.07658569514751434,
+          "gradient_dot": 0.027318360283970833,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.3448123037815094,
+          "projection_active": false,
+          "rl_gradient_norm": 0.3448123037815094
+        },
+        {
+          "anchor_gradient_norm": 0.858949601650238,
+          "anchor_mse": 0.010007204487919807,
+          "gradient_cosine": 0.2563113868236542,
+          "gradient_dot": 0.054859671741724014,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.2491825371980667,
+          "projection_active": false,
+          "rl_gradient_norm": 0.2491825371980667
+        },
+        {
+          "anchor_gradient_norm": 1.0449715852737427,
+          "anchor_mse": 0.011348485946655273,
+          "gradient_cosine": -0.01966233365237713,
+          "gradient_dot": -0.01081937737762928,
+          "gradient_norm_retention": 0.9998066673284651,
+          "projected_gradient_norm": 0.5264762043952942,
+          "projection_active": true,
+          "rl_gradient_norm": 0.5265780091285706
+        },
+        {
+          "anchor_gradient_norm": 1.1331406831741333,
+          "anchor_mse": 0.011437677778303623,
+          "gradient_cosine": 0.16264092922210693,
+          "gradient_dot": 0.08160777390003204,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.44281041622161865,
+          "projection_active": false,
+          "rl_gradient_norm": 0.44281041622161865
+        },
+        {
+          "anchor_gradient_norm": 1.2983051538467407,
+          "anchor_mse": 0.012831066735088825,
+          "gradient_cosine": -0.010291066952049732,
+          "gradient_dot": -0.004742401652038097,
+          "gradient_norm_retention": 0.9999470192225344,
+          "projected_gradient_norm": 0.3549262583255768,
+          "projection_active": true,
+          "rl_gradient_norm": 0.3549450635910034
+        },
+        {
+          "anchor_gradient_norm": 0.8643476366996765,
+          "anchor_mse": 0.009963363409042358,
+          "gradient_cosine": -0.008631834760308266,
+          "gradient_dot": -0.0026558004319667816,
+          "gradient_norm_retention": 0.9999626594164538,
+          "projected_gradient_norm": 0.35594889521598816,
+          "projection_active": true,
+          "rl_gradient_norm": 0.35596218705177307
+        },
+        {
+          "anchor_gradient_norm": 1.0555425882339478,
+          "anchor_mse": 0.014103058725595474,
+          "gradient_cosine": 0.08602675050497055,
+          "gradient_dot": 0.01040721870958805,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.11461076885461807,
+          "projection_active": false,
+          "rl_gradient_norm": 0.11461076885461807
+        },
+        {
+          "anchor_gradient_norm": 1.029444932937622,
+          "anchor_mse": 0.0124627985060215,
+          "gradient_cosine": 0.06038569286465645,
+          "gradient_dot": 0.029644453898072243,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.4768769145011902,
+          "projection_active": false,
+          "rl_gradient_norm": 0.4768769145011902
+        },
+        {
+          "anchor_gradient_norm": 2.3289196491241455,
+          "anchor_mse": 0.011928746476769447,
+          "gradient_cosine": -0.048154961317777634,
+          "gradient_dot": -0.042400576174259186,
+          "gradient_norm_retention": 0.9988399060037721,
+          "projected_gradient_norm": 0.3776348829269409,
+          "projection_active": true,
+          "rl_gradient_norm": 0.37807348370552063
+        },
+        {
+          "anchor_gradient_norm": 1.2077562808990479,
+          "anchor_mse": 0.010821693576872349,
+          "gradient_cosine": 0.024179818108677864,
+          "gradient_dot": 0.002844427479431033,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.09740079939365387,
+          "projection_active": false,
+          "rl_gradient_norm": 0.09740079939365387
+        },
+        {
+          "anchor_gradient_norm": 1.243840217590332,
+          "anchor_mse": 0.0126875638961792,
+          "gradient_cosine": -0.08856260031461716,
+          "gradient_dot": -0.027215782552957535,
+          "gradient_norm_retention": 0.9960706989509319,
+          "projected_gradient_norm": 0.24609118700027466,
+          "projection_active": true,
+          "rl_gradient_norm": 0.24706196784973145
+        },
+        {
+          "anchor_gradient_norm": 1.4760620594024658,
+          "anchor_mse": 0.011660073883831501,
+          "gradient_cosine": 0.09345248341560364,
+          "gradient_dot": 0.05973874032497406,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.4330724775791168,
+          "projection_active": false,
+          "rl_gradient_norm": 0.4330724775791168
+        },
+        {
+          "anchor_gradient_norm": 1.1771906614303589,
+          "anchor_mse": 0.011814621277153492,
+          "gradient_cosine": 0.2447335422039032,
+          "gradient_dot": 0.12908567488193512,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.44806164503097534,
+          "projection_active": false,
+          "rl_gradient_norm": 0.44806164503097534
+        }
+      ]
+    },
+    {
+      "iteration": 5,
+      "mean_anchor_mse": 0.015117082162760198,
+      "mean_gradient_cosine": 0.1797819568302657,
+      "mean_gradient_norm_retention": 0.9996991352938664,
+      "num_actor_steps": 80,
+      "projection_active_fraction": 0.1125,
+      "steps": [
+        {
+          "anchor_gradient_norm": 0.9355657696723938,
+          "anchor_mse": 0.009443467482924461,
+          "gradient_cosine": 0.027538668364286423,
+          "gradient_dot": 0.33032462000846863,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 12.821052551269531,
+          "projection_active": false,
+          "rl_gradient_norm": 12.821052551269531
+        },
+        {
+          "anchor_gradient_norm": 1.0253924131393433,
+          "anchor_mse": 0.009843896143138409,
+          "gradient_cosine": 0.14062857627868652,
+          "gradient_dot": 1.168607473373413,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 8.104103088378906,
+          "projection_active": false,
+          "rl_gradient_norm": 8.104103088378906
+        },
+        {
+          "anchor_gradient_norm": 0.9597852230072021,
+          "anchor_mse": 0.010057089850306511,
+          "gradient_cosine": 0.1365237981081009,
+          "gradient_dot": 1.3451118469238281,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 10.265402793884277,
+          "projection_active": false,
+          "rl_gradient_norm": 10.265402793884277
+        },
+        {
+          "anchor_gradient_norm": 1.4079326391220093,
+          "anchor_mse": 0.012756967917084694,
+          "gradient_cosine": 0.4036981463432312,
+          "gradient_dot": 5.00531005859375,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 8.80627727508545,
+          "projection_active": false,
+          "rl_gradient_norm": 8.80627727508545
+        },
+        {
+          "anchor_gradient_norm": 0.9162752032279968,
+          "anchor_mse": 0.009737087413668633,
+          "gradient_cosine": 0.11042146384716034,
+          "gradient_dot": 0.8308238387107849,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 8.21163272857666,
+          "projection_active": false,
+          "rl_gradient_norm": 8.21163272857666
+        },
+        {
+          "anchor_gradient_norm": 1.0172628164291382,
+          "anchor_mse": 0.010195774026215076,
+          "gradient_cosine": 0.25974228978157043,
+          "gradient_dot": 2.8060717582702637,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 10.619961738586426,
+          "projection_active": false,
+          "rl_gradient_norm": 10.619961738586426
+        },
+        {
+          "anchor_gradient_norm": 1.3386679887771606,
+          "anchor_mse": 0.013129020109772682,
+          "gradient_cosine": 0.039210204035043716,
+          "gradient_dot": 0.4483705163002014,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 8.542108535766602,
+          "projection_active": false,
+          "rl_gradient_norm": 8.542108535766602
+        },
+        {
+          "anchor_gradient_norm": 2.0039448738098145,
+          "anchor_mse": 0.015906760469079018,
+          "gradient_cosine": 0.09090583771467209,
+          "gradient_dot": 1.8672459125518799,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 10.250001907348633,
+          "projection_active": false,
+          "rl_gradient_norm": 10.250001907348633
+        },
+        {
+          "anchor_gradient_norm": 1.1699986457824707,
+          "anchor_mse": 0.011113696731626987,
+          "gradient_cosine": 0.050635140389204025,
+          "gradient_dot": 0.37218302488327026,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 6.2823076248168945,
+          "projection_active": false,
+          "rl_gradient_norm": 6.2823076248168945
+        },
+        {
+          "anchor_gradient_norm": 1.491112232208252,
+          "anchor_mse": 0.014178302139043808,
+          "gradient_cosine": 0.396549254655838,
+          "gradient_dot": 2.9381260871887207,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 4.968930721282959,
+          "projection_active": false,
+          "rl_gradient_norm": 4.968930721282959
+        },
+        {
+          "anchor_gradient_norm": 1.4902974367141724,
+          "anchor_mse": 0.016038062050938606,
+          "gradient_cosine": 0.3649097681045532,
+          "gradient_dot": 2.3409829139709473,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 4.304669380187988,
+          "projection_active": false,
+          "rl_gradient_norm": 4.304669380187988
+        },
+        {
+          "anchor_gradient_norm": 2.5711255073547363,
+          "anchor_mse": 0.02037634886801243,
+          "gradient_cosine": 0.5855289101600647,
+          "gradient_dot": 10.581159591674805,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 7.028483867645264,
+          "projection_active": false,
+          "rl_gradient_norm": 7.028483867645264
+        },
+        {
+          "anchor_gradient_norm": 1.6268885135650635,
+          "anchor_mse": 0.01713504083454609,
+          "gradient_cosine": 0.31908145546913147,
+          "gradient_dot": 1.9057546854019165,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 3.671196699142456,
+          "projection_active": false,
+          "rl_gradient_norm": 3.671196699142456
+        },
+        {
+          "anchor_gradient_norm": 1.478061318397522,
+          "anchor_mse": 0.01573307439684868,
+          "gradient_cosine": 0.10003131628036499,
+          "gradient_dot": 0.8370611071586609,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 5.661463737487793,
+          "projection_active": false,
+          "rl_gradient_norm": 5.661463737487793
+        },
+        {
+          "anchor_gradient_norm": 1.0622237920761108,
+          "anchor_mse": 0.013243580237030983,
+          "gradient_cosine": 0.23012246191501617,
+          "gradient_dot": 1.2472127676010132,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 5.102294445037842,
+          "projection_active": false,
+          "rl_gradient_norm": 5.102294445037842
+        },
+        {
+          "anchor_gradient_norm": 2.721824884414673,
+          "anchor_mse": 0.020765624940395355,
+          "gradient_cosine": 0.12398747354745865,
+          "gradient_dot": 1.2869677543640137,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 3.813551902770996,
+          "projection_active": false,
+          "rl_gradient_norm": 3.813551902770996
+        },
+        {
+          "anchor_gradient_norm": 2.8613638877868652,
+          "anchor_mse": 0.023253168910741806,
+          "gradient_cosine": 0.2792970538139343,
+          "gradient_dot": 2.357332468032837,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.9497241973876953,
+          "projection_active": false,
+          "rl_gradient_norm": 2.9497241973876953
+        },
+        {
+          "anchor_gradient_norm": 1.3569985628128052,
+          "anchor_mse": 0.015081292018294334,
+          "gradient_cosine": 0.38248273730278015,
+          "gradient_dot": 1.7385221719741821,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 3.34956955909729,
+          "projection_active": false,
+          "rl_gradient_norm": 3.34956955909729
+        },
+        {
+          "anchor_gradient_norm": 1.522600769996643,
+          "anchor_mse": 0.015125870704650879,
+          "gradient_cosine": 0.49778392910957336,
+          "gradient_dot": 3.109853982925415,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 4.103109359741211,
+          "projection_active": false,
+          "rl_gradient_norm": 4.103109359741211
+        },
+        {
+          "anchor_gradient_norm": 1.5081182718276978,
+          "anchor_mse": 0.012751194648444653,
+          "gradient_cosine": -0.012082589790225029,
+          "gradient_dot": -0.06046152859926224,
+          "gradient_norm_retention": 0.9999269954196093,
+          "projected_gradient_norm": 3.3178136348724365,
+          "projection_active": true,
+          "rl_gradient_norm": 3.3180558681488037
+        },
+        {
+          "anchor_gradient_norm": 1.0240421295166016,
+          "anchor_mse": 0.009593057446181774,
+          "gradient_cosine": 0.202420175075531,
+          "gradient_dot": 0.7871270775794983,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 3.797285318374634,
+          "projection_active": false,
+          "rl_gradient_norm": 3.797285318374634
+        },
+        {
+          "anchor_gradient_norm": 1.210377812385559,
+          "anchor_mse": 0.01424169447273016,
+          "gradient_cosine": 0.05758535489439964,
+          "gradient_dot": 0.23173248767852783,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 3.3247110843658447,
+          "projection_active": false,
+          "rl_gradient_norm": 3.3247110843658447
+        },
+        {
+          "anchor_gradient_norm": 1.1144016981124878,
+          "anchor_mse": 0.012555427849292755,
+          "gradient_cosine": 0.2378690391778946,
+          "gradient_dot": 0.8176992535591125,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 3.084707021713257,
+          "projection_active": false,
+          "rl_gradient_norm": 3.084707021713257
+        },
+        {
+          "anchor_gradient_norm": 1.3502862453460693,
+          "anchor_mse": 0.014102753251791,
+          "gradient_cosine": 0.4573655128479004,
+          "gradient_dot": 2.6135449409484863,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 4.231951713562012,
+          "projection_active": false,
+          "rl_gradient_norm": 4.231951713562012
+        },
+        {
+          "anchor_gradient_norm": 1.3598487377166748,
+          "anchor_mse": 0.01558201014995575,
+          "gradient_cosine": 0.1248195469379425,
+          "gradient_dot": 0.3548276722431183,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.0904717445373535,
+          "projection_active": false,
+          "rl_gradient_norm": 2.0904717445373535
+        },
+        {
+          "anchor_gradient_norm": 1.563128113746643,
+          "anchor_mse": 0.015721259638667107,
+          "gradient_cosine": 0.34115108847618103,
+          "gradient_dot": 1.106063723564148,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.074143648147583,
+          "projection_active": false,
+          "rl_gradient_norm": 2.074143648147583
+        },
+        {
+          "anchor_gradient_norm": 2.422381639480591,
+          "anchor_mse": 0.015546138398349285,
+          "gradient_cosine": 0.0946325808763504,
+          "gradient_dot": 0.37160006165504456,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.6210354566574097,
+          "projection_active": false,
+          "rl_gradient_norm": 1.6210354566574097
+        },
+        {
+          "anchor_gradient_norm": 1.454888105392456,
+          "anchor_mse": 0.016264483332633972,
+          "gradient_cosine": 0.2518218755722046,
+          "gradient_dot": 0.47274529933929443,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.2903399467468262,
+          "projection_active": false,
+          "rl_gradient_norm": 1.2903399467468262
+        },
+        {
+          "anchor_gradient_norm": 1.5162473917007446,
+          "anchor_mse": 0.01528642512857914,
+          "gradient_cosine": 0.33558812737464905,
+          "gradient_dot": 0.9244353771209717,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.8167698383331299,
+          "projection_active": false,
+          "rl_gradient_norm": 1.8167698383331299
+        },
+        {
+          "anchor_gradient_norm": 1.2887622117996216,
+          "anchor_mse": 0.015729183331131935,
+          "gradient_cosine": 0.32100820541381836,
+          "gradient_dot": 0.9594243168830872,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.3191123008728027,
+          "projection_active": false,
+          "rl_gradient_norm": 2.3191123008728027
+        },
+        {
+          "anchor_gradient_norm": 1.1229071617126465,
+          "anchor_mse": 0.013765659183263779,
+          "gradient_cosine": 0.0366947241127491,
+          "gradient_dot": 0.10750146210193634,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.608956813812256,
+          "projection_active": false,
+          "rl_gradient_norm": 2.608956813812256
+        },
+        {
+          "anchor_gradient_norm": 1.1653982400894165,
+          "anchor_mse": 0.013192384503781796,
+          "gradient_cosine": 0.15792050957679749,
+          "gradient_dot": 0.290499746799469,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.5784573554992676,
+          "projection_active": false,
+          "rl_gradient_norm": 1.5784573554992676
+        },
+        {
+          "anchor_gradient_norm": 1.0925480127334595,
+          "anchor_mse": 0.013949016109108925,
+          "gradient_cosine": 0.12996844947338104,
+          "gradient_dot": 0.16971264779567719,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.195186734199524,
+          "projection_active": false,
+          "rl_gradient_norm": 1.195186734199524
+        },
+        {
+          "anchor_gradient_norm": 1.4043469429016113,
+          "anchor_mse": 0.0162627175450325,
+          "gradient_cosine": 0.2583179473876953,
+          "gradient_dot": 0.7469556331634521,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.05904483795166,
+          "projection_active": false,
+          "rl_gradient_norm": 2.05904483795166
+        },
+        {
+          "anchor_gradient_norm": 1.2064168453216553,
+          "anchor_mse": 0.013417250476777554,
+          "gradient_cosine": 0.16333116590976715,
+          "gradient_dot": 0.35150614380836487,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.7838833332061768,
+          "projection_active": false,
+          "rl_gradient_norm": 1.7838833332061768
+        },
+        {
+          "anchor_gradient_norm": 1.4625303745269775,
+          "anchor_mse": 0.01680540107190609,
+          "gradient_cosine": 0.24321869015693665,
+          "gradient_dot": 0.32121044397354126,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.9030001163482666,
+          "projection_active": false,
+          "rl_gradient_norm": 0.9030001163482666
+        },
+        {
+          "anchor_gradient_norm": 1.4061654806137085,
+          "anchor_mse": 0.0177681352943182,
+          "gradient_cosine": 0.3862050175666809,
+          "gradient_dot": 1.1492060422897339,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 2.116135835647583,
+          "projection_active": false,
+          "rl_gradient_norm": 2.116135835647583
+        },
+        {
+          "anchor_gradient_norm": 3.060431957244873,
+          "anchor_mse": 0.022071847692131996,
+          "gradient_cosine": 0.23916077613830566,
+          "gradient_dot": 2.5895044803619385,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 3.5378870964050293,
+          "projection_active": false,
+          "rl_gradient_norm": 3.5378870964050293
+        },
+        {
+          "anchor_gradient_norm": 1.1934281587600708,
+          "anchor_mse": 0.01549674291163683,
+          "gradient_cosine": 0.08245684951543808,
+          "gradient_dot": 0.12002775073051453,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.2197158336639404,
+          "projection_active": false,
+          "rl_gradient_norm": 1.2197158336639404
+        },
+        {
+          "anchor_gradient_norm": 1.7532520294189453,
+          "anchor_mse": 0.01725764386355877,
+          "gradient_cosine": 0.35350126028060913,
+          "gradient_dot": 0.7857716083526611,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.2678300142288208,
+          "projection_active": false,
+          "rl_gradient_norm": 1.2678300142288208
+        },
+        {
+          "anchor_gradient_norm": 1.4663982391357422,
+          "anchor_mse": 0.01301266998052597,
+          "gradient_cosine": 0.38144123554229736,
+          "gradient_dot": 0.49208885431289673,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.8797594904899597,
+          "projection_active": false,
+          "rl_gradient_norm": 0.8797594904899597
+        },
+        {
+          "anchor_gradient_norm": 1.4762051105499268,
+          "anchor_mse": 0.015514628030359745,
+          "gradient_cosine": 0.22257469594478607,
+          "gradient_dot": 0.2198476940393448,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.6691129207611084,
+          "projection_active": false,
+          "rl_gradient_norm": 0.6691129207611084
+        },
+        {
+          "anchor_gradient_norm": 1.3646018505096436,
+          "anchor_mse": 0.01455299835652113,
+          "gradient_cosine": 0.20298108458518982,
+          "gradient_dot": 0.9483518004417419,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 3.4237966537475586,
+          "projection_active": false,
+          "rl_gradient_norm": 3.4237966537475586
+        },
+        {
+          "anchor_gradient_norm": 1.279293417930603,
+          "anchor_mse": 0.01416771486401558,
+          "gradient_cosine": 0.21511809527873993,
+          "gradient_dot": 0.20236606895923615,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.7353440523147583,
+          "projection_active": false,
+          "rl_gradient_norm": 0.7353440523147583
+        },
+        {
+          "anchor_gradient_norm": 1.586935043334961,
+          "anchor_mse": 0.01845001056790352,
+          "gradient_cosine": 0.04658771678805351,
+          "gradient_dot": 0.05604133754968643,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.7580152153968811,
+          "projection_active": false,
+          "rl_gradient_norm": 0.7580152153968811
+        },
+        {
+          "anchor_gradient_norm": 1.1847368478775024,
+          "anchor_mse": 0.01547851599752903,
+          "gradient_cosine": 0.28822287917137146,
+          "gradient_dot": 0.4356578290462494,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.2758369445800781,
+          "projection_active": false,
+          "rl_gradient_norm": 1.2758369445800781
+        },
+        {
+          "anchor_gradient_norm": 2.7080342769622803,
+          "anchor_mse": 0.01966719515621662,
+          "gradient_cosine": 0.025467166677117348,
+          "gradient_dot": 0.04814987629652023,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.6981686949729919,
+          "projection_active": false,
+          "rl_gradient_norm": 0.6981686949729919
+        },
+        {
+          "anchor_gradient_norm": 1.5374277830123901,
+          "anchor_mse": 0.017115896567702293,
+          "gradient_cosine": 0.24865330755710602,
+          "gradient_dot": 0.26123568415641785,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.6833505034446716,
+          "projection_active": false,
+          "rl_gradient_norm": 0.6833505034446716
+        },
+        {
+          "anchor_gradient_norm": 1.1957367658615112,
+          "anchor_mse": 0.013321956619620323,
+          "gradient_cosine": 0.09357891976833344,
+          "gradient_dot": 0.09873045235872269,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.8823431134223938,
+          "projection_active": false,
+          "rl_gradient_norm": 0.8823431134223938
+        },
+        {
+          "anchor_gradient_norm": 2.0623981952667236,
+          "anchor_mse": 0.01627715490758419,
+          "gradient_cosine": 0.5085899233818054,
+          "gradient_dot": 1.002887487411499,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.9561189413070679,
+          "projection_active": false,
+          "rl_gradient_norm": 0.9561189413070679
+        },
+        {
+          "anchor_gradient_norm": 3.243253469467163,
+          "anchor_mse": 0.02313625067472458,
+          "gradient_cosine": 0.13335949182510376,
+          "gradient_dot": 0.21915730834007263,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.5067002773284912,
+          "projection_active": false,
+          "rl_gradient_norm": 0.5067002773284912
+        },
+        {
+          "anchor_gradient_norm": 1.4540936946868896,
+          "anchor_mse": 0.017194341868162155,
+          "gradient_cosine": 0.5055848360061646,
+          "gradient_dot": 1.2730448246002197,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.7316386699676514,
+          "projection_active": false,
+          "rl_gradient_norm": 1.7316386699676514
+        },
+        {
+          "anchor_gradient_norm": 1.2965519428253174,
+          "anchor_mse": 0.016228623688220978,
+          "gradient_cosine": 0.2836560606956482,
+          "gradient_dot": 0.39395439624786377,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.071183681488037,
+          "projection_active": false,
+          "rl_gradient_norm": 1.071183681488037
+        },
+        {
+          "anchor_gradient_norm": 1.7354283332824707,
+          "anchor_mse": 0.016025029122829437,
+          "gradient_cosine": 0.11312464624643326,
+          "gradient_dot": 0.136773020029068,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.6966851353645325,
+          "projection_active": false,
+          "rl_gradient_norm": 0.6966851353645325
+        },
+        {
+          "anchor_gradient_norm": 1.7873791456222534,
+          "anchor_mse": 0.016614621505141258,
+          "gradient_cosine": 0.18886123597621918,
+          "gradient_dot": 0.3577646315097809,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.0598341226577759,
+          "projection_active": false,
+          "rl_gradient_norm": 1.0598341226577759
+        },
+        {
+          "anchor_gradient_norm": 1.5554720163345337,
+          "anchor_mse": 0.017799271270632744,
+          "gradient_cosine": 0.2587525546550751,
+          "gradient_dot": 0.2879208028316498,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.715362548828125,
+          "projection_active": false,
+          "rl_gradient_norm": 0.715362548828125
+        },
+        {
+          "anchor_gradient_norm": 1.2086517810821533,
+          "anchor_mse": 0.013578196987509727,
+          "gradient_cosine": 0.3764621615409851,
+          "gradient_dot": 0.3543636202812195,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.7788012027740479,
+          "projection_active": false,
+          "rl_gradient_norm": 0.7788012027740479
+        },
+        {
+          "anchor_gradient_norm": 1.4673274755477905,
+          "anchor_mse": 0.015776101499795914,
+          "gradient_cosine": 0.14924238622188568,
+          "gradient_dot": 0.08594409376382828,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.39246127009391785,
+          "projection_active": false,
+          "rl_gradient_norm": 0.39246127009391785
+        },
+        {
+          "anchor_gradient_norm": 3.3023626804351807,
+          "anchor_mse": 0.021530237048864365,
+          "gradient_cosine": -0.053821176290512085,
+          "gradient_dot": -0.12602628767490387,
+          "gradient_norm_retention": 0.9985506124339162,
+          "projected_gradient_norm": 0.7080326676368713,
+          "projection_active": true,
+          "rl_gradient_norm": 0.7090603709220886
+        },
+        {
+          "anchor_gradient_norm": 1.2025539875030518,
+          "anchor_mse": 0.014349862933158875,
+          "gradient_cosine": 0.20849452912807465,
+          "gradient_dot": 0.1091509759426117,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.4353398382663727,
+          "projection_active": false,
+          "rl_gradient_norm": 0.4353398382663727
+        },
+        {
+          "anchor_gradient_norm": 1.1993876695632935,
+          "anchor_mse": 0.016029391437768936,
+          "gradient_cosine": 0.09438418596982956,
+          "gradient_dot": 0.05174010619521141,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.4570550322532654,
+          "projection_active": false,
+          "rl_gradient_norm": 0.4570550322532654
+        },
+        {
+          "anchor_gradient_norm": 1.1552517414093018,
+          "anchor_mse": 0.013541647233068943,
+          "gradient_cosine": -0.08714058250188828,
+          "gradient_dot": -0.016779053956270218,
+          "gradient_norm_retention": 0.9961960125049082,
+          "projected_gradient_norm": 0.16604094207286835,
+          "projection_active": true,
+          "rl_gradient_norm": 0.16667497158050537
+        },
+        {
+          "anchor_gradient_norm": 1.3158663511276245,
+          "anchor_mse": 0.013582451269030571,
+          "gradient_cosine": 0.11317114531993866,
+          "gradient_dot": 0.15482011437416077,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.0396325588226318,
+          "projection_active": false,
+          "rl_gradient_norm": 1.0396325588226318
+        },
+        {
+          "anchor_gradient_norm": 1.3334399461746216,
+          "anchor_mse": 0.014927064999938011,
+          "gradient_cosine": 0.31724461913108826,
+          "gradient_dot": 0.2913709282875061,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.6887767910957336,
+          "projection_active": false,
+          "rl_gradient_norm": 0.6887767910957336
+        },
+        {
+          "anchor_gradient_norm": 1.1748907566070557,
+          "anchor_mse": 0.015451546758413315,
+          "gradient_cosine": 0.087883360683918,
+          "gradient_dot": 0.04553681239485741,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.4410201907157898,
+          "projection_active": false,
+          "rl_gradient_norm": 0.4410201907157898
+        },
+        {
+          "anchor_gradient_norm": 1.292792558670044,
+          "anchor_mse": 0.014913211576640606,
+          "gradient_cosine": 0.3135291337966919,
+          "gradient_dot": 0.400310754776001,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.9876214265823364,
+          "projection_active": false,
+          "rl_gradient_norm": 0.9876214265823364
+        },
+        {
+          "anchor_gradient_norm": 2.675255298614502,
+          "anchor_mse": 0.018831098452210426,
+          "gradient_cosine": 0.03528071939945221,
+          "gradient_dot": 0.04862842708826065,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.5152139067649841,
+          "projection_active": false,
+          "rl_gradient_norm": 0.5152139067649841
+        },
+        {
+          "anchor_gradient_norm": 1.1989282369613647,
+          "anchor_mse": 0.013666709885001183,
+          "gradient_cosine": -0.1706000566482544,
+          "gradient_dot": -0.11879271268844604,
+          "gradient_norm_retention": 0.9853404161185944,
+          "projected_gradient_norm": 0.5722736120223999,
+          "projection_active": true,
+          "rl_gradient_norm": 0.580787718296051
+        },
+        {
+          "anchor_gradient_norm": 1.2518153190612793,
+          "anchor_mse": 0.014159638434648514,
+          "gradient_cosine": -0.030029941350221634,
+          "gradient_dot": -0.0266664270311594,
+          "gradient_norm_retention": 0.9995489522508653,
+          "projected_gradient_norm": 0.7090455889701843,
+          "projection_active": true,
+          "rl_gradient_norm": 0.7093655467033386
+        },
+        {
+          "anchor_gradient_norm": 0.9900215268135071,
+          "anchor_mse": 0.012358699925243855,
+          "gradient_cosine": 0.0005562025471590459,
+          "gradient_dot": 0.00023537036031484604,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.42743903398513794,
+          "projection_active": false,
+          "rl_gradient_norm": 0.42743903398513794
+        },
+        {
+          "anchor_gradient_norm": 1.183393955230713,
+          "anchor_mse": 0.013026165775954723,
+          "gradient_cosine": -0.05891188606619835,
+          "gradient_dot": -0.03639976680278778,
+          "gradient_norm_retention": 0.9982631704343067,
+          "projected_gradient_norm": 0.5212083458900452,
+          "projection_active": true,
+          "rl_gradient_norm": 0.522115170955658
+        },
+        {
+          "anchor_gradient_norm": 1.2479572296142578,
+          "anchor_mse": 0.014409167692065239,
+          "gradient_cosine": -0.035502854734659195,
+          "gradient_dot": -0.005563147831708193,
+          "gradient_norm_retention": 0.9993694749695329,
+          "projected_gradient_norm": 0.12548264861106873,
+          "projection_active": true,
+          "rl_gradient_norm": 0.12556181848049164
+        },
+        {
+          "anchor_gradient_norm": 1.1261570453643799,
+          "anchor_mse": 0.014374150894582272,
+          "gradient_cosine": 0.06604204326868057,
+          "gradient_dot": 0.009452350437641144,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.1270926147699356,
+          "projection_active": false,
+          "rl_gradient_norm": 0.1270926147699356
+        },
+        {
+          "anchor_gradient_norm": 1.0929702520370483,
+          "anchor_mse": 0.014390061609447002,
+          "gradient_cosine": 0.1514296680688858,
+          "gradient_dot": 0.022851882502436638,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.13807106018066406,
+          "projection_active": false,
+          "rl_gradient_norm": 0.13807106018066406
+        },
+        {
+          "anchor_gradient_norm": 1.1111867427825928,
+          "anchor_mse": 0.014020795933902264,
+          "gradient_cosine": -0.0398811437189579,
+          "gradient_dot": -0.04986073821783066,
+          "gradient_norm_retention": 0.9992044121486233,
+          "projected_gradient_norm": 1.12423837184906,
+          "projection_active": true,
+          "rl_gradient_norm": 1.1251335144042969
+        },
+        {
+          "anchor_gradient_norm": 1.3046668767929077,
+          "anchor_mse": 0.013057945296168327,
+          "gradient_cosine": 0.07604881376028061,
+          "gradient_dot": 0.12682145833969116,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 1.278205394744873,
+          "projection_active": false,
+          "rl_gradient_norm": 1.278205394744873
+        },
+        {
+          "anchor_gradient_norm": 1.0712612867355347,
+          "anchor_mse": 0.013472209684550762,
+          "gradient_cosine": -0.03062947280704975,
+          "gradient_dot": -0.012479228898882866,
+          "gradient_norm_retention": 0.9995307772289669,
+          "projected_gradient_norm": 0.38014474511146545,
+          "projection_active": true,
+          "rl_gradient_norm": 0.380323201417923
+        },
+        {
+          "anchor_gradient_norm": 1.019300937652588,
+          "anchor_mse": 0.012892099097371101,
+          "gradient_cosine": 0.04516100510954857,
+          "gradient_dot": 0.004184130113571882,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.09089481830596924,
+          "projection_active": false,
+          "rl_gradient_norm": 0.09089481830596924
+        },
+        {
+          "anchor_gradient_norm": 1.1289937496185303,
+          "anchor_mse": 0.01273665763437748,
+          "gradient_cosine": 0.025589298456907272,
+          "gradient_dot": 0.004957381170243025,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.17159411311149597,
+          "projection_active": false,
+          "rl_gradient_norm": 0.17159411311149597
+        },
+        {
+          "anchor_gradient_norm": 2.9186055660247803,
+          "anchor_mse": 0.01926003023982048,
+          "gradient_cosine": 0.10996774584054947,
+          "gradient_dot": 0.13507947325706482,
+          "gradient_norm_retention": 1.0,
+          "projected_gradient_norm": 0.42087066173553467,
+          "projection_active": false,
+          "rl_gradient_norm": 0.42087066173553467
+        }
+      ]
+    }
+  ]
+}

@@ -197,6 +197,15 @@ deterministic loss while introducing a new 15-point stochastic deficit. Moreover
 did not beat its anchor under random sampling on this seed, leaving no demonstrated online gain for
 weight interpolation to retain.
 
+Zero-endpoint PCGrad passed its mechanism audit but could not establish a reward improvement in H30.
+The candidate projection was active on 36/320 actor optimizer steps (11.25%) with 99.954% mean
+gradient-norm retention, satisfying the locked training-frequency gate. However, the matched
+four-update FPO++ control scored 20/20 in both zero and random modes. The required candidate random
+gain of at least 2/20 was therefore mathematically impossible, so candidate evaluation and the
+confirmation seed were stopped. This is evidence that the short step-6000 screen saturated, not that
+endpoint projection degrades reward; a future training comparison needs a discriminative control
+regime before it can test strict improvement.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -232,6 +241,7 @@ weight interpolation to retain.
 - Explicit Gaussian-bridge distillation is closed before implementation because H8 already resamples Gaussian CFM variables for zero-source rollout actions, and H15 rejects success-only gradient selection as a faithful proxy for positive GAE.
 - Antithetic action-chunk averaging produced a 15-point small-screen gain but a 6-point loss on the independent confirmation; its pooled 52/70 success exactly ties zero-source inference, so source symmetry is not a stable inference improvement.
 - Doubling visual replanning frequency by executing four rather than eight actions reduced the locked Can screen from 70% to 60%; the released checkpoint does not benefit from a shorter execution horizon without retraining.
+- A mechanism-positive intervention is still not reward evidence: H29 passed its endpoint-drift audit, while H30's matched control saturated both 20-episode modes and made the strict improvement gate impossible.
 
 ## Lessons and Constraints
 
@@ -247,7 +257,8 @@ weight interpolation to retain.
 - Should reflow be an offline post-training stage, an auxiliary online loss, or both?
 - Which reward-aware FPO++ mechanism can improve Can success without relying on unstable BC-source exploration changes?
 - A frozen BC velocity-field anchor strongly conflicts with FPO++ and prevents drift, but global PCGrad retains only 34-46% of one-step surrogate gain. Generic flow-space behavior protection is too broad; a deterministic endpoint anchor is the next narrower test.
-- Narrowing the anchor to the deterministic zero-source action endpoint passes the fixed-batch mechanism audit: it retains 72.8-73.7% of surrogate gain while removing 66.5-76.4% of endpoint drift. Reward improvement remains untested pending H30.
+- Narrowing the anchor to the deterministic zero-source action endpoint passes the fixed-batch mechanism audit, but H30 could not test reward superiority because its matched control saturated at 20/20 in both modes.
+- Which non-saturated, inexpensive evaluation regime best predicts official-scale Can improvements without returning to the sparse step-1000 training bottleneck?
 - Which training-time intervention remains distinct from the closed source, estimator, critic, optimizer, interpolation, and inference-averaging routes?
 
 ## Optimization Trajectory
