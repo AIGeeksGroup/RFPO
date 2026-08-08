@@ -21,9 +21,13 @@ If the geometry gate passes, run one 20-episode, 10-environment Can screen at 10
 evaluation seed 20260808 for zero and random sampling. Continue only if zero success exceeds the
 control by at least two successes and random success is not zero when the matched control is nonzero.
 
+If the first rollout screen passes, repeat only the 10-step 20-episode screen with evaluation seed
+20260809. Continue to an official-scale evaluation only if mixed reflow gains at least one zero-
+sampling success over that seed's control and random success is no more than one success below the
+control. Keep the trained checkpoint fixed.
+
 ## Stop Conditions
 
 - Stop the mixed-endpoint direction if either geometry or rollout gate fails.
 - Do not tune the mixture probability after observing this pilot.
 - Do not launch online FPO++ or a large confirmation until the small rollout gate passes.
-
