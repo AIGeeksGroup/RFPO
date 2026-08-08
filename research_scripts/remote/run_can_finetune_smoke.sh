@@ -14,6 +14,7 @@ TOTAL_TIMESTEPS="${TOTAL_TIMESTEPS:-$((NUM_ENVS * DATA_COLLECTION_STEPS))}"
 EVAL_EPISODES="${EVAL_EPISODES:-20}"
 N_ACTION_SAMPLES="${N_ACTION_SAMPLES:-8}"
 LEARNING_RATE_ACTOR="${LEARNING_RATE_ACTOR:-1e-5}"
+GRADIENT_ACCUMULATION_STEPS="${GRADIENT_ACCUMULATION_STEPS:-1}"
 ROLLOUT_FREQ="${ROLLOUT_FREQ:-1}"
 RESET_CFM_INVALID_MASK_EACH_ITERATION="${RESET_CFM_INVALID_MASK_EACH_ITERATION:-False}"
 ROLLOUT_ZERO_FRACTION="${ROLLOUT_ZERO_FRACTION:-0.0}"
@@ -70,7 +71,7 @@ torchrun --nproc_per_node=1 --master_port "$MASTER_PORT" finetune_online_rl.py \
   --experiment "$RUN_NAME" \
   --output-dir "$OUTPUT_DIR" \
   --total-timesteps "$TOTAL_TIMESTEPS" \
-  --gradient-accumulation-steps 1 \
+  --gradient-accumulation-steps "$GRADIENT_ACCUMULATION_STEPS" \
   --num-minibatches 8 \
   --log-freq 1 \
   --save-freq 1 \
