@@ -11,6 +11,7 @@
 | Advantage-Weighted Regression (2019) | Exponentiated-advantage maximum-likelihood policy regression | Stable prioritization of rare successful on-policy actions |
 | Advantage Weighted Matching (2025) | Advantage-weighted score/flow matching with optional reference regularization | Confirms clean CFM as a reward-weighted policy surrogate |
 | FMER (2026) | Normalized exponential advantage-weighted CFM and entropy control | Motivates an ESS-controlled mirror-weighted FPO++ objective |
+| Direct Advantage Estimation (2022/2023) | Learns centered action effects directly through a return-decomposition objective | Candidate for replacing unreliable first-update GAE weights; continuous flow actions require Monte Carlo centering |
 
 ## Additional Candidates To Audit After Baseline
 
