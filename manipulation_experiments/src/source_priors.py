@@ -42,7 +42,7 @@ def split_action_history(
     action_is_pad: Tensor,
     history_steps: int,
     horizon: int,
-) -> tuple[Tensor, Tensor, Tensor]:
+) -> tuple[Tensor, Tensor, Tensor, Tensor]:
     """Split a dataset action query into previous actions and current targets."""
     expected_steps = history_steps + horizon
     if action_sequence.ndim != 3:
@@ -54,5 +54,6 @@ def split_action_history(
 
     previous_actions = action_sequence[:, :history_steps]
     target_actions = action_sequence[:, history_steps:]
+    target_is_pad = action_is_pad[:, history_steps:]
     has_previous_actions = ~action_is_pad[:, :history_steps].to(torch.bool).any(dim=1)
-    return previous_actions, target_actions, has_previous_actions
+    return previous_actions, target_actions, target_is_pad, has_previous_actions

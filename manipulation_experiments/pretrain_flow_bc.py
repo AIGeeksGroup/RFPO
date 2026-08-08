@@ -1105,7 +1105,7 @@ def main(cfg: TrainFlowBCConfig):
                 batch["action"] = batch.pop("actions")
 
             if policy_cfg.source_prior_mode == "previous_action":
-                previous_actions, target_actions, has_previous_actions = split_action_history(
+                previous_actions, target_actions, target_is_pad, has_previous_actions = split_action_history(
                     action_sequence=batch[ACTION],
                     action_is_pad=batch[f"{ACTION}_is_pad"],
                     history_steps=policy_cfg.n_action_steps,
@@ -1114,6 +1114,7 @@ def main(cfg: TrainFlowBCConfig):
                 batch["previous_action"] = previous_actions
                 batch["has_previous_actions"] = has_previous_actions
                 batch[ACTION] = target_actions
+                batch[f"{ACTION}_is_pad"] = target_is_pad
                 valid_history_count += has_previous_actions.sum()
                 history_sample_count += has_previous_actions.numel()
 

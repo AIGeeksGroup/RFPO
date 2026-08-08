@@ -44,10 +44,11 @@ def test_split_action_history_falls_back_at_episode_boundary():
         ]
     )
 
-    previous, target, available = split_action_history(
+    previous, target, target_padding, available = split_action_history(
         actions, padding, history_steps=2, horizon=4
     )
 
     torch.testing.assert_close(previous, actions[:, :2])
     torch.testing.assert_close(target, actions[:, 2:])
+    torch.testing.assert_close(target_padding, padding[:, 2:])
     assert available.tolist() == [True, False]
