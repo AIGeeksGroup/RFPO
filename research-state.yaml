@@ -214,7 +214,7 @@ hypotheses:
     priority: high
   - id: H27
     statement: "Executing four rather than eight actions from each predicted Can chunk improves success by incorporating visual feedback more frequently."
-    status: active
+    status: refuted
     motivation: "The released policy predicts 16 actions but executes eight open loop; shorter receding-horizon execution can correct grasp and placement errors before they accumulate without changing weights or source sampling."
     parent: null
     priority: high
@@ -233,7 +233,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 101
+  total_runs: 103
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -777,11 +777,19 @@ experiments:
       metric: success_rate
       value: 0.68
       episodes: 50
+    - run: can_step1000_action_steps_screen_seed20260826_action8
+      metric: success_rate
+      value: 0.70
+      episodes: 20
+    - run: can_step1000_action_steps_screen_seed20260826_action4
+      metric: success_rate
+      value: 0.60
+      episodes: 20
 
 outer_loop:
   cycle: 15
-  last_direction: "Screen four-step receding-horizon execution against the official eight-action chunk on the released Can step-1000 checkpoint."
-  last_reflection: "H26's exact pooled tie closes source-symmetric inference averaging. H27 instead targets open-loop control error by increasing observation-feedback frequency while preserving checkpoint weights, zero-source inference, and the 10-step flow solver."
+  last_direction: "Return to training-time method design after inference-only source averaging and feedback-frequency changes failed to improve Can reliably."
+  last_reflection: "Four-step execution reduced the locked screen from 14/20 to 12/20 despite more frequent observation feedback. The checkpoint appears coupled to its trained eight-action execution cadence; stop without an action-count sweep."
 
 workspace:
   findings: "findings.md"

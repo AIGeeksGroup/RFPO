@@ -1,0 +1,25 @@
+{
+  "hypothesis": "H27",
+  "checkpoint": "95j3noe4_step_1000",
+  "load_ema": true,
+  "sampling_mode": "zero",
+  "sampling_steps": 10,
+  "seed": 20260826,
+  "episodes_per_condition": 20,
+  "control": {
+    "action_steps": 8,
+    "successes": 14,
+    "success_rate": 0.70,
+    "average_episode_length": 209.0,
+    "fps": 99.4
+  },
+  "candidate": {
+    "action_steps": 4,
+    "successes": 12,
+    "success_rate": 0.60,
+    "average_episode_length": 237.7,
+    "fps": 110.3
+  },
+  "gate_passed": false,
+  "decision": "refuted"
+}
