@@ -18,6 +18,7 @@ from src.antithetic_inference import average_antithetic_predictions, build_antit
 from src.rollout_bookkeeping import apply_source_sampling_scale, apply_zero_sampling_mask
 
 from .flow_model_config import FlowMatchingConfig
+from .flow_integrators import explicit_midpoint_step
 from .flow_net_mlp import FlowMatchingMLPModel
 from .flow_net_unet import FlowMatchingUnetModel
 from .flow_net_residual_mlp import FlowMatchingResidualMLPModel
@@ -390,8 +391,11 @@ class FlowMatchingPolicy(PreTrainedPolicy):
         zero_sampling_mask: Tensor | None = None,
         source_sampling_scale: Tensor | None = None,
     ) -> Tensor:
-        """Predict a chunk of actions using flow matching with Euler integration."""
+        """Predict a chunk of actions by integrating the learned flow field."""
         self.eval()
+
+        if sde_sampling and self.config.integration_method != "euler":
+            raise ValueError("sde_sampling is only supported with Euler integration")
 
         # Normalize inputs
         batch = self.normalize_inputs(batch)
@@ -431,7 +435,7 @@ class FlowMatchingPolicy(PreTrainedPolicy):
                 sigma=self.config.source_prior_sigma,
             )
 
-        # Flow schedule for Euler integration
+        # Flow schedule for numerical integration
         flow_steps = self.config.sampling_steps
         # t_path = torch.linspace(1.0, 0.0, flow_steps + 1, device=x_t.device)
         t_path = self.get_schedule(x_t.device)
@@ -446,39 +450,39 @@ class FlowMatchingPolicy(PreTrainedPolicy):
             else:
                 raise ValueError(f"sde_sigma shape should be (B, horizon, 1, D) or (flow_steps,), but got {sde_sigma.shape}")
 
-        # Euler integration from t=1 to t=0
+        def velocity_at(state: Tensor, time: Tensor) -> Tensor:
+            timeembedding = self.model.diffusion_step_encoder(time.reshape(1))
+            assert timeembedding.shape == (1, self.config.timestep_embed_dim)
+            timeembedding = timeembedding.expand(B, -1)
+
+            network_output = self.config.mlp_output_scale * self.model(state, timeembedding, obs_cond)
+            assert network_output.shape == (
+                B,
+                self.config.horizon,
+                self.model.action_dim,
+            ), "network_output shape should be (B, horizon, action_dim)"
+            if self.config.transported_clip_value is not None:
+                network_output = network_output.clamp(
+                    -self.config.transported_clip_value,
+                    self.config.transported_clip_value,
+                )
+
+            if self.config.flow_network_output_param == "u":
+                return network_output
+            if time.item() > 1e-5:
+                return (state - network_output) / time
+            return torch.zeros_like(state)
+
+        # Integrate from t=1 to t=0.
         for i in range(flow_steps):
             t_current = t_path[i]
             t_next = t_path[i + 1]
             dt = t_next - t_current  # Negative value since we go from 1 to 0
-            
-            timeembedding = self.model.diffusion_step_encoder(torch.tensor([t_current], device=x_t.device))
-            assert timeembedding.shape == (1, self.config.timestep_embed_dim)
-            timeembedding = timeembedding.expand(B, -1)
 
-            # Predict based on output parameterization
-            network_output = self.model(x_t, timeembedding, obs_cond)
-            network_output = self.config.mlp_output_scale * network_output
-            assert network_output.shape == (B, self.config.horizon, self.model.action_dim), "network_output shape should be (B, horizon, action_dim)"
-
-            # Apply clipping if configured
-            if self.config.transported_clip_value is not None:
-                network_output = network_output.clamp(-self.config.transported_clip_value, self.config.transported_clip_value)
-
-            if self.config.flow_network_output_param == "u":
-                # Direct velocity prediction
-                velocity = network_output
-            elif self.config.flow_network_output_param == "x0":
-                # x0 prediction mode: compute velocity from x0
-                x0_pred = network_output
-                # Velocity: u = (x_t - x0) / t for t > 0
-                if t_current > 1e-5:  # Avoid division by zero
-                    velocity = (x_t - x0_pred) / t_current
-                else:
-                    velocity = torch.zeros_like(x_t)
-            
-            # Euler step: x_{t+dt} = x_t + velocity * dt
-            x_t = x_t + velocity * dt 
+            if self.config.integration_method == "euler":
+                x_t = x_t + velocity_at(x_t, t_current) * dt
+            else:
+                x_t = explicit_midpoint_step(x_t, t_current, dt, velocity_at)
             if sde_sampling:
                 # x_t = x_t + self.config.sde_sigma * torch.randn_like(x_t)
                 x_t = x_t + sde_sigma[:, :, i, :] * torch.randn_like(x_t)

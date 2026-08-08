@@ -34,6 +34,9 @@ class GeometryConfig:
     num_workers: int = 2
     device: str = "cuda"
     load_ema: bool = True
+    candidate_method: str | None = None
+    candidate_steps: int | None = None
+    control_steps: int = 10
 
 
 def _load_policy(cfg: GeometryConfig, metadata: LeRobotDatasetMetadata) -> FlowMatchingPolicy:
@@ -86,10 +89,47 @@ def _repeat_observations(batch: dict[str, Any], count: int) -> dict[str, Any]:
     return repeated
 
 
+def _predict_with_nfe(
+    policy: FlowMatchingPolicy,
+    batch: dict[str, Any],
+    source: torch.Tensor,
+    *,
+    method: str,
+    steps: int,
+) -> tuple[torch.Tensor, torch.Tensor, int]:
+    policy.config.integration_method = method
+    policy.config.sampling_steps = steps
+    network_evaluations = 0
+
+    def count_network_evaluation(*_args: Any) -> None:
+        nonlocal network_evaluations
+        network_evaluations += 1
+
+    hook = policy.model.register_forward_hook(count_network_evaluation)
+    try:
+        actions, path = policy.predict_action_chunk(batch, source_noise=source)
+    finally:
+        hook.remove()
+    return actions, path, network_evaluations
+
+
+def _safe_ratio(numerator: float, denominator: float) -> float:
+    if denominator == 0.0:
+        return 1.0 if numerator == 0.0 else float("inf")
+    return numerator / denominator
+
+
 @torch.no_grad()
 def main(cfg: GeometryConfig) -> None:
     if cfg.reference_steps < 1 or cfg.num_batches < 1 or cfg.batch_size < 1:
         raise ValueError("reference_steps, num_batches, and batch_size must be positive")
+    candidate_enabled = cfg.candidate_method is not None or cfg.candidate_steps is not None
+    if candidate_enabled and (cfg.candidate_method is None or cfg.candidate_steps is None):
+        raise ValueError("candidate_method and candidate_steps must be provided together")
+    if candidate_enabled and cfg.candidate_method != "midpoint":
+        raise ValueError("the optional equal-NFE candidate method must be 'midpoint'")
+    if candidate_enabled and (cfg.candidate_steps < 1 or cfg.control_steps < 1):
+        raise ValueError("candidate_steps and control_steps must be positive")
     steps = sorted({int(value) for value in cfg.sampling_steps.split(",")}, reverse=True)
     if any(value < 1 for value in steps):
         raise ValueError("all sampling steps must be positive")
@@ -118,6 +158,18 @@ def main(cfg: GeometryConfig) -> None:
         for step in steps
     }
     diversity_batch = None
+    equal_nfe_aggregate = None
+    if candidate_enabled:
+        equal_nfe_aggregate = {
+            source_kind: {
+                "count": 0,
+                "control_endpoint_squared_error": 0.0,
+                "candidate_endpoint_squared_error": 0.0,
+            }
+            for source_kind in ("gaussian", "zero")
+        }
+        observed_nfe = {"reference": set(), "control": set(), "candidate": set()}
+        finite_actions = {"reference": True, "control": True, "candidate": True}
 
     for batch_index, raw_batch in enumerate(loader):
         if batch_index >= cfg.num_batches:
@@ -131,10 +183,12 @@ def main(cfg: GeometryConfig) -> None:
             device=cfg.device,
         )
 
+        policy.config.integration_method = "euler"
         policy.config.sampling_steps = cfg.reference_steps
         reference_actions, _ = policy.predict_action_chunk(batch, source_noise=source)
 
         for step in steps:
+            policy.config.integration_method = "euler"
             policy.config.sampling_steps = step
             actions, path = policy.predict_action_chunk(batch, source_noise=source)
             geometry = flow_geometry(source, path)
@@ -144,6 +198,45 @@ def main(cfg: GeometryConfig) -> None:
             values["straightness_error"] += geometry["straightness_error"].sum().item()
             values["path_length_ratio"] += geometry["path_length_ratio"].sum().item()
             values["endpoint_mse"] += (actions - reference_actions).square().flatten(1).mean(dim=1).sum().item()
+
+        if equal_nfe_aggregate is not None:
+            for source_kind, audit_source in (("gaussian", source), ("zero", torch.zeros_like(source))):
+                reference, _, reference_nfe = _predict_with_nfe(
+                    policy,
+                    batch,
+                    audit_source,
+                    method="euler",
+                    steps=cfg.reference_steps,
+                )
+                control, _, control_nfe = _predict_with_nfe(
+                    policy,
+                    batch,
+                    audit_source,
+                    method="euler",
+                    steps=cfg.control_steps,
+                )
+                candidate, _, candidate_nfe = _predict_with_nfe(
+                    policy,
+                    batch,
+                    audit_source,
+                    method=cfg.candidate_method,
+                    steps=cfg.candidate_steps,
+                )
+                observed_nfe["reference"].add(reference_nfe)
+                observed_nfe["control"].add(control_nfe)
+                observed_nfe["candidate"].add(candidate_nfe)
+                finite_actions["reference"] &= torch.isfinite(reference).all().item()
+                finite_actions["control"] &= torch.isfinite(control).all().item()
+                finite_actions["candidate"] &= torch.isfinite(candidate).all().item()
+
+                values = equal_nfe_aggregate[source_kind]
+                values["count"] += source.shape[0]
+                values["control_endpoint_squared_error"] += (
+                    (control - reference).square().flatten(1).mean(dim=1).sum().item()
+                )
+                values["candidate_endpoint_squared_error"] += (
+                    (candidate - reference).square().flatten(1).mean(dim=1).sum().item()
+                )
 
     if diversity_batch is None:
         raise RuntimeError("dataset yielded no full batches")
@@ -155,6 +248,7 @@ def main(cfg: GeometryConfig) -> None:
     )
     diversity = {}
     for step in steps:
+        policy.config.integration_method = "euler"
         policy.config.sampling_steps = step
         actions, _ = policy.predict_action_chunk(diversity_batch, source_noise=diversity_source)
         flattened = actions.flatten(1)
@@ -177,6 +271,64 @@ def main(cfg: GeometryConfig) -> None:
         "metrics": metrics,
         "source_conditioned_diversity": diversity,
     }
+    if equal_nfe_aggregate is not None:
+        control_diversity_actions, _, control_diversity_nfe = _predict_with_nfe(
+            policy,
+            diversity_batch,
+            diversity_source,
+            method="euler",
+            steps=cfg.control_steps,
+        )
+        candidate_diversity_actions, _, candidate_diversity_nfe = _predict_with_nfe(
+            policy,
+            diversity_batch,
+            diversity_source,
+            method=cfg.candidate_method,
+            steps=cfg.candidate_steps,
+        )
+        observed_nfe["control"].add(control_diversity_nfe)
+        observed_nfe["candidate"].add(candidate_diversity_nfe)
+        finite_actions["control"] &= torch.isfinite(control_diversity_actions).all().item()
+        finite_actions["candidate"] &= torch.isfinite(candidate_diversity_actions).all().item()
+
+        def diversity_metrics(actions: torch.Tensor) -> dict[str, float]:
+            flattened = actions.flatten(1)
+            return {
+                "mean_element_std": flattened.std(dim=0).mean().item(),
+                "mean_pairwise_distance": torch.pdist(flattened).mean().item(),
+            }
+
+        control_diversity = diversity_metrics(control_diversity_actions)
+        candidate_diversity = diversity_metrics(candidate_diversity_actions)
+        endpoint_metrics = {}
+        for source_kind, values in equal_nfe_aggregate.items():
+            count = values["count"]
+            control_mse = values["control_endpoint_squared_error"] / count
+            candidate_mse = values["candidate_endpoint_squared_error"] / count
+            endpoint_metrics[source_kind] = {
+                "control_endpoint_mse": control_mse,
+                "candidate_endpoint_mse": candidate_mse,
+                "candidate_to_control_mse_ratio": _safe_ratio(candidate_mse, control_mse),
+            }
+
+        result["equal_nfe_candidate"] = {
+            "reference": {"method": "euler", "steps": cfg.reference_steps},
+            "control": {"method": "euler", "steps": cfg.control_steps},
+            "candidate": {"method": cfg.candidate_method, "steps": cfg.candidate_steps},
+            "observed_network_evaluations": {
+                key: sorted(values) for key, values in observed_nfe.items()
+            },
+            "finite_actions": finite_actions,
+            "endpoint_metrics": endpoint_metrics,
+            "gaussian_diversity": {
+                "control": control_diversity,
+                "candidate": candidate_diversity,
+                "candidate_to_control_ratio": {
+                    key: _safe_ratio(candidate_diversity[key], control_diversity[key])
+                    for key in control_diversity
+                },
+            },
+        }
     output_path = Path(cfg.output_json)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")

@@ -32,7 +32,8 @@ class FlowMatchingConfig(PreTrainedConfig):
         n_obs_steps: Number of environment steps worth of observations to pass to the policy.
         horizon: The prediction horizon (chunk size) in units of environment steps.
         n_action_steps: The number of action steps to execute in the environment.
-        sampling_steps: Number of integration steps for inference (Euler integration).
+        sampling_steps: Number of integration steps for inference.
+        integration_method: ODE integration method used at inference ('euler' or 'midpoint').
         timestep_embed_dim: Dimension of the timestep embedding.
         down_dims: Dimensions for the U-Net encoder layers.
         kernel_size: Kernel size for convolutional layers.
@@ -65,7 +66,8 @@ class FlowMatchingConfig(PreTrainedConfig):
     n_action_steps: int = 8  # Number of action steps to execute
 
     # Flow matching parameters
-    sampling_steps: int = 10  # Number of Euler integration steps for inference
+    sampling_steps: int = 10  # Number of integration steps for inference
+    integration_method: str = "euler"
     timestep_embed_dim: int = 32  # Dimension of timestep embedding
 
     # Flow network configuration
@@ -153,6 +155,12 @@ class FlowMatchingConfig(PreTrainedConfig):
 
         if self.flow_network_output_param not in ["x0", "u"]:
             raise ValueError(f"flow_network_output_param must be 'x0' or 'u'. Got {self.flow_network_output_param}")
+
+        if self.integration_method not in ["euler", "midpoint"]:
+            raise ValueError(
+                "integration_method must be 'euler' or 'midpoint'. "
+                f"Got {self.integration_method}"
+            )
 
         if self.cfm_loss_mode not in ["x0", "u", "eps"]:
             raise ValueError(f"cfm_loss_mode must be 'x0', 'u', or 'eps'. Got {self.cfm_loss_mode}")

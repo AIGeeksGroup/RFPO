@@ -81,7 +81,9 @@ class EvalCheckpointConfig:
     source_temporal_correlation: float = 0.9
     """AR(1) coefficient used only by correlated_random sampling."""
     sampling_steps: Optional[int] = None
-    """Optional Euler-step override for low-NFE checkpoint evaluation."""
+    """Optional integration-step override for low-NFE checkpoint evaluation."""
+    integration_method: Optional[Literal["euler", "midpoint"]] = None
+    """Optional integration-method override; checkpoint/default behavior is Euler."""
     action_steps: Optional[int] = None
     """Optional number of predicted actions to execute before replanning."""
     # image_observation_keys: Optional[str] = None # "agentview_image robot0_eye_in_hand_image"
@@ -586,7 +588,10 @@ def main(cfg: EvalCheckpointConfig):
         if cfg.sampling_steps < 1:
             raise ValueError("sampling_steps must be at least 1")
         policy.config.sampling_steps = cfg.sampling_steps
-        logger.info("Overriding Euler sampling steps: %d", cfg.sampling_steps)
+        logger.info("Overriding integration steps: %d", cfg.sampling_steps)
+    if cfg.integration_method is not None:
+        policy.config.integration_method = cfg.integration_method
+        logger.info("Overriding integration method: %s", cfg.integration_method)
     if cfg.action_steps is not None:
         policy.config.n_action_steps = validate_action_steps(
             cfg.action_steps, policy.config.horizon
