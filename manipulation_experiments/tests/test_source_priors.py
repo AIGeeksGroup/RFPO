@@ -1,7 +1,7 @@
 import pytest
 import torch
 
-from src.source_priors import apply_previous_action_prior
+from src.source_priors import apply_previous_action_prior, split_action_history
 
 
 def test_previous_action_prior_warms_only_available_prefixes():
@@ -33,3 +33,21 @@ def test_previous_action_prior_rejects_negative_sigma():
             torch.ones(1, dtype=torch.bool),
             sigma=-0.1,
         )
+
+
+def test_split_action_history_falls_back_at_episode_boundary():
+    actions = torch.arange(2 * 6, dtype=torch.float32).reshape(2, 6, 1)
+    padding = torch.tensor(
+        [
+            [False, False, False, False, False, False],
+            [True, False, False, False, False, False],
+        ]
+    )
+
+    previous, target, available = split_action_history(
+        actions, padding, history_steps=2, horizon=4
+    )
+
+    torch.testing.assert_close(previous, actions[:, :2])
+    torch.testing.assert_close(target, actions[:, 2:])
+    assert available.tolist() == [True, False]

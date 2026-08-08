@@ -616,11 +616,25 @@ class FlowMatchingPolicy(PreTrainedPolicy):
         actions = batch[ACTION]  # Shape: (B, T, D)
         B, T, D = actions.shape
 
+        normalized_previous_actions = None
+        has_previous_actions = batch.get("has_previous_actions")
+        if self.config.source_prior_mode == "previous_action" and "previous_action" in batch:
+            normalized_previous_actions = self.normalize_targets(
+                {ACTION: batch["previous_action"]}
+            )[ACTION]
+
         if cfm_loss_eps is None or cfm_loss_t is None:
             # Sample random timesteps uniformly from [0, 1]
             t = torch.rand((B, 1, 1), device=actions.device)
             # Sample noise (x1)
             noise = torch.randn_like(actions)
+            if normalized_previous_actions is not None and has_previous_actions is not None:
+                noise = apply_previous_action_prior(
+                    source_noise=noise,
+                    previous_actions=normalized_previous_actions,
+                    has_previous_actions=has_previous_actions,
+                    sigma=self.config.source_prior_sigma,
+                )
         else:
             t = cfm_loss_t
             noise = cfm_loss_eps

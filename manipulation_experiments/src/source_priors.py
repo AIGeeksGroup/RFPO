@@ -35,3 +35,24 @@ def apply_previous_action_prior(
     source = source_noise.clone()
     source[:, :warm_steps] = torch.where(warm_mask, warm_source, source[:, :warm_steps])
     return source
+
+
+def split_action_history(
+    action_sequence: Tensor,
+    action_is_pad: Tensor,
+    history_steps: int,
+    horizon: int,
+) -> tuple[Tensor, Tensor, Tensor]:
+    """Split a dataset action query into previous actions and current targets."""
+    expected_steps = history_steps + horizon
+    if action_sequence.ndim != 3:
+        raise ValueError("action_sequence must have shape (batch, time, action_dim)")
+    if action_sequence.shape[1] != expected_steps:
+        raise ValueError(f"expected {expected_steps} action positions, got {action_sequence.shape[1]}")
+    if action_is_pad.shape != action_sequence.shape[:2]:
+        raise ValueError("action_is_pad must match the batch and time dimensions")
+
+    previous_actions = action_sequence[:, :history_steps]
+    target_actions = action_sequence[:, history_steps:]
+    has_previous_actions = ~action_is_pad[:, :history_steps].to(torch.bool).any(dim=1)
+    return previous_actions, target_actions, has_previous_actions

@@ -189,6 +189,8 @@ class FlowMatchingConfig(PreTrainedConfig):
 
     @property
     def action_delta_indices(self) -> list:
+        if self.source_prior_mode == "previous_action":
+            return list(range(-self.n_action_steps, self.horizon))
         return list(range(self.horizon))
 
     @property

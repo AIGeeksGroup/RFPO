@@ -29,6 +29,7 @@ from torch.utils.data.distributed import DistributedSampler
 from torchvision.transforms import Compose, Resize
 from safetensors.torch import load_file
 
+from lerobot.common.constants import ACTION
 from lerobot.common.datasets.factory import resolve_delta_timestamps
 from lerobot.common.datasets.lerobot_dataset import LeRobotDataset, LeRobotDatasetMetadata
 from lerobot.common.datasets.transforms import ImageTransforms, ImageTransformsConfig
@@ -42,6 +43,7 @@ from termcolor import colored
 from src.flow_model_config import FlowMatchingConfig
 from src.dexmg_env import VectorizedEnvWrapper, create_vectorized_env
 from src.flow_model import FlowMatchingPolicy
+from src.source_priors import split_action_history
 
 # Set multiprocessing start method for CUDA compatibility
 # This must be done before any other multiprocessing operations
@@ -179,6 +181,10 @@ class TrainFlowBCConfig:
     """Use Huber loss instead of MSE loss."""
     cfm_loss_huber_delta: float = 0.5
     """Huber loss delta."""
+    source_prior_mode: Literal["gaussian", "previous_action"] = "gaussian"
+    """Flow source distribution used for behavior cloning and rollout evaluation."""
+    source_prior_sigma: float = 0.5
+    """Residual Gaussian scale on previous-action source positions."""
 
 
     # Evaluation rollouts
@@ -664,6 +670,8 @@ def main(cfg: TrainFlowBCConfig):
         transported_clip_value = getattr(cfg, 'transported_clip_value', None)
         cfm_loss_use_huber = getattr(cfg, 'cfm_loss_use_huber', False)
         cfm_loss_huber_delta = getattr(cfg, 'cfm_loss_huber_delta', 0.5)
+        source_prior_mode = getattr(cfg, 'source_prior_mode', "gaussian")
+        source_prior_sigma = getattr(cfg, 'source_prior_sigma', 0.5)
         network_architecture = getattr(cfg, 'network_architecture', "unet")
         mlp_dims = getattr(cfg, 'mlp_dims', None)
 
@@ -683,6 +691,8 @@ def main(cfg: TrainFlowBCConfig):
             transported_clip_value=transported_clip_value,
             cfm_loss_use_huber=cfm_loss_use_huber,
             cfm_loss_huber_delta=cfm_loss_huber_delta,
+            source_prior_mode=source_prior_mode,
+            source_prior_sigma=source_prior_sigma,
             network_architecture=network_architecture,
             mlp_dims=mlp_dims if mlp_dims is not None else [512, 512, 512],
         )
@@ -840,6 +850,11 @@ def main(cfg: TrainFlowBCConfig):
                 config_dict.pop('type', None)
                 config_dict.pop('normalization_mapping', None)
                 policy_cfg = FlowMatchingConfig(**config_dict)
+
+            # Treat the source distribution as an explicit run-level override
+            # when continuing from a Gaussian checkpoint.
+            policy_cfg.source_prior_mode = cfg.source_prior_mode
+            policy_cfg.source_prior_sigma = cfg.source_prior_sigma
 
             logger.info(colored("Loaded policy config from checkpoint", "green"))
 
@@ -1086,6 +1101,17 @@ def main(cfg: TrainFlowBCConfig):
             # HACK: Rename 'actions' to 'action' for LIBERO compatibility
             if "actions" in batch and "action" not in batch:
                 batch["action"] = batch.pop("actions")
+
+            if policy_cfg.source_prior_mode == "previous_action":
+                previous_actions, target_actions, has_previous_actions = split_action_history(
+                    action_sequence=batch[ACTION],
+                    action_is_pad=batch[f"{ACTION}_is_pad"],
+                    history_steps=policy_cfg.n_action_steps,
+                    horizon=policy_cfg.horizon,
+                )
+                batch["previous_action"] = previous_actions
+                batch["has_previous_actions"] = has_previous_actions
+                batch[ACTION] = target_actions
 
             # Save sample images for inspection (only once at step 0)
             if cfg.debug and step == 0 and rank == 0:
