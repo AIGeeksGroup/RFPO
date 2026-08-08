@@ -300,6 +300,12 @@ hypotheses:
     motivation: "H34's coordinate median damaged outcome alignment despite preserving scale, implicating broken cross-coordinate structure rather than the absence of heavy-tailed microbatch gradients. GMOM robustly aggregates whole gradient vectors and is supported by prior PPO evidence."
     parent: H34
     priority: high
+  - id: H38
+    statement: "Five explicit-midpoint flow steps reduce Can action-endpoint integration error relative to ten Euler steps at the same ten network evaluations, without reducing source-conditioned diversity."
+    status: proposed
+    motivation: "Conditional reflow established that endpoint discretization error is measurable, while recent update-path and robust-gradient interventions failed. A second-order solver is a distinct inference-only route that can improve endpoint fidelity without training or extra NFE."
+    parent: H1
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -982,9 +988,9 @@ experiments:
       eligible_chunks: 250
 
 outer_loop:
-  cycle: 24
-  last_direction: "H37 GMOM is closed without optimizer integration; the next direction must change how useful gradients are estimated or applied rather than robustly aggregate the same four blocks."
-  last_reflection: "Full-vector GMOM converged and preserved the mean almost exactly, but outcome alignment fell by 0.0044 and 0.0098. Together H34 and H37 close coordinate-wise and geometric robust microbatch aggregation at this scale."
+  cycle: 25
+  last_direction: "Audit H38 midpoint-5 against Euler-10 at equal NFE on fixed Gaussian and zero-source endpoints before any rollout."
+  last_reflection: "Full-vector GMOM preserved the mean but did not improve outcome alignment. Before paying for another optimizer mechanism, test whether a second-order sampler can exploit the already-measured flow integration error through a cheap inference-only intervention."
 
 workspace:
   findings: "findings.md"
