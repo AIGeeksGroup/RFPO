@@ -35,6 +35,10 @@ from src.flow_model_config import FlowMatchingConfig
 from src.rollout_bookkeeping import build_rollout_zero_sampling_mask, prepare_invalid_step_mask
 from src.replay_audit import effective_sample_fraction, successful_chunk_mask
 from src.cfm_sampling import sample_cfm_variables
+from src.stratified_mc_audit import (
+    advantage_stratified_sample_counts,
+    gradient_estimator_metrics,
+)
 from src.advantage_weighting import (
     clipped_mirror_ratio_loss,
     ess_softmax_weights,
@@ -118,6 +122,16 @@ class FlowPPOConfig:
     cfm_ratio_generalization_audit_chunks: int = 64
     cfm_ratio_generalization_audit_min_chunks: int = 32
     cfm_ratio_generalization_audit_output_json: Optional[str] = None
+    advantage_stratified_mc_audit: bool = False
+    advantage_stratified_mc_audit_iteration: int = 2
+    advantage_stratified_mc_audit_batches: int = 2
+    advantage_stratified_mc_audit_batch_size: int = 32
+    advantage_stratified_mc_audit_repeats: int = 8
+    advantage_stratified_mc_audit_reference_samples: int = 64
+    advantage_stratified_mc_audit_uniform_samples: int = 8
+    advantage_stratified_mc_audit_low_samples: int = 4
+    advantage_stratified_mc_audit_high_samples: int = 12
+    advantage_stratified_mc_audit_output_json: Optional[str] = None
     rollout_zero_fraction: float = 0.0
     rollout_tempered_fraction: float = 0.0
     rollout_tempered_scale: float = 0.5
@@ -629,6 +643,34 @@ def main(cfg: FlowPPOConfig):
             cfg.cfm_ratio_generalization_audit_min_chunks,
         ) < 1:
             raise ValueError("CFM ratio audit iteration and chunk counts must be positive")
+    if cfg.advantage_stratified_mc_audit:
+        if cfg.loss_mode != "fpo" or not cfg.do_chunk_level_ppo:
+            raise ValueError("advantage-stratified MC audit requires chunk-level FPO")
+        if world_size != 1:
+            raise ValueError("advantage-stratified MC audit currently requires one process")
+        if min(
+            cfg.advantage_stratified_mc_audit_iteration,
+            cfg.advantage_stratified_mc_audit_batches,
+            cfg.advantage_stratified_mc_audit_batch_size,
+            cfg.advantage_stratified_mc_audit_repeats,
+            cfg.advantage_stratified_mc_audit_low_samples,
+        ) < 1:
+            raise ValueError("advantage-stratified MC audit settings must be positive")
+        if cfg.advantage_stratified_mc_audit_batch_size % 2:
+            raise ValueError("advantage-stratified MC audit batch size must be even")
+        if cfg.advantage_stratified_mc_audit_repeats < 2:
+            raise ValueError("advantage-stratified MC audit requires at least two repeats")
+        if (
+            cfg.advantage_stratified_mc_audit_low_samples
+            + cfg.advantage_stratified_mc_audit_high_samples
+            != 2 * cfg.advantage_stratified_mc_audit_uniform_samples
+        ):
+            raise ValueError("stratified and uniform MC budgets must match")
+        if (
+            cfg.advantage_stratified_mc_audit_reference_samples
+            <= cfg.advantage_stratified_mc_audit_high_samples
+        ):
+            raise ValueError("reference MC count must exceed the high allocation")
 
     # Run dir on all ranks (avoid races)
     run_start_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -1092,6 +1134,89 @@ def main(cfg: FlowPPOConfig):
         if not torch.isfinite(ratios).all() or not torch.isfinite(vector).all():
             raise RuntimeError("success replay audit produced non-finite ratios or gradients")
         return ratios.detach().cpu(), vector
+
+    def stratified_mc_audit_gradient(
+        chunk_indices: torch.Tensor,
+        chunk_weights: torch.Tensor,
+        sample_counts: torch.Tensor,
+        *,
+        seed_offset: int,
+        b_actions: torch.Tensor,
+        b_obs_images: dict[str, torch.Tensor],
+        b_obs_state: torch.Tensor,
+    ) -> torch.Tensor:
+        """Estimate one signed behavior-policy gradient with per-chunk MC counts."""
+        if chunk_indices.numel() != chunk_weights.numel() or sample_counts.shape != chunk_weights.shape:
+            raise ValueError("stratified MC audit inputs must have matching lengths")
+
+        total_loss = torch.zeros((), device=device)
+        for sample_count_tensor in torch.unique(sample_counts, sorted=True):
+            sample_count = int(sample_count_tensor.item())
+            group_positions = torch.where(sample_counts == sample_count_tensor)[0]
+            group_indices = chunk_indices[group_positions]
+            group_actions = b_actions[group_indices].to(device)
+            group_obs = {
+                key: value[group_indices, 0].to(device) for key, value in b_obs_images.items()
+            }
+            group_obs["observation.state"] = b_obs_state[group_indices, 0].to(device)
+            group_obs["action"] = group_actions
+            times, noises = sample_cfm_variables(
+                batch_size=group_indices.numel(),
+                num_samples=sample_count,
+                horizon=n_action_steps,
+                action_dim=action_dim,
+                mode="iid",
+                time_generator=torch.Generator(device=device).manual_seed(
+                    cfg.seed + seed_offset + 31 * sample_count
+                ),
+                noise_generator=torch.Generator(device=device).manual_seed(
+                    cfg.seed + seed_offset + 31 * sample_count + 1
+                ),
+                device=device,
+                dtype=group_actions.dtype,
+            )
+            with torch.no_grad():
+                old_losses, fixed_times, fixed_noises = get_cfm_values(
+                    actor_module,
+                    group_obs,
+                    sample_count,
+                    times,
+                    noises,
+                )
+            current_losses, _, _ = get_cfm_values(
+                actor_module,
+                group_obs,
+                sample_count,
+                fixed_times,
+                fixed_noises,
+            )
+            old_chunk_losses = old_losses.sum(dim=-1).permute(1, 0)
+            current_chunk_losses = current_losses.sum(dim=-1).permute(1, 0)
+            logratio = old_chunk_losses - current_chunk_losses
+            if cfg.clamp_logratio is not None:
+                logratio = clamp_ste(
+                    logratio,
+                    min=-cfg.clamp_logratio,
+                    max=cfg.clamp_logratio,
+                )
+            chunk_ratios = logratio.exp().mean(dim=1)
+            group_weights = chunk_weights[group_positions].to(device)
+            total_loss = total_loss - (group_weights * chunk_ratios).sum() / chunk_indices.numel()
+
+        parameters = [parameter for parameter in actor_module.parameters() if parameter.requires_grad]
+        gradients = torch.autograd.grad(total_loss, parameters, allow_unused=True)
+        vector = torch.cat(
+            [
+                (torch.zeros_like(parameter) if gradient is None else gradient)
+                .detach()
+                .flatten()
+                .cpu()
+                for parameter, gradient in zip(parameters, gradients, strict=True)
+            ]
+        )
+        if not torch.isfinite(vector).all() or vector.norm() <= 0:
+            raise RuntimeError("advantage-stratified MC audit produced an invalid gradient")
+        return vector
 
     def get_log_prob_and_entropy(actor, obs):
         log_prob, entropy, sde_sigma = actor(obs, is_dppo=True)
@@ -1571,6 +1696,140 @@ def main(cfg: FlowPPOConfig):
                 stored_pre_ratios.std(unbiased=False).item(),
                 heldout_pre_ratios.std(unbiased=False).item(),
             )
+
+        if (
+            cfg.advantage_stratified_mc_audit
+            and iteration == cfg.advantage_stratified_mc_audit_iteration
+        ):
+            valid_chunk_indices = torch.where(
+                b_cfm_value_invalid.sum(dim=1) == 0
+            )[0]
+            required_chunks = (
+                cfg.advantage_stratified_mc_audit_batches
+                * cfg.advantage_stratified_mc_audit_batch_size
+            )
+            if valid_chunk_indices.numel() < required_chunks:
+                raise RuntimeError(
+                    "advantage-stratified MC audit requires "
+                    f"{required_chunks} valid chunks, found {valid_chunk_indices.numel()}"
+                )
+            audit_generator = torch.Generator().manual_seed(cfg.seed + iteration * 3011)
+            selected_indices = valid_chunk_indices[
+                torch.randperm(valid_chunk_indices.numel(), generator=audit_generator)[
+                    :required_chunks
+                ]
+            ]
+            actor_module.eval()
+            stratified_batch_results = []
+            for audit_batch in range(cfg.advantage_stratified_mc_audit_batches):
+                batch_start = audit_batch * cfg.advantage_stratified_mc_audit_batch_size
+                batch_end = batch_start + cfg.advantage_stratified_mc_audit_batch_size
+                batch_indices = selected_indices[batch_start:batch_end]
+                batch_weights = b_advantages[batch_indices, 0].float()
+                candidate_counts = advantage_stratified_sample_counts(
+                    batch_weights,
+                    low_samples=cfg.advantage_stratified_mc_audit_low_samples,
+                    high_samples=cfg.advantage_stratified_mc_audit_high_samples,
+                )
+                uniform_counts = torch.full_like(
+                    candidate_counts,
+                    cfg.advantage_stratified_mc_audit_uniform_samples,
+                )
+                reference_counts = torch.full_like(
+                    candidate_counts,
+                    cfg.advantage_stratified_mc_audit_reference_samples,
+                )
+                reference_gradient = stratified_mc_audit_gradient(
+                    batch_indices,
+                    batch_weights,
+                    reference_counts,
+                    seed_offset=500_000 + 10_000 * audit_batch,
+                    b_actions=b_actions,
+                    b_obs_images=b_obs_images,
+                    b_obs_state=b_obs_state,
+                )
+                uniform_gradients = []
+                candidate_gradients = []
+                for audit_repeat in range(cfg.advantage_stratified_mc_audit_repeats):
+                    uniform_gradients.append(
+                        stratified_mc_audit_gradient(
+                            batch_indices,
+                            batch_weights,
+                            uniform_counts,
+                            seed_offset=600_000 + 10_000 * audit_batch + 100 * audit_repeat,
+                            b_actions=b_actions,
+                            b_obs_images=b_obs_images,
+                            b_obs_state=b_obs_state,
+                        )
+                    )
+                    candidate_gradients.append(
+                        stratified_mc_audit_gradient(
+                            batch_indices,
+                            batch_weights,
+                            candidate_counts,
+                            seed_offset=700_000 + 10_000 * audit_batch + 100 * audit_repeat,
+                            b_actions=b_actions,
+                            b_obs_images=b_obs_images,
+                            b_obs_state=b_obs_state,
+                        )
+                    )
+                uniform_gradients_tensor = torch.stack(uniform_gradients)
+                candidate_gradients_tensor = torch.stack(candidate_gradients)
+                uniform_metrics = gradient_estimator_metrics(
+                    uniform_gradients_tensor, reference_gradient
+                )
+                candidate_metrics = gradient_estimator_metrics(
+                    candidate_gradients_tensor, reference_gradient
+                )
+                repeat_average_cosine = torch.nn.functional.cosine_similarity(
+                    uniform_gradients_tensor.mean(dim=0).unsqueeze(0),
+                    candidate_gradients_tensor.mean(dim=0).unsqueeze(0),
+                    dim=1,
+                ).item()
+                stratified_batch_results.append(
+                    {
+                        "batch": audit_batch,
+                        "num_chunks": int(batch_indices.numel()),
+                        "advantage_abs_median": float(batch_weights.abs().median().item()),
+                        "reference_gradient_norm": float(reference_gradient.norm().item()),
+                        "uniform": uniform_metrics,
+                        "candidate": candidate_metrics,
+                        "candidate_mean_mse_relative_change": (
+                            candidate_metrics["mean_normalized_gradient_mse"]
+                            / max(uniform_metrics["mean_normalized_gradient_mse"], 1e-12)
+                            - 1.0
+                        ),
+                        "repeat_average_gradient_cosine": repeat_average_cosine,
+                    }
+                )
+                del reference_gradient, uniform_gradients_tensor, candidate_gradients_tensor
+
+            stratified_result = {
+                "iteration": iteration,
+                "num_valid_chunks_available": int(valid_chunk_indices.numel()),
+                "batch_size": cfg.advantage_stratified_mc_audit_batch_size,
+                "num_batches": cfg.advantage_stratified_mc_audit_batches,
+                "num_repeats": cfg.advantage_stratified_mc_audit_repeats,
+                "reference_samples": cfg.advantage_stratified_mc_audit_reference_samples,
+                "uniform_samples": cfg.advantage_stratified_mc_audit_uniform_samples,
+                "low_samples": cfg.advantage_stratified_mc_audit_low_samples,
+                "high_samples": cfg.advantage_stratified_mc_audit_high_samples,
+                "batches": stratified_batch_results,
+            }
+            stratified_output_path = (
+                Path(cfg.advantage_stratified_mc_audit_output_json)
+                if cfg.advantage_stratified_mc_audit_output_json is not None
+                else run_dir / "advantage_stratified_mc_audit.json"
+            )
+            stratified_output_path.parent.mkdir(parents=True, exist_ok=True)
+            stratified_output_path.write_text(
+                json.dumps(stratified_result, indent=2, sort_keys=True) + "\n"
+            )
+            logger.info(
+                "Advantage-stratified MC audit: %s",
+                json.dumps(stratified_result, sort_keys=True),
+            )
+            actor_module.train()
 
         # ---------- Policy update ----------
         b_inds = np.arange(local_batch_size)
