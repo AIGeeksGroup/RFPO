@@ -146,6 +146,10 @@ class FlowPPOConfig:
     discounted_success_critic_audit_iteration: int = 2
     discounted_success_critic_audit_chunks: int = 64
     discounted_success_critic_audit_output_json: Optional[str] = None
+    critic_warmup_scheduler_audit: bool = False
+    critic_warmup_scheduler_audit_iteration: int = 2
+    critic_warmup_scheduler_audit_chunks: int = 64
+    critic_warmup_scheduler_audit_output_json: Optional[str] = None
     rollout_zero_fraction: float = 0.0
     rollout_tempered_fraction: float = 0.0
     rollout_tempered_scale: float = 0.5
@@ -713,6 +717,22 @@ def main(cfg: FlowPPOConfig):
             raise ValueError("discounted-success critic audit settings must be positive")
         if cfg.discounted_success_critic_audit_chunks % 2:
             raise ValueError("discounted-success critic audit requires an even chunk count")
+    if cfg.critic_warmup_scheduler_audit:
+        if cfg.discounted_success_critic_audit:
+            raise ValueError("critic side audits are mutually exclusive")
+        if cfg.loss_mode != "fpo" or not cfg.do_chunk_level_ppo:
+            raise ValueError("critic warmup scheduler audit requires chunk-level FPO")
+        if world_size != 1:
+            raise ValueError("critic warmup scheduler audit currently requires one process")
+        if cfg.gradient_accumulation_steps != 1:
+            raise ValueError("critic warmup scheduler audit requires gradient accumulation 1")
+        if min(
+            cfg.critic_warmup_scheduler_audit_iteration,
+            cfg.critic_warmup_scheduler_audit_chunks,
+        ) < 1:
+            raise ValueError("critic warmup scheduler audit settings must be positive")
+        if cfg.critic_warmup_scheduler_audit_chunks % 2:
+            raise ValueError("critic warmup scheduler audit requires an even chunk count")
 
     # Run dir on all ranks (avoid races)
     run_start_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -891,7 +911,11 @@ def main(cfg: FlowPPOConfig):
 
     # Critic
     critic = Critic(global_obs_dim=actor.model.global_cond_dim)
-    success_critic = copy.deepcopy(critic) if cfg.discounted_success_critic_audit else None
+    success_critic = (
+        copy.deepcopy(critic)
+        if cfg.discounted_success_critic_audit or cfg.critic_warmup_scheduler_audit
+        else None
+    )
 
     # Move to device BEFORE DDP
     actor.to(device)
@@ -1040,6 +1064,7 @@ def main(cfg: FlowPPOConfig):
     )
     optimizer_success_critic = None
     lr_scheduler_success_critic = None
+    critic_audit_initial_parameters = None
     if success_critic is not None:
         optimizer_success_critic = optim.AdamW(
             success_critic.parameters(),
@@ -1047,12 +1072,18 @@ def main(cfg: FlowPPOConfig):
             eps=1e-5,
             weight_decay=1e-6,
         )
-        lr_scheduler_success_critic = get_scheduler(
-            name=cfg.lr_scheduler_name,
-            optimizer=optimizer_success_critic,
-            num_warmup_steps=cfg.lr_scheduler_critic_warmup_steps,
-            num_training_steps=num_iterations,
-        )
+        if cfg.discounted_success_critic_audit:
+            lr_scheduler_success_critic = get_scheduler(
+                name=cfg.lr_scheduler_name,
+                optimizer=optimizer_success_critic,
+                num_warmup_steps=cfg.lr_scheduler_critic_warmup_steps,
+                num_training_steps=num_iterations,
+            )
+        if cfg.critic_warmup_scheduler_audit:
+            critic_audit_initial_parameters = [
+                parameter.detach().cpu().clone()
+                for parameter in success_critic.parameters()
+            ]
     logger.info(f"[Rank {rank}] Total timesteps: {cfg.total_timesteps}, batch size: {batch_size} | "
                 f"MB: {minibatch_size}, iterations: {num_iterations}")
 
@@ -1605,8 +1636,11 @@ def main(cfg: FlowPPOConfig):
                     ].reshape(-1, joint_pos_dim).to(device)
                     value_obs = actor_module.normalize_inputs(value_images)
                     value_cond = actor_module.model.encode_observations(value_obs)
+                    candidate_output = success_critic(value_cond)
+                    if cfg.discounted_success_critic_audit:
+                        candidate_output = candidate_output.sigmoid()
                     candidate_value_batches.append(
-                        success_critic(value_cond).sigmoid().reshape(
+                        candidate_output.reshape(
                             value_end - value_start, n_action_steps
                         ).cpu()
                     )
@@ -1618,9 +1652,10 @@ def main(cfg: FlowPPOConfig):
                 candidate_next_cond = actor_module.model.encode_observations(
                     candidate_next_obs
                 )
-                candidate_next_value = success_critic(candidate_next_cond).sigmoid().reshape(
-                    1, -1
-                ).cpu()
+                candidate_next_value = success_critic(candidate_next_cond)
+                if cfg.discounted_success_critic_audit:
+                    candidate_next_value = candidate_next_value.sigmoid()
+                candidate_next_value = candidate_next_value.reshape(1, -1).cpu()
             candidate_advantages_stored, _ = calculate_advantage(
                 candidate_values_stored,
                 candidate_next_value,
@@ -1674,9 +1709,14 @@ def main(cfg: FlowPPOConfig):
                     int(moment_sums[2].item()),
                 )
 
+        critic_side_audit_iteration = (
+            cfg.discounted_success_critic_audit_iteration
+            if cfg.discounted_success_critic_audit
+            else cfg.critic_warmup_scheduler_audit_iteration
+        )
         if (
-            cfg.discounted_success_critic_audit
-            and iteration == cfg.discounted_success_critic_audit_iteration
+            (cfg.discounted_success_critic_audit or cfg.critic_warmup_scheduler_audit)
+            and iteration == critic_side_audit_iteration
         ):
             if candidate_b_values is None or candidate_advantages is None:
                 raise RuntimeError("discounted-success critic audit has no candidate values")
@@ -1703,7 +1743,11 @@ def main(cfg: FlowPPOConfig):
                 b_cfm_value_invalid.sum(dim=1) == 0
             )
             gradient_candidate_indices = torch.where(gradient_candidate_mask)[0]
-            required_chunks = cfg.discounted_success_critic_audit_chunks
+            required_chunks = (
+                cfg.discounted_success_critic_audit_chunks
+                if cfg.discounted_success_critic_audit
+                else cfg.critic_warmup_scheduler_audit_chunks
+            )
             if gradient_candidate_indices.numel() < required_chunks:
                 raise RuntimeError(
                     "discounted-success critic audit requires "
@@ -1802,10 +1846,50 @@ def main(cfg: FlowPPOConfig):
                 "candidate_value_spearman": candidate_value_spearman,
                 "batches": gradient_batch_results,
             }
+            if cfg.critic_warmup_scheduler_audit:
+                control_parameters = list(critic.parameters())
+                candidate_parameters = list(success_critic.parameters())
+                control_delta_sq = 0.0
+                candidate_delta_sq = 0.0
+                cross_delta_sq = 0.0
+                for initial, control_parameter, candidate_parameter in zip(
+                    critic_audit_initial_parameters,
+                    control_parameters,
+                    candidate_parameters,
+                    strict=True,
+                ):
+                    control_cpu = control_parameter.detach().cpu()
+                    candidate_cpu = candidate_parameter.detach().cpu()
+                    control_delta_sq += float((control_cpu - initial).square().sum().item())
+                    candidate_delta_sq += float((candidate_cpu - initial).square().sum().item())
+                    cross_delta_sq += float(
+                        (candidate_cpu - control_cpu).square().sum().item()
+                    )
+                success_critic_result.update(
+                    {
+                        "control_parameter_delta_norm": control_delta_sq**0.5,
+                        "candidate_parameter_delta_norm": candidate_delta_sq**0.5,
+                        "candidate_control_parameter_distance": cross_delta_sq**0.5,
+                        "control_iteration1_learning_rate": 0.0,
+                        "candidate_iteration1_learning_rate": float(
+                            optimizer_success_critic.param_groups[0]["lr"]
+                        ),
+                    }
+                )
+            critic_audit_output_json = (
+                cfg.discounted_success_critic_audit_output_json
+                if cfg.discounted_success_critic_audit
+                else cfg.critic_warmup_scheduler_audit_output_json
+            )
+            critic_audit_filename = (
+                "discounted_success_critic_audit.json"
+                if cfg.discounted_success_critic_audit
+                else "critic_warmup_scheduler_audit.json"
+            )
             success_critic_output_path = (
-                Path(cfg.discounted_success_critic_audit_output_json)
-                if cfg.discounted_success_critic_audit_output_json is not None
-                else run_dir / "discounted_success_critic_audit.json"
+                Path(critic_audit_output_json)
+                if critic_audit_output_json is not None
+                else run_dir / critic_audit_filename
             )
             success_critic_output_path.parent.mkdir(parents=True, exist_ok=True)
             success_critic_output_path.write_text(
@@ -2285,15 +2369,25 @@ def main(cfg: FlowPPOConfig):
 
                 if success_critic is not None:
                     optimizer_success_critic.zero_grad(set_to_none=True)
-                    candidate_logits = success_critic(obs_chunk_cond.detach()).reshape(
+                    candidate_output = success_critic(obs_chunk_cond.detach()).reshape(
                         mb_returns.shape[0], -1
                     )
-                    candidate_valid = mb_mc_valid & valid_idx_mask_in_chunk.bool()
+                    candidate_valid = valid_idx_mask_in_chunk.bool()
+                    if cfg.discounted_success_critic_audit:
+                        candidate_valid = candidate_valid & mb_mc_valid
                     if candidate_valid.any():
-                        candidate_value_loss = torch.nn.functional.binary_cross_entropy_with_logits(
-                            candidate_logits[candidate_valid],
-                            mb_mc_returns[candidate_valid],
-                        )
+                        if cfg.discounted_success_critic_audit:
+                            candidate_value_loss = torch.nn.functional.binary_cross_entropy_with_logits(
+                                candidate_output[candidate_valid],
+                                mb_mc_returns[candidate_valid],
+                            )
+                        else:
+                            candidate_value_loss = 0.5 * torch.mean(
+                                (
+                                    candidate_output[candidate_valid]
+                                    - mb_returns[candidate_valid]
+                                ).square()
+                            )
                         candidate_value_loss.backward()
                         nn.utils.clip_grad_norm_(success_critic.parameters(), cfg.max_grad_norm)
                         optimizer_success_critic.step()
