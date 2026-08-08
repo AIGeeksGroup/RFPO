@@ -98,7 +98,7 @@ hypotheses:
     priority: high
   - id: H9
     statement: "A minority tempered-Gaussian rollout subset transfers successful near-modal Can trajectories into the official full-noise policy."
-    status: pending
+    status: refuted
     motivation: "Unlike a delta-zero source, N(0, 0.5^2 I) continuously overlaps the official N(0, I) source while concentrating samples near the successful deterministic mode."
     parent: H8
     priority: high
@@ -117,7 +117,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 68
+  total_runs: 70
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -414,11 +414,31 @@ experiments:
       metric: success_rate
       value: 0.12
       episodes: 50
+    - run: can_tempered05_5iter_seed0_random_collection
+      metric: pooled_collection_success
+      value: 0.0909
+      successes: 44
+      episodes: 484
+      iterations: "2-5"
+    - run: can_tempered05_5iter_seed0_guided_collection
+      metric: pooled_collection_success
+      value: 0.5850
+      successes: 86
+      episodes: 147
+      iterations: "2-5"
+    - run: can_tempered05_5iter_seed0_zero_final
+      metric: success_rate
+      value: 0.84
+      episodes: 50
+    - run: can_tempered05_5iter_seed0_random_final
+      metric: success_rate
+      value: 0.06
+      episodes: 50
 
 outer_loop:
   cycle: 1
-  last_direction: "Test a fixed 20% N(0, 0.5^2 I) and 80% N(0, I) rollout mixture, judging improvement only on the official full-noise subset and final evaluations."
-  last_reflection: "A 20% zero-source mixture tripled successful trajectories but its held-out Gaussian subset fell from 8.77% to 7.08%; final zero/random remained 84%/12%. H8 is refuted because delta-zero successes did not transfer into a stable Gaussian collection gain."
+  last_direction: "Test whether resetting the cumulative CFM invalid mask unlocks the tempered-source signal, which creates more episode boundaries and loses valid samples faster than the official control."
+  last_reflection: "A 20% scale-0.5 source subset recovered full-noise collection from H8's 7.08% to 9.09%, but gained only 0.32 points over control and reduced final random success to 6%. H9 is refuted without a source sweep; its 93.91% final valid-CFM fraction motivates one interaction test with mask reset."
 
 workspace:
   findings: "findings.md"

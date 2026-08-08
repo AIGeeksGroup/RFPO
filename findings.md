@@ -88,6 +88,13 @@ Gaussian subset fell to 34/480 (7.08%) from the control's 53/604 (8.77%). Delta-
 provide successful trajectories without collapse, but those trajectories did not improve the
 full-noise behavior distribution under the preregistered short-budget metric.
 
+Replacing the delta source with a scale-0.5 Gaussian established that continuous source overlap is
+helpful but insufficient. The official scale-1 subset rose from H8's 7.08% to 44/484 (9.09%), only
+0.32 points above the control and statistically indistinguishable (`p=0.915`). Final zero success tied
+the control at 84%, while random success fell to 6%. The scale-0.5 subset itself succeeded on 86/147
+episodes, confirming the reward-supply mechanism. Its extra episode boundaries drove cumulative valid
+CFM actions down to 93.91%, making mask contamination a stronger interaction than in the baseline.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -103,6 +110,7 @@ full-noise behavior distribution under the preregistered short-budget metric.
 - CFM invalid-step state must be reset between independent rollouts, but the resulting 2.3-point increase in valid samples by iteration 5 was not enough to improve Can reward materially.
 - Propagating the same sparse terminal rewards farther with lambda 1.0 reduced rather than improved early collection success; the bottleneck is reward-information acquisition, not lambda decay alone.
 - Zero-source collection tripled the number of successes without final-policy collapse, but the disjoint delta source did not transfer into better Gaussian-source collection; source overlap is now the key constraint.
+- Tempered Gaussian overlap recovered the delta-source deficit but not a useful gain; high-success source mixtures also amplify the cumulative invalid-mask defect by creating more episode boundaries.
 
 ## Lessons and Constraints
 
@@ -120,4 +128,4 @@ full-noise behavior distribution under the preregistered short-budget metric.
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased Monte Carlo sampling, validity-mask reset, full-lambda GAE, and delta-zero mixed rollout screening are closed. Pure conditional reflow is supported as a geometry and sampling-efficiency method but refuted as a five-point Can reward improvement. The next candidate should preserve the successful-trajectory supply of mixed collection while using a source with continuous overlap to the official Gaussian distribution.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased Monte Carlo sampling, full-lambda GAE, and both delta-zero and tempered mixed rollout screens are closed as standalone reward improvements. Pure conditional reflow is supported as a geometry and sampling-efficiency method. The next candidate is one targeted interaction: combine the overlapping tempered source with the already verified per-rollout validity-mask reset, because the mixture amplifies that bookkeeping defect.
