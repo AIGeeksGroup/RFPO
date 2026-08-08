@@ -108,6 +108,12 @@ hypotheses:
     motivation: "The tempered mixture ended with only 93.91% valid CFM actions, so the bookkeeping defect is materially larger than in the official control."
     parent: H9
     priority: high
+  - id: H11
+    statement: "ESS-normalized exponential advantage weights improve early standard-Gaussian Can learning when used inside the FPO++ per-sample clipped-ratio objective."
+    status: pending
+    motivation: "H8-H10 show that reward supply is abundant but guided-source transfer is invalid or ineffective; mirror weights prioritize the rare successful on-policy samples without source mismatch."
+    parent: H2
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -463,7 +469,7 @@ experiments:
 
 outer_loop:
   cycle: 2
-  last_direction: "Stop source-mixture and estimator combinations; return to literature and select a mechanism that changes how successful trajectories update the full-noise policy."
+  last_direction: "Test one ESS-controlled mirror-weighted FPO++ pilot on standard-Gaussian Can rollouts; do not sweep the weighting temperature or ESS target."
   last_reflection: "Mask reset held valid CFM samples near 98%, but tempered-source full-noise collection fell to 41/481 (8.52%) and final random success remained 6%. Invalid-mask loss is not the cause of failed transfer, so H10 is refuted and scale/fraction/lambda/mask sweeps are closed."
 
 workspace:
