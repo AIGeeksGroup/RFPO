@@ -1078,6 +1078,8 @@ def main(cfg: TrainFlowBCConfig):
     while step < cfg.steps:
         # Accumulate loss over all micro-batches for logging
         total_loss_for_logging = torch.tensor(0.0, device=device)
+        valid_history_count = torch.tensor(0, device=device, dtype=torch.long)
+        history_sample_count = torch.tensor(0, device=device, dtype=torch.long)
         iter_start_t = time.perf_counter()
 
         # Inner loop for gradient accumulation
@@ -1112,6 +1114,8 @@ def main(cfg: TrainFlowBCConfig):
                 batch["previous_action"] = previous_actions
                 batch["has_previous_actions"] = has_previous_actions
                 batch[ACTION] = target_actions
+                valid_history_count += has_previous_actions.sum()
+                history_sample_count += has_previous_actions.numel()
 
             # Save sample images for inspection (only once at step 0)
             if cfg.debug and step == 0 and rank == 0:
@@ -1158,6 +1162,8 @@ def main(cfg: TrainFlowBCConfig):
         # Clip gradients and step optimizer
         if is_ddp:
             dist.all_reduce(total_loss_for_logging, op=dist.ReduceOp.AVG)
+            dist.all_reduce(valid_history_count, op=dist.ReduceOp.SUM)
+            dist.all_reduce(history_sample_count, op=dist.ReduceOp.SUM)
 
         # Compute gradient norm before clipping (for logging)
         grad_norm_before_clip = torch.nn.utils.clip_grad_norm_(policy.parameters(), cfg.grad_clip_norm)
@@ -1182,6 +1188,11 @@ def main(cfg: TrainFlowBCConfig):
 
         # Current learning rate
         current_lr = optimizer.param_groups[0]["lr"]
+        valid_history_frac = (
+            valid_history_count.float() / history_sample_count
+            if history_sample_count.item() > 0
+            else None
+        )
 
         if rank == 0 and step % cfg.log_freq == 0:
             msg = (
@@ -1193,6 +1204,8 @@ def main(cfg: TrainFlowBCConfig):
                 f" | data: {data_load_ms:.1f} ms"
                 f" | iter: {iter_ms:.1f} ms"
             )
+            if valid_history_frac is not None:
+                msg += f" | valid_history_frac: {valid_history_frac.item():.4f}"
             logger.info(msg)
             if cfg.wandb_enable:
                 wandb.log(
@@ -1204,6 +1217,11 @@ def main(cfg: TrainFlowBCConfig):
                         "train/epoch": fractional_epoch,
                         "time/data_load_ms": data_load_ms,
                         "time/iter_ms": iter_ms,
+                        **(
+                            {"train/valid_history_frac": valid_history_frac.item()}
+                            if valid_history_frac is not None
+                            else {}
+                        ),
                     },
                     step=step,
                 )

@@ -18,7 +18,7 @@ fi
 python pretrain_flow_bc.py \
   --dataset ankile/robomimic-mh-can-image \
   --resume-ckpt "$CAN_CHECKPOINT" \
-  --steps 1001 \
+  --steps 1002 \
   --batch-size "${BATCH_SIZE:-8}" \
   --num-workers "${NUM_WORKERS:-2}" \
   --source-prior-mode previous_action \
