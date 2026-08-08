@@ -39,6 +39,10 @@ literature:
       title: "Kickstarting Deep Reinforcement Learning"
       year: 2018
       relevance: "Motivates retaining a fixed pretrained teacher as an auxiliary behavior objective during RL."
+    - id: wang2020_truly_ppo
+      title: "Truly Proximal Policy Optimization"
+      year: 2020
+      relevance: "Motivates rollback gradients for improving CFM ratios that cross the FPO++ clipping boundary."
   open_problems:
     - "FPO++ uses many Euler steps; it is unknown whether conditional reflow improves control return or only sampling efficiency."
     - "The relation between flow curvature, CFM ratio variance, and policy-update stability is not established."
@@ -279,6 +283,12 @@ hypotheses:
     status: refuted
     motivation: "H29 passed its mechanism audit and H30 training was valid, but the original reward screen was censored by requesting fewer episodes than asynchronous environments. Existing frozen checkpoints can be compared without retraining using one episode from every environment."
     parent: H30
+    priority: high
+  - id: H36
+    statement: "Replacing FPO++ flat clipping with paper-default PPO-RB rollback preserves the pre-update held-out gradient direction across ten actor epochs without sacrificing most surrogate progress."
+    status: proposed
+    motivation: "H18 isolates severe repeated-epoch ratio drift and gradient rotation, while H23-H24 show that smaller steps and full-batch accumulation do not fix it. Rollback adds inward pressure exactly when improving CFM ratios cross the existing bound while preserving the on-policy gradient."
+    parent: H18
     priority: high
 
 experiments:
@@ -935,8 +945,8 @@ experiments:
 
 outer_loop:
   cycle: 23
-  last_direction: "Treat H30b as suggestive but below gate; do not confirm or tune it, and require a new H36 mechanism before further reward runs."
-  last_reflection: "Balanced H30b evaluation removed censoring and showed candidate gains of 1/20 in both zero and random modes, for +2/40 pooled. The pooled and non-degradation gates passed, but the locked random-source +2/20 gate failed, so no 50-episode confirmation is authorized."
+  last_direction: "Audit H36 paper-default PPO-RB on the repeated FPO++ update path; run no reward experiment unless both held-out replicas pass the locked mechanism gates."
+  last_reflection: "H21-H22-H35 retain official GAE, H18 locates harmful rotation after optimization begins, and H23-H24 rule out simple step-size and accumulation fixes. PPO-RB is selected because it changes only improving out-of-bound gradients and is compatible with FPO++ CFM ratios without inventing a flow-policy KL."
 
 workspace:
   findings: "findings.md"
