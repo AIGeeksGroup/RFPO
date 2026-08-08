@@ -13,8 +13,9 @@ will preserve outcome ranking and align the actor gradient more consistently wit
 - Can rollout seed: 20260819; official scale-1 Gaussian source
 - Actor: frozen during iteration 1 and never updated with candidate weights
 - Control: unchanged official critic and GAE advantages
-- Candidate input: frozen 1033-dimensional observation encoding and the normalized executed action
-  chunk
+- Candidate input: the frozen observation encoding whose dimension is read from
+  `actor.model.global_cond_dim`, plus the normalized executed action chunk. For the locked
+  `95j3noe4_step_6000` checkpoint, the runtime dimension is 10377.
 - Candidate head: two-layer ReLU MLP with widths 512 and 256 and one scalar output
 - Continuous-action centering: for every chunk-start observation, subtract the mean candidate output
   over four fixed action chunks sampled from the same frozen flow policy
