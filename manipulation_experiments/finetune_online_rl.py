@@ -175,6 +175,7 @@ class FlowPPOConfig:
     bc_anchor_pcgrad_audit: bool = False
     bc_anchor_pcgrad_audit_iteration: int = 2
     bc_anchor_pcgrad_audit_chunks: int = 64
+    bc_anchor_pcgrad_anchor_mode: Literal["velocity", "zero_endpoint"] = "velocity"
     bc_anchor_pcgrad_audit_output_json: Optional[str] = None
     rollout_zero_fraction: float = 0.0
     rollout_tempered_fraction: float = 0.0
@@ -1365,6 +1366,39 @@ def main(cfg: FlowPPOConfig):
         if actor_module.config.flow_network_output_param == "u":
             return network_output
         return (query_points - network_output) / query_times.clamp_min(1e-5)
+
+    def actor_zero_source_endpoint(
+        observation_conditioning: torch.Tensor,
+    ) -> torch.Tensor:
+        """Differentiably integrate the policy from its deterministic zero source."""
+        batch = observation_conditioning.shape[0]
+        x_t = torch.zeros(
+            (batch, actor_module.config.horizon, action_dim),
+            device=observation_conditioning.device,
+            dtype=observation_conditioning.dtype,
+        )
+        schedule = actor_module.get_schedule(x_t.device)
+        for step in range(actor_module.config.sampling_steps):
+            t_current = schedule[step]
+            dt = schedule[step + 1] - t_current
+            time_embedding = actor_module.model.diffusion_step_encoder(
+                t_current.reshape(1)
+            ).reshape(1, -1).expand(batch, -1)
+            network_output = actor_module.model(
+                x_t, time_embedding, observation_conditioning
+            )
+            network_output = actor_module.config.mlp_output_scale * network_output
+            if actor_module.config.transported_clip_value is not None:
+                network_output = network_output.clamp(
+                    -actor_module.config.transported_clip_value,
+                    actor_module.config.transported_clip_value,
+                )
+            if actor_module.config.flow_network_output_param == "u":
+                velocity = network_output
+            else:
+                velocity = (x_t - network_output) / t_current.clamp_min(1e-5)
+            x_t = x_t + velocity * dt
+        return actor_module.config.actor_scale * x_t[:, :n_action_steps]
 
     def autograd_list(loss: torch.Tensor) -> tuple[list[torch.Tensor], list[torch.Tensor | None]]:
         parameters = [
@@ -2921,25 +2955,33 @@ def main(cfg: FlowPPOConfig):
                     observation_conditioning = actor_module.model.encode_observations(
                         normalized_observations
                     ).detach()
-                query_generator = torch.Generator(device=device).manual_seed(
-                    cfg.seed + 820_000 + audit_batch
-                )
-                query_points = torch.randn(
-                    (pcgrad_batch_size, n_action_steps, action_dim),
-                    generator=query_generator,
-                    device=device,
-                    dtype=audit_actions.dtype,
-                )
-                query_times = torch.rand(
-                    (pcgrad_batch_size, 1, 1),
-                    generator=query_generator,
-                    device=device,
-                    dtype=audit_actions.dtype,
-                )
-                with torch.no_grad():
-                    anchor_velocity = actor_velocity_field(
-                        observation_conditioning, query_points, query_times
-                    ).detach()
+                query_points = None
+                query_times = None
+                if cfg.bc_anchor_pcgrad_anchor_mode == "velocity":
+                    query_generator = torch.Generator(device=device).manual_seed(
+                        cfg.seed + 820_000 + audit_batch
+                    )
+                    query_points = torch.randn(
+                        (pcgrad_batch_size, n_action_steps, action_dim),
+                        generator=query_generator,
+                        device=device,
+                        dtype=audit_actions.dtype,
+                    )
+                    query_times = torch.rand(
+                        (pcgrad_batch_size, 1, 1),
+                        generator=query_generator,
+                        device=device,
+                        dtype=audit_actions.dtype,
+                    )
+                    with torch.no_grad():
+                        anchor_behavior = actor_velocity_field(
+                            observation_conditioning, query_points, query_times
+                        ).detach()
+                else:
+                    with torch.no_grad():
+                        anchor_behavior = actor_zero_source_endpoint(
+                            observation_conditioning
+                        ).detach()
 
                 def fixed_rl_objective() -> torch.Tensor:
                     _, objective = replay_audit_objective(
@@ -2956,10 +2998,15 @@ def main(cfg: FlowPPOConfig):
                     return objective
 
                 def anchor_objective() -> torch.Tensor:
-                    velocity = actor_velocity_field(
-                        observation_conditioning, query_points, query_times
-                    )
-                    return (velocity - anchor_velocity).square().mean()
+                    if cfg.bc_anchor_pcgrad_anchor_mode == "velocity":
+                        behavior = actor_velocity_field(
+                            observation_conditioning, query_points, query_times
+                        )
+                    else:
+                        behavior = actor_zero_source_endpoint(
+                            observation_conditioning
+                        )
+                    return (behavior - anchor_behavior).square().mean()
 
                 parameters = [
                     parameter
@@ -3033,11 +3080,11 @@ def main(cfg: FlowPPOConfig):
                         "candidate_rl_surrogate_gain": float(
                             (pre_rl_loss - candidate_rl_loss).detach().item()
                         ),
-                        "pre_bc_velocity_mse": float(pre_bc_loss.detach().item()),
-                        "control_bc_velocity_mse": float(
+                        "pre_bc_anchor_mse": float(pre_bc_loss.detach().item()),
+                        "control_bc_anchor_mse": float(
                             control_bc_loss.detach().item()
                         ),
-                        "candidate_bc_velocity_mse": float(
+                        "candidate_bc_anchor_mse": float(
                             candidate_bc_loss.detach().item()
                         ),
                         "control_bc_mse_increase": float(
@@ -3057,6 +3104,7 @@ def main(cfg: FlowPPOConfig):
                 "num_chunks_audited": audit_count,
                 "num_batches": 2,
                 "cfm_samples": n_action_samples,
+                "anchor_mode": cfg.bc_anchor_pcgrad_anchor_mode,
                 "virtual_learning_rate": cfg.learning_rate_actor,
                 "max_grad_norm": cfg.max_grad_norm,
                 "batches": batch_results,
