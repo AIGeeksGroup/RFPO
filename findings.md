@@ -119,6 +119,11 @@ run at step 6000. A locked 50-episode audit reproduced Figure A.8: Gaussian-rand
 This checkpoint removes the early sparse-reward bottleneck and is suitable for inexpensive method
 screening, but its gain over step 1000 is attributable to behavior-cloning initialization quality.
 
+Changing advantage normalization from per-minibatch moments to fixed rollout-level moments did not
+improve the high-signal step-6000 screen. Actor-update collection was 426/734 (58.04%) versus
+425/725 (58.62%) for control, and final random evaluation was 64% versus 72%. The hypothesis that
+minibatch normalization drift materially destabilizes the update is therefore unsupported.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -139,6 +144,7 @@ screening, but its gain over step 1000 is attributable to behavior-cloning initi
 - Soft positive mirror weights preserved stability and random evaluation but did not outperform signed FPO++ advantages; simple reward reweighting is not enough to improve early Can learning.
 - Reflow's 22% curvature reduction does not translate into lower CFM gradient disagreement, so an online reflow auxiliary lacks its proposed stabilization mechanism.
 - Can step 6000 faithfully reproduces the high-quality 96% zero / roughly 64% random base-policy regime in Appendix D.4, enabling more informative short-budget optimizer experiments without conflating initialization and algorithm effects.
+- Freezing advantage moments over a complete rollout does not improve FPO++; simple rescaling changes are now closed alongside reward-weighting changes.
 
 ## Lessons and Constraints
 
@@ -156,4 +162,4 @@ screening, but its gain over step 1000 is attributable to behavior-cloning initi
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, and online reflow stabilization are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The verified step-6000 Can policy now supplies a high-signal short-budget screen; improvements must be paired against FPO++ there and then transferred back to the official step-1000 initialization.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, and rollout-level advantage normalization are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The verified step-6000 Can policy supplies a high-signal short-budget screen; the next intervention must add useful update information rather than rescale the same advantages, then transfer back to the official step-1000 initialization if supported.

@@ -122,7 +122,7 @@ hypotheses:
     priority: high
   - id: H13
     statement: "Using fixed rollout-level advantage moments reduces update-weight drift and improves early FPO++ Can success relative to per-minibatch normalization."
-    status: active
+    status: refuted
     motivation: "Terminal binary rewards make minibatch composition highly variable; recomputing normalization after every reshuffle changes trajectory weights across epochs without adding information."
     parent: H2
     priority: high
@@ -141,7 +141,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 82
+  total_runs: 84
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -522,11 +522,21 @@ experiments:
       value: 0.96
       episodes: 50
       successes: 48
+    - run: can_step6000_advnorm_minibatch_5iter_seed20260812
+      metric: pooled_collection_success_rate_iterations_2_5
+      value: 0.58621
+      episodes: 725
+      successes: 425
+    - run: can_step6000_advnorm_rollout_5iter_seed20260812
+      metric: pooled_collection_success_rate_iterations_2_5
+      value: 0.58038
+      episodes: 734
+      successes: 426
 
 outer_loop:
   cycle: 3
-  last_direction: "Use the verified high-quality step-6000 Can initialization for paired, short-budget algorithm screening; retain step-1000 as the final benchmark gate."
-  last_reflection: "The step-6000 checkpoint reproduced Figure A.8 with 34/50 random and 48/50 zero successes. This removes reward scarcity for low-cost screening while remaining explicitly separate from an algorithmic gain."
+  last_direction: "Stop normalization-scope changes; use the high-signal step-6000 screen to test an intervention that changes the information in the policy update rather than only its rescaling."
+  last_reflection: "Fixed rollout-level advantage moments produced 426/734 collection successes versus 425/725 for minibatch normalization (p=0.832) and lower final random evaluation (64% versus 72%). H13 is refuted."
 
 workspace:
   findings: "findings.md"
