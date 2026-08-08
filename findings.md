@@ -264,6 +264,12 @@ pairwise action distance were retained at 100.35% and 100.25%, all outputs were 
 hooks measured exactly ten velocity evaluations for both methods. This establishes a large numerical
 fidelity gain at unchanged network-evaluation cost, but closed-loop reward remains untested.
 
+That fidelity gain did not produce a reward-screen gain. In a balanced step-1000 Can comparison,
+midpoint-5 improved zero-source success from 14/20 to 16/20 but reduced Gaussian-source success from
+4/20 to 2/20. Pooled success tied at 18/40, failing both the locked +3-success gate and the per-mode
+non-degradation gate. A closer approximation to the high-NFE flow endpoint is therefore not
+intrinsically a better closed-loop action for the released policy.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -311,6 +317,7 @@ fidelity gain at unchanged network-evaluation cost, but closed-loop reward remai
 - PPO-RB demonstrates that retaining more unclipped positive ratios does not by itself preserve the useful update: its strong boundary activity traded away roughly two thirds of surrogate progress and improved held-out direction in only one batch.
 - Robust microbatch aggregation is closed at this scale: coordinate median damages useful cross-coordinate structure, while full-vector GMOM stays near the ordinary mean and slightly worsens outcome alignment in both replicas.
 - A second-order sampler can exploit the existing flow field without retraining: midpoint-5 nearly matches the Euler-64 endpoint at the same NFE as Euler-10 and preserves Gaussian-source diversity. Reward transfer must still be established independently.
+- Higher endpoint fidelity is not a sufficient reward objective: midpoint-5's deterministic +2/20 was exactly offset by a Gaussian-source -2/20 in balanced Can evaluation.
 
 ## Lessons and Constraints
 
@@ -332,4 +339,4 @@ fidelity gain at unchanged network-evaluation cost, but closed-loop reward remai
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, rank-based GAE weighting, terminal-sign filtering, fixed lower actor learning rate, full-batch gradient accumulation, BC/FPO++ midpoint interpolation, explicit Gaussian-bridge distillation, antithetic endpoint averaging, shorter receding-horizon execution, temporally correlated Gaussian inference, advantage-sign gradient surgery, temporal per-timestep clipping, coordinate-wise median and geometric-median gradient aggregation, and PPO-RB ratio rollback are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. Equal-NFE midpoint sampling is the active reward-screen candidate after passing all fixed-endpoint gates.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, rank-based GAE weighting, terminal-sign filtering, fixed lower actor learning rate, full-batch gradient accumulation, BC/FPO++ midpoint interpolation, explicit Gaussian-bridge distillation, antithetic endpoint averaging, shorter receding-horizon execution, temporally correlated Gaussian inference, advantage-sign gradient surgery, temporal per-timestep clipping, coordinate-wise median and geometric-median gradient aggregation, PPO-RB ratio rollback, and equal-NFE midpoint sampling are closed as reward-improvement routes. Reflow and midpoint retain geometry/sampling-fidelity value only. The next candidate must target reward-relevant behavior rather than endpoint fidelity alone.

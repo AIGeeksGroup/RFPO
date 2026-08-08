@@ -308,7 +308,7 @@ hypotheses:
     priority: high
   - id: H38b
     statement: "Equal-NFE midpoint-5 improves balanced Can success over official Euler-10 without materially degrading either zero- or Gaussian-source behavior."
-    status: proposed
+    status: refuted
     motivation: "H38 reduced source-matched Euler-64 endpoint error by more than 98% under both source regimes at unchanged measured NFE and diversity; closed-loop reward transfer is the remaining question."
     parent: H38
     priority: high
@@ -327,7 +327,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 116
+  total_runs: 120
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -1000,11 +1000,31 @@ experiments:
       control_nfe: 10
       candidate_nfe: 10
       audited_observations: 128
+    - run: can_step1000_h38b_control_zero_balanced20_seed20260910
+      metric: success_rate
+      value: 0.70
+      episodes: 20
+      balanced_episodes_per_env: true
+    - run: can_step1000_h38b_control_random_balanced20_seed20260910
+      metric: success_rate
+      value: 0.20
+      episodes: 20
+      balanced_episodes_per_env: true
+    - run: can_step1000_h38b_midpoint_zero_balanced20_seed20260910
+      metric: success_rate
+      value: 0.80
+      episodes: 20
+      balanced_episodes_per_env: true
+    - run: can_step1000_h38b_midpoint_random_balanced20_seed20260910
+      metric: success_rate
+      value: 0.10
+      episodes: 20
+      balanced_episodes_per_env: true
 
 outer_loop:
-  cycle: 25
-  last_direction: "Run the separately locked balanced H38 reward screen for midpoint-5 versus Euler-10 under zero and Gaussian sources."
-  last_reflection: "H38 passed all fixed-endpoint gates with roughly 98.5-98.9% lower error at equal measured NFE and unchanged diversity. Test whether this numerical fidelity transfers to closed-loop Can success before any solver variants or larger evaluation."
+  cycle: 26
+  last_direction: "Pivot away from endpoint-fidelity-only inference changes and select a reward-relevant candidate distinct from the closed source, solver, critic, estimator, clipping, and robust-aggregation routes."
+  last_reflection: "H38b tied pooled reward because midpoint's +2/20 zero-source gain was offset by -2/20 random. Numerical fidelity is real but not aligned with both benchmark modes; do not tune the solver after this locked failure."
 
 workspace:
   findings: "findings.md"
