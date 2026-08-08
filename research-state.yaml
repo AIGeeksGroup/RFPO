@@ -53,8 +53,11 @@ experiments:
   baseline_value:
     can_validation20_zero_success: 0.80
     can_validation20_random_success: 0.10
+    can_baseline200_zero_success: 0.71
+    can_baseline200_random_success: 0.14
+    can_two_run_random_pooled_success: 0.1175
   best_value: null
-  total_runs: 2
+  total_runs: 9
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -64,11 +67,36 @@ experiments:
       metric: success_rate
       value: 0.10
       episodes: 20
+    - run: can_baseline200_env30_zero
+      metric: success_rate
+      value: 0.705
+      episodes: 200
+    - run: can_baseline200_env30_random
+      metric: success_rate
+      value: 0.095
+      episodes: 200
+    - run: can_baseline200_env50_zero
+      metric: success_rate
+      value: 0.71
+      episodes: 200
+    - run: can_baseline200_env50_random
+      metric: success_rate
+      value: 0.14
+      episodes: 200
+    - run: go2_smoke_64x5
+      metric: completed_iterations
+      value: 5
+    - run: go2_validation_256x50
+      metric: completed_iterations
+      value: 50
+    - run: can_fpopp_one_update_seed0
+      metric: completed_updates
+      value: 1
 
 outer_loop:
-  cycle: 0
-  last_direction: null
-  last_reflection: ""
+  cycle: 1
+  last_direction: "Baseline infrastructure and representative released-checkpoint reproduction."
+  last_reflection: "Can checkpoint behavior reproduces and both training pipelines pass. Proceed to matched improvement pilots while the official Go2 seed completes."
 
 workspace:
   findings: "findings.md"
@@ -83,5 +111,5 @@ infrastructure:
   remote_code: "~/workspace/code/fpo-control"
   remote_outputs: "~/workspace/outputs/fpo-control"
   manipulation_environment: verified
-  isaac_environment: installing
+  isaac_environment: verified
   checkpoints: verified

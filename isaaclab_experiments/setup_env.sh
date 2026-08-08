@@ -38,6 +38,10 @@ if [[ ! -f $SENTINEL_FILE ]]; then
     MAMBA_ROOT_PREFIX=$CONDA_ROOT $CONDA_ROOT/bin/mamba create -y -n isaaclab_fpo python=3.10
   fi
 
+  # Isaac Sim's Iray plugin links against libGLU, which is not installed on
+  # minimal headless servers. Keep it inside the project environment.
+  $CONDA_ROOT/bin/conda install -y -n isaaclab_fpo -c conda-forge libglu
+
   source $CONDA_ROOT/bin/activate isaaclab_fpo
 
   pip install "numpy==1.26.4"

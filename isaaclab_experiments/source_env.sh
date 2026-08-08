@@ -1,5 +1,5 @@
 SOURCE_ENV_SETUP_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-if [ -n "$ZSH_VERSION" ]; then
+if [ -n "${ZSH_VERSION:-}" ]; then
     SOURCE_ENV_SETUP_DIR="$( cd "$( dirname "$0" )" && pwd )"
 fi
 source ${SOURCE_ENV_SETUP_DIR}/thirdparty/miniconda3/bin/activate isaaclab_fpo

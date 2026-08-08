@@ -303,7 +303,7 @@ def _run_rollouts(
     if save_video and video_path:
         logger.info(f"Video saved: {video_path}")
 
-    return mean_success_rate, std_success_rate, avg_return, std_return, video_path, final_fps, all_episode_returns, all_episode_lengths, all_episode_successes
+    return success_rate, std_success_rate, avg_return, std_return, video_path, final_fps, all_episode_returns, all_episode_lengths, all_episode_successes
 
 
 def download_checkpoint_from_wandb(

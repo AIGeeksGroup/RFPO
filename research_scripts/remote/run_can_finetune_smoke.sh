@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/common.sh"
+
+cd "$PROJECT_ROOT/manipulation_experiments"
+source source_env.sh
+
+CHECKPOINT_ROOT="${CHECKPOINT_ROOT:-$PROJECT_ROOT/manipulation_experiments/downloaded_checkpoints}"
+CAN_CHECKPOINT="$CHECKPOINT_ROOT/95j3noe4_step_1000"
+NUM_ENVS="${NUM_ENVS:-30}"
+DATA_COLLECTION_STEPS="${DATA_COLLECTION_STEPS:-1600}"
+TOTAL_TIMESTEPS="${TOTAL_TIMESTEPS:-$((NUM_ENVS * DATA_COLLECTION_STEPS))}"
+EVAL_EPISODES="${EVAL_EPISODES:-20}"
+SEED="${SEED:-0}"
+RUN_NAME="${RUN_NAME:-can_fpopp_smoke_seed${SEED}_$(timestamp)}"
+OUTPUT_DIR="${OUTPUT_DIR:-$RUNTIME_ROOT/results/$RUN_NAME}"
+
+if [[ ! -f "$CAN_CHECKPOINT/policy/model.safetensors" ]]; then
+  echo "Missing Can checkpoint: $CAN_CHECKPOINT" >&2
+  exit 1
+fi
+
+torchrun --nproc_per_node=1 finetune_online_rl.py \
+  --distributed True \
+  --base-policy-local-path "$CAN_CHECKPOINT" \
+  --load-ema True \
+  --wandb-enable False \
+  --experiment "$RUN_NAME" \
+  --output-dir "$OUTPUT_DIR" \
+  --total-timesteps "$TOTAL_TIMESTEPS" \
+  --gradient-accumulation-steps 1 \
+  --num-minibatches 8 \
+  --log-freq 1 \
+  --save-freq 1 \
+  --rollout-freq 1 \
+  --task Can \
+  --eval-env Can \
+  --eval-num-episodes "$EVAL_EPISODES" \
+  --data-collection-steps "$DATA_COLLECTION_STEPS" \
+  --do-chunk-level-ppo True \
+  --eval-ema False \
+  --exploration-noise-std None \
+  --freeze-vision-encoder True \
+  --gae-lambda 0.99 \
+  --n-action-samples 8 \
+  --n-action-steps 16 \
+  --num-envs "$NUM_ENVS" \
+  --sampling-steps 10 \
+  --spo-clip-coef 0.01 \
+  --zero-sampling True \
+  --discount 0.99 \
+  --sde-sigma 0 \
+  --cfm-loss-average-group-size 1 \
+  --cfm-loss-use-huber True \
+  --cfm-loss-huber-delta 0.5 \
+  --clip-coef 0.02 \
+  --max-grad-norm 5 \
+  --clamp-logratio 5 \
+  --clamp-old-cfm-loss 4 \
+  --trust-region-mode ppo \
+  --seed "$SEED"

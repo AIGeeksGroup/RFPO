@@ -21,7 +21,7 @@ for zero_sampling in True False; do
     --load-ema True \
     --eval_env Can \
     --eval_num_episodes "${EVAL_EPISODES:-200}" \
-    --eval-num-envs "${EVAL_ENVS:-30}" \
+    --eval-num-envs "${EVAL_ENVS:-50}" \
     --zero-sampling "$zero_sampling" \
     --save-video False \
     --wandb-enable False \
