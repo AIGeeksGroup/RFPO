@@ -156,6 +156,12 @@ hypotheses:
     motivation: "H16 found that the official ten-epoch update leaves only 54.7% of held-out positive ratios active and rotates the held-out gradient to cosine 0.743; PPO clipping does not itself stop repeated-epoch drift."
     parent: H2
     priority: high
+  - id: H19
+    statement: "A bounded critic trained on uncensored discounted binary-success returns improves next-rollout value accuracy and aligns the first FPO++ actor gradient with Monte Carlo outcomes."
+    status: active
+    motivation: "H18 shows that gradient rotation is already severe after one actor epoch, so later trust-region controls cannot fix the first-step learning signal; Can rewards are binary and bounded but the official critic uses an unbounded scalar MSE target."
+    parent: H2
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -625,8 +631,8 @@ experiments:
 
 outer_loop:
   cycle: 6
-  last_direction: "Move from update-path controls to advantage or critic signal quality after H18 failed in the first actor epoch."
-  last_reflection: "H18 selected epoch 1 but its two held-out gradient cosines were only 0.754 and 0.263, and it retained none or 5.4% of the full surrogate gain. Later-epoch drift is real, but early stopping cannot repair an unstable first-step direction."
+  last_direction: "Audit a cross-iteration discounted-success critic before changing the actor learning signal."
+  last_reflection: "H18 shows first-epoch direction failure despite 85.5% active positive ratios. H19 tests whether matching Can's bounded terminal-return structure improves value prediction and outcome-gradient alignment before any online actor change."
 
 workspace:
   findings: "findings.md"
