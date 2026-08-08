@@ -90,6 +90,12 @@ hypotheses:
     motivation: "At the 300-step Can horizon, the official gamma-lambda product almost eliminates terminal credit for early actions."
     parent: H2
     priority: high
+  - id: H8
+    statement: "A minority of zero-source rollout environments supplies successful trajectories that improve the shared Gaussian-source Can policy."
+    status: pending
+    motivation: "Can's zero-source policy succeeds far more often than its random-source policy, so mixed collection can add reward information without discarding Gaussian exploration."
+    parent: null
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -385,7 +391,7 @@ experiments:
 
 outer_loop:
   cycle: 1
-  last_direction: "Pivot from estimator-only changes to acquiring more informative successful trajectories while retaining a held-out random-sampling signal."
+  last_direction: "Test a fixed 20% zero-source and 80% Gaussian-source Can rollout mixture, judging improvement only on the Gaussian subset and standard final evaluations."
   last_reflection: "Full-lambda GAE reduced pooled actor-update collection success from 8.77% to 6.64%, while final zero/random evaluation was 80%/12% versus 84%/10%. H7 is refuted: propagating existing sparse rewards farther does not create enough useful policy signal and adds estimator variance."
 
 workspace:
