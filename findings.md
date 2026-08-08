@@ -177,6 +177,13 @@ cosine fell to 0.815 and 0.618. The transform's positive 16-chunk smoke did not 
 seed and sample size. GAE magnitudes therefore contain useful information alongside their strong
 ordering, and advantage replacement or nonlinear reweighting is no longer the next route.
 
+A fixed fourfold lower actor learning rate also failed to preserve the useful pre-update direction.
+At epoch 10, pooled active positive ratios were 0.537 for the `1e-5` control and 0.545 for the
+`2.5e-6` candidate. Candidate gradient cosine changed by only -0.023 and +0.029 in the two locked
+batches, missing both the 0.60 absolute and +0.20 relative gates. Its surrogate gains were positive
+but retained only about 30% of control. Simple global step-size reduction therefore sacrifices
+progress without resolving update-direction drift.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -206,6 +213,7 @@ ordering, and advantage replacement or nonlinear reweighting is no longer the ne
 - Lower value MSE does not imply a better policy gradient: the discounted-success critic improved calibration while degrading value ranking and one batch's outcome-reference gradient alignment.
 - Continuous-action Monte Carlo centering does not transfer DAE's discrete-action benefit here; it reversed an already strong GAE outcome ranking and both audited gradient directions.
 - Exact GAE rank preservation is insufficient: discarding advantage magnitudes reduced outcome-gradient cosine in both formal batches.
+- A fourfold actor learning-rate reduction scales down surrogate improvement but does not materially preserve held-out gradient direction; global Adam step size is not the dominant failure mechanism.
 
 ## Lessons and Constraints
 
@@ -220,8 +228,8 @@ ordering, and advantage replacement or nonlinear reweighting is no longer the ne
 - Is curvature correlated with FPO ratio variance or gradient disagreement?
 - Should reflow be an offline post-training stage, an auxiliary online loss, or both?
 - Which reward-aware FPO++ mechanism can improve Can success without relying on unstable BC-source exploration changes?
-- Can a smaller actor parameter step preserve the well-aligned pre-update GAE gradient through the first optimizer epoch?
+- Does accumulating all eight minibatch gradients before each actor optimizer step reduce order-dependent gradient rotation without changing the FPO++ objective?
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, and rank-based GAE weighting are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The verified step-6000 Can policy supplies a high-signal short-budget screen; the next direction retains official GAE and constrains the actor parameter step that follows it.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, rank-based GAE weighting, and fixed lower actor learning rate are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The verified step-6000 Can policy supplies a high-signal short-budget screen; the next direction retains the official objective but accumulates all minibatch gradients before each actor step to test order-dependent drift.

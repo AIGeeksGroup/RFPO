@@ -1,0 +1,251 @@
+{
+  "active_ratio_threshold": 0.8,
+  "cfm_samples": 8,
+  "epochs": [
+    {
+      "batches": [
+        {
+          "active_positive_ratio_fraction": 0.69140625,
+          "batch": 0,
+          "gradient_cosine_to_preupdate": 0.525057315826416,
+          "gradient_norm": 1.0994489192962646,
+          "ratio_mean": 0.9512617588043213,
+          "surrogate": 0.07560430467128754,
+          "surrogate_gain": 0.0012550652027130127
+        },
+        {
+          "active_positive_ratio_fraction": 0.60546875,
+          "batch": 1,
+          "gradient_cosine_to_preupdate": 0.32656627893447876,
+          "gradient_norm": 0.8036215901374817,
+          "ratio_mean": 0.9887657165527344,
+          "surrogate": 0.07898707687854767,
+          "surrogate_gain": 0.0044328272342681885
+        }
+      ],
+      "epoch": 1,
+      "pooled_active_positive_ratio_fraction": 0.6484375
+    },
+    {
+      "batches": [
+        {
+          "active_positive_ratio_fraction": 0.6015625,
+          "batch": 0,
+          "gradient_cosine_to_preupdate": 0.1936090886592865,
+          "gradient_norm": 0.6143524646759033,
+          "ratio_mean": 0.9992284774780273,
+          "surrogate": 0.08450847864151001,
+          "surrogate_gain": 0.010159239172935486
+        },
+        {
+          "active_positive_ratio_fraction": 0.6015625,
+          "batch": 1,
+          "gradient_cosine_to_preupdate": 0.3752783238887787,
+          "gradient_norm": 0.8976995348930359,
+          "ratio_mean": 1.0150146484375,
+          "surrogate": 0.0822787880897522,
+          "surrogate_gain": 0.007724538445472717
+        }
+      ],
+      "epoch": 2,
+      "pooled_active_positive_ratio_fraction": 0.6015625
+    },
+    {
+      "batches": [
+        {
+          "active_positive_ratio_fraction": 0.5859375,
+          "batch": 0,
+          "gradient_cosine_to_preupdate": 0.3003174960613251,
+          "gradient_norm": 0.5307925939559937,
+          "ratio_mean": 1.007794976234436,
+          "surrogate": 0.08599662035703659,
+          "surrogate_gain": 0.011647380888462067
+        },
+        {
+          "active_positive_ratio_fraction": 0.5390625,
+          "batch": 1,
+          "gradient_cosine_to_preupdate": 0.202578604221344,
+          "gradient_norm": 0.44409748911857605,
+          "ratio_mean": 1.065331220626831,
+          "surrogate": 0.09290715306997299,
+          "surrogate_gain": 0.018352903425693512
+        }
+      ],
+      "epoch": 3,
+      "pooled_active_positive_ratio_fraction": 0.5625
+    },
+    {
+      "batches": [
+        {
+          "active_positive_ratio_fraction": 0.59375,
+          "batch": 0,
+          "gradient_cosine_to_preupdate": 0.3339267373085022,
+          "gradient_norm": 0.45754000544548035,
+          "ratio_mean": 1.015313744544983,
+          "surrogate": 0.08753152191638947,
+          "surrogate_gain": 0.013182282447814941
+        },
+        {
+          "active_positive_ratio_fraction": 0.58984375,
+          "batch": 1,
+          "gradient_cosine_to_preupdate": 0.20920352637767792,
+          "gradient_norm": 0.511274516582489,
+          "ratio_mean": 1.0680752992630005,
+          "surrogate": 0.09496533870697021,
+          "surrogate_gain": 0.020411089062690735
+        }
+      ],
+      "epoch": 4,
+      "pooled_active_positive_ratio_fraction": 0.591796875
+    },
+    {
+      "batches": [
+        {
+          "active_positive_ratio_fraction": 0.61328125,
+          "batch": 0,
+          "gradient_cosine_to_preupdate": 0.2992664575576782,
+          "gradient_norm": 0.45642557740211487,
+          "ratio_mean": 1.00675630569458,
+          "surrogate": 0.08846263587474823,
+          "surrogate_gain": 0.014113396406173706
+        },
+        {
+          "active_positive_ratio_fraction": 0.55078125,
+          "batch": 1,
+          "gradient_cosine_to_preupdate": 0.24759727716445923,
+          "gradient_norm": 0.39129456877708435,
+          "ratio_mean": 1.0772931575775146,
+          "surrogate": 0.0966435894370079,
+          "surrogate_gain": 0.022089339792728424
+        }
+      ],
+      "epoch": 5,
+      "pooled_active_positive_ratio_fraction": 0.58203125
+    },
+    {
+      "batches": [
+        {
+          "active_positive_ratio_fraction": 0.59375,
+          "batch": 0,
+          "gradient_cosine_to_preupdate": 0.27768415212631226,
+          "gradient_norm": 0.3568303883075714,
+          "ratio_mean": 1.0200356245040894,
+          "surrogate": 0.08981987088918686,
+          "surrogate_gain": 0.015470631420612335
+        },
+        {
+          "active_positive_ratio_fraction": 0.51953125,
+          "batch": 1,
+          "gradient_cosine_to_preupdate": 0.30556589365005493,
+          "gradient_norm": 0.38749146461486816,
+          "ratio_mean": 1.0877044200897217,
+          "surrogate": 0.09620485454797745,
+          "surrogate_gain": 0.021650604903697968
+        }
+      ],
+      "epoch": 6,
+      "pooled_active_positive_ratio_fraction": 0.556640625
+    },
+    {
+      "batches": [
+        {
+          "active_positive_ratio_fraction": 0.5703125,
+          "batch": 0,
+          "gradient_cosine_to_preupdate": 0.2770569622516632,
+          "gradient_norm": 0.31794169545173645,
+          "ratio_mean": 1.0328147411346436,
+          "surrogate": 0.09034008532762527,
+          "surrogate_gain": 0.01599084585905075
+        },
+        {
+          "active_positive_ratio_fraction": 0.51953125,
+          "batch": 1,
+          "gradient_cosine_to_preupdate": 0.2541556656360626,
+          "gradient_norm": 0.32339397072792053,
+          "ratio_mean": 1.1037276983261108,
+          "surrogate": 0.09817226231098175,
+          "surrogate_gain": 0.02361801266670227
+        }
+      ],
+      "epoch": 7,
+      "pooled_active_positive_ratio_fraction": 0.544921875
+    },
+    {
+      "batches": [
+        {
+          "active_positive_ratio_fraction": 0.5546875,
+          "batch": 0,
+          "gradient_cosine_to_preupdate": 0.18424129486083984,
+          "gradient_norm": 0.2845528721809387,
+          "ratio_mean": 1.0290271043777466,
+          "surrogate": 0.09033205360174179,
+          "surrogate_gain": 0.015982814133167267
+        },
+        {
+          "active_positive_ratio_fraction": 0.48828125,
+          "batch": 1,
+          "gradient_cosine_to_preupdate": 0.24398642778396606,
+          "gradient_norm": 0.3398004174232483,
+          "ratio_mean": 1.0990214347839355,
+          "surrogate": 0.09810833632946014,
+          "surrogate_gain": 0.023554086685180664
+        }
+      ],
+      "epoch": 8,
+      "pooled_active_positive_ratio_fraction": 0.521484375
+    },
+    {
+      "batches": [
+        {
+          "active_positive_ratio_fraction": 0.58984375,
+          "batch": 0,
+          "gradient_cosine_to_preupdate": 0.2749415934085846,
+          "gradient_norm": 0.329572468996048,
+          "ratio_mean": 1.0184965133666992,
+          "surrogate": 0.08972888439893723,
+          "surrogate_gain": 0.015379644930362701
+        },
+        {
+          "active_positive_ratio_fraction": 0.5078125,
+          "batch": 1,
+          "gradient_cosine_to_preupdate": 0.25667425990104675,
+          "gradient_norm": 0.3190302550792694,
+          "ratio_mean": 1.0876604318618774,
+          "surrogate": 0.09693215787410736,
+          "surrogate_gain": 0.02237790822982788
+        }
+      ],
+      "epoch": 9,
+      "pooled_active_positive_ratio_fraction": 0.548828125
+    },
+    {
+      "batches": [
+        {
+          "active_positive_ratio_fraction": 0.57421875,
+          "batch": 0,
+          "gradient_cosine_to_preupdate": 0.290889710187912,
+          "gradient_norm": 0.31983405351638794,
+          "ratio_mean": 1.031656265258789,
+          "surrogate": 0.09004049748182297,
+          "surrogate_gain": 0.015691258013248444
+        },
+        {
+          "active_positive_ratio_fraction": 0.5,
+          "batch": 1,
+          "gradient_cosine_to_preupdate": 0.2798800766468048,
+          "gradient_norm": 0.33110395073890686,
+          "ratio_mean": 1.0917253494262695,
+          "surrogate": 0.09743807464838028,
+          "surrogate_gain": 0.0228838250041008
+        }
+      ],
+      "epoch": 10,
+      "pooled_active_positive_ratio_fraction": 0.537109375
+    }
+  ],
+  "iteration": 2,
+  "num_batches": 2,
+  "num_chunks_audited": 64,
+  "num_positive_chunks_available": 166,
+  "selected_epoch": 0
+}

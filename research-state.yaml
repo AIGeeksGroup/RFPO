@@ -186,7 +186,7 @@ hypotheses:
     priority: high
   - id: H23
     statement: "A fourfold lower actor learning rate preserves the initially aligned GAE gradient through ten FPO++ optimizer epochs."
-    status: active
+    status: refuted
     motivation: "H21-H22 retain official GAE, while H18 shows severe parameter-induced gradient rotation after optimization; reducing step size targets the remaining failure mechanism directly."
     parent: H2
     priority: high
@@ -687,11 +687,31 @@ experiments:
       batch1_candidate_cosine: 0.61801
       audited_chunks: 64
       eligible_chunks: 124
+    - run: can_step6000_lrdrift_control16_osmesa_seed20260822
+      metric: epoch10_pooled_active_positive_ratio
+      value: 0.53711
+      batch0_gradient_cosine: 0.29089
+      batch1_gradient_cosine: 0.27988
+      batch0_surrogate_gain: 0.01569
+      batch1_surrogate_gain: 0.02288
+      audited_chunks: 64
+      eligible_chunks: 166
+      actor_learning_rate: 0.00001
+    - run: can_step6000_lrdrift_candidate025_16_osmesa_seed20260822
+      metric: epoch10_pooled_active_positive_ratio
+      value: 0.54492
+      batch0_gradient_cosine: 0.26763
+      batch1_gradient_cosine: 0.30924
+      batch0_surrogate_gain: 0.00471
+      batch1_surrogate_gain: 0.00687
+      audited_chunks: 64
+      eligible_chunks: 177
+      actor_learning_rate: 0.0000025
 
 outer_loop:
-  cycle: 9
-  last_direction: "Retain official GAE and audit a fixed fourfold lower actor learning rate against first-epoch gradient rotation."
-  last_reflection: "H21 and H22 show that both GAE ordering and magnitude carry useful signal before the update. H18 shows that the official first optimizer epoch can still rotate that signal severely, motivating a smaller parameter step rather than another weight transform."
+  cycle: 10
+  last_direction: "Audit one accumulated actor optimizer step per epoch so all eight minibatches contribute before Adam changes the policy."
+  last_reflection: "H23 reduced surrogate movement to about 30% of control but left held-out gradient rotation essentially unchanged. Global learning-rate scaling is not the missing trust region; minibatch-order path dependence is the next narrow mechanism to test."
 
 workspace:
   findings: "findings.md"
