@@ -19,6 +19,10 @@ literature:
       title: "WarmPrior: Straightening Flow-Matching Policies with Temporal Priors"
       year: 2026
       relevance: "Motivates training the source distribution around the previous executed action chunk."
+    - id: schulman2015_gae
+      title: "High-Dimensional Continuous Control Using Generalized Advantage Estimation"
+      year: 2015
+      relevance: "Motivates lambda=1 as a lower-bias way to propagate sparse terminal success through long Can episodes."
   open_problems:
     - "FPO++ uses many Euler steps; it is unknown whether conditional reflow improves control return or only sampling efficiency."
     - "The relation between flow curvature, CFM ratio variance, and policy-update stability is not established."
@@ -78,6 +82,12 @@ hypotheses:
     statement: "Resetting the reused CFM invalid-step mask every rollout iteration prevents cumulative sample loss and improves early Can FPO++ reward learning."
     status: refuted
     motivation: "The released loop marks post-boundary actions invalid in a persistent buffer but never clears that buffer between independent rollouts."
+    parent: H2
+    priority: high
+  - id: H7
+    statement: "Using GAE lambda 1.0 instead of 0.99 propagates sparse terminal success farther and improves early Can FPO++ reward learning."
+    status: pending
+    motivation: "At the 300-step Can horizon, the official gamma-lambda product almost eliminates terminal credit for early actions."
     parent: H2
     priority: high
 
@@ -361,7 +371,7 @@ experiments:
 
 outer_loop:
   cycle: 1
-  last_direction: "Test a single credit-assignment change that propagates sparse terminal success farther through Can episodes without changing rewards or policy sampling."
+  last_direction: "Run a five-update Can pilot with GAE lambda 1.0, holding gamma and all policy settings fixed, to test stronger long-horizon sparse credit."
   last_reflection: "Resetting the CFM validity mask fixed a real cumulative data-loss defect (98.07% valid at iteration 5 versus 95.81%), but pooled actor-update success improved only 0.50 points and final zero/random evaluation was 82%/10% versus 84%/10%. H6 is refuted as a reward-improvement claim."
 
 workspace:

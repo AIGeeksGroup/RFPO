@@ -15,6 +15,7 @@ EVAL_EPISODES="${EVAL_EPISODES:-20}"
 N_ACTION_SAMPLES="${N_ACTION_SAMPLES:-8}"
 ROLLOUT_FREQ="${ROLLOUT_FREQ:-1}"
 RESET_CFM_INVALID_MASK_EACH_ITERATION="${RESET_CFM_INVALID_MASK_EACH_ITERATION:-False}"
+GAE_LAMBDA="${GAE_LAMBDA:-0.99}"
 MASTER_PORT="${MASTER_PORT:-29500}"
 SEED="${SEED:-0}"
 RUN_NAME="${RUN_NAME:-can_fpopp_smoke_seed${SEED}_$(timestamp)}"
@@ -46,7 +47,7 @@ torchrun --nproc_per_node=1 --master_port "$MASTER_PORT" finetune_online_rl.py \
   --eval-ema False \
   --exploration-noise-std None \
   --freeze-vision-encoder True \
-  --gae-lambda 0.99 \
+  --gae-lambda "$GAE_LAMBDA" \
   --n-action-samples "$N_ACTION_SAMPLES" \
   --n-action-steps 16 \
   --num-envs "$NUM_ENVS" \

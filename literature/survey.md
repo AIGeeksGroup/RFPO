@@ -7,6 +7,7 @@
 | Flow Policy Gradients for Robot Control (2026) | Per-sample CFM ratios and ASPO | Target benchmark and baseline |
 | Flow Straight and Fast (2022) | Reflow straightens model-induced transport couplings | Candidate for lower-NFE policies |
 | WarmPrior (2026) | Temporal action prior with residual Gaussian noise | Candidate for better manipulation exploration and reward |
+| Generalized Advantage Estimation (2015) | Exponentially weighted advantage estimation with a bias-variance parameter | Candidate for propagating sparse Can success farther through long episodes |
 
 ## Additional Candidates To Audit After Baseline
 
