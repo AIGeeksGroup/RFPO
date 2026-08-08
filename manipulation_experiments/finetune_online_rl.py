@@ -177,6 +177,7 @@ class FlowPPOConfig:
     bc_anchor_pcgrad_audit_chunks: int = 64
     bc_anchor_pcgrad_anchor_mode: Literal["velocity", "zero_endpoint"] = "velocity"
     bc_anchor_pcgrad_audit_output_json: Optional[str] = None
+    zero_endpoint_pcgrad_train: bool = False
     rollout_zero_fraction: float = 0.0
     rollout_tempered_fraction: float = 0.0
     rollout_tempered_scale: float = 0.5
@@ -806,6 +807,13 @@ def main(cfg: FlowPPOConfig):
             raise ValueError("BC-anchor PCGrad audit settings must be positive")
         if cfg.bc_anchor_pcgrad_audit_chunks % 2:
             raise ValueError("BC-anchor PCGrad audit requires an even chunk count")
+    if cfg.zero_endpoint_pcgrad_train:
+        if cfg.loss_mode != "fpo" or not cfg.do_chunk_level_ppo:
+            raise ValueError("zero-endpoint PCGrad training requires chunk-level FPO")
+        if world_size != 1:
+            raise ValueError("zero-endpoint PCGrad training currently requires one process")
+        if cfg.gradient_accumulation_steps != 1:
+            raise ValueError("zero-endpoint PCGrad training requires gradient accumulation 1")
 
     # Run dir on all ranks (avoid races)
     run_start_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -1014,6 +1022,12 @@ def main(cfg: FlowPPOConfig):
         for p in actor.model.vision_encoder.parameters():
             p.requires_grad = False
 
+    endpoint_anchor_model = None
+    if cfg.zero_endpoint_pcgrad_train:
+        endpoint_anchor_model = copy.deepcopy(actor.model).eval()
+        for parameter in endpoint_anchor_model.parameters():
+            parameter.requires_grad = False
+
     # Wrap with DDP
     if is_ddp:
         # Remove ema model from actor before wrapping to avoid unused parameter issues
@@ -1206,6 +1220,7 @@ def main(cfg: FlowPPOConfig):
     best_eval_success_rate = 0.0
     training_cum_time = 0.0
     direct_advantage_training_losses: list[float] = []
+    endpoint_pcgrad_training_history: list[dict[str, Any]] = []
 
     obs_state_stored = torch.zeros((steps_per_iteration, num_envs_per_process, joint_pos_dim))
     actions_stored = torch.zeros((steps_per_iteration, num_envs_per_process, action_dim))
@@ -1369,8 +1384,11 @@ def main(cfg: FlowPPOConfig):
 
     def actor_zero_source_endpoint(
         observation_conditioning: torch.Tensor,
+        *,
+        policy_model: nn.Module | None = None,
     ) -> torch.Tensor:
         """Differentiably integrate the policy from its deterministic zero source."""
+        policy_model = actor_module.model if policy_model is None else policy_model
         batch = observation_conditioning.shape[0]
         x_t = torch.zeros(
             (batch, actor_module.config.horizon, action_dim),
@@ -1381,10 +1399,10 @@ def main(cfg: FlowPPOConfig):
         for step in range(actor_module.config.sampling_steps):
             t_current = schedule[step]
             dt = schedule[step + 1] - t_current
-            time_embedding = actor_module.model.diffusion_step_encoder(
+            time_embedding = policy_model.diffusion_step_encoder(
                 t_current.reshape(1)
             ).reshape(1, -1).expand(batch, -1)
-            network_output = actor_module.model(
+            network_output = policy_model(
                 x_t, time_embedding, observation_conditioning
             )
             network_output = actor_module.config.mlp_output_scale * network_output
@@ -3126,9 +3144,32 @@ def main(cfg: FlowPPOConfig):
             if cfg.freeze_vision_encoder:
                 actor_module.model.vision_encoder.eval()
 
+        endpoint_anchor_conditioning = None
+        endpoint_anchor_targets = None
+        if (
+            cfg.zero_endpoint_pcgrad_train
+            and iteration > cfg.n_iterations_train_only_value
+        ):
+            anchor_observations = {
+                key: value[:, 0].to(device) for key, value in b_obs_images.items()
+            }
+            anchor_observations["observation.state"] = b_obs_state[:, 0].to(device)
+            normalized_anchor_observations = actor_module.normalize_inputs(
+                copy.deepcopy(anchor_observations)
+            )
+            with torch.no_grad():
+                endpoint_anchor_conditioning = endpoint_anchor_model.encode_observations(
+                    normalized_anchor_observations
+                ).detach()
+                endpoint_anchor_targets = actor_zero_source_endpoint(
+                    endpoint_anchor_conditioning,
+                    policy_model=endpoint_anchor_model,
+                ).detach()
+
         # ---------- Policy update ----------
         b_inds = np.arange(local_batch_size)
         clipfracs = []
+        endpoint_pcgrad_step_metrics = []
         actor.train(); critic.train()
         if cfg.freeze_vision_encoder:
             actor_module.model.vision_encoder.eval()
@@ -3365,6 +3406,70 @@ def main(cfg: FlowPPOConfig):
                 policy_loss = pg_loss + cfg.entropy_loss_coef * entropy_loss if iteration > cfg.n_iterations_train_only_value else 0.0
                 loss = (policy_loss + v_loss * cfg.vf_coef) / cfg.gradient_accumulation_steps
                 loss.backward()
+                if (
+                    cfg.zero_endpoint_pcgrad_train
+                    and iteration > cfg.n_iterations_train_only_value
+                ):
+                    endpoint_indices = torch.as_tensor(
+                        mb_inds, device=device, dtype=torch.long
+                    )
+                    current_endpoints = actor_zero_source_endpoint(
+                        endpoint_anchor_conditioning[endpoint_indices]
+                    )
+                    endpoint_anchor_loss = (
+                        current_endpoints - endpoint_anchor_targets[endpoint_indices]
+                    ).square().mean()
+                    actor_parameters = [
+                        parameter
+                        for parameter in actor_module.parameters()
+                        if parameter.requires_grad
+                    ]
+                    anchor_gradients = list(
+                        torch.autograd.grad(
+                            endpoint_anchor_loss,
+                            actor_parameters,
+                            allow_unused=True,
+                        )
+                    )
+                    rl_gradients = [
+                        None if parameter.grad is None else parameter.grad.detach().clone()
+                        for parameter in actor_parameters
+                    ]
+                    projected_gradients, gradient_dot_value, projection_active = (
+                        project_conflicting_gradient(rl_gradients, anchor_gradients)
+                    )
+                    rl_gradient_norm = float(gradient_norm(rl_gradients).item())
+                    anchor_gradient_norm = float(gradient_norm(anchor_gradients).item())
+                    projected_gradient_norm = float(
+                        gradient_norm(projected_gradients).item()
+                    )
+                    gradient_cosine_value = (
+                        float(
+                            list_gradient_cosine(
+                                rl_gradients, anchor_gradients
+                            ).item()
+                        )
+                        if min(rl_gradient_norm, anchor_gradient_norm) > 1e-12
+                        else 0.0
+                    )
+                    for parameter, projected_gradient in zip(
+                        actor_parameters, projected_gradients, strict=True
+                    ):
+                        if projected_gradient is not None:
+                            parameter.grad.copy_(projected_gradient)
+                    endpoint_pcgrad_step_metrics.append(
+                        {
+                            "anchor_mse": float(endpoint_anchor_loss.detach().item()),
+                            "projection_active": projection_active,
+                            "gradient_dot": float(gradient_dot_value.item()),
+                            "gradient_cosine": gradient_cosine_value,
+                            "rl_gradient_norm": rl_gradient_norm,
+                            "anchor_gradient_norm": anchor_gradient_norm,
+                            "projected_gradient_norm": projected_gradient_norm,
+                            "gradient_norm_retention": projected_gradient_norm
+                            / max(rl_gradient_norm, 1e-12),
+                        }
+                    )
                 accumulation_counter += 1
 
                 if accumulation_counter % cfg.gradient_accumulation_steps == 0:
@@ -3470,6 +3575,64 @@ def main(cfg: FlowPPOConfig):
 
             if early_stop:
                 break
+
+        if cfg.zero_endpoint_pcgrad_train and endpoint_pcgrad_step_metrics:
+            projection_active_fraction = float(
+                np.mean(
+                    [
+                        metric["projection_active"]
+                        for metric in endpoint_pcgrad_step_metrics
+                    ]
+                )
+            )
+            endpoint_pcgrad_iteration_result = {
+                "iteration": iteration,
+                "num_actor_steps": len(endpoint_pcgrad_step_metrics),
+                "projection_active_fraction": projection_active_fraction,
+                "mean_anchor_mse": float(
+                    np.mean(
+                        [metric["anchor_mse"] for metric in endpoint_pcgrad_step_metrics]
+                    )
+                ),
+                "mean_gradient_cosine": float(
+                    np.mean(
+                        [
+                            metric["gradient_cosine"]
+                            for metric in endpoint_pcgrad_step_metrics
+                        ]
+                    )
+                ),
+                "mean_gradient_norm_retention": float(
+                    np.mean(
+                        [
+                            metric["gradient_norm_retention"]
+                            for metric in endpoint_pcgrad_step_metrics
+                        ]
+                    )
+                ),
+                "steps": endpoint_pcgrad_step_metrics,
+            }
+            endpoint_pcgrad_training_history.append(endpoint_pcgrad_iteration_result)
+            endpoint_pcgrad_output_path = run_dir / "zero_endpoint_pcgrad_training.json"
+            endpoint_pcgrad_output_path.write_text(
+                json.dumps(
+                    {"iterations": endpoint_pcgrad_training_history},
+                    indent=2,
+                    sort_keys=True,
+                )
+                + "\n"
+            )
+            logger.info(
+                "Zero-endpoint PCGrad training: iteration=%d active=%.2f%% "
+                "mean_cosine=%.6f mean_norm_retention=%.2f%%",
+                iteration,
+                100 * projection_active_fraction,
+                endpoint_pcgrad_iteration_result["mean_gradient_cosine"],
+                100
+                * endpoint_pcgrad_iteration_result[
+                    "mean_gradient_norm_retention"
+                ],
+            )
 
         if (
             direct_advantage_head is not None

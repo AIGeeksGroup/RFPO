@@ -58,6 +58,7 @@ BC_ANCHOR_PCGRAD_AUDIT_ITERATION="${BC_ANCHOR_PCGRAD_AUDIT_ITERATION:-2}"
 BC_ANCHOR_PCGRAD_AUDIT_CHUNKS="${BC_ANCHOR_PCGRAD_AUDIT_CHUNKS:-64}"
 BC_ANCHOR_PCGRAD_ANCHOR_MODE="${BC_ANCHOR_PCGRAD_ANCHOR_MODE:-velocity}"
 BC_ANCHOR_PCGRAD_AUDIT_OUTPUT_JSON="${BC_ANCHOR_PCGRAD_AUDIT_OUTPUT_JSON:-None}"
+ZERO_ENDPOINT_PCGRAD_TRAIN="${ZERO_ENDPOINT_PCGRAD_TRAIN:-False}"
 MASTER_PORT="${MASTER_PORT:-29500}"
 SEED="${SEED:-0}"
 RUN_NAME="${RUN_NAME:-can_fpopp_smoke_seed${SEED}_$(timestamp)}"
@@ -127,6 +128,7 @@ torchrun --nproc_per_node=1 --master_port "$MASTER_PORT" finetune_online_rl.py \
   --bc-anchor-pcgrad-audit-chunks "$BC_ANCHOR_PCGRAD_AUDIT_CHUNKS" \
   --bc-anchor-pcgrad-anchor-mode "$BC_ANCHOR_PCGRAD_ANCHOR_MODE" \
   --bc-anchor-pcgrad-audit-output-json "$BC_ANCHOR_PCGRAD_AUDIT_OUTPUT_JSON" \
+  --zero-endpoint-pcgrad-train "$ZERO_ENDPOINT_PCGRAD_TRAIN" \
   --n-action-samples "$N_ACTION_SAMPLES" \
   --learning-rate-actor "$LEARNING_RATE_ACTOR" \
   --n-action-steps 16 \
