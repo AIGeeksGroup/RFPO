@@ -40,6 +40,10 @@ from src.stratified_mc_audit import (
     gradient_estimator_metrics,
 )
 from src.heldout_ratio_early_stop import select_epoch_before_ratio_violation
+from src.discounted_success_critic import (
+    discounted_returns_to_observed_terminal,
+    spearman_rank_correlation,
+)
 from src.advantage_weighting import (
     clipped_mirror_ratio_loss,
     ess_softmax_weights,
@@ -138,6 +142,10 @@ class FlowPPOConfig:
     heldout_ratio_early_stop_audit_chunks: int = 64
     heldout_ratio_early_stop_threshold: float = 0.8
     heldout_ratio_early_stop_audit_output_json: Optional[str] = None
+    discounted_success_critic_audit: bool = False
+    discounted_success_critic_audit_iteration: int = 2
+    discounted_success_critic_audit_chunks: int = 64
+    discounted_success_critic_audit_output_json: Optional[str] = None
     rollout_zero_fraction: float = 0.0
     rollout_tempered_fraction: float = 0.0
     rollout_tempered_scale: float = 0.5
@@ -691,6 +699,20 @@ def main(cfg: FlowPPOConfig):
             raise ValueError("held-out ratio early-stop audit requires an even chunk count")
         if not 0.0 < cfg.heldout_ratio_early_stop_threshold <= 1.0:
             raise ValueError("held-out ratio early-stop threshold must be in (0, 1]")
+    if cfg.discounted_success_critic_audit:
+        if cfg.loss_mode != "fpo" or not cfg.do_chunk_level_ppo:
+            raise ValueError("discounted-success critic audit requires chunk-level FPO")
+        if world_size != 1:
+            raise ValueError("discounted-success critic audit currently requires one process")
+        if cfg.gradient_accumulation_steps != 1:
+            raise ValueError("discounted-success critic audit requires gradient accumulation 1")
+        if min(
+            cfg.discounted_success_critic_audit_iteration,
+            cfg.discounted_success_critic_audit_chunks,
+        ) < 1:
+            raise ValueError("discounted-success critic audit settings must be positive")
+        if cfg.discounted_success_critic_audit_chunks % 2:
+            raise ValueError("discounted-success critic audit requires an even chunk count")
 
     # Run dir on all ranks (avoid races)
     run_start_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -869,12 +891,15 @@ def main(cfg: FlowPPOConfig):
 
     # Critic
     critic = Critic(global_obs_dim=actor.model.global_cond_dim)
+    success_critic = copy.deepcopy(critic) if cfg.discounted_success_critic_audit else None
 
     # Move to device BEFORE DDP
     actor.to(device)
     if getattr(actor, "ema_model", None) is not None:
         actor.ema_model.to(device)
     critic.to(device)
+    if success_critic is not None:
+        success_critic.to(device)
 
     # Freeze vision encoder AFTER wrapping with DDP (same on all ranks)
     if cfg.freeze_vision_encoder:
@@ -1013,6 +1038,21 @@ def main(cfg: FlowPPOConfig):
         num_warmup_steps=cfg.lr_scheduler_critic_warmup_steps,
         num_training_steps=num_iterations,
     )
+    optimizer_success_critic = None
+    lr_scheduler_success_critic = None
+    if success_critic is not None:
+        optimizer_success_critic = optim.AdamW(
+            success_critic.parameters(),
+            lr=cfg.learning_rate_critic,
+            eps=1e-5,
+            weight_decay=1e-6,
+        )
+        lr_scheduler_success_critic = get_scheduler(
+            name=cfg.lr_scheduler_name,
+            optimizer=optimizer_success_critic,
+            num_warmup_steps=cfg.lr_scheduler_critic_warmup_steps,
+            num_training_steps=num_iterations,
+        )
     logger.info(f"[Rank {rank}] Total timesteps: {cfg.total_timesteps}, batch size: {batch_size} | "
                 f"MB: {minibatch_size}, iterations: {num_iterations}")
 
@@ -1050,6 +1090,9 @@ def main(cfg: FlowPPOConfig):
     mdp_x_t_paths_stored = torch.zeros((steps_per_iteration, actor_module.config.sampling_steps, num_envs_per_process, action_dim))
     rewards_stored = torch.zeros((steps_per_iteration, num_envs_per_process))
     dones_stored = torch.zeros((steps_per_iteration, num_envs_per_process))
+    terminals_stored = torch.zeros(
+        (steps_per_iteration, num_envs_per_process), dtype=torch.bool
+    )
     values_stored = torch.zeros((steps_per_iteration, num_envs_per_process))
     cfm_losses_stored = torch.zeros((steps_per_iteration, num_envs_per_process, n_action_samples))
     cfm_loss_ts_stored = torch.zeros((steps_per_iteration, num_envs_per_process, n_action_samples))
@@ -1339,6 +1382,7 @@ def main(cfg: FlowPPOConfig):
                     mdp_x_t_paths_stored[step] = mdp_x_t_path.permute(1, 0, 2).cpu()
                     rewards_stored[step] = reward.view(-1).cpu()
                     next_done = next_done.view(-1).cpu()
+                    terminals_stored[step] = next_done.bool()
 
                     if any(next_done):
                         done_episodes += next_done.sum().item()
@@ -1532,6 +1576,65 @@ def main(cfg: FlowPPOConfig):
         b_advantages = advantages.reshape(-1, n_action_steps, num_envs_per_process).permute(0, 2, 1).reshape(-1, n_action_steps)
         b_returns = returns.reshape(-1, n_action_steps, num_envs_per_process).permute(0, 2, 1).reshape(-1, n_action_steps)
 
+        mc_returns_stored, mc_valid_stored = discounted_returns_to_observed_terminal(
+            rewards_stored,
+            terminals_stored,
+            cfg.discount,
+        )
+        b_mc_returns = mc_returns_stored.reshape(
+            -1, n_action_steps, num_envs_per_process
+        ).permute(0, 2, 1).reshape(-1, n_action_steps)
+        b_mc_valid = mc_valid_stored.reshape(
+            -1, n_action_steps, num_envs_per_process
+        ).permute(0, 2, 1).reshape(-1, n_action_steps)
+
+        candidate_b_values = None
+        candidate_advantages = None
+        if success_critic is not None:
+            success_critic.eval()
+            candidate_value_batches = []
+            with torch.no_grad():
+                for value_start in range(0, local_batch_size, minibatch_size):
+                    value_end = min(value_start + minibatch_size, local_batch_size)
+                    value_images = {
+                        key: value[value_start:value_end].reshape(-1, 3, img_h, img_w).to(device)
+                        for key, value in b_obs_images.items()
+                    }
+                    value_images["observation.state"] = b_obs_state[
+                        value_start:value_end
+                    ].reshape(-1, joint_pos_dim).to(device)
+                    value_obs = actor_module.normalize_inputs(value_images)
+                    value_cond = actor_module.model.encode_observations(value_obs)
+                    candidate_value_batches.append(
+                        success_critic(value_cond).sigmoid().reshape(
+                            value_end - value_start, n_action_steps
+                        ).cpu()
+                    )
+                candidate_b_values = torch.cat(candidate_value_batches, dim=0)
+                candidate_values_stored = candidate_b_values.reshape(
+                    -1, num_envs_per_process, n_action_steps
+                ).permute(0, 2, 1).reshape(steps_per_iteration, num_envs_per_process)
+                candidate_next_obs = actor_module.normalize_inputs(copy.deepcopy(next_obs))
+                candidate_next_cond = actor_module.model.encode_observations(
+                    candidate_next_obs
+                )
+                candidate_next_value = success_critic(candidate_next_cond).sigmoid().reshape(
+                    1, -1
+                ).cpu()
+            candidate_advantages_stored, _ = calculate_advantage(
+                candidate_values_stored,
+                candidate_next_value,
+                rewards_stored,
+                dones_stored,
+                next_done,
+                steps_per_iteration,
+                cfg.discount,
+                cfg.gae_lambda,
+            )
+            candidate_advantages = candidate_advantages_stored.reshape(
+                -1, n_action_steps, num_envs_per_process
+            ).permute(0, 2, 1).reshape(-1, n_action_steps)
+
         rollout_advantage_mean = torch.tensor(float("nan"), device=device)
         rollout_advantage_std = torch.tensor(float("nan"), device=device)
         if cfg.norm_adv and cfg.advantage_normalization_scope == "rollout":
@@ -1570,6 +1673,148 @@ def main(cfg: FlowPPOConfig):
                     rollout_advantage_std.item(),
                     int(moment_sums[2].item()),
                 )
+
+        if (
+            cfg.discounted_success_critic_audit
+            and iteration == cfg.discounted_success_critic_audit_iteration
+        ):
+            if candidate_b_values is None or candidate_advantages is None:
+                raise RuntimeError("discounted-success critic audit has no candidate values")
+            value_mask = b_mc_valid.bool()
+            control_value_targets = b_mc_returns[value_mask]
+            control_value_predictions = b_values[value_mask]
+            candidate_value_predictions = candidate_b_values[value_mask]
+            if control_value_targets.numel() < 2:
+                raise RuntimeError("discounted-success critic audit has too few value targets")
+            control_value_mse = torch.mean(
+                (control_value_predictions - control_value_targets).square()
+            ).item()
+            candidate_value_mse = torch.mean(
+                (candidate_value_predictions - control_value_targets).square()
+            ).item()
+            control_value_spearman = spearman_rank_correlation(
+                control_value_predictions, control_value_targets
+            )
+            candidate_value_spearman = spearman_rank_correlation(
+                candidate_value_predictions, control_value_targets
+            )
+
+            gradient_candidate_mask = b_mc_valid[:, 0].bool() & (
+                b_cfm_value_invalid.sum(dim=1) == 0
+            )
+            gradient_candidate_indices = torch.where(gradient_candidate_mask)[0]
+            required_chunks = cfg.discounted_success_critic_audit_chunks
+            if gradient_candidate_indices.numel() < required_chunks:
+                raise RuntimeError(
+                    "discounted-success critic audit requires "
+                    f"{required_chunks} fully valid labeled chunks, "
+                    f"found {gradient_candidate_indices.numel()}"
+                )
+            gradient_generator = torch.Generator().manual_seed(
+                cfg.seed + iteration * 5011
+            )
+            gradient_indices = gradient_candidate_indices[
+                torch.randperm(
+                    gradient_candidate_indices.numel(), generator=gradient_generator
+                )[:required_chunks]
+            ]
+            control_weights = b_advantages[gradient_indices, 0].float()
+            candidate_weights = candidate_advantages[gradient_indices, 0].float()
+            reference_weights = b_mc_returns[gradient_indices, 0].float()
+            reference_weights = reference_weights - reference_weights.mean()
+            audit_batch_size = required_chunks // 2
+            gradient_batch_results = []
+            actor_module.eval()
+            for audit_batch in range(2):
+                batch_slice = slice(
+                    audit_batch * audit_batch_size,
+                    (audit_batch + 1) * audit_batch_size,
+                )
+                batch_indices = gradient_indices[batch_slice]
+                _, reference_gradient = replay_audit_gradient(
+                    batch_indices,
+                    reference_weights[batch_slice],
+                    b_actions=b_actions,
+                    b_cfm_losses=b_cfm_losses,
+                    b_cfm_loss_ts=b_cfm_loss_ts,
+                    b_cfm_loss_epsilons=b_cfm_loss_epsilons,
+                    b_cfm_value_invalid=b_cfm_value_invalid,
+                    b_obs_images=b_obs_images,
+                    b_obs_state=b_obs_state,
+                )
+                _, control_gradient = replay_audit_gradient(
+                    batch_indices,
+                    control_weights[batch_slice],
+                    b_actions=b_actions,
+                    b_cfm_losses=b_cfm_losses,
+                    b_cfm_loss_ts=b_cfm_loss_ts,
+                    b_cfm_loss_epsilons=b_cfm_loss_epsilons,
+                    b_cfm_value_invalid=b_cfm_value_invalid,
+                    b_obs_images=b_obs_images,
+                    b_obs_state=b_obs_state,
+                )
+                _, candidate_gradient = replay_audit_gradient(
+                    batch_indices,
+                    candidate_weights[batch_slice],
+                    b_actions=b_actions,
+                    b_cfm_losses=b_cfm_losses,
+                    b_cfm_loss_ts=b_cfm_loss_ts,
+                    b_cfm_loss_epsilons=b_cfm_loss_epsilons,
+                    b_cfm_value_invalid=b_cfm_value_invalid,
+                    b_obs_images=b_obs_images,
+                    b_obs_state=b_obs_state,
+                )
+                reference_norm = reference_gradient.norm().item()
+                if reference_norm <= 0 or not torch.isfinite(reference_gradient).all():
+                    raise RuntimeError("discounted-success audit produced an invalid reference gradient")
+                control_cosine = torch.nn.functional.cosine_similarity(
+                    control_gradient.unsqueeze(0), reference_gradient.unsqueeze(0), dim=1
+                ).item()
+                candidate_cosine = torch.nn.functional.cosine_similarity(
+                    candidate_gradient.unsqueeze(0), reference_gradient.unsqueeze(0), dim=1
+                ).item()
+                gradient_batch_results.append(
+                    {
+                        "batch": audit_batch,
+                        "num_chunks": audit_batch_size,
+                        "reference_gradient_norm": reference_norm,
+                        "control_gradient_cosine_to_reference": control_cosine,
+                        "candidate_gradient_cosine_to_reference": candidate_cosine,
+                        "candidate_cosine_gain": candidate_cosine - control_cosine,
+                    }
+                )
+            actor_module.train()
+            if cfg.freeze_vision_encoder:
+                actor_module.model.vision_encoder.eval()
+            success_critic_result = {
+                "iteration": iteration,
+                "num_value_targets": int(control_value_targets.numel()),
+                "num_gradient_chunks_available": int(
+                    gradient_candidate_indices.numel()
+                ),
+                "num_gradient_chunks_audited": required_chunks,
+                "control_value_mse": control_value_mse,
+                "candidate_value_mse": candidate_value_mse,
+                "candidate_value_mse_relative_change": (
+                    candidate_value_mse / max(control_value_mse, 1e-12) - 1.0
+                ),
+                "control_value_spearman": control_value_spearman,
+                "candidate_value_spearman": candidate_value_spearman,
+                "batches": gradient_batch_results,
+            }
+            success_critic_output_path = (
+                Path(cfg.discounted_success_critic_audit_output_json)
+                if cfg.discounted_success_critic_audit_output_json is not None
+                else run_dir / "discounted_success_critic_audit.json"
+            )
+            success_critic_output_path.parent.mkdir(parents=True, exist_ok=True)
+            success_critic_output_path.write_text(
+                json.dumps(success_critic_result, indent=2, sort_keys=True) + "\n"
+            )
+            logger.info(
+                "Discounted-success critic audit: %s",
+                json.dumps(success_critic_result, sort_keys=True),
+            )
 
         replay_audit_indices = None
         replay_audit_pre_gradient = None
@@ -2023,6 +2268,8 @@ def main(cfg: FlowPPOConfig):
                 mb_advantages = b_advantages[mb_inds].to(device)
                 mb_returns = b_returns[mb_inds].to(device)
                 mb_values = b_values[mb_inds].to(device)
+                mb_mc_returns = b_mc_returns[mb_inds].to(device)
+                mb_mc_valid = b_mc_valid[mb_inds].to(device)
                 mb_obs_images = {k: b_obs_images[k][mb_inds].to(device) for k in b_obs_images.keys()}
                 mb_obs_state = b_obs_state[mb_inds].to(device)
 
@@ -2035,6 +2282,21 @@ def main(cfg: FlowPPOConfig):
                 obs_chunk_cond = actor_module.model.encode_observations(obs_chunk)
                 newvalue = critic(obs_chunk_cond)
                 newvalue = newvalue.reshape(mb_returns.shape[0], -1)
+
+                if success_critic is not None:
+                    optimizer_success_critic.zero_grad(set_to_none=True)
+                    candidate_logits = success_critic(obs_chunk_cond.detach()).reshape(
+                        mb_returns.shape[0], -1
+                    )
+                    candidate_valid = mb_mc_valid & valid_idx_mask_in_chunk.bool()
+                    if candidate_valid.any():
+                        candidate_value_loss = torch.nn.functional.binary_cross_entropy_with_logits(
+                            candidate_logits[candidate_valid],
+                            mb_mc_returns[candidate_valid],
+                        )
+                        candidate_value_loss.backward()
+                        nn.utils.clip_grad_norm_(success_critic.parameters(), cfg.max_grad_norm)
+                        optimizer_success_critic.step()
 
                 if cfg.loss_mode == "fpo":
                     # CFM losses
@@ -2585,6 +2847,8 @@ def main(cfg: FlowPPOConfig):
         # Step schedulers
         lr_scheduler_actor.step()
         lr_scheduler_critic.step()
+        if lr_scheduler_success_critic is not None:
+            lr_scheduler_success_critic.step()
 
         # Checkpointing (rank 0)
         if rank == 0 and cfg.save_freq > 0 and iteration % cfg.save_freq == 0:
