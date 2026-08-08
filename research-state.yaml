@@ -43,6 +43,10 @@ literature:
       title: "Truly Proximal Policy Optimization"
       year: 2020
       relevance: "Motivates rollback gradients for improving CFM ratios that cross the FPO++ clipping boundary."
+    - id: garg2021_heavy_tailed_ppo
+      title: "On Proximal Policy Optimization's Heavy-tailed Gradients"
+      year: 2021
+      relevance: "Motivates geometric median-of-means aggregation of complete PPO gradient vectors."
   open_problems:
     - "FPO++ uses many Euler steps; it is unknown whether conditional reflow improves control return or only sampling efficiency."
     - "The relation between flow curvature, CFM ratio variance, and policy-update stability is not established."
@@ -289,6 +293,12 @@ hypotheses:
     status: refuted
     motivation: "H18 isolates severe repeated-epoch ratio drift and gradient rotation, while H23-H24 show that smaller steps and full-batch accumulation do not fix it. Rollback adds inward pressure exactly when improving CFM ratios cross the existing bound while preserving the on-policy gradient."
     parent: H18
+    priority: high
+  - id: H37
+    statement: "Geometric median-of-means aggregation improves the initial FPO++ gradient's alignment to observed terminal outcomes while preserving complete-vector structure."
+    status: proposed
+    motivation: "H34's coordinate median damaged outcome alignment despite preserving scale, implicating broken cross-coordinate structure rather than the absence of heavy-tailed microbatch gradients. GMOM robustly aggregates whole gradient vectors and is supported by prior PPO evidence."
+    parent: H34
     priority: high
 
 experiments:
@@ -962,9 +972,9 @@ experiments:
       paired_preupdate: true
 
 outer_loop:
-  cycle: 23
-  last_direction: "H36 PPO-RB is closed without reward training; select a genuinely distinct H37 rather than tuning rollback."
-  last_reflection: "Rollback retained substantially more active positive ratios, but one held-out gradient direction worsened and surrogate progress fell below 36% of control in both batches. Boundary activity alone is not a sufficient update-quality target."
+  cycle: 24
+  last_direction: "Audit H37 full-vector geometric median-of-means on two fixed outcome-reference replicas before any optimizer integration."
+  last_reflection: "H34 implicates coordinate-wise structure destruction, while H36 shows that clipping activity is not a sufficient target. GMOM is the lowest-cost distinct test of robust complete-vector aggregation and has prior PPO motivation."
 
 workspace:
   findings: "findings.md"
