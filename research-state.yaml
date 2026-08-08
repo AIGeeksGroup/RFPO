@@ -262,6 +262,12 @@ hypotheses:
     motivation: "The paper extends clipping from per-action to per-CFM-sample, but manipulation still sums 16 timestep losses before clipping. A single shifted timestep can therefore suppress the entire chunk update; temporal per-sample clipping can localize that trust-region decision while preserving the on-policy gradient scale."
     parent: H2
     priority: high
+  - id: H34
+    statement: "Coordinate-wise median aggregation of initial FPO++ microbatch gradients improves alignment to observed terminal outcomes relative to ordinary mean accumulation."
+    status: active
+    motivation: "H24 shows that summing minibatch gradients does not remove update drift, but a mean retains outlier components. A coefficient-free coordinate median can suppress microbatch-specific gradient outliers at the first update without changing rewards, advantages, sources, or CFM samples."
+    parent: H24
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -885,7 +891,7 @@ experiments:
 
 outer_loop:
   cycle: 20
-  last_direction: "Stop post-clipping refinements and search for an H34 intervention that improves the first actor-step learning signal."
+  last_direction: "Audit coordinate-wise median aggregation of FPO++ microbatch gradients as H34 before any optimizer integration."
   last_reflection: "H33 exactly preserved the on-policy gradient, but the official-size virtual actor step left 100% of positive ratios active for both chunk and temporal clipping. Their post-step direction differed by only about 1e-6, so finer clipping cannot affect the already-problematic first update and is closed without larger-step or grouping variants."
 
 workspace:
