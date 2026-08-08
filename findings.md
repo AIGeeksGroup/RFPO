@@ -225,6 +225,12 @@ the official chunk ratio and the temporal candidate, while post-step gradient-co
 0.0000010 and 0.0000013. Finer clipping may differ after larger accumulated drift, but it cannot fix
 the first-step direction problem identified by H18 and is stopped under the locked audit.
 
+Coordinate-wise median aggregation also failed before optimizer integration. It stayed close to the
+ordinary mean gradient in direction and norm, but reduced alignment to observed terminal outcomes
+from 0.833 to 0.696 and from 0.688 to 0.619 in two independent replicas. Microbatch-specific
+coordinates therefore contain useful joint structure rather than removable scalar outliers; robust
+coordinate aggregation is closed without microbatch-count, trimming, or sign-voting variants.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -266,6 +272,7 @@ the first-step direction problem identified by H18 and is stopped under the lock
 - Small asynchronous screens must use equal per-environment episode quotas because successful Can episodes terminate earlier than failures.
 - Positive- and negative-GAE FPO++ gradients are nearly orthogonal or weakly aligned on the audited step-6000 batches; their direct cancellation is not the source of unstable policy updates.
 - Finer trust-region clipping cannot improve an update before any ratios reach the clipping boundary; at the official first-step scale, both chunk and temporal ratios remained fully active.
+- Coordinate-wise robust aggregation can preserve global gradient scale while deleting task-relevant cross-coordinate structure; closeness to the mean is not evidence of improved outcome alignment.
 
 ## Lessons and Constraints
 
@@ -287,4 +294,4 @@ the first-step direction problem identified by H18 and is stopped under the lock
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, rank-based GAE weighting, fixed lower actor learning rate, full-batch gradient accumulation, BC/FPO++ midpoint interpolation, explicit Gaussian-bridge distillation, antithetic endpoint averaging, shorter receding-horizon execution, temporally correlated Gaussian inference, advantage-sign gradient surgery, and temporal per-timestep clipping are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The next candidate must improve the first actor-step learning signal rather than activate only after policy drift.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, rank-based GAE weighting, fixed lower actor learning rate, full-batch gradient accumulation, BC/FPO++ midpoint interpolation, explicit Gaussian-bridge distillation, antithetic endpoint averaging, shorter receding-horizon execution, temporally correlated Gaussian inference, advantage-sign gradient surgery, temporal per-timestep clipping, and coordinate-wise median gradient aggregation are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The next candidate must change the reward target or credit assignment at the first actor step rather than remix the same GAE gradients.

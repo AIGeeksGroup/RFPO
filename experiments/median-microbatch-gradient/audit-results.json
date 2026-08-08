@@ -1,0 +1,122 @@
+{
+  "cfm_samples": 8,
+  "iteration": 2,
+  "microbatches_per_replica": 4,
+  "num_chunks_audited": 192,
+  "num_eligible_chunks": 207,
+  "num_replicas": 2,
+  "passed": false,
+  "replicas": [
+    {
+      "candidate_control_cosine": 0.8853170275688171,
+      "candidate_control_norm_ratio": 0.9823076725006104,
+      "candidate_gradient_norm": 9.87838363647461,
+      "candidate_reference_cosine": 0.6956103444099426,
+      "candidate_reference_cosine_gain": -0.13773256540298462,
+      "control_gradient_norm": 10.056303024291992,
+      "control_reference_cosine": 0.8333429098129272,
+      "gates": {
+        "candidate_control_direction": true,
+        "candidate_control_norm": true,
+        "candidate_reference_absolute": false,
+        "candidate_reference_gain": false,
+        "finite_nonzero": true,
+        "not_below_typical_microbatch": true
+      },
+      "median_microbatch_reference_cosine": 0.4158194959163666,
+      "microbatch_reference_cosines": [
+        0.3590450882911682,
+        0.47259390354156494,
+        0.615113377571106,
+        0.2747305929660797
+      ],
+      "microbatch_size": 24,
+      "microbatches": [
+        {
+          "gae_mean": 0.08832758665084839,
+          "gae_std": 0.13793732225894928,
+          "gradient_norm": 16.545854568481445,
+          "microbatch": 0
+        },
+        {
+          "gae_mean": 0.10158846527338028,
+          "gae_std": 0.08958865702152252,
+          "gradient_norm": 19.21391487121582,
+          "microbatch": 1
+        },
+        {
+          "gae_mean": 0.12453252077102661,
+          "gae_std": 0.12772278487682343,
+          "gradient_norm": 23.37691307067871,
+          "microbatch": 2
+        },
+        {
+          "gae_mean": 0.11873427033424377,
+          "gae_std": 0.10159163922071457,
+          "gradient_norm": 14.999631881713867,
+          "microbatch": 3
+        }
+      ],
+      "num_chunks": 96,
+      "passed": false,
+      "reference_gradient_norm": 2.582834482192993,
+      "replica": 0
+    },
+    {
+      "candidate_control_cosine": 0.9124936461448669,
+      "candidate_control_norm_ratio": 1.057619333267212,
+      "candidate_gradient_norm": 8.447748184204102,
+      "candidate_reference_cosine": 0.6185652613639832,
+      "candidate_reference_cosine_gain": -0.0698847770690918,
+      "control_gradient_norm": 7.987513065338135,
+      "control_reference_cosine": 0.688450038433075,
+      "gates": {
+        "candidate_control_direction": true,
+        "candidate_control_norm": true,
+        "candidate_reference_absolute": false,
+        "candidate_reference_gain": false,
+        "finite_nonzero": true,
+        "not_below_typical_microbatch": true
+      },
+      "median_microbatch_reference_cosine": 0.34317639470100403,
+      "microbatch_reference_cosines": [
+        0.43042486906051636,
+        0.2559279203414917,
+        0.19806800782680511,
+        0.4885755181312561
+      ],
+      "microbatch_size": 24,
+      "microbatches": [
+        {
+          "gae_mean": 0.08180425316095352,
+          "gae_std": 0.09367924183607101,
+          "gradient_norm": 15.964827537536621,
+          "microbatch": 0
+        },
+        {
+          "gae_mean": 0.1306663304567337,
+          "gae_std": 0.11354561150074005,
+          "gradient_norm": 15.586947441101074,
+          "microbatch": 1
+        },
+        {
+          "gae_mean": 0.08068639785051346,
+          "gae_std": 0.08929009735584259,
+          "gradient_norm": 15.388615608215332,
+          "microbatch": 2
+        },
+        {
+          "gae_mean": 0.0912790521979332,
+          "gae_std": 0.11553297936916351,
+          "gradient_norm": 16.55266571044922,
+          "microbatch": 3
+        }
+      ],
+      "num_chunks": 96,
+      "passed": false,
+      "reference_gradient_norm": 2.2409133911132812,
+      "replica": 1
+    }
+  ],
+  "seed": 20260904
+}

@@ -264,7 +264,7 @@ hypotheses:
     priority: high
   - id: H34
     statement: "Coordinate-wise median aggregation of initial FPO++ microbatch gradients improves alignment to observed terminal outcomes relative to ordinary mean accumulation."
-    status: active
+    status: refuted
     motivation: "H24 shows that summing minibatch gradients does not remove update drift, but a mean retains outlier components. A coefficient-free coordinate median can suppress microbatch-specific gradient outliers at the first update without changing rewards, advantages, sources, or CFM samples."
     parent: H24
     priority: high
@@ -888,11 +888,20 @@ experiments:
       pre_norm_ratios: [1.0000003, 1.0000002]
       audited_chunks: 64
       eligible_chunks: 225
+    - run: can_step6000_median_microbatch_gradient_audit_osmesa_seed20260904
+      metric: outcome_reference_cosine_gain
+      values: [-0.1377326, -0.0698848]
+      control_reference_cosines: [0.8333429, 0.6884500]
+      candidate_reference_cosines: [0.6956103, 0.6185653]
+      candidate_control_cosines: [0.8853170, 0.9124936]
+      candidate_control_norm_ratios: [0.9823077, 1.0576193]
+      audited_chunks: 192
+      eligible_chunks: 207
 
 outer_loop:
-  cycle: 20
-  last_direction: "Audit coordinate-wise median aggregation of FPO++ microbatch gradients as H34 before any optimizer integration."
-  last_reflection: "H33 exactly preserved the on-policy gradient, but the official-size virtual actor step left 100% of positive ratios active for both chunk and temporal clipping. Their post-step direction differed by only about 1e-6, so finer clipping cannot affect the already-problematic first update and is closed without larger-step or grouping variants."
+  cycle: 21
+  last_direction: "Stop coordinate-robust aggregation and identify an H35 intervention that changes the reward target rather than mixing the same GAE gradients."
+  last_reflection: "H34 retained candidate/control cosine above 0.88 and norm ratios near one, but reduced outcome-reference cosine by 0.138 and 0.070 in the two fixed replicas. Microbatch variation contains task-relevant joint coordinate structure, so coordinate-wise robust aggregation is closed without variants."
 
 workspace:
   findings: "findings.md"
