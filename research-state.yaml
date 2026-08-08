@@ -206,6 +206,12 @@ hypotheses:
     motivation: "The existing five-update FPO++ run improves random-source success but degrades zero-source success; WiSE-FT-style interpolation can recover pretrained robustness without another unstable policy-gradient update."
     parent: null
     priority: high
+  - id: H26
+    statement: "Averaging action chunks generated from one antithetic Gaussian source pair improves released step-1000 Can success over official zero-source inference."
+    status: active
+    motivation: "Symmetric source evaluation can cancel odd endpoint variation while retaining even nonlinear corrections, potentially reducing inference variance without changing training or checkpoint weights."
+    parent: null
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -751,9 +757,9 @@ experiments:
       interpolation_alpha: 0.5
 
 outer_loop:
-  cycle: 13
-  last_direction: "Audit whether successful zero-source actions can be distilled through a Gaussian-source CFM objective that explicitly bridges the official exploration distribution."
-  last_reflection: "The step-6000 FPO++ endpoint tied its exact actor anchor on paired random success and lost zero success; midpoint interpolation then degraded random success. Return to the official step-1000 source gap and test an explicit training-time bridge rather than post-training averaging."
+  cycle: 14
+  last_direction: "Screen inference-only antithetic action-chunk averaging on the released Can step-1000 checkpoint against official zero-source inference."
+  last_reflection: "Reject the proposed Gaussian-bridge distillation before implementation: H8 already trains zero-source rollout actions with freshly sampled Gaussian CFM variables, while H15 found success-only gradients nearly orthogonal to fresh positive-GAE gradients. A new bridge would substantially repeat both negative tests."
 
 workspace:
   findings: "findings.md"
