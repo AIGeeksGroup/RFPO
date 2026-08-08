@@ -256,6 +256,12 @@ hypotheses:
     motivation: "FPO++ uses positive and negative advantages to move CFM losses in opposite directions; sparse-reward minibatches may let the abundant negative branch cancel useful positive updates. Sign-conflict projection preserves both branches except for their directly opposing component and requires no loss coefficient."
     parent: H2
     priority: high
+  - id: H33
+    statement: "Clipping FPO++ ratios independently across action-chunk timesteps preserves the initially useful policy-gradient direction better than clipping one ratio formed from the summed chunk loss."
+    status: active
+    motivation: "The paper extends clipping from per-action to per-CFM-sample, but manipulation still sums 16 timestep losses before clipping. A single shifted timestep can therefore suppress the entire chunk update; temporal per-sample clipping can localize that trust-region decision while preserving the on-policy gradient scale."
+    parent: H2
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -870,7 +876,7 @@ experiments:
 
 outer_loop:
   cycle: 19
-  last_direction: "Stop advantage-sign gradient surgery and select a distinct H33 mechanism; do not implement online H32 training."
+  last_direction: "Audit temporally factorized FPO++ clipping as H33, preserving exact on-policy gradient scale before testing post-update direction retention."
   last_reflection: "H32 found negligible sign conflict in one fixed batch and no conflict in the other. Projection changed outcome-reference cosine by -0.00009 and 0.00000, so negative-GAE cancellation is not the update bottleneck and advantage-sign gradient surgery is closed."
 
 workspace:
