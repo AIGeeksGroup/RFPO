@@ -64,7 +64,7 @@ hypotheses:
     priority: low
   - id: H4
     statement: "Mixing dataset and reflow endpoints restores action grounding while retaining enough straightening to improve Can success."
-    status: pending
+    status: refuted
     motivation: "Pure reflow improved geometry but not official-scale reward, suggesting endpoint grounding rather than curvature is now the bottleneck."
     parent: H1
     priority: high
@@ -83,7 +83,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 49
+  total_runs: 53
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -274,11 +274,27 @@ experiments:
       metric: success_rate
       value: 0.115
       episodes: 200
+    - run: can_mixed_reflow50_nfe10_zero_eval20260808
+      metric: success_rate
+      value: 0.75
+      episodes: 20
+    - run: can_mixed_reflow50_nfe10_random_eval20260808
+      metric: success_rate
+      value: 0.25
+      episodes: 20
+    - run: can_mixed_reflow50_nfe10_zero_eval20260809
+      metric: success_rate
+      value: 0.80
+      episodes: 20
+    - run: can_mixed_reflow50_nfe10_random_eval20260809
+      metric: success_rate
+      value: 0.0
+      episodes: 20
 
 outer_loop:
   cycle: 1
-  last_direction: "Test one 50/50 mixed dataset/reflow endpoint pilot; stop without a probability sweep if its geometry or 20-episode rollout gate fails."
-  last_reflection: "Official-scale Can evaluation gave 150/200 reflow versus 147/200 control at 10-step zero and 23/200 versus 24/200 random. Pure reflow preserves performance and improves geometry, but misses the preregistered +5 pp reward gate. H1 is supported for straightening and low-step preservation; H1b is refuted."
+  last_direction: "Stop BC-distillation variants and return to reward-aware FPO++ mechanisms; inspect official Can training cost and metrics before selecting the next small pilot."
+  last_reflection: "A 50/50 dataset/reflow mixture retained an 11% straightness reduction and improved zero success in two small screens, but random success collapsed to 0/20 on the confirmation seed versus 3/20 control. H4 is refuted under its exploration gate, so no probability sweep or large evaluation is justified."
 
 workspace:
   findings: "findings.md"

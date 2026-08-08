@@ -55,6 +55,12 @@ p=0.819). Random success was 23/200 versus 24/200. Pure one-stage reflow therefo
 performance while reliably straightening the flow, but it does not establish a benchmark reward
 improvement and should not be integrated into online FPO++ on that premise.
 
+A 50/50 mixture of dataset and teacher endpoints tested whether action grounding was the missing
+ingredient. It retained an 11.0% straightness reduction and improved zero success in both small
+screens, but random success changed from 5/20 versus 1/20 on the first seed to 0/20 versus 3/20 on
+the confirmation seed. The deterministic signal is interesting, but unstable exploration violates
+the online-policy requirement. The mixed-endpoint direction is stopped without a probability sweep.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -65,6 +71,7 @@ improvement and should not be integrated into online FPO++ on that premise.
 - A short 100-update training-time adaptation is also insufficient: it preserves neither deterministic success nor random exploration.
 - Conditional reflow's lower integration error transferred to a positive low-step rollout screen; this is the first improvement candidate to pass both mechanism and task gates.
 - Small 20-episode screens overestimated pure reflow's reward effect; the 200-episode result retained only +1.5 points while confirming non-degradation.
+- Mixing real and reflow endpoints can retain partial straightening and deterministic gains, but does not reliably preserve random-source exploration.
 
 ## Lessons and Constraints
 
@@ -78,8 +85,8 @@ improvement and should not be integrated into online FPO++ on that premise.
 - Does conditional reflow preserve the multimodal exploration that gives flow policies their advantage?
 - Is curvature correlated with FPO ratio variance or gradient disagreement?
 - Should reflow be an offline post-training stage, an auxiliary online loss, or both?
-- Can a mixed data-endpoint/reflow objective retain straightening while improving action grounding enough to produce a real reward gain?
+- Which reward-aware FPO++ mechanism can improve Can success without relying on unstable BC-source exploration changes?
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior screening is closed after two negative variants. Pure conditional reflow is supported as a geometry and sampling-efficiency method but refuted as a five-point Can reward improvement; online integration is stopped pending a new small-scale hypothesis.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior and mixed-endpoint screening are closed. Pure conditional reflow is supported as a geometry and sampling-efficiency method but refuted as a five-point Can reward improvement. The next direction must be reward-aware rather than another BC distillation variant.
