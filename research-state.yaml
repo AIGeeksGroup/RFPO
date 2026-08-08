@@ -144,6 +144,12 @@ hypotheses:
     motivation: "H15 found severe one-update clipping on stored successful chunks; fresh behavior-anchored CFM draws per epoch could improve estimator generalization without changing rewards or exploration."
     parent: H2
     priority: high
+  - id: H17
+    statement: "A fixed-budget 12/4 CFM sample allocation to high/low absolute-advantage chunks estimates the signed FPO++ policy gradient more accurately than uniform MC8."
+    status: active
+    motivation: "Uniform MC8 spends equal estimator compute on chunks with very different policy-gradient coefficients; reallocating rather than increasing samples may improve information efficiency without changing total forward cost."
+    parent: H2
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -580,9 +586,9 @@ experiments:
       available_positive_chunks: 1754
 
 outer_loop:
-  cycle: 4
-  last_direction: "H16 refutes epoch-level CFM resampling; return to a fresh mechanism screen rather than tuning fixed-draw or scalar-weight variants."
-  last_reflection: "Held-out CFM draws are modestly less shifted than stored draws, but not enough to preserve active terms or a stable gradient direction. Fixed-draw overfitting is not the dominant FPO++ bottleneck."
+  cycle: 5
+  last_direction: "Audit a fixed-budget advantage-stratified CFM sample allocation before changing online training."
+  last_reflection: "H16 closes fixed-draw resampling. H17 tests information allocation rather than adding total MC compute, changing source distributions, or applying another advantage transform."
 
 workspace:
   findings: "findings.md"
