@@ -190,6 +190,12 @@ hypotheses:
     motivation: "H21-H22 retain official GAE, while H18 shows severe parameter-induced gradient rotation after optimization; reducing step size targets the remaining failure mechanism directly."
     parent: H2
     priority: high
+  - id: H24
+    statement: "Accumulating all eight minibatch gradients before each actor optimizer step preserves the initially aligned GAE gradient through ten FPO++ epochs."
+    status: active
+    motivation: "H23 reduced surrogate movement without preserving gradient direction, suggesting that sequential Adam steps on shuffled minibatches, rather than global learning rate alone, drive the update path away from the pre-update gradient."
+    parent: H2
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
