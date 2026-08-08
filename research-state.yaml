@@ -110,7 +110,7 @@ hypotheses:
     priority: high
   - id: H11
     statement: "ESS-normalized exponential advantage weights improve early standard-Gaussian Can learning when used inside the FPO++ per-sample clipped-ratio objective."
-    status: pending
+    status: refuted
     motivation: "H8-H10 show that reward supply is abundant but guided-source transfer is invalid or ineffective; mirror weights prioritize the rare successful on-policy samples without source mismatch."
     parent: H2
     priority: high
@@ -129,7 +129,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 73
+  total_runs: 76
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -466,11 +466,25 @@ experiments:
       metric: success_rate
       value: 0.06
       episodes: 50
+    - run: can_essweighted05_5iter_seed0_random_collection
+      metric: pooled_collection_success
+      value: 0.0857
+      successes: 52
+      episodes: 607
+      iterations: "2-5"
+    - run: can_essweighted05_5iter_seed0_zero_final
+      metric: success_rate
+      value: 0.82
+      episodes: 50
+    - run: can_essweighted05_5iter_seed0_random_final
+      metric: success_rate
+      value: 0.16
+      episodes: 50
 
 outer_loop:
   cycle: 2
-  last_direction: "Test one ESS-controlled mirror-weighted FPO++ pilot on standard-Gaussian Can rollouts; do not sweep the weighting temperature or ESS target."
-  last_reflection: "Mask reset held valid CFM samples near 98%, but tempered-source full-noise collection fell to 41/481 (8.52%) and final random success remained 6%. Invalid-mask loss is not the cause of failed transfer, so H10 is refuted and scale/fraction/lambda/mask sweeps are closed."
+  last_direction: "Stop reward-weighting sweeps and perform the pending H2 mechanism audit: test whether reflow actually reduces CFM sample-gradient disagreement before integrating it into online FPO++."
+  last_reflection: "ESS-controlled mirror weights were numerically stable and retained final random behavior, but pooled full-noise success was 52/607 (8.57%), indistinguishable from the official 8.77% control. H11 is refuted; reward weighting alone does not solve sparse Can learning."
 
 workspace:
   findings: "findings.md"

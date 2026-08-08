@@ -101,6 +101,12 @@ slightly below the control's 53/604 (8.77%) and the no-reset mixture's 44/484 (9
 zero/random evaluation was 86%/6%. The bookkeeping defect therefore explains lost training samples,
 but not why abundant tempered-source successes fail to improve the Gaussian-source policy.
 
+Normalized exponential advantage weights also failed to improve the standard-Gaussian update.
+An ESS-controlled mirror-weighted FPO++ objective held weight ESS at exactly 50% and trained with
+finite losses, but pooled actor-update success was 52/607 (8.57%) versus 53/604 (8.77%) for the
+official signed-advantage control. Final zero/random evaluation was 82%/16%. The random point
+estimate is non-degraded, but the preregistered collection metric establishes no learning gain.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -118,6 +124,7 @@ but not why abundant tempered-source successes fail to improve the Gaussian-sour
 - Zero-source collection tripled the number of successes without final-policy collapse, but the disjoint delta source did not transfer into better Gaussian-source collection; source overlap is now the key constraint.
 - Tempered Gaussian overlap recovered the delta-source deficit but not a useful gain; high-success source mixtures also amplify the cumulative invalid-mask defect by creating more episode boundaries.
 - Correcting that amplified mask defect restored about 98% valid CFM actions but left full-noise success unchanged; failed transfer is an update/objective problem rather than a sample-retention problem.
+- Soft positive mirror weights preserved stability and random evaluation but did not outperform signed FPO++ advantages; simple reward reweighting is not enough to improve early Can learning.
 
 ## Lessons and Constraints
 
@@ -135,4 +142,4 @@ but not why abundant tempered-source successes fail to improve the Gaussian-sour
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased Monte Carlo sampling, full-lambda GAE, and both delta-zero and tempered mixed rollout screens are closed as standalone reward improvements. Pure conditional reflow is supported as a geometry and sampling-efficiency method. The tempered-source plus mask-reset interaction is also closed: correcting sample retention did not improve full-noise reward. The project now returns to an outer-loop literature and mechanism review rather than sweeping the exhausted source-mixture and estimator settings.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, and ESS-weighted mirror updates are closed as standalone reward improvements. Pure conditional reflow is supported as a geometry and sampling-efficiency method. The next low-cost decision is the pending H2 mechanism audit: measure whether the replicated straightening effect reduces CFM sample-gradient disagreement before attempting an online reflow auxiliary.
