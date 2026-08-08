@@ -14,6 +14,7 @@ TOTAL_TIMESTEPS="${TOTAL_TIMESTEPS:-$((NUM_ENVS * DATA_COLLECTION_STEPS))}"
 EVAL_EPISODES="${EVAL_EPISODES:-20}"
 N_ACTION_SAMPLES="${N_ACTION_SAMPLES:-8}"
 ROLLOUT_FREQ="${ROLLOUT_FREQ:-1}"
+MASTER_PORT="${MASTER_PORT:-29500}"
 SEED="${SEED:-0}"
 RUN_NAME="${RUN_NAME:-can_fpopp_smoke_seed${SEED}_$(timestamp)}"
 OUTPUT_DIR="${OUTPUT_DIR:-$RUNTIME_ROOT/results/$RUN_NAME}"
@@ -23,7 +24,7 @@ if [[ ! -f "$CAN_CHECKPOINT/policy/model.safetensors" ]]; then
   exit 1
 fi
 
-torchrun --nproc_per_node=1 finetune_online_rl.py \
+torchrun --nproc_per_node=1 --master_port "$MASTER_PORT" finetune_online_rl.py \
   --distributed True \
   --base-policy-local-path "$CAN_CHECKPOINT" \
   --load-ema True \
