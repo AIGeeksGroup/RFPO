@@ -138,6 +138,12 @@ hypotheses:
     motivation: "H8-H11 show that reward supply and reweighting alone are insufficient; replay may reuse rare valid successes, but only if short-horizon policy staleness is measurable and controlled."
     parent: H2
     priority: high
+  - id: H16
+    statement: "FPO++ overfits rollout-stored MC8 CFM variables across update epochs, leaving independent held-out MC8 ratios closer to the behavior policy and less clipped."
+    status: active
+    motivation: "H15 found severe one-update clipping on stored successful chunks; fresh behavior-anchored CFM draws per epoch could improve estimator generalization without changing rewards or exploration."
+    parent: H2
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -566,9 +572,9 @@ experiments:
       available_successful_chunks: 1608
 
 outer_loop:
-  cycle: 3
-  last_direction: "Stop successful replay before integration; audit whether critic-free terminal outcome labels agree with useful fresh on-policy gradients before changing the advantage estimator."
-  last_reflection: "Successful replay retained 99.56% ratio ESS, but only 40.82% of positive ratios stayed active, pre/post gradient cosine was 0.614, and selection-versus-fresh gradient cosine was 0.049. H15 is refuted."
+  cycle: 4
+  last_direction: "Audit stored-versus-held-out CFM ratio generalization before changing epoch-level sampling; avoid more reward selection and scalar reweighting."
+  last_reflection: "H15 refutes replay and provides exploratory evidence against terminal-outcome and successful-chunk objectives. The remaining specific bottleneck is repeated optimization on fixed rollout CFM variables."
 
 workspace:
   findings: "findings.md"
