@@ -150,6 +150,13 @@ direction-preservation gate. Like antithetic sampling, this is genuine variance 
 sufficient evidence that the online update remains invariant, so fixed-budget sampling allocation is
 closed without training or post-hoc tuning.
 
+Held-out active-ratio early stopping did not rescue the unstable actor update. The locked 80% rule
+selected epoch 1 because pooled positive active ratios fell from 85.5% to 72.9% at epoch 2, but the
+two epoch-1 held-out gradient cosines were already only 0.754 and 0.263. One batch's surrogate moved
+in the wrong direction, and the other retained only 5.4% of the epoch-10 gain. Repeated epochs worsen
+drift, but the first actor step is already unreliable; threshold tuning or a fixed smaller epoch count
+cannot address the underlying learning-signal problem.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -175,6 +182,7 @@ closed without training or post-hoc tuning.
 - One-update-old successful chunks retain high ratio ESS but are mostly positive-clipped, and success-only selection produces a strongly biased gradient direction.
 - Independent MC8 draws are modestly less shifted than stored draws, but do not retain enough active positive terms or gradient alignment to justify epoch-level behavior-loss resampling.
 - Absolute-advantage 12/4 allocation improves fixed-budget estimator accuracy, but both it and antithetic sampling fail the locked cross-estimator direction gate; CFM sampling tricks are not the next reward-improvement route.
+- Positive active-ratio fraction does not reliably diagnose gradient quality: it remained 85.5% after one epoch while one held-out gradient had rotated to cosine 0.263. Actor early stopping is closed without threshold tuning.
 
 ## Lessons and Constraints
 
@@ -193,4 +201,4 @@ closed without training or post-hoc tuning.
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, and epoch-resampled CFM losses are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The verified step-6000 Can policy supplies a high-signal short-budget screen; the next direction must begin with a new learning-signal or objective mechanism audit rather than another scalar, source, or fixed-draw schedule variant.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, and active-ratio actor stopping are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The verified step-6000 Can policy supplies a high-signal short-budget screen; the next direction must improve the first-step learning signal through a new advantage, critic, or objective mechanism.

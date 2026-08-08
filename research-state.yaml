@@ -152,7 +152,7 @@ hypotheses:
     priority: high
   - id: H18
     statement: "Rolling back the first actor epoch that drives independent positive CFM ratios below 80% active preserves useful surrogate improvement while preventing FPO++ gradient rotation."
-    status: active
+    status: refuted
     motivation: "H16 found that the official ten-epoch update leaves only 54.7% of held-out positive ratios active and rotates the held-out gradient to cosine 0.743; PPO clipping does not itself stop repeated-epoch drift."
     parent: H2
     priority: high
@@ -171,7 +171,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 89
+  total_runs: 90
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -606,11 +606,27 @@ experiments:
       cross_method_average_gradient_cosine: 0.97373
       chunks: 32
       repeats: 8
+    - run: can_step6000_heldoutratio_audit_osmesa_seed20260817_batch0
+      metric: selected_epoch_gradient_cosine
+      value: 0.75446
+      selected_epoch: 1
+      epoch10_gradient_cosine: 0.20894
+      selected_surrogate_gain: -0.00742
+      epoch10_surrogate_gain: 0.01245
+      chunks: 32
+    - run: can_step6000_heldoutratio_audit_osmesa_seed20260817_batch1
+      metric: selected_epoch_gradient_cosine
+      value: 0.26305
+      selected_epoch: 1
+      epoch10_gradient_cosine: 0.08007
+      selected_surrogate_gain: 0.00196
+      epoch10_surrogate_gain: 0.03597
+      chunks: 32
 
 outer_loop:
   cycle: 6
-  last_direction: "Audit held-out positive-ratio early stopping before changing the online actor update."
-  last_reflection: "H14 and H17 close fixed-budget CFM sampling tricks. H18 targets the separate repeated-epoch drift measured by H16 using a locked rollback rule rather than a fixed epoch-count sweep."
+  last_direction: "Move from update-path controls to advantage or critic signal quality after H18 failed in the first actor epoch."
+  last_reflection: "H18 selected epoch 1 but its two held-out gradient cosines were only 0.754 and 0.263, and it retained none or 5.4% of the full surrogate gain. Later-epoch drift is real, but early stopping cannot repair an unstable first-step direction."
 
 workspace:
   findings: "findings.md"
