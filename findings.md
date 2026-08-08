@@ -26,6 +26,14 @@ Gaussian control, versus 0/20 in both modes for WP-Past. The warm run used valid
 histories in 95-98% of logged batches, so the failure is not explained by universal Gaussian fallback.
 This refutes H3 at the allocated screening budget and shifts the main effort to conditional reflow.
 
+One-stage conditional reflow passed both pilot gates. On 128 fixed observation/source pairs, it
+reduced normalized straightness error by 22.9%, reduced four-step endpoint MSE by 27.8%, and retained
+the control's action diversity. In a matched 20-episode-per-cell Can screen, reflow improved zero-
+sampling success from 11/20 to 14/20 at 10 Euler steps and from 14/20 to 15/20 at four steps. Random
+success pooled across the two step counts was 3/40 for both methods. These results support the claimed
+straightening and provide an initial task-level improvement signal, but the rollout sample is not yet
+large enough to establish a stable benchmark gain.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -34,6 +42,7 @@ This refutes H3 at the allocated screening budget and shifts the main effort to 
 - WarmPrior (arXiv:2605.13959) offers a more direct reward-improvement hypothesis for chunked manipulation: center the flow source on recent actions and retain residual Gaussian noise for exploration.
 - WarmPrior cannot be grafted onto a Gaussian-trained FPO checkpoint at inference time; training-time source adaptation is necessary on Can.
 - A short 100-update training-time adaptation is also insufficient: it preserves neither deterministic success nor random exploration.
+- Conditional reflow's lower integration error transferred to a positive low-step rollout screen; this is the first improvement candidate to pass both mechanism and task gates.
 
 ## Lessons and Constraints
 
@@ -47,8 +56,8 @@ This refutes H3 at the allocated screening budget and shifts the main effort to 
 - Does conditional reflow preserve the multimodal exploration that gives flow policies their advantage?
 - Is curvature correlated with FPO ratio variance or gradient disagreement?
 - Should reflow be an offline post-training stage, an auxiliary online loss, or both?
-- Can one-stage conditional reflow reduce curvature enough to preserve return with fewer Euler steps?
+- Does the positive one-stage conditional-reflow rollout screen replicate under an independent evaluation seed?
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior screening is closed after two negative variants; conditional reflow is the active improvement direction.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior screening is closed after two negative variants. Conditional reflow passed its geometry and first rollout screens and is awaiting one independent-seed confirmation before any larger experiment.

@@ -34,7 +34,7 @@ hypotheses:
     priority: high
   - id: H1
     statement: "Conditional reflow reduces policy trajectory curvature and preserves return when the Euler sampling steps are reduced."
-    status: pending
+    status: screening_supported
     motivation: "Rectified Flow predicts straighter paths and lower numerical integration error after reflow."
     parent: null
     priority: high
@@ -65,8 +65,12 @@ experiments:
     can_baseline200_zero_success: 0.71
     can_baseline200_random_success: 0.14
     can_two_run_random_pooled_success: 0.1175
-  best_value: null
-  total_runs: 21
+  best_value:
+    run: can_reflow_stage1_100_nfe4_zero_seed20260808
+    metric: success_rate
+    value: 0.75
+    matched_control: 0.70
+  total_runs: 29
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -145,11 +149,43 @@ experiments:
       metric: success_rate
       value: 0.0
       episodes: 20
+    - run: can_reflow_control100_nfe10_zero_seed20260808
+      metric: success_rate
+      value: 0.55
+      episodes: 20
+    - run: can_reflow_stage1_100_nfe10_zero_seed20260808
+      metric: success_rate
+      value: 0.70
+      episodes: 20
+    - run: can_reflow_control100_nfe10_random_seed20260808
+      metric: success_rate
+      value: 0.05
+      episodes: 20
+    - run: can_reflow_stage1_100_nfe10_random_seed20260808
+      metric: success_rate
+      value: 0.10
+      episodes: 20
+    - run: can_reflow_control100_nfe4_zero_seed20260808
+      metric: success_rate
+      value: 0.70
+      episodes: 20
+    - run: can_reflow_stage1_100_nfe4_zero_seed20260808
+      metric: success_rate
+      value: 0.75
+      episodes: 20
+    - run: can_reflow_control100_nfe4_random_seed20260808
+      metric: success_rate
+      value: 0.10
+      episodes: 20
+    - run: can_reflow_stage1_100_nfe4_random_seed20260808
+      metric: success_rate
+      value: 0.05
+      episodes: 20
 
 outer_loop:
   cycle: 1
-  last_direction: "Stop WarmPrior after matched training-time adaptation fails; begin one-stage conditional reflow."
-  last_reflection: "H0 is supported on Can and Go2. Both inference-only and short training-time WP-Past fail on Can, so H3 is refuted at the screening budget. H1 is now the highest-priority improvement hypothesis."
+  last_direction: "Confirm the positive one-stage conditional reflow screen with one independent evaluation seed before extending training."
+  last_reflection: "H1 passed its geometry and first rollout gates: straightness error fell 22.9%, four-step endpoint MSE fell 27.8%, and four-step zero success improved from 14/20 to 15/20 without pooled random-success collapse. The rollout sample is small, so H1 remains screening-supported pending confirmation."
 
 workspace:
   findings: "findings.md"
