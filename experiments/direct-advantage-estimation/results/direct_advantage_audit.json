@@ -1,0 +1,43 @@
+{
+  "batches": [
+    {
+      "batch": 0,
+      "candidate_cosine_gain": -0.8237988352775574,
+      "candidate_gradient_cosine_to_reference": -0.13418668508529663,
+      "control_gradient_cosine_to_reference": 0.6896121501922607,
+      "num_chunks": 32,
+      "reference_gradient_norm": 3.198267936706543
+    },
+    {
+      "batch": 1,
+      "candidate_cosine_gain": -1.2036055028438568,
+      "candidate_gradient_cosine_to_reference": -0.48608502745628357,
+      "control_gradient_cosine_to_reference": 0.7175204753875732,
+      "num_chunks": 32,
+      "reference_gradient_norm": 3.6848888397216797
+    }
+  ],
+  "candidate_advantage_spearman": -0.04137226883846789,
+  "candidate_spearman_gain": -0.8579749646686589,
+  "candidate_weight_mean": 6.107955414336175e-06,
+  "candidate_weight_std": 0.0007861538324505091,
+  "center_samples": 4,
+  "control_advantage_spearman": 0.816602695830191,
+  "horizon_chunks": 4,
+  "iteration": 2,
+  "num_gradient_chunks_audited": 64,
+  "num_rank_chunks": 129,
+  "training_loss_relative_change": -0.029596268218122335,
+  "training_losses": [
+    0.005726121831685305,
+    0.00571669265627861,
+    0.005705410614609718,
+    0.0056917136535048485,
+    0.005675892811268568,
+    0.005657656583935022,
+    0.005637606140226126,
+    0.005614671856164932,
+    0.005587785039097071,
+    0.005556649994105101
+  ]
+}

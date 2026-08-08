@@ -174,7 +174,7 @@ hypotheses:
     priority: high
   - id: H21
     statement: "A chunk-level direct-advantage head with Monte Carlo flow-policy centering improves fresh-rollout advantage ranking and first-step FPO++ gradient alignment."
-    status: active
+    status: refuted
     motivation: "H19 lowered value MSE but degraded rank and one gradient batch; DAE targets action effects directly instead of relying on absolute value calibration."
     parent: H2
     priority: high
@@ -193,7 +193,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 94
+  total_runs: 95
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -655,11 +655,21 @@ experiments:
       batch1_gradient_cosine_gain: 0.16816
       audited_chunks: 64
       value_targets: 1837
+    - run: can_step6000_dae_audit_osmesa_formal_seed20260819
+      metric: candidate_spearman_gain
+      value: -0.85797
+      control_advantage_spearman: 0.81660
+      candidate_advantage_spearman: -0.04137
+      batch0_gradient_cosine_gain: -0.82380
+      batch1_gradient_cosine_gain: -1.20361
+      training_loss_relative_change: -0.02960
+      audited_chunks: 64
+      rank_targets: 129
 
 outer_loop:
-  cycle: 7
-  last_direction: "Audit a continuous-action Monte Carlo approximation to Direct Advantage Estimation before any online integration."
-  last_reflection: "H19 shows that better scalar calibration is insufficient. H21 targets action effects directly, but the discrete-action DAE centering constraint must be approximated with same-observation samples from the frozen flow policy and rejected if either fresh gradient batch fails."
+  cycle: 8
+  last_direction: "Preserve the official GAE ordering and audit a deterministic rank-based weight transform before any online integration."
+  last_reflection: "H21 reversed a strong control ranking and both actor gradients. Learned replacement advantages are stopped; the next candidate must retain GAE ordering and only change the influence of unreliable magnitudes."
 
 workspace:
   findings: "findings.md"

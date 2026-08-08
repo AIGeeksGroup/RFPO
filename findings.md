@@ -164,6 +164,13 @@ reference worsened by 0.073 in one 32-chunk batch and improved by 0.168 in the o
 quality and per-batch gradient improvement were preregistered requirements, H19 is stopped without
 online integration or post-hoc tuning.
 
+Continuous-action Direct Advantage Estimation failed more decisively. On 129 fully valid fresh
+chunks, official GAE already achieved 0.817 Spearman correlation with Monte Carlo returns, while the
+four-sample centered DAE head achieved -0.041. Its actor-gradient cosine was negative in both locked
+32-chunk batches (-0.134 and -0.486), compared with 0.690 and 0.718 for control. Side-training loss
+fell only 2.96% against the 20% gate. Learned replacement advantages are therefore stopped; the
+useful signal to preserve is GAE ordering, not a new action-effect predictor.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -191,6 +198,7 @@ online integration or post-hoc tuning.
 - Absolute-advantage 12/4 allocation improves fixed-budget estimator accuracy, but both it and antithetic sampling fail the locked cross-estimator direction gate; CFM sampling tricks are not the next reward-improvement route.
 - Positive active-ratio fraction does not reliably diagnose gradient quality: it remained 85.5% after one epoch while one held-out gradient had rotated to cosine 0.263. Actor early stopping is closed without threshold tuning.
 - Lower value MSE does not imply a better policy gradient: the discounted-success critic improved calibration while degrading value ranking and one batch's outcome-reference gradient alignment.
+- Continuous-action Monte Carlo centering does not transfer DAE's discrete-action benefit here; it reversed an already strong GAE outcome ranking and both audited gradient directions.
 
 ## Lessons and Constraints
 
@@ -205,8 +213,8 @@ online integration or post-hoc tuning.
 - Is curvature correlated with FPO ratio variance or gradient disagreement?
 - Should reflow be an offline post-training stage, an auxiliary online loss, or both?
 - Which reward-aware FPO++ mechanism can improve Can success without relying on unstable BC-source exploration changes?
-- Which advantage estimator can preserve return ordering while improving first-update gradient alignment across independent rollout subsets?
+- Can a deterministic rank-preserving transform retain GAE's strong return ordering while reducing magnitude-driven actor-gradient distortion?
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, and bounded discounted-success critics are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The verified step-6000 Can policy supplies a high-signal short-budget screen; the next direction must preserve advantage ranking while improving the first-step gradient signal.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, and continuous-action DAE are closed as reward-improvement routes. Pure conditional reflow remains supported only as a geometry and sampling-efficiency method. The verified step-6000 Can policy supplies a high-signal short-budget screen; the next direction must preserve GAE's strong advantage ranking while improving the first-step gradient signal.
