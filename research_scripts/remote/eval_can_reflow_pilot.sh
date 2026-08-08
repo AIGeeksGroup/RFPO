@@ -14,8 +14,11 @@ if [[ ! -f "$CHECKPOINT_PATH/policy/model.safetensors" ]]; then
   exit 1
 fi
 
-for sampling_steps in 10 4; do
-  for zero_sampling in True False; do
+read -r -a sampling_steps_list <<< "${EVAL_SAMPLING_STEPS:-10 4}"
+read -r -a sampling_modes <<< "${EVAL_SAMPLING_MODES:-True False}"
+
+for sampling_steps in "${sampling_steps_list[@]}"; do
+  for zero_sampling in "${sampling_modes[@]}"; do
     output_dir="$RUNTIME_ROOT/results/${EVAL_TAG}_nfe${sampling_steps}_${zero_sampling}_$(timestamp)"
     python eval_checkpoint.py \
       --local-checkpoint-path "$CHECKPOINT_PATH" \

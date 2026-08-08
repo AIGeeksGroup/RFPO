@@ -34,6 +34,15 @@ fresh optimizers, batch size 64, 100 updates, and 64-step teacher unchanged. App
 geometry gate before rollout evaluation. This confirmation tests training stability; do not extend
 the original checkpoint or tune hyperparameters first.
 
+## Official-scale confirmation
+
+If the second training seed passes both geometry and rollout screening, evaluate its matched control
+and reflow checkpoints at the official 10 Euler steps with 200 episodes, 50 environments, and a new
+environment seed (20260810), for both zero and random sampling. Call the benchmark improvement stable
+only if reflow gains at least 10 zero-sampling successes out of 200 (+5 percentage points). Random
+success must not fall more than 10 successes below the matched control. If the zero gate fails, retain
+only the geometry/sampling-efficiency conclusion and do not start online FPO++ integration.
+
 ## Stop Conditions
 
 - Stop if normalized straightness error does not improve by at least 20% over the control.
