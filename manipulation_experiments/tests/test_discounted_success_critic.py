@@ -2,6 +2,7 @@ import pytest
 import torch
 
 from src.discounted_success_critic import (
+    centered_average_rank_scores,
     discounted_returns_to_observed_terminal,
     spearman_rank_correlation,
 )
@@ -45,3 +46,17 @@ def test_spearman_rank_correlation_detects_reverse_order():
     assert spearman_rank_correlation(
         torch.tensor([1.0, 2.0, 3.0]), torch.tensor([3.0, 2.0, 1.0])
     ) == pytest.approx(-1.0)
+
+
+def test_centered_average_rank_scores_average_ties_and_preserve_order():
+    values = torch.tensor([4.0, 1.0, 2.0, 2.0])
+
+    scores = centered_average_rank_scores(values)
+
+    assert scores.tolist() == pytest.approx([1.0, -1.0, 0.0, 0.0])
+    assert scores.mean().item() == pytest.approx(0.0)
+
+
+def test_centered_average_rank_scores_reject_nonfinite_values():
+    with pytest.raises(ValueError, match="finite"):
+        centered_average_rank_scores(torch.tensor([0.0, float("nan")]))

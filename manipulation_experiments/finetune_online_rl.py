@@ -41,6 +41,7 @@ from src.stratified_mc_audit import (
 )
 from src.heldout_ratio_early_stop import select_epoch_before_ratio_violation
 from src.discounted_success_critic import (
+    centered_average_rank_scores,
     discounted_returns_to_observed_terminal,
     spearman_rank_correlation,
 )
@@ -162,6 +163,10 @@ class FlowPPOConfig:
     direct_advantage_horizon_chunks: int = 4
     direct_advantage_center_batch_size: int = 16
     direct_advantage_audit_output_json: Optional[str] = None
+    rank_advantage_audit: bool = False
+    rank_advantage_audit_iteration: int = 2
+    rank_advantage_audit_chunks: int = 64
+    rank_advantage_audit_output_json: Optional[str] = None
     rollout_zero_fraction: float = 0.0
     rollout_tempered_fraction: float = 0.0
     rollout_tempered_scale: float = 0.5
@@ -762,6 +767,23 @@ def main(cfg: FlowPPOConfig):
             raise ValueError("direct-advantage audit settings must be positive")
         if cfg.direct_advantage_audit_chunks % 2:
             raise ValueError("direct-advantage audit requires an even chunk count")
+    if cfg.rank_advantage_audit:
+        if any(
+            (
+                cfg.discounted_success_critic_audit,
+                cfg.critic_warmup_scheduler_audit,
+                cfg.direct_advantage_audit,
+            )
+        ):
+            raise ValueError("rank-advantage and advantage side audits are mutually exclusive")
+        if cfg.loss_mode != "fpo" or not cfg.do_chunk_level_ppo:
+            raise ValueError("rank-advantage audit requires chunk-level FPO")
+        if world_size != 1:
+            raise ValueError("rank-advantage audit currently requires one process")
+        if min(cfg.rank_advantage_audit_iteration, cfg.rank_advantage_audit_chunks) < 1:
+            raise ValueError("rank-advantage audit settings must be positive")
+        if cfg.rank_advantage_audit_chunks % 2:
+            raise ValueError("rank-advantage audit requires an even chunk count")
 
     # Run dir on all ranks (avoid races)
     run_start_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -2172,6 +2194,132 @@ def main(cfg: FlowPPOConfig):
             logger.info(
                 "Direct-advantage audit: %s",
                 json.dumps(direct_advantage_result, sort_keys=True),
+            )
+
+        if cfg.rank_advantage_audit and iteration == cfg.rank_advantage_audit_iteration:
+            rank_mask = b_mc_valid[:, 0].bool() & (b_cfm_value_invalid.sum(dim=1) == 0)
+            rank_indices = torch.where(rank_mask)[0]
+            required_chunks = cfg.rank_advantage_audit_chunks
+            if rank_indices.numel() < required_chunks:
+                raise RuntimeError(
+                    "rank-advantage audit requires "
+                    f"{required_chunks} fully valid labeled chunks, found {rank_indices.numel()}"
+                )
+
+            all_control_weights = b_advantages[rank_indices, 0].float()
+            all_candidate_weights = centered_average_rank_scores(all_control_weights)
+            all_reference_weights = b_mc_returns[rank_indices, 0].float()
+            all_reference_weights = all_reference_weights - all_reference_weights.mean()
+            if (
+                not torch.isfinite(all_candidate_weights).all()
+                or all_candidate_weights.std() <= 0
+                or all_candidate_weights.min() >= 0
+                or all_candidate_weights.max() <= 0
+            ):
+                raise RuntimeError("rank-advantage audit produced invalid candidate weights")
+            order_spearman = spearman_rank_correlation(
+                all_control_weights, all_candidate_weights
+            )
+            if not np.isclose(order_spearman, 1.0, atol=1e-12):
+                raise RuntimeError("rank-advantage audit did not preserve weight ordering")
+
+            gradient_generator = torch.Generator().manual_seed(
+                cfg.seed + iteration * 7211
+            )
+            selected_positions = torch.randperm(
+                rank_indices.numel(), generator=gradient_generator
+            )[:required_chunks]
+            gradient_indices = rank_indices[selected_positions]
+            control_weights = all_control_weights[selected_positions]
+            candidate_weights = all_candidate_weights[selected_positions]
+            reference_weights = all_reference_weights[selected_positions]
+            audit_batch_size = required_chunks // 2
+            gradient_batch_results = []
+            actor_module.eval()
+            for audit_batch in range(2):
+                batch_slice = slice(
+                    audit_batch * audit_batch_size,
+                    (audit_batch + 1) * audit_batch_size,
+                )
+                batch_indices = gradient_indices[batch_slice]
+                _, reference_gradient = replay_audit_gradient(
+                    batch_indices,
+                    reference_weights[batch_slice],
+                    b_actions=b_actions,
+                    b_cfm_losses=b_cfm_losses,
+                    b_cfm_loss_ts=b_cfm_loss_ts,
+                    b_cfm_loss_epsilons=b_cfm_loss_epsilons,
+                    b_cfm_value_invalid=b_cfm_value_invalid,
+                    b_obs_images=b_obs_images,
+                    b_obs_state=b_obs_state,
+                )
+                _, control_gradient = replay_audit_gradient(
+                    batch_indices,
+                    control_weights[batch_slice],
+                    b_actions=b_actions,
+                    b_cfm_losses=b_cfm_losses,
+                    b_cfm_loss_ts=b_cfm_loss_ts,
+                    b_cfm_loss_epsilons=b_cfm_loss_epsilons,
+                    b_cfm_value_invalid=b_cfm_value_invalid,
+                    b_obs_images=b_obs_images,
+                    b_obs_state=b_obs_state,
+                )
+                _, candidate_gradient = replay_audit_gradient(
+                    batch_indices,
+                    candidate_weights[batch_slice],
+                    b_actions=b_actions,
+                    b_cfm_losses=b_cfm_losses,
+                    b_cfm_loss_ts=b_cfm_loss_ts,
+                    b_cfm_loss_epsilons=b_cfm_loss_epsilons,
+                    b_cfm_value_invalid=b_cfm_value_invalid,
+                    b_obs_images=b_obs_images,
+                    b_obs_state=b_obs_state,
+                )
+                reference_norm = reference_gradient.norm().item()
+                if reference_norm <= 0 or not torch.isfinite(reference_gradient).all():
+                    raise RuntimeError("rank-advantage audit produced an invalid reference gradient")
+                control_cosine = torch.nn.functional.cosine_similarity(
+                    control_gradient.unsqueeze(0), reference_gradient.unsqueeze(0), dim=1
+                ).item()
+                candidate_cosine = torch.nn.functional.cosine_similarity(
+                    candidate_gradient.unsqueeze(0), reference_gradient.unsqueeze(0), dim=1
+                ).item()
+                gradient_batch_results.append(
+                    {
+                        "batch": audit_batch,
+                        "num_chunks": audit_batch_size,
+                        "reference_gradient_norm": reference_norm,
+                        "control_gradient_cosine_to_reference": control_cosine,
+                        "candidate_gradient_cosine_to_reference": candidate_cosine,
+                        "candidate_cosine_gain": candidate_cosine - control_cosine,
+                    }
+                )
+            actor_module.train()
+            if cfg.freeze_vision_encoder:
+                actor_module.model.vision_encoder.eval()
+            rank_advantage_result = {
+                "iteration": iteration,
+                "num_eligible_chunks": int(rank_indices.numel()),
+                "num_gradient_chunks_audited": required_chunks,
+                "control_candidate_spearman": order_spearman,
+                "candidate_weight_mean": float(all_candidate_weights.mean().item()),
+                "candidate_weight_std": float(
+                    all_candidate_weights.std(unbiased=False).item()
+                ),
+                "batches": gradient_batch_results,
+            }
+            rank_advantage_output_path = (
+                Path(cfg.rank_advantage_audit_output_json)
+                if cfg.rank_advantage_audit_output_json is not None
+                else run_dir / "rank_advantage_audit.json"
+            )
+            rank_advantage_output_path.parent.mkdir(parents=True, exist_ok=True)
+            rank_advantage_output_path.write_text(
+                json.dumps(rank_advantage_result, indent=2, sort_keys=True) + "\n"
+            )
+            logger.info(
+                "Rank-advantage audit: %s",
+                json.dumps(rank_advantage_result, sort_keys=True),
             )
 
         replay_audit_indices = None

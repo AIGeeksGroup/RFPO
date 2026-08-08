@@ -5,6 +5,29 @@ from __future__ import annotations
 import torch
 
 
+def centered_average_rank_scores(values: torch.Tensor) -> torch.Tensor:
+    """Map a finite vector to centered [-1, 1] average-rank scores."""
+    if values.ndim != 1 or values.numel() < 2:
+        raise ValueError("values must be a vector with at least two entries")
+    if not torch.isfinite(values).all():
+        raise ValueError("values must be finite")
+
+    order = torch.argsort(values, stable=True)
+    sorted_values = values[order]
+    ranks = torch.empty_like(values, dtype=torch.float64)
+    start = 0
+    while start < values.numel():
+        end = start + 1
+        while end < values.numel() and sorted_values[end] == sorted_values[start]:
+            end += 1
+        ranks[order[start:end]] = (start + end - 1) / 2.0
+        start = end
+    scores = 2.0 * ranks / (values.numel() - 1) - 1.0
+    scores = scores - scores.mean()
+    output_dtype = values.dtype if values.is_floating_point() else torch.float32
+    return scores.to(dtype=output_dtype)
+
+
 def discounted_returns_to_observed_terminal(
     rewards: torch.Tensor,
     terminals: torch.Tensor,
@@ -37,23 +60,8 @@ def spearman_rank_correlation(x: torch.Tensor, y: torch.Tensor) -> float:
     if x.ndim != 1 or y.ndim != 1 or x.numel() != y.numel() or x.numel() < 2:
         raise ValueError("x and y must be equal-length vectors with at least two values")
 
-    def average_ranks(values: torch.Tensor) -> torch.Tensor:
-        order = torch.argsort(values, stable=True)
-        sorted_values = values[order]
-        ranks = torch.empty_like(values, dtype=torch.float64)
-        start = 0
-        while start < values.numel():
-            end = start + 1
-            while end < values.numel() and sorted_values[end] == sorted_values[start]:
-                end += 1
-            ranks[order[start:end]] = (start + end - 1) / 2.0
-            start = end
-        return ranks
-
-    x_rank = average_ranks(x.detach().cpu())
-    y_rank = average_ranks(y.detach().cpu())
-    x_centered = x_rank - x_rank.mean()
-    y_centered = y_rank - y_rank.mean()
+    x_centered = centered_average_rank_scores(x.detach().cpu()).double()
+    y_centered = centered_average_rank_scores(y.detach().cpu()).double()
     denominator = x_centered.norm() * y_centered.norm()
     if denominator == 0:
         return float("nan")
