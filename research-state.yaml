@@ -184,6 +184,12 @@ hypotheses:
     motivation: "H21 found that official GAE already has 0.817 outcome Spearman correlation, while learned replacement advantages reverse ordering; a rank transform retains the useful signal and removes unreliable magnitude information."
     parent: H2
     priority: high
+  - id: H23
+    statement: "A fourfold lower actor learning rate preserves the initially aligned GAE gradient through ten FPO++ optimizer epochs."
+    status: active
+    motivation: "H21-H22 retain official GAE, while H18 shows severe parameter-induced gradient rotation after optimization; reducing step size targets the remaining failure mechanism directly."
+    parent: H2
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
