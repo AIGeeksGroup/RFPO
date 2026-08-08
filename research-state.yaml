@@ -228,9 +228,15 @@ hypotheses:
     priority: high
   - id: H28
     statement: "Conflict projection against a frozen BC velocity-field gradient preserves initial Can behavior while retaining most useful FPO++ surrogate improvement."
-    status: active
+    status: refuted
     motivation: "H18 and H23 show destructive gradient rotation that a smaller step does not fix; H25 shows post-hoc interpolation cannot recover an absent reward gain."
     parent: H18
+    priority: high
+  - id: H29
+    statement: "Conflict projection against the frozen zero-source action endpoint preserves deterministic Can behavior while retaining most useful FPO++ surrogate improvement."
+    status: active
+    motivation: "H28's generic velocity-field anchor removed 93-98% of BC drift but also 54-66% of surrogate gain; protecting only the benchmark-relevant endpoint may avoid irrelevant constraints."
+    parent: H28
     priority: high
 
 experiments:
@@ -801,9 +807,9 @@ experiments:
       episodes: 20
 
 outer_loop:
-  cycle: 15
-  last_direction: "Return to training-time method design after inference-only source averaging and feedback-frequency changes failed to improve Can reliably."
-  last_reflection: "Four-step execution reduced the locked screen from 14/20 to 12/20 despite more frequent observation feedback. The checkpoint appears coupled to its trained eight-action execution cadence; stop without an action-count sweep."
+  cycle: 16
+  last_direction: "Narrow behavior-preserving gradient projection from generic flow queries to the deterministic action endpoint used by the successful Can policy."
+  last_reflection: "H28 confirmed severe RL/BC gradient conflict and excellent drift protection, but full velocity-field projection retained only 34-46% of surrogate gain. The constraint is active but protects too broad a function."
 
 workspace:
   findings: "findings.md"
