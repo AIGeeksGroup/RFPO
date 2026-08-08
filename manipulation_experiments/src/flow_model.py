@@ -14,6 +14,8 @@ from lerobot.common.policies.pretrained import PreTrainedPolicy
 from lerobot.configs.types import FeatureType, PolicyFeature
 from torch import Tensor, nn
 
+from src.rollout_bookkeeping import apply_zero_sampling_mask
+
 from .flow_model_config import FlowMatchingConfig
 from .flow_net_mlp import FlowMatchingMLPModel
 from .flow_net_unet import FlowMatchingUnetModel
@@ -205,7 +207,13 @@ class FlowMatchingPolicy(PreTrainedPolicy):
         return torch.linspace(1.0, 0.0, self.config.sampling_steps + 1, device=device)
 
     @torch.no_grad
-    def select_action(self, batch: dict[str, Tensor], zero_sampling: bool = False, sde_sampling: bool = False) -> Tensor:
+    def select_action(
+        self,
+        batch: dict[str, Tensor],
+        zero_sampling: bool = False,
+        sde_sampling: bool = False,
+        zero_sampling_mask: Tensor | None = None,
+    ) -> Tensor:
         """Select actions for multiple environments with separate buffers.
         
         Args:
@@ -218,6 +226,14 @@ class FlowMatchingPolicy(PreTrainedPolicy):
         
         if self.num_envs is None and self.action_buffers is None:
             raise ValueError("Action buffers not initialized. Call init_action_buffers first.")
+        if zero_sampling_mask is not None:
+            if zero_sampling:
+                raise ValueError("zero_sampling and zero_sampling_mask cannot be used together")
+            if zero_sampling_mask.shape != (self.num_envs,):
+                raise ValueError(
+                    f"zero_sampling_mask must have shape ({self.num_envs},), "
+                    f"got {tuple(zero_sampling_mask.shape)}"
+                )
         
         # Check which environments need new action chunks
         envs_needing_actions = []
@@ -254,6 +270,11 @@ class FlowMatchingPolicy(PreTrainedPolicy):
                 sub_batch,
                 zero_sampling=zero_sampling,
                 sde_sampling=sde_sampling,
+                zero_sampling_mask=(
+                    zero_sampling_mask[envs_needing_actions]
+                    if zero_sampling_mask is not None
+                    else None
+                ),
                 previous_actions=previous_actions,
                 has_previous_actions=has_previous_actions,
             )
@@ -291,6 +312,7 @@ class FlowMatchingPolicy(PreTrainedPolicy):
         previous_actions: Tensor | None = None,
         has_previous_actions: Tensor | None = None,
         source_noise: Tensor | None = None,
+        zero_sampling_mask: Tensor | None = None,
     ) -> Tensor:
         """Predict a chunk of actions using flow matching with Euler integration."""
         self.eval()
@@ -305,8 +327,8 @@ class FlowMatchingPolicy(PreTrainedPolicy):
         B = obs_cond.shape[0]
         expected_source_shape = (B, self.config.horizon, self.model.action_dim)
         if source_noise is not None:
-            if zero_sampling:
-                raise ValueError("source_noise and zero_sampling cannot be used together")
+            if zero_sampling or zero_sampling_mask is not None:
+                raise ValueError("source_noise cannot be combined with zero sampling options")
             if source_noise.shape != expected_source_shape:
                 raise ValueError(
                     f"source_noise must have shape {expected_source_shape}, got {tuple(source_noise.shape)}"
@@ -316,6 +338,9 @@ class FlowMatchingPolicy(PreTrainedPolicy):
             x_t = torch.zeros((B, self.config.horizon, self.model.action_dim), device=obs_cond.device)
         else:
             x_t = torch.randn((B, self.config.horizon, self.model.action_dim), device=obs_cond.device)
+
+        if zero_sampling_mask is not None:
+            x_t = apply_zero_sampling_mask(x_t, zero_sampling_mask)
 
         if self.config.source_prior_mode == "previous_action":
             if previous_actions is None or has_previous_actions is None:

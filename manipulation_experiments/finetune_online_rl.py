@@ -32,7 +32,7 @@ from lerobot.common.policies.pretrained import PreTrainedPolicy
 from src.dexmg_env import VectorizedEnvWrapper, create_vectorized_env
 from src.flow_model import FlowMatchingPolicy
 from src.flow_model_config import FlowMatchingConfig
-from src.rollout_bookkeeping import prepare_invalid_step_mask
+from src.rollout_bookkeeping import build_rollout_zero_sampling_mask, prepare_invalid_step_mask
 
 # ---- Multiprocessing start method (CUDA compat) ------------------------------
 try:
@@ -98,6 +98,7 @@ class FlowPPOConfig:
     clamp_logratio: Optional[float] = None
     cfm_loss_weight_from_t: str = "constant"
     reset_cfm_invalid_mask_each_iteration: bool = False
+    rollout_zero_fraction: float = 0.0
     exploration_noise_std: Optional[float] = None
     zero_sampling: bool = True  # deprecated. now we evaluate with both zero and non zero sampling
     save_non_zero_sampling_video: bool = False
@@ -810,6 +811,7 @@ def main(cfg: FlowPPOConfig):
     
     if is_ddp:
         num_envs_per_process = cfg.num_envs // world_size + (1 if rank < (cfg.num_envs % world_size) else 0)
+        global_env_offset = rank * (cfg.num_envs // world_size) + min(rank, cfg.num_envs % world_size)
         batch_size = cfg.data_collection_steps * cfg.num_envs // n_action_steps
         local_batch_size = cfg.data_collection_steps * num_envs_per_process // n_action_steps
         minibatch_size = max(local_batch_size // cfg.num_minibatches, 1)
@@ -817,6 +819,7 @@ def main(cfg: FlowPPOConfig):
                     f"Local batch: {local_batch_size} | Minibatch: {minibatch_size}")
     else:
         num_envs_per_process = cfg.num_envs
+        global_env_offset = 0
         batch_size = cfg.data_collection_steps * cfg.num_envs // n_action_steps
         local_batch_size = batch_size
         minibatch_size = max(batch_size // cfg.num_minibatches, 1)
@@ -839,6 +842,18 @@ def main(cfg: FlowPPOConfig):
     )
     # Init action buffers
     actor_module.init_action_buffers(num_envs_per_process)
+    rollout_zero_sampling_mask = build_rollout_zero_sampling_mask(
+        num_envs_per_process,
+        cfg.rollout_zero_fraction,
+        global_num_envs=cfg.num_envs,
+        global_offset=global_env_offset,
+        device=device,
+    )
+    zero_rollout_env_ids = set(torch.where(rollout_zero_sampling_mask.cpu())[0].tolist())
+    logger.info(
+        f"[Rank {rank}] Mixed-source rollout: {len(zero_rollout_env_ids)} zero-source and "
+        f"{num_envs_per_process - len(zero_rollout_env_ids)} Gaussian-source environments"
+    )
     logger.info(colored(f"[Rank {rank}] Initialized action buffers for {num_envs_per_process} environments", "green"))
 
     # Obs/action dims
@@ -939,7 +954,11 @@ def main(cfg: FlowPPOConfig):
 
     def get_action_and_value(actor_module, critic, obs, sde_sampling: bool = False) -> Tuple[torch.Tensor, torch.Tensor]:
         obs_copy = copy.deepcopy(obs)
-        action, mdp_x_t_path = actor_module.select_action(obs, sde_sampling=sde_sampling)
+        action, mdp_x_t_path = actor_module.select_action(
+            obs,
+            sde_sampling=sde_sampling,
+            zero_sampling_mask=rollout_zero_sampling_mask,
+        )
         obs_copy = actor_module.normalize_inputs(obs_copy)
         obs_cond = actor_module.model.encode_observations(obs_copy)
         value = critic(obs_cond)
@@ -966,6 +985,10 @@ def main(cfg: FlowPPOConfig):
 
         done_episodes = 0
         successes = 0
+        zero_done_episodes = 0
+        zero_successes = 0
+        random_done_episodes = 0
+        random_successes = 0
         step = 0
         iteration_start_time = time.time()
 
@@ -1007,7 +1030,17 @@ def main(cfg: FlowPPOConfig):
                     if any(next_done):
                         done_episodes += next_done.sum().item()
                         successes += reward[torch.where(next_done)[0]].sum().item()
-                        actor_module.reset(env_ids=torch.where(next_done)[0])
+                        done_env_ids = torch.where(next_done)[0]
+                        for env_idx_tensor in done_env_ids:
+                            env_idx = int(env_idx_tensor.item())
+                            success = int(reward[env_idx].item() == 1.0)
+                            if env_idx in zero_rollout_env_ids:
+                                zero_done_episodes += 1
+                                zero_successes += success
+                            else:
+                                random_done_episodes += 1
+                                random_successes += success
+                        actor_module.reset(env_ids=done_env_ids)
 
                     if step > 0 and step % 100 == 0:
                         sps_local = step * num_envs_per_process / (time.time() - iteration_start_time + 1e-9)
@@ -1067,16 +1100,53 @@ def main(cfg: FlowPPOConfig):
 
         # Optionally reduce SR stats to rank 0 (not strictly necessary for training)
         if is_ddp:
-            t = torch.tensor([successes, done_episodes], dtype=torch.float32, device=device)
+            t = torch.tensor(
+                [
+                    successes,
+                    done_episodes,
+                    zero_successes,
+                    zero_done_episodes,
+                    random_successes,
+                    random_done_episodes,
+                ],
+                dtype=torch.float32,
+                device=device,
+            )
             dist.all_reduce(t, op=dist.ReduceOp.SUM)
-            successes_global, episodes_global = t.tolist()
+            (
+                successes_global,
+                episodes_global,
+                zero_successes_global,
+                zero_episodes_global,
+                random_successes_global,
+                random_episodes_global,
+            ) = t.tolist()
             success_rate_global = (successes_global / episodes_global) if episodes_global > 0 else 0.0
         else:
             success_rate_global = success_rate_local
+            successes_global = successes
+            episodes_global = done_episodes
+            zero_successes_global = zero_successes
+            zero_episodes_global = zero_done_episodes
+            random_successes_global = random_successes
+            random_episodes_global = random_done_episodes
+
+        zero_success_rate_global = (
+            zero_successes_global / zero_episodes_global if zero_episodes_global > 0 else 0.0
+        )
+        random_success_rate_global = (
+            random_successes_global / random_episodes_global if random_episodes_global > 0 else 0.0
+        )
 
         if rank == 0:
             logger.info(
                 f"[Rank {rank}] SR: {success_rate_global:.2%} from {int(episodes_global)} episodes | SPS_local(rank0 est): {sps_local_total:.2f}"
+            )
+            logger.info(
+                f"[Rank {rank}] Source SR: zero={zero_success_rate_global:.2%} "
+                f"({int(zero_successes_global)}/{int(zero_episodes_global)}) | "
+                f"random={random_success_rate_global:.2%} "
+                f"({int(random_successes_global)}/{int(random_episodes_global)})"
             )
 
         valid_cfm_steps = (cfm_value_invalid_stored == 0).sum().to(device=device, dtype=torch.float32)
@@ -1462,6 +1532,8 @@ def main(cfg: FlowPPOConfig):
                     "training/critic_grad_norm_after_clip": float(critic_grad_norm_after),
                     "charts/rewards": b_rewards.sum().item(),
                     "charts/success_rate": success_rate_global,
+                    "charts/success_rate_zero_source": zero_success_rate_global,
+                    "charts/success_rate_random_source": random_success_rate_global,
                     "charts/valid_cfm_action_fraction": valid_cfm_action_fraction,
                     "charts/action_norm_mean": action_norms.mean(),
                     "charts/action_norm_std": action_norms.std(),
@@ -1648,4 +1720,3 @@ def main(cfg: FlowPPOConfig):
 if __name__ == "__main__":
     args_cli = tyro.cli(FlowPPOConfig, config=(tyro.conf.FlagConversionOff,))
     main(args_cli)
-
