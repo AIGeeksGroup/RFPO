@@ -460,7 +460,7 @@ hypotheses:
     priority: high
   - id: H58
     statement: "Substituting the zero-source gripper output into an otherwise unchanged Gaussian-source arm chunk improves released Can random-source success."
-    status: proposed
+    status: refuted
     motivation: "H57's two no-loss rescues do not reveal whether zero gripper latent helped through the gripper decision or coupled arm changes; output-coordinate substitution isolates that mechanism exactly."
     parent: null
     priority: high
@@ -1750,11 +1750,28 @@ experiments:
       validity_passed: true
       passed: false
       renderer: osmesa
+    - run: can_h58_hybrid_gripper_audit_seed20261031
+      metric: random_source_success_rate
+      value: 0.05
+      successes: 1
+      episodes: 20
+      control_successes: 1
+      success_gain: 0
+      common_source_key_count: 750
+      hybrid_record_count: 760
+      active_hybrid_record_count: 760
+      arm_source_hashes_exact: true
+      arm_output_bitwise_exact: true
+      gripper_output_bitwise_exact: true
+      initial_observation_hashes_exact: true
+      validity_passed: true
+      passed: false
+      renderer: osmesa
 
 outer_loop:
-  cycle: 43
-  last_direction: "Test H58 by preserving Gaussian-source arm outputs bitwise and substituting only the same-observation zero-source gripper trajectory."
-  last_reflection: "H57's sub-threshold rescues may arise from either the gripper decision or coupled arm-output changes. H58 is the minimal output-level causal isolation and reuses H57's exact control, seeds, and stateless source keys."
+  cycle: 44
+  last_direction: "Close gripper-specific output interventions after H58 swaps the sole successful seed but leaves net random-source success unchanged."
+  last_reflection: "H58 preserved Gaussian arm outputs and substituted deterministic gripper outputs exactly at all 760 replans, yet tied control 1/20 by trading one success for another. Candidate quality, not fixed gripper post-processing, is the next intervention boundary."
 
 workspace:
   findings: "findings.md"
