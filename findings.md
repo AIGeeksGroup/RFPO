@@ -541,3 +541,14 @@ symmetry to justify a paired-gradient audit or training run.
 ## Optimization Trajectory
 
 Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, advantage-sign-stratified minibatches, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, rank-based GAE weighting, terminal-sign filtering, fixed and KL-adaptive lower actor learning rates, full-batch gradient accumulation, exact AdamW extragradient, BC/FPO++ midpoint interpolation, within-trajectory SWA, explicit Gaussian-bridge distillation, antithetic endpoint averaging, curvature-ranked best-of-two, full-horizon Square collection, shorter receding-horizon execution, temporally correlated Gaussian inference, ACT-inspired overlap ensembling, BCP-style adaptive continuation, fixed binary gripper projection, gripper-latent source factorization, deterministic gripper substitution, advantage-sign and endpoint-anchor gradient surgery, temporal per-timestep clipping, coordinate-wise median and geometric-median gradient aggregation, PPO-RB ratio rollback, equal-NFE midpoint sampling, checkpoint-native Square execution horizon restoration, rollout-local Adam, output-head-only surgical fine-tuning, fixed-subspace mirrored parameter ES, replay-exact sparse binary vine ranking, exact-scene group-relative episodic advantages, and deterministic-reference episodic advantages are closed as reward-improvement routes. Reflow and midpoint retain geometry/sampling-fidelity value only. The next candidate must improve reward without trading away Gaussian-source exploration or collapsing useful surrogate progress.
+
+## Publication Status
+
+The completed package supports an empirical workshop or short-paper submission. The official Go2
+baseline is reproduced; symmetric source pairing recovers the random-source deficit at equal total
+NFE across four independently trained policies; equal-IID controls isolate a symmetry-specific Go2
+effect; mechanism and high-batch throughput audits explain the result; and Spot plus mirrored-rollout
+failures bound the claim. The manuscript, committed artifacts, and analysis CLIs form a reproducible
+simulation-only record. A main-conference full-paper claim remains unsupported without broader
+independent-task attribution, superiority to the strongest deterministic control, or real-robot and
+end-to-end latency evidence.

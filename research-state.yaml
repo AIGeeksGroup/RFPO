@@ -1,7 +1,7 @@
 project:
   title: "Reproducing and Improving FPO++ for Robot Control"
   question: "Can the official FPO++ benchmark results be reproduced, and can straighter conditional policy flows improve return or sampling efficiency?"
-  status: active
+  status: complete
   started: "2026-08-08"
   domain: "robot reinforcement learning and flow policies"
 
@@ -2327,7 +2327,17 @@ experiments:
 outer_loop:
   cycle: 67
   last_direction: "Conclude the method-search stage and prepare a workshop/short-paper submission centered on stochastic-source deficit recovery, affine antisymmetry, strong deterministic controls, and cross-task limits."
-  last_reflection: "H77 shows that H75's immediate action antisymmetry does not survive as a reliable closed-loop return control variate: variance ratio 0.882 with bootstrap [0.414, 1.475]. Together with H74, this closes both action-averaging and training-control-variate routes. The evidence supports a rigorous empirical analysis paper, but not a main-conference claim of a universally superior deployment method."
+  last_reflection: "The final audit closes the project at workshop/short-paper submission level. The official Go2 baseline is reproduced, all six central analyses regenerate byte-for-byte, the H69 archival path preserves strict default checkpoint validation, and the eight-page anonymous draft passes claim, test, build, font, color, and grayscale checks. H74 and H77 still rule out a main-conference claim of a universally superior deployment or training method."
+
+publication:
+  status: "workshop_or_short_paper_ready"
+  manuscript: "paper/iclr2026/main.pdf"
+  scope: "simulation-only empirical analysis"
+  central_claim: "Symmetric source pairing consistently recovers the Go2 stochastic-source inference deficit at equal compute, but does not beat deterministic deployment and lacks symmetry-specific cross-task confirmation."
+  remaining_for_full_main_conference:
+    - "independent-policy evidence on additional official tasks"
+    - "a task where symmetry beats both IID averaging and the strongest deterministic control"
+    - "end-to-end or real-robot latency and safety validation"
 
 workspace:
   findings: "findings.md"
