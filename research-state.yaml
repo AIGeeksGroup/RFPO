@@ -496,7 +496,7 @@ hypotheses:
     priority: high
   - id: H62
     statement: "Replay-exact Square vine rollouts yield reproducible local action-chunk return rankings across independent continuation-noise blocks."
-    status: planned
+    status: refuted
     motivation: "Existing critic and trajectory-level estimators are unreliable; common-state branch returns may isolate local sparse-reward action credit without learning a Q function."
     parent: H2
     priority: high
@@ -1886,11 +1886,31 @@ experiments:
       validity_passed: true
       passed: false
       renderer: osmesa
+    - run: square_h62_replay_exact_vines_audit_osmesa_seed20261070
+      metric: cross_block_candidate_ranking_reproducibility
+      value: -0.4377975179
+      root_records: 8
+      vine_states: 23
+      suffix_rollouts: 184
+      replay_exact_count: 184
+      candidate_source_mean: 0.0004691300
+      candidate_source_std: 0.9924978122
+      median_candidate_normalized_rms: 0.2778572981
+      nonzero_states_block_a: 2
+      nonzero_states_block_b: 3
+      common_nonzero_states: 1
+      common_sign_agreement: 0.0
+      top_a_heldout_b: 0.1666666667
+      top_b_heldout_a: -0.0833333333
+      policy_parameters_bitwise_unchanged: true
+      validity_passed: true
+      passed: false
+      renderer: osmesa
 
 outer_loop:
-  cycle: 48
-  last_direction: "Audit replay-exact branch returns as a critic-free local credit signal before implementing any new actor update."
-  last_reflection: "Direct VINE is a value-gradient twin-Q method rather than value-free credit assignment and is too coupled for a clean pilot. Polychromic vine sampling suggests a smaller prerequisite: test whether multiple continuations from exact Square prefixes rank Gaussian flow actions reproducibly across future-noise blocks."
+  cycle: 49
+  last_direction: "Close replay-exact sparse branch returns before actor integration because their local rankings do not reproduce across continuation-noise blocks."
+  last_reflection: "Exact prefix replay works and Gaussian candidates are active, but terminal success is tied at most Square vine states; the few nonzero differences anticorrelate across independent continuations. A future candidate must supply denser reward-relevant local evidence rather than spend more rollout budget on the same binary branch-return estimator."
 
 workspace:
   findings: "findings.md"

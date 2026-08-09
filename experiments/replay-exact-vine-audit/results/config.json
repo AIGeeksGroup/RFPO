@@ -1,0 +1,34 @@
+{
+  "action_steps": 16,
+  "branch_steps": [
+    80,
+    160,
+    240
+  ],
+  "camera_size": 84,
+  "checkpoint_name": "trc7rbt0_step_110000",
+  "continuation_replicas": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "device": "cuda",
+  "horizon_steps": 400,
+  "local_checkpoint_path": "/home/haoyu/workspace/code/fpo-control/manipulation_experiments/downloaded_checkpoints/trc7rbt0_step_110000",
+  "mode": "audit",
+  "num_candidates": 2,
+  "output_dir": "/home/haoyu/workspace/outputs/fpo-control/results/square_h62_replay_exact_vines_audit_osmesa_seed20261070",
+  "renderer_claim": "OSMesa mechanism audit; not an official EGL benchmark result",
+  "root_seeds": [
+    20261070,
+    20261071,
+    20261072,
+    20261073,
+    20261074,
+    20261075,
+    20261076,
+    20261077
+  ],
+  "sampling_steps": 10
+}
