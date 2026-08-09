@@ -368,6 +368,14 @@ reduced integration depth provides the simpler best-deployment route; symmetric 
 supported value is recovery of the official Gaussian-random deficit at equal total NFE, not lower
 latency or higher return than deterministic inference.
 
+Independent official training seeds confirm that this source-symmetry effect is not specific to
+one learned policy. Across seeds 43, 44, and 45, antithetic-minus-IID gains were +0.357, +0.574,
+and +0.551; their stratified estimate was +0.494 with bootstrap 95% [0.353, 0.642] at equal 128
+NFE. Relative to one random source, the pooled gain was +0.920 [0.771, 1.075]. Antithetic remained
+below zero in all three point estimates and pooled to -0.085 [-0.212, 0.041]. The robust finding is
+therefore cancellation-specific recovery of central-policy return across independent actors, not
+a better deterministic action rule.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -380,6 +388,7 @@ latency or higher return than deterministic inference.
 - Across one training trajectory, antithetic pairing beats IID pairing from checkpoints 500 through 1499, while its deficit to zero collapses as the policy matures.
 - H70 eliminates the twofold NFE penalty on seed 42: two 32-step symmetric solves match the 64-step symmetric solve and recover the roughly one-point random-source deficit at the same total NFE as the baseline.
 - H71 shows that fusing the two half-depth solves is 19.36% faster than sequential pairing and 11.25% faster than random64 at batch 4,096 on H200, but H72 shows this is not the best deployment option because zero32 preserves return with half as many NFE.
+- H69 establishes independent-model generality: antithetic pairing beats equal-compute IID averaging in all three new official Go2 seeds and beats one random endpoint by roughly 0.89-0.97 return, while remaining tied with or below zero.
 - WarmPrior (arXiv:2605.13959) offers a more direct reward-improvement hypothesis for chunked manipulation: center the flow source on recent actions and retain residual Gaussian noise for exploration.
 - WarmPrior cannot be grafted onto a Gaussian-trained FPO checkpoint at inference time; training-time source adaptation is necessary on Can.
 - A short 100-update training-time adaptation is also insufficient: it preserves neither deterministic success nor random exploration.

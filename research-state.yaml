@@ -550,7 +550,7 @@ hypotheses:
     priority: high
   - id: H69
     statement: "Antithetic source pairing beats an equal-NFE IID endpoint pair across three independently trained official Go2 policies."
-    status: active
+    status: supported
     motivation: "Same-trajectory checkpoint consistency cannot establish model-seed generality; three fixed final checkpoints provide the minimum publication-stage independent confirmation."
     parent: H67
     priority: high
@@ -2177,11 +2177,34 @@ experiments:
       initial_observation_hashes_match: true
       validity_passed: true
       passed: false
+    - run: go2_h69_antithetic_independent_seeds_43_44_45
+      metric: pooled_equal_nfe_antithetic_minus_iid_paired_return
+      value: 0.4942459401
+      training_seeds: [43, 44, 45]
+      training_environments: 4096
+      training_iterations: 1500
+      episodes_per_method_seed: 512
+      total_evaluation_episodes: 6144
+      seed_43_antithetic_minus_iid: 0.3569997717
+      seed_44_antithetic_minus_iid: 0.5743370012
+      seed_45_antithetic_minus_iid: 0.5514010475
+      pooled_antithetic_minus_iid_bootstrap_95: [0.3530991812, 0.6422453364]
+      pooled_antithetic_minus_random: 0.9203199299
+      pooled_antithetic_minus_random_bootstrap_95: [0.7713196357, 1.0746264983]
+      pooled_antithetic_minus_zero: -0.0847488379
+      pooled_antithetic_minus_zero_bootstrap_95: [-0.2119520831, 0.0405868729]
+      distinct_final_checkpoint_hashes: true
+      initial_observation_hashes_match: true
+      primary_source_stream_hashes_match: true
+      equal_pair_nfe: true
+      passed: true
+      deployment_passed: false
+      renderer: egl
 
 outer_loop:
-  cycle: 61
-  last_direction: "Finish H69 independent-policy attribution, then confirm the H70 equal-total-NFE result across those policies before expanding to other official locomotion tasks."
-  last_reflection: "H72 supplies the missing strong deployment baseline: zero32 scored 41.5882 and statistically matched both zero64 and antithetic32, so antithetic projection is not the best low-latency deployment on seed 42. H71 remains a valid batching optimization, while H70 must be framed specifically as equal-NFE recovery of the official stochastic-source deficit. H69 independent-policy generality now determines whether that narrower benchmark contribution survives."
+  cycle: 62
+  last_direction: "Confirm H70 equal-total-NFE stochastic-source recovery across the three fixed H69 checkpoints, retaining zero32 as the strongest deployment control."
+  last_reflection: "H69 passed across three independently trained official Go2 policies. Antithetic pairing beat equal-NFE IID averaging in every seed and pooled to +0.4942 [0.3531, 0.6422]; it beat one random source by +0.9203 [0.7713, 1.0746]. Antithetic remained statistically below or tied with zero, so the contribution is stable stochastic-source deficit recovery rather than a new best deterministic deployment."
 
 workspace:
   findings: "findings.md"

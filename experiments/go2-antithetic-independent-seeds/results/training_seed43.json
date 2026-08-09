@@ -1,0 +1,12 @@
+{
+  "hypothesis": "H69",
+  "training_seed": 43,
+  "num_envs": 4096,
+  "iterations": 1500,
+  "post_training_checkpoint_sweep": false,
+  "run_dir": "/mnt/data/users/haoyu/workspace/code/fpo-control/isaaclab_experiments/logs/isaaclab_fpo/unitree_go2_flat_flow/2026-08-09_20-27-42_go2_h69_seed43",
+  "final_checkpoint": "/mnt/data/users/haoyu/workspace/code/fpo-control/isaaclab_experiments/logs/isaaclab_fpo/unitree_go2_flat_flow/2026-08-09_20-27-42_go2_h69_seed43/model_1499.pt",
+  "final_checkpoint_sha256": "b469fa8b52fa2248236d281ebd4b18b61f01583535ec6d1eeb1b86941e92e4d5",
+  "final_checkpoint_bytes": 17097570,
+  "passed": true
+}
