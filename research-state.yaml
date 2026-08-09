@@ -596,6 +596,12 @@ hypotheses:
     motivation: "Episode-level bootstrap intervals establish within-policy effects but do not alone justify cross-training-seed generalization; a four-policy summary makes the statistical unit explicit."
     parent: H73
     priority: high
+  - id: H77
+    statement: "Matched closed-loop Go2 trajectories driven by z/-z have lower source-induced pair-return variance than trajectories driven by two IID flow sources."
+    status: active
+    motivation: "H75's immediate action antisymmetry could reduce training variance without collapsing exploration, but only if the covariance survives closed-loop feedback; a fixed-policy return audit can falsify this before any FPO++ training change."
+    parent: H75
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -2300,7 +2306,7 @@ experiments:
 
 outer_loop:
   cycle: 66
-  last_direction: "Stop Spot/H1/G1 expansion after H74 fails the equal-IID attribution gate; reassess whether a distinct control contribution can clear a small mechanism screen before any more official training."
+  last_direction: "Test H77 as a small fixed-policy prerequisite for using flow antisymmetry as a training-time closed-loop control variate; do not train unless mirrored return variance beats IID pairing."
   last_reflection: "H74 transfers recovery over the official random source to Spot (+13.78 [5.58, 22.37]) but not the antithetic-specific advantage over an equal-NFE IID pair (+2.67 [-5.72, 10.66]); antithetic32 is also worse than zero32 (-3.92 [-8.60, -0.42]). The current evidence is a strong Go2 result with partial cross-task transfer, not yet a main-conference method claim."
 
 workspace:
