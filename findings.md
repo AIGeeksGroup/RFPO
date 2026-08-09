@@ -270,6 +270,13 @@ midpoint-5 improved zero-source success from 14/20 to 16/20 but reduced Gaussian
 non-degradation gate. A closer approximation to the high-NFE flow endpoint is therefore not
 intrinsically a better closed-loop action for the released policy.
 
+Dense-reward Go2 confirmed the same separation more precisely. On 256 formal H200 observations,
+midpoint-32 at exactly 64 NFE reduced zero/random endpoint MSE against Euler-256 to 12.52%/13.68% of
+Euler-64 while retaining random diversity within 1.33%. In the paired 50-episode-per-mode screen,
+zero return changed by only +0.0049 and random return fell by 0.0627; average gain was -0.0289 and the
+pooled paired bootstrap interval was [-0.0400, -0.0187]. Higher endpoint fidelity therefore does not
+translate into reward even when sparse binary success is removed as a confounder.
+
 Uniformly averaging all four actor-update checkpoints from the H43 Square control trajectory also
 failed. The finite 35-tensor average improved zero-source success from 7/20 to 8/20 but reduced
 Gaussian-source success from 5/20 to 3/20, leaving pooled success down from 12/40 to 11/40. Together
@@ -353,6 +360,7 @@ cannot be replaced by this cheap critic substitution.
 - Robust microbatch aggregation is closed at this scale: coordinate median damages useful cross-coordinate structure, while full-vector GMOM stays near the ordinary mean and slightly worsens outcome alignment in both replicas.
 - A second-order sampler can exploit the existing flow field without retraining: midpoint-5 nearly matches the Euler-64 endpoint at the same NFE as Euler-10 and preserves Gaussian-source diversity. Reward transfer must still be established independently.
 - Higher endpoint fidelity is not a sufficient reward objective: midpoint-5's deterministic +2/20 was exactly offset by a Gaussian-source -2/20 in balanced Can evaluation.
+- Dense-reward Go2 closes the remaining endpoint-fidelity ambiguity: equal-NFE midpoint reduced integration error by about 86-87% but left zero return unchanged and caused a small paired random-return loss. Do not tune solver order, step count, or training around numerical fidelity alone.
 - The released `x1_pred` KL-adaptive LR controller does preserve more active ratios, but in manipulation it immediately collapses to the transferred lower LR bound, retains only 27-32% of control surrogate progress, and fails to improve held-out direction consistently. Adaptive step-size reduction is closed alongside fixed low LR.
 - Balanced Square evaluation gives both zero and random inference meaningful success and headroom (45% and 35%), making it a better short reward screen than sparse step-1000 or saturated step-6000 Can.
 - Zero-endpoint PCGrad repeats the same sub-threshold pattern across Can and Square: it preserves zero-source success and adds only one random-source success in each balanced 20-episode screen. Endpoint conflict protection is therefore closed as a reward-improvement route without confirmation or tuning.

@@ -1,0 +1,40 @@
+{
+  "control": "/mnt/data/users/haoyu/workspace/outputs/fpo-control/results/go2_h60_equal_nfe_midpoint/control.json",
+  "candidate": "/mnt/data/users/haoyu/workspace/outputs/fpo-control/results/go2_h60_equal_nfe_midpoint/candidate.json",
+  "bootstrap_seed": 20261062,
+  "bootstrap_samples": 100000,
+  "modes": {
+    "random": {
+      "control_mean": 39.536764507293704,
+      "candidate_mean": 39.47402758598328,
+      "paired_mean_difference": -0.0627369213104248,
+      "paired_sem": 0.007520956391789329,
+      "paired_bootstrap_95": [
+        -0.07855417108535766,
+        -0.04936651992797852
+      ]
+    },
+    "zero": {
+      "control_mean": 41.11486423492432,
+      "candidate_mean": 41.11979518890381,
+      "paired_mean_difference": 0.004930953979492187,
+      "paired_sem": 0.004279289602131767,
+      "paired_bootstrap_95": [
+        -0.003164985656738281,
+        0.013535848617553711
+      ]
+    }
+  },
+  "average_mode_gain": -0.028902983665466307,
+  "pooled_paired_bootstrap_95": [
+    -0.04003971350193023,
+    -0.018664691329002385
+  ],
+  "gates": {
+    "zero_nonnegative": true,
+    "random_nonnegative": false,
+    "average_mode_gain_at_least_0_5": false,
+    "pooled_lower_bound_above_minus_0_25": true
+  },
+  "passed": false
+}

@@ -472,7 +472,7 @@ hypotheses:
     priority: high
   - id: H60
     statement: "At equal 64 velocity-network evaluations, midpoint integration improves the reproduced final Go2 checkpoint's zero- and random-source returns over official Euler integration."
-    status: active
+    status: refuted
     motivation: "Rectified-flow geometry and equal-NFE midpoint accuracy are supported, but their Can reward tests were confounded by sparse binary reward and a zero/random tradeoff; Go2 provides dense reward and needs no MuJoCo EGL renderer."
     parent: H1
     priority: high
@@ -491,7 +491,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 194
+  total_runs: 197
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -1802,6 +1802,34 @@ experiments:
       validity_passed: true
       passed: false
       renderer: osmesa
+    - run: go2_h60_equal_nfe_midpoint_geometry_seed20261060
+      metric: midpoint_to_euler_endpoint_mse_ratio
+      value: 0.1310016017
+      num_observations: 256
+      zero_mse_ratio: 0.1251812472
+      random_mse_ratio: 0.1368219561
+      random_std_ratio: 1.0132688166
+      random_pairwise_distance_ratio: 1.0130721666
+      control_nfe: 64
+      candidate_nfe: 64
+      validity_passed: true
+      passed: true
+      renderer: egl
+    - run: go2_h60_equal_nfe_midpoint_reward_seed20261061
+      metric: average_mode_return_gain
+      value: -0.0289029837
+      episodes_per_mode: 50
+      control_zero_mean: 41.1148642349
+      candidate_zero_mean: 41.1197951889
+      zero_paired_gain: 0.0049309540
+      control_random_mean: 39.5367645073
+      candidate_random_mean: 39.4740275860
+      random_paired_gain: -0.0627369213
+      pooled_paired_bootstrap_95: [-0.0400397135, -0.0186646913]
+      actions_finite: true
+      validity_passed: true
+      passed: false
+      renderer: egl
 
 outer_loop:
   cycle: 46

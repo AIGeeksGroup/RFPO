@@ -1,0 +1,51 @@
+{
+  "checkpoint": "/mnt/data/users/haoyu/workspace/code/fpo-control/isaaclab_experiments/logs/isaaclab_fpo/unitree_go2_flat_flow/2026-08-08_16-24-22_go2_official_seed42_20260808/model_1499.pt",
+  "task": "Isaac-Velocity-Flat-Unitree-Go2-v0",
+  "seed": 20261060,
+  "num_observations": 256,
+  "rollout_steps": 8,
+  "results": {
+    "zero": {
+      "control_mse": 1.83438476142328e-06,
+      "candidate_mse": 2.2963057233482687e-07,
+      "mse_ratio": 0.12518124723008434,
+      "control_nfe": 64,
+      "candidate_nfe": 64,
+      "reference_nfe": 256,
+      "finite": true
+    },
+    "random": {
+      "control_mse": 1.2562336451082956e-05,
+      "candidate_mse": 1.718803446237871e-06,
+      "mse_ratio": 0.1368219560852232,
+      "control_nfe": 64,
+      "candidate_nfe": 64,
+      "reference_nfe": 256,
+      "finite": true,
+      "control_diversity": {
+        "mean_element_std": 0.32536616921424866,
+        "mean_pairwise_distance": 1.5771775245666504
+      },
+      "candidate_diversity": {
+        "mean_element_std": 0.329683393239975,
+        "mean_pairwise_distance": 1.5977946519851685
+      },
+      "diversity_ratios": {
+        "mean_element_std": 1.0132688165956292,
+        "mean_pairwise_distance": 1.0130721666377935
+      }
+    }
+  },
+  "gates": {
+    "zero_finite": true,
+    "random_finite": true,
+    "zero_mse_ratio_at_most_0_25": true,
+    "random_mse_ratio_at_most_0_25": true,
+    "control_nfe_exact": true,
+    "candidate_nfe_exact": true,
+    "reference_nfe_exact": true,
+    "std_ratio_in_range": true,
+    "pairwise_ratio_in_range": true
+  },
+  "passed": true
+}
