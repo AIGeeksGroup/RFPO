@@ -36,6 +36,9 @@ class ActorCritic(nn.Module):
         self.mlp_output_scale = cfg.actor_mlp_output_scale
         self.cfm_loss_t_inverse_cdf_beta = cfg.cfm_loss_t_inverse_cdf_beta
         self.sampling_steps = cfg.sampling_steps
+        self.integration_method = cfg.integration_method
+        if self.integration_method not in {"euler", "midpoint"}:
+            raise ValueError(f"Unknown integration method: {self.integration_method}")
         self.cfm_loss_reduction = cfg.cfm_loss_reduction
 
         # Inference parameters
@@ -113,6 +116,9 @@ class ActorCritic(nn.Module):
         self._compiled_integrate_flow = torch.compile(
             self._integrate_flow, mode="reduce-overhead"
         )
+        self._compiled_integrate_flow_midpoint = torch.compile(
+            self._integrate_flow_midpoint, mode="reduce-overhead"
+        )
 
     def reset(self, dones=None):
         pass
@@ -139,9 +145,8 @@ class ActorCritic(nn.Module):
         t_next = full_t_path[1:]
         dt = t_next - t_current
 
-        # Use compiled integration loop for CUDA graph replay speedup
-        x_t = self._compiled_integrate_flow(
-            observations, x_t, t_current, dt, flow_steps
+        x_t = self._integrate_selected_flow(
+            observations, x_t, t_current, dt, flow_steps, self.integration_method
         )
 
         # Scale actions
@@ -268,6 +273,63 @@ class ActorCritic(nn.Module):
 
         return x_t
 
+    def _integrate_flow_midpoint(
+        self,
+        observations: torch.Tensor,
+        x_t: torch.Tensor,
+        t_current: torch.Tensor,
+        dt: torch.Tensor,
+        flow_steps: int,
+    ) -> torch.Tensor:
+        """Integrate with the explicit midpoint method using two actor calls per step."""
+        batch_size = observations.shape[0]
+        half_dim = self.timestep_embed_dim // 2
+        freqs = 2 ** torch.arange(
+            half_dim, device=observations.device, dtype=observations.dtype
+        )
+
+        for i in range(flow_steps):
+            t_val = t_current[i].reshape(1, 1)
+            scaled_t = t_val * freqs
+            embedded_t = torch.cat([torch.cos(scaled_t), torch.sin(scaled_t)], dim=-1)
+            embedded_t = embedded_t.expand(batch_size, -1)
+            velocity = self.actor(torch.cat([observations, embedded_t, x_t], dim=-1))
+            velocity = self.mlp_output_scale * velocity
+
+            x_mid = x_t + 0.5 * dt[i] * velocity
+            t_mid = t_val + 0.5 * dt[i]
+            scaled_t_mid = t_mid * freqs
+            embedded_t_mid = torch.cat(
+                [torch.cos(scaled_t_mid), torch.sin(scaled_t_mid)], dim=-1
+            )
+            embedded_t_mid = embedded_t_mid.expand(batch_size, -1)
+            velocity_mid = self.actor(
+                torch.cat([observations, embedded_t_mid, x_mid], dim=-1)
+            )
+            velocity_mid = self.mlp_output_scale * velocity_mid
+            x_t = x_t + dt[i] * velocity_mid
+
+        return x_t
+
+    def _integrate_selected_flow(
+        self,
+        observations: torch.Tensor,
+        x_t: torch.Tensor,
+        t_current: torch.Tensor,
+        dt: torch.Tensor,
+        flow_steps: int,
+        integration_method: str,
+    ) -> torch.Tensor:
+        if integration_method == "euler":
+            return self._compiled_integrate_flow(
+                observations, x_t, t_current, dt, flow_steps
+            )
+        if integration_method == "midpoint":
+            return self._compiled_integrate_flow_midpoint(
+                observations, x_t, t_current, dt, flow_steps
+            )
+        raise ValueError(f"Unknown integration method: {integration_method}")
+
     def _compute_squared_error(
         self, predictions: torch.Tensor, targets: torch.Tensor
     ) -> torch.Tensor:
@@ -278,11 +340,17 @@ class ActorCritic(nn.Module):
             return torch.sum((predictions - targets) ** 2, dim=-1)
         else:  # "sqrt"
             squared_errors = (predictions - targets) ** 2
-            return torch.sum(squared_errors, dim=-1) / (
-                squared_errors.shape[-1] ** 0.5
-            )
+            return torch.sum(squared_errors, dim=-1) / (squared_errors.shape[-1] ** 0.5)
 
-    def act_inference(self, observations, eval_mode="zero", eval_fixed_seed=12345):
+    def act_inference(
+        self,
+        observations,
+        eval_mode="zero",
+        eval_fixed_seed=12345,
+        source=None,
+        integration_method=None,
+        sampling_steps=None,
+    ):
         """Inference with configurable deterministic sampling for flow matching.
 
         Args:
@@ -302,8 +370,13 @@ class ActorCritic(nn.Module):
         )
         batch_size = observations.shape[0]
 
-        # Initialize x_t based on eval_mode
-        if eval_mode == "zero":
+        if source is not None:
+            if source.shape != (batch_size, self.num_actions):
+                raise ValueError(
+                    f"source must have shape {(batch_size, self.num_actions)}, got {source.shape}"
+                )
+            x_t = source.to(device=device, dtype=observations.dtype)
+        elif eval_mode == "zero":
             x_t = torch.zeros(size=(batch_size, self.num_actions), device=device)
         elif eval_mode == "fixed_seed":
             generator = torch.Generator(device=device)
@@ -316,15 +389,19 @@ class ActorCritic(nn.Module):
         else:
             raise ValueError(f"Unknown eval_mode: {eval_mode}")
 
-        flow_steps = self.sampling_steps
+        flow_steps = self.sampling_steps if sampling_steps is None else sampling_steps
+        method = (
+            self.integration_method
+            if integration_method is None
+            else integration_method
+        )
         full_t_path = torch.linspace(1.0, 0.0, flow_steps + 1, device=device)
         t_current = full_t_path[:-1]
         t_next = full_t_path[1:]
         dt = t_next - t_current
 
-        # Use compiled integration loop for CUDA graph replay speedup
-        x_t = self._compiled_integrate_flow(
-            observations, x_t, t_current, dt, flow_steps
+        x_t = self._integrate_selected_flow(
+            observations, x_t, t_current, dt, flow_steps, method
         )
 
         actions = self.actor_scale * x_t

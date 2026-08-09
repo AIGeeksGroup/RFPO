@@ -86,6 +86,9 @@ class FpoRslRlPpoActorCriticCfg:
     sampling_steps: int = 64
     """Number of sampling steps for flow matching inference. Default is 64."""
 
+    integration_method: Literal["euler", "midpoint"] = "euler"
+    """Fixed-step ODE solver used for flow sampling. Default preserves official Euler sampling."""
+
     cfm_loss_reduction: Literal["mean", "sum", "sqrt"] = "sqrt"
     """Reduction method for CFM loss across action dimensions. Default is "sqrt".
 
