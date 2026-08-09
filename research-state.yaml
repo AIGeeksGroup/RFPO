@@ -51,6 +51,10 @@ literature:
       title: "Averaging Weights Leads to Wider Optima and Better Generalization"
       year: 2018
       relevance: "Motivates uniform averaging of policy checkpoints along one online optimization trajectory."
+    - id: andrychowicz2020_onpolicy
+      title: "What Matters In On-Policy Reinforcement Learning? A Large-Scale Empirical Study"
+      year: 2020
+      relevance: "Establishes that minibatch and normalization implementation choices materially affect on-policy continuous control."
   open_problems:
     - "FPO++ uses many Euler steps; it is unknown whether conditional reflow improves control return or only sampling efficiency."
     - "The relation between flow curvature, CFM ratio variance, and policy-update stability is not established."
@@ -350,6 +354,12 @@ hypotheses:
     statement: "Uniform averaging of all actor-update checkpoints from one short Square FPO++ trajectory improves random-source success without degrading zero-source behavior."
     status: refuted
     motivation: "SWA can smooth one optimization trajectory without source-specific inference or checkpoint selection; H25 tested only a BC-to-final midpoint rather than within-trajectory averaging."
+    parent: H40
+    priority: high
+  - id: H45
+    statement: "Advantage-sign-stratified actor minibatches improve Gaussian-source Square success by stabilizing sequential minibatch composition without reweighting samples."
+    status: active
+    motivation: "The official loop combines random chunk shuffling, minibatch-local advantage normalization, and eight sequential Adam steps; H32 shows both advantage signs carry mostly non-conflicting information, so composition should be stabilized rather than projected away."
     parent: H40
     priority: high
 
@@ -1246,9 +1256,9 @@ experiments:
       renderer: osmesa
 
 outer_loop:
-  cycle: 30
-  last_direction: "H44 is closed; synthesize a new training-time candidate that targets Gaussian-source reward without modal-policy smoothing."
-  last_reflection: "Uniform actor-trajectory averaging improved zero success by 1/20 but reduced random success by 2/20 and pooled success by 1/40. Across H25, H43, and H44, smoothing the online trajectory repeatedly trades stochastic-source behavior for the deterministic mode."
+  cycle: 31
+  last_direction: "Evaluate H45 advantage-sign-stratified actor minibatches on the frozen H43 Square training trajectory."
+  last_reflection: "H44 closes weight-space smoothing. H45 instead preserves all samples and objectives while stabilizing the sign composition seen by each sequential Adam step and its local advantage normalization."
 
 workspace:
   findings: "findings.md"
