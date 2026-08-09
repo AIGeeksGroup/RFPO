@@ -578,6 +578,12 @@ hypotheses:
     motivation: "H69 establishes independent-policy symmetry attribution at 128 NFE and H70 establishes equal-total-NFE recovery on seed 42; their intersection is the critical gate before cross-task training."
     parent: H70
     priority: high
+  - id: H74
+    statement: "Equal-total-NFE antithetic projection beats both random64 and IID-pair32 on a fully trained official Spot FPO++ policy."
+    status: active
+    motivation: "Four Go2 training seeds support a stable effect, but publication-level generality requires transfer across robot morphology and the distinct official Spot optimizer configuration before broader task expansion."
+    parent: H73
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
