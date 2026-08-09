@@ -332,7 +332,7 @@ hypotheses:
     priority: high
   - id: H42
     statement: "Restoring a short-finetuned Square checkpoint from 16 to its pretrained 8-action execution horizon improves random-source success without degrading zero-source behavior."
-    status: active
+    status: refuted
     motivation: "H41 exposed a task-specific execution mismatch: the released Square checkpoint defaults to 8 actions while the official FPO++ command evaluates 16; restoring the native horizon directly increases visual feedback and is testable without training."
     parent: H40
     priority: high
@@ -351,7 +351,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 132
+  total_runs: 136
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -1121,11 +1121,39 @@ experiments:
       episodes: 20
       action_steps: 16
       balanced_episodes_per_env: true
+    - run: square_h42_action16_zero_balanced20_seed20260915
+      metric: success_rate
+      value: 0.50
+      episodes: 20
+      action_steps: 16
+      balanced_episodes_per_env: true
+      renderer: osmesa
+    - run: square_h42_action16_random_balanced20_seed20260915
+      metric: success_rate
+      value: 0.30
+      episodes: 20
+      action_steps: 16
+      balanced_episodes_per_env: true
+      renderer: osmesa
+    - run: square_h42_action8_zero_balanced20_seed20260915
+      metric: success_rate
+      value: 0.35
+      episodes: 20
+      action_steps: 8
+      balanced_episodes_per_env: true
+      renderer: osmesa
+    - run: square_h42_action8_random_balanced20_seed20260915
+      metric: success_rate
+      value: 0.40
+      episodes: 20
+      action_steps: 8
+      balanced_episodes_per_env: true
+      renderer: osmesa
 
 outer_loop:
   cycle: 28
-  last_direction: "Evaluate H42's frozen Square control checkpoint at official 16-step versus checkpoint-native 8-step execution before any new training."
-  last_reflection: "Endpoint anchoring is closed after repeated sub-threshold reward gains. H41 exposed a Square-specific 8-versus-16 execution boundary that can be tested coefficient-free and without training."
+  last_direction: "Run an outer-loop synthesis before selecting another training-time intervention; action-horizon changes are closed without tuning."
+  last_reflection: "H42 traded a +2/20 random-source gain for a -3/20 zero-source loss and reduced pooled success by one. Restoring the checkpoint-native horizon is not a stable improvement."
 
 workspace:
   findings: "findings.md"
