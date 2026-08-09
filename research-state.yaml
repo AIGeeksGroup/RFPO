@@ -514,6 +514,12 @@ hypotheses:
     motivation: "H62's intermediate binary suffix outcomes were mostly tied, while Square's roughly 35% full-trajectory random success predicts mixed outcomes in about 80% of four-replica common-scene groups."
     parent: H40
     priority: high
+  - id: H64
+    statement: "A same-scene frozen zero-source return yields denser behavior-preserving episodic advantages for Gaussian Square trajectories than an exact group-relative baseline."
+    status: planned
+    motivation: "H63 proves scene difficulty matters but discards homogeneous Gaussian groups; a deterministic reference rewards stochastic rescues and penalizes stochastic regressions without depending on the sampled Gaussian action."
+    parent: H63
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -1940,9 +1946,9 @@ experiments:
       renderer: osmesa
 
 outer_loop:
-  cycle: 51
-  last_direction: "Close exact-scene group-relative terminal advantages before actor integration because homogeneous scene groups discard half the rollout population."
-  last_reflection: "Complete trajectories restore global success/failure support, but outcomes are more scene-correlated than the marginal 35% success estimate implied. Four of eight groups are homogeneous, leaving only 16 nonzero trajectories and ESS 12; scaling group size would spend substantially more rollout compute without changing the underlying sparse terminal signal."
+  cycle: 52
+  last_direction: "Test a frozen deterministic scene reference that distinguishes Gaussian exploration rescues from regressions without zeroing homogeneous Gaussian groups."
+  last_reflection: "H63's exact group mean removes scene difficulty but also removes every trajectory in homogeneous groups. A zero-source reference is action-independent and behavior-aware: relative returns update only stochastic deviations that change the scene outcome. Eight reference episodes can establish whether this restores enough positive and negative support before any gradient work."
 
 workspace:
   findings: "findings.md"
