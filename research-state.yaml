@@ -572,6 +572,12 @@ hypotheses:
     motivation: "H70 matches zero64 and H71 is faster than random64, but zero32 could be an even cheaper deterministic deployment baseline; this strong control must precede a practical efficiency claim."
     parent: H70
     priority: high
+  - id: H73
+    statement: "Two Euler-32 antithetic endpoints beat one Euler-64 random endpoint at equal total NFE across all three independently trained H69 Go2 policies."
+    status: active
+    motivation: "H69 establishes independent-policy symmetry attribution at 128 NFE and H70 establishes equal-total-NFE recovery on seed 42; their intersection is the critical gate before cross-task training."
+    parent: H70
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
