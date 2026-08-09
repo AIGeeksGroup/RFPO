@@ -146,6 +146,7 @@ class FlowMatchingPolicy(PreTrainedPolicy):
         self.temporal_chunk_continuations = {
             env_id: None for env_id in range(self.num_envs)
         }
+        self.action_plan_counts = {env_id: 0 for env_id in range(self.num_envs)}
         self.mdp_x_t_path_buffers = {
             env_id: deque([], maxlen=self.config.n_action_steps) for env_id in range(self.num_envs)
         }
@@ -183,6 +184,7 @@ class FlowMatchingPolicy(PreTrainedPolicy):
                 self.previous_action_buffers = {}
                 self.temporal_source_buffers = {}
                 self.temporal_chunk_continuations = {}
+                self.action_plan_counts = {}
 
             else:
                 # Reset all buffers
@@ -192,6 +194,7 @@ class FlowMatchingPolicy(PreTrainedPolicy):
                     self.previous_action_buffers[env_id] = deque([], maxlen=self.config.n_action_steps)
                     self.temporal_source_buffers[env_id] = None
                     self.temporal_chunk_continuations[env_id] = None
+                    self.action_plan_counts[env_id] = 0
         else:
             # Reset only specified environment buffers
             if not isinstance(env_ids, torch.Tensor):
@@ -204,6 +207,7 @@ class FlowMatchingPolicy(PreTrainedPolicy):
                     self.previous_action_buffers[env_id] = deque([], maxlen=self.config.n_action_steps)
                     self.temporal_source_buffers[env_id] = None
                     self.temporal_chunk_continuations[env_id] = None
+                    self.action_plan_counts[env_id] = 0
     def step_ema(self):
         """Update the EMA model with current model parameters."""
         if self.ema_model is not None:
@@ -239,6 +243,7 @@ class FlowMatchingPolicy(PreTrainedPolicy):
         temporal_source_correlation: float = 0.0,
         curvature_best_of_two: bool = False,
         temporal_chunk_ensemble: bool = False,
+        initial_action_steps: int | None = None,
     ) -> Tensor:
         """Select actions for multiple environments with separate buffers.
         
@@ -289,6 +294,15 @@ class FlowMatchingPolicy(PreTrainedPolicy):
             if self.config.horizon != 2 * self.config.n_action_steps:
                 raise ValueError(
                     "temporal chunk ensemble requires horizon == 2 * n_action_steps"
+                )
+        if initial_action_steps is not None:
+            if temporal_chunk_ensemble:
+                raise ValueError(
+                    "initial action steps cannot be combined with temporal chunk ensemble"
+                )
+            if not 1 <= initial_action_steps <= self.config.n_action_steps:
+                raise ValueError(
+                    "initial_action_steps must lie within the executed action chunk"
                 )
         if not 0.0 <= temporal_source_correlation < 1.0:
             raise ValueError("temporal_source_correlation must be in [0, 1)")
@@ -537,8 +551,17 @@ class FlowMatchingPolicy(PreTrainedPolicy):
             # Fill the buffers for these environments
             for i, env_id in enumerate(envs_needing_actions):
                 # Transpose to get actions for this environment across timesteps
-                self.action_buffers[env_id].extend(action_chunks[i])
-                self.mdp_x_t_path_buffers[env_id].extend(mdp_x_t_path[i].transpose(0,1))
+                action_count = (
+                    initial_action_steps
+                    if initial_action_steps is not None
+                    and self.action_plan_counts[env_id] == 0
+                    else self.config.n_action_steps
+                )
+                self.action_buffers[env_id].extend(action_chunks[i, :action_count])
+                self.mdp_x_t_path_buffers[env_id].extend(
+                    mdp_x_t_path[i, :, :action_count].transpose(0, 1)
+                )
+                self.action_plan_counts[env_id] += 1
 
         # Collect actions for all environments
         actions = []
