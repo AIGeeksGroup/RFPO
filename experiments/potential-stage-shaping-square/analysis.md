@@ -46,6 +46,25 @@ and authorizes a separately committed independent confirmation. It is not yet a 
 the screen contains only 20 episodes per cell, uses OSMesa rather than the official EGL renderer,
 and shares one training/evaluation seed pair.
 
+## Independent Confirmation
+
+The independently seeded training pair was valid. Its first two collection fingerprints matched
+exactly and diverged from iteration three onward. Every candidate iteration recorded 5,120 finite
+shaping terms, with 65.00% to 81.91% active terms.
+
+| Evaluation mode | Control | Candidate | Delta | Locked gate | Outcome |
+|---|---:|---:|---:|---:|---|
+| Zero source | 16/50 (32%) | 17/50 (34%) | +1/50 | >= -2/50 | Pass |
+| Gaussian source | 21/50 (42%) | 16/50 (32%) | -5/50 | >= +3/50 | Fail |
+| Pooled | 37/100 (37%) | 33/100 (33%) | -4/100 | >= +5/100 | Fail |
+
+The independent confirmation reverses the screen's Gaussian and pooled gains. Across both locked
+evaluations, control and candidate pool to 58/140 and 58/140 successes respectively: the apparent
+screen improvement disappears exactly when evidence is combined. H51 is therefore refuted as a
+stable Square reward improvement. Its potential transformation remains valid mechanism evidence,
+but no additional seed, coefficient, potential variant, duration, or checkpoint selection is
+authorized.
+
 ## Artifacts
 
 - `results/config.json`
@@ -59,3 +78,10 @@ and shares one training/evaluation seed pair.
 - `screen-results/*_summary.txt`
 - `screen-results/control_{zero,random}.log`
 - `screen-results/candidate_{zero,random}.log`
+- `confirmation-results/control_collection_fingerprints.json`
+- `confirmation-results/candidate_collection_fingerprints.json`
+- `confirmation-results/candidate_potential_shaping_history.json`
+- `confirmation-results/*_train.log`
+- `confirmation-results/*_summary.txt`
+- `confirmation-results/control_{zero,random}.log`
+- `confirmation-results/candidate_{zero,random}.log`

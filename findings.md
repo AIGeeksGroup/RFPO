@@ -368,6 +368,7 @@ cannot be replaced by this cheap critic substitution.
 - Privileged simulator inputs do not guarantee a better sparse-reward critic under the official short optimization budget: H50 worsened cross-fit MSE in both folds and failed to improve return ranking consistently.
 - Potential-based Square stage shaping is a valid active credit signal: its complete-episode return telescoped to the sparse objective within `3.75e-16`, while 76.02% of failed-episode nonterminal transitions carried non-negligible signed progress. Reward transfer remains untested until the locked paired screen completes.
 - Potential-based Square stage shaping passed its first paired reward screen: zero success improved by 1/20, Gaussian-source success by 3/20, and pooled success by 4/40. This is the first H51 reward-positive signal, but it requires independent-seed confirmation before being treated as a stable method improvement.
+- Potential-based stage shaping did not confirm: the independent Gaussian result reversed from a screen gain of +3/20 to -5/50, and the independent pooled result was -4/100. Control and candidate tie exactly at 58/140 when both locked evaluations are pooled, so valid local credit alone does not produce a stable Square improvement.
 
 ## Lessons and Constraints
 

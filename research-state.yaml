@@ -410,7 +410,7 @@ hypotheses:
     priority: high
   - id: H51
     statement: "Potential-based RoboSuite stage shaping improves Gaussian-source Square success without degrading zero-source behavior."
-    status: active
+    status: refuted
     motivation: "H50 rules out a cheap privileged critic, while the released wrapper discards bounded reach, grasp, lift, and hover progress that can be converted into policy-invariant local credit."
     parent: H40
     priority: high
@@ -429,7 +429,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 182
+  total_runs: 188
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -1535,11 +1535,53 @@ experiments:
       pooled_delta_successes: 4
       passed: true
       renderer: osmesa
+    - run: square_h51_confirmation_control_osmesa_seed20260977
+      metric: independent_paired_training
+      value: 25600
+      iterations: 5
+      interactions: 25600
+      renderer: osmesa
+    - run: square_h51_confirmation_candidate_osmesa_seed20260977
+      metric: independent_paired_training
+      value: 25600
+      iterations: 5
+      interactions: 25600
+      shaping_terms_per_iteration: 5120
+      finite: true
+      renderer: osmesa
+    - run: square_h51_confirmation_control_zero_balanced50_seed20260978
+      metric: success_rate
+      value: 0.32
+      episodes: 50
+      successes: 16
+      renderer: osmesa
+    - run: square_h51_confirmation_control_random_balanced50_seed20260978
+      metric: success_rate
+      value: 0.42
+      episodes: 50
+      successes: 21
+      renderer: osmesa
+    - run: square_h51_confirmation_candidate_zero_balanced50_seed20260978
+      metric: success_rate
+      value: 0.34
+      episodes: 50
+      successes: 17
+      renderer: osmesa
+    - run: square_h51_confirmation_candidate_random_balanced50_seed20260978
+      metric: success_rate
+      value: 0.32
+      episodes: 50
+      successes: 16
+      pooled_delta_successes: -4
+      combined_screen_and_confirmation_control_successes: 58
+      combined_screen_and_confirmation_candidate_successes: 58
+      passed: false
+      renderer: osmesa
 
 outer_loop:
   cycle: 36
-  last_direction: "Freeze and run an independent-seed H51 confirmation after the paired Square reward screen passed all three gates."
-  last_reflection: "H51 improved zero success by 1/20, Gaussian-source success by 3/20, and pooled success by 4/40 after valid paired training. The small OSMesa screen is positive but not stable evidence until an independently seeded training and evaluation pair confirms it."
+  last_direction: "Close H51 after its independent confirmation reversed the Gaussian-source gain; select a distinct next intervention before further runs."
+  last_reflection: "H51's confirmation changed Gaussian success by -5/50 and pooled success by -4/100 despite valid paired training. Screen plus confirmation ties exactly at 58/140, showing that the initial gain was seed noise rather than a stable reward improvement."
 
 workspace:
   findings: "findings.md"

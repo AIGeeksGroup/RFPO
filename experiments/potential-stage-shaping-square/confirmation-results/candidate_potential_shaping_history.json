@@ -1,0 +1,67 @@
+[
+  {
+    "active_fraction": 0.6541015625,
+    "count": 5120,
+    "iteration": 1,
+    "max": 0.32595473527908325,
+    "mean": -2.569497041869373e-05,
+    "min": -0.4333272874355316,
+    "negative_fraction": 0.3451171875,
+    "positive_fraction": 0.308984375,
+    "shaped_reward_sum": 1.8684413433074951,
+    "sparse_reward_sum": 2.0,
+    "std": 0.02228903482232457
+  },
+  {
+    "active_fraction": 0.819140625,
+    "count": 5120,
+    "iteration": 2,
+    "max": 0.36359113454818726,
+    "mean": 8.77048409372954e-05,
+    "min": -0.37895095348358154,
+    "negative_fraction": 0.4548828125,
+    "positive_fraction": 0.3642578125,
+    "shaped_reward_sum": 3.4490487575531006,
+    "sparse_reward_sum": 3.0,
+    "std": 0.025490161179179953
+  },
+  {
+    "active_fraction": 0.743359375,
+    "count": 5120,
+    "iteration": 3,
+    "max": 0.32891422510147095,
+    "mean": 4.6081333859304685e-06,
+    "min": -0.3845701217651367,
+    "negative_fraction": 0.3724609375,
+    "positive_fraction": 0.3708984375,
+    "shaped_reward_sum": 4.023593902587891,
+    "sparse_reward_sum": 4.0,
+    "std": 0.024018582466341136
+  },
+  {
+    "active_fraction": 0.799609375,
+    "count": 5120,
+    "iteration": 4,
+    "max": 0.3094416558742523,
+    "mean": -0.0003997911355919148,
+    "min": -0.40788549184799194,
+    "negative_fraction": 0.421484375,
+    "positive_fraction": 0.378125,
+    "shaped_reward_sum": 4.953069686889648,
+    "sparse_reward_sum": 7.0,
+    "std": 0.028795398012346277
+  },
+  {
+    "active_fraction": 0.65,
+    "count": 5120,
+    "iteration": 5,
+    "max": 0.4104076325893402,
+    "mean": -0.00032538227807983323,
+    "min": -0.41274937987327576,
+    "negative_fraction": 0.3380859375,
+    "positive_fraction": 0.3119140625,
+    "shaped_reward_sum": 2.334043025970459,
+    "sparse_reward_sum": 4.0,
+    "std": 0.030284780005525175
+  }
+]

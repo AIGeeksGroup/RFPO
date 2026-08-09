@@ -1,0 +1,32 @@
+[
+  {
+    "fingerprint": "f79f06c561c67c14ef6788cfbeff376f032b0341ecc222f2d76ecc5ff2de8fb0",
+    "iteration": 1,
+    "sparse_reward_sum": 2.0,
+    "terminal_count": 2
+  },
+  {
+    "fingerprint": "ac7db9e4d805ebbb265e9049ff210a93ba8135b0e08092d2e7f66c5923dad082",
+    "iteration": 2,
+    "sparse_reward_sum": 3.0,
+    "terminal_count": 3
+  },
+  {
+    "fingerprint": "158a8d81bd196c9fa0ec413bc1e48085362aa2f05277706bbf482219ce3a7e0b",
+    "iteration": 3,
+    "sparse_reward_sum": 4.0,
+    "terminal_count": 4
+  },
+  {
+    "fingerprint": "e2f3f9c42be80096179a7e777bfa8696ca7e58c73458a554cf4ad1f266749d8c",
+    "iteration": 4,
+    "sparse_reward_sum": 7.0,
+    "terminal_count": 7
+  },
+  {
+    "fingerprint": "28cbbe3654713156fba8ba08dcadeb1e8af9891133e62ca23aff7e15a70637c8",
+    "iteration": 5,
+    "sparse_reward_sum": 4.0,
+    "terminal_count": 4
+  }
+]
