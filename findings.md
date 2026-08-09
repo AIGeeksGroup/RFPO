@@ -354,6 +354,13 @@ antithetic result (+0.0026, 95% [-0.0023, 0.0080]) and from zero64 (-0.0045, 95%
 0.0204]). H70 therefore supports same-compute recovery of central-policy performance, not
 superiority over deterministic zero-source deployment.
 
+The two symmetric solves can also be fused into one doubled policy batch. On an H200 with 4,096
+frozen observations, batched antithetic32 took 3.685 ms versus 4.399 ms sequentially and 4.152 ms
+for random64. This is a 1.194x speedup over sequential pairing and an 11.25% latency reduction from
+random64, while differing from sequential actions by at most 4.77e-7. The result establishes
+policy-only batch throughput, not end-to-end or single-robot latency; its approximately 2.56 MB
+incremental peak allocation is negligible on the measured device.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -365,6 +372,7 @@ superiority over deterministic zero-source deployment.
 - The stronger deployment claim remains open because H67's antithetic-minus-zero interval crosses zero despite a positive point estimate.
 - Across one training trajectory, antithetic pairing beats IID pairing from checkpoints 500 through 1499, while its deficit to zero collapses as the policy matures.
 - H70 eliminates the twofold NFE penalty on seed 42: two 32-step symmetric solves match the 64-step symmetric solve and recover the roughly one-point random-source deficit at the same total NFE as the baseline.
+- H71 shows that fusing the two half-depth solves along the batch dimension is not merely FLOP accounting: at batch 4,096 on H200 it is 19.36% faster than sequential pairing and 11.25% faster than random64 policy inference, within a 4.77e-7 action tolerance.
 - WarmPrior (arXiv:2605.13959) offers a more direct reward-improvement hypothesis for chunked manipulation: center the flow source on recent actions and retain residual Gaussian noise for exploration.
 - WarmPrior cannot be grafted onto a Gaussian-trained FPO checkpoint at inference time; training-time source adaptation is necessary on Can.
 - A short 100-update training-time adaptation is also insufficient: it preserves neither deterministic success nor random exploration.

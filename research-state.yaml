@@ -562,7 +562,7 @@ hypotheses:
     priority: high
   - id: H71
     statement: "Batching the two Euler-32 antithetic endpoint solves reduces policy latency by at least 15% versus sequential execution and stays within 1.25x of one Euler-64 random solve."
-    status: active
+    status: supported
     motivation: "H70 establishes equal NFE, but the current helper launches its two endpoint solves sequentially; a publication-level efficiency claim should include measured policy latency."
     parent: H70
     priority: high
@@ -2138,11 +2138,30 @@ experiments:
       passed: true
       deployment_passed: false
       renderer: egl
+    - run: go2_h71_antithetic_batched_throughput_seed20261610
+      metric: batched_over_sequential_policy_speedup
+      value: 1.1935934891
+      device: "NVIDIA H200"
+      num_observations: 4096
+      warmup_calls_per_method: 10
+      timing_blocks_per_method: 5
+      calls_per_block: 20
+      random64_median_ms: 4.1524418863
+      antithetic32_sequential_median_ms: 4.3988996884
+      antithetic32_batched_median_ms: 3.6854253383
+      batched_over_random64_latency_ratio: 0.8875320689
+      batched_sequential_max_abs_difference: 0.0000004768
+      batched_sequential_rms_difference: 0.0000000517
+      random64_peak_incremental_cuda_bytes: 197632
+      antithetic32_sequential_peak_incremental_cuda_bytes: 983040
+      antithetic32_batched_peak_incremental_cuda_bytes: 2556928
+      actor_parameters_unchanged: true
+      passed: true
 
 outer_loop:
-  cycle: 59
+  cycle: 60
   last_direction: "Finish H69 independent-policy attribution, then confirm the H70 equal-total-NFE result across those policies before expanding to other official locomotion tasks."
-  last_reflection: "H70 removes H66's doubled-compute limitation on seed 42: two Euler-32 antithetic endpoints beat one Euler-64 random endpoint by +0.9813 at the same 64 total NFE, with bootstrap 95% [0.9542, 1.0085]. Euler-32 and Euler-64 antithetic returns were statistically indistinguishable, and antithetic32 matched zero64 rather than beating it. Independent-model generality is now the critical gate."
+  last_reflection: "H70 removes H66's doubled-compute limitation, and H71 removes its practical batched-throughput limitation at official Go2 parallelism. On one H200, batched antithetic32 was 1.194x faster than sequential antithetic inference and used only 0.888x random64 latency, with maximum action difference 4.77e-7. This is policy-only batch throughput; independent-model generality remains the critical gate."
 
 workspace:
   findings: "findings.md"

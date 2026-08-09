@@ -1,0 +1,64 @@
+{
+  "hypothesis": "H71",
+  "checkpoint": "/mnt/data/users/haoyu/workspace/code/fpo-control/isaaclab_experiments/logs/isaaclab_fpo/unitree_go2_flat_flow/2026-08-08_16-24-22_go2_official_seed42_20260808/model_1499.pt",
+  "task": "Isaac-Velocity-Flat-Unitree-Go2-v0",
+  "device_name": "NVIDIA H200",
+  "seed": 20261610,
+  "num_envs": 4096,
+  "warmup_calls": 10,
+  "blocks": 5,
+  "calls_per_block": 20,
+  "timings": {
+    "random64": {
+      "block_seconds_per_call": [
+        0.00413642639759928,
+        0.004158703098073602,
+        0.0041432939004153015,
+        0.004152441886253655,
+        0.004153697728179395
+      ],
+      "median_seconds_per_call": 0.004152441886253655,
+      "iqr_seconds_per_call": 1.0403827764093355e-05,
+      "actions_per_second": 986407.5433685172,
+      "peak_incremental_cuda_bytes": 197632
+    },
+    "antithetic32_sequential": {
+      "block_seconds_per_call": [
+        0.004513142840005457,
+        0.004398899688385427,
+        0.004396931501105428,
+        0.0044249675935134295,
+        0.004394506057724357
+      ],
+      "median_seconds_per_call": 0.004398899688385427,
+      "iqr_seconds_per_call": 2.803609240800177e-05,
+      "actions_per_second": 931141.9423395391,
+      "peak_incremental_cuda_bytes": 983040
+    },
+    "antithetic32_batched": {
+      "block_seconds_per_call": [
+        0.0036854253383353354,
+        0.003678983496502042,
+        0.0037017133552581074,
+        0.003690028190612793,
+        0.0036738744005560876
+      ],
+      "median_seconds_per_call": 0.0036854253383353354,
+      "iqr_seconds_per_call": 1.1044694110751065e-05,
+      "actions_per_second": 1111404.959800411,
+      "peak_incremental_cuda_bytes": 2556928
+    }
+  },
+  "batched_sequential_max_abs_difference": 4.76837158203125e-07,
+  "batched_sequential_rms_difference": 5.172060276993274e-08,
+  "batched_over_sequential_speedup": 1.1935934890957145,
+  "batched_over_random64_latency_ratio": 0.8875320689100207,
+  "gates": {
+    "finite_actions": true,
+    "batched_sequential_max_abs_at_most_1e_5": true,
+    "batched_speedup_at_least_1_15": true,
+    "batched_random64_latency_ratio_at_most_1_25": true,
+    "actor_parameters_unchanged": true
+  },
+  "passed": true
+}
