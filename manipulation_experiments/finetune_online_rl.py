@@ -82,6 +82,14 @@ from src.surgical_finetuning import (
     optimizer_parameter_names,
     snapshot_actor_parameters,
 )
+from src.adamw_extragradient import (
+    displacement_vector as extragradient_displacement_vector,
+    fresh_adamw_step,
+    parameters_equal_snapshot as extragradient_parameters_equal_snapshot,
+    restore_parameters as restore_extragradient_parameters,
+    snapshot_parameters as snapshot_extragradient_parameters,
+    trainable_parameters as extragradient_trainable_parameters,
+)
 
 # ---- Multiprocessing start method (CUDA compat) ------------------------------
 try:
@@ -177,6 +185,10 @@ class FlowPPOConfig:
     heldout_ratio_early_stop_audit_chunks: int = 64
     heldout_ratio_early_stop_threshold: float = 0.8
     heldout_ratio_early_stop_audit_output_json: Optional[str] = None
+    adamw_extragradient_audit: bool = False
+    adamw_extragradient_audit_iteration: int = 2
+    adamw_extragradient_audit_chunks: int = 64
+    adamw_extragradient_audit_output_json: Optional[str] = None
     discounted_success_critic_audit: bool = False
     discounted_success_critic_audit_iteration: int = 2
     discounted_success_critic_audit_chunks: int = 64
@@ -785,6 +797,20 @@ def main(cfg: FlowPPOConfig):
             raise ValueError("held-out ratio early-stop audit requires an even chunk count")
         if not 0.0 < cfg.heldout_ratio_early_stop_threshold <= 1.0:
             raise ValueError("held-out ratio early-stop threshold must be in (0, 1]")
+    if cfg.adamw_extragradient_audit:
+        if cfg.loss_mode != "fpo" or not cfg.do_chunk_level_ppo:
+            raise ValueError("AdamW extragradient audit requires chunk-level FPO")
+        if world_size != 1:
+            raise ValueError("AdamW extragradient audit currently requires one process")
+        if cfg.gradient_accumulation_steps != 1:
+            raise ValueError("AdamW extragradient audit requires gradient accumulation 1")
+        if min(
+            cfg.adamw_extragradient_audit_iteration,
+            cfg.adamw_extragradient_audit_chunks,
+        ) < 1:
+            raise ValueError("AdamW extragradient audit settings must be positive")
+        if cfg.adamw_extragradient_audit_chunks % 2:
+            raise ValueError("AdamW extragradient audit requires an even chunk count")
     if cfg.discounted_success_critic_audit:
         if cfg.loss_mode != "fpo" or not cfg.do_chunk_level_ppo:
             raise ValueError("discounted-success critic audit requires chunk-level FPO")
@@ -3869,6 +3895,386 @@ def main(cfg: FlowPPOConfig):
                 early_stop_positive_chunks_available,
             )
             actor_module.train()
+
+        if (
+            cfg.adamw_extragradient_audit
+            and iteration == cfg.adamw_extragradient_audit_iteration
+        ):
+            if optimizer_actor.state:
+                raise RuntimeError(
+                    "AdamW extragradient audit requires an empty actor optimizer state"
+                )
+            eligible_mask = (
+                (b_cfm_value_invalid.sum(dim=1) == 0)
+                & b_mc_valid[:, 0].bool()
+                & torch.isfinite(b_advantages[:, 0])
+                & torch.isfinite(b_mc_returns[:, 0])
+            )
+            eligible_indices = torch.where(eligible_mask)[0]
+            required_chunks = cfg.adamw_extragradient_audit_chunks
+            if eligible_indices.numel() < required_chunks:
+                raise RuntimeError(
+                    "AdamW extragradient audit requires "
+                    f"{required_chunks} fully valid labeled chunks, "
+                    f"found {eligible_indices.numel()}"
+                )
+            audit_generator = torch.Generator().manual_seed(
+                cfg.seed + iteration * 11003
+            )
+            selected_indices = eligible_indices[
+                torch.randperm(
+                    eligible_indices.numel(), generator=audit_generator
+                )[:required_chunks]
+            ]
+            audit_actions = b_actions[selected_indices]
+            audit_images = {
+                key: value[selected_indices] for key, value in b_obs_images.items()
+            }
+            audit_states = b_obs_state[selected_indices]
+            audit_invalid = b_cfm_value_invalid[selected_indices]
+            audit_times, audit_noises = sample_cfm_variables(
+                batch_size=required_chunks,
+                num_samples=n_action_samples,
+                horizon=n_action_steps,
+                action_dim=action_dim,
+                mode="iid",
+                time_generator=torch.Generator(device=device).manual_seed(
+                    cfg.seed + 625_242
+                ),
+                noise_generator=torch.Generator(device=device).manual_seed(
+                    cfg.seed + 625_243
+                ),
+                device=device,
+                dtype=audit_actions.dtype,
+            )
+            audit_observations = {
+                key: value[:, 0].to(device) for key, value in audit_images.items()
+            }
+            audit_observations["observation.state"] = audit_states[:, 0].to(device)
+            audit_observations["action"] = audit_actions.to(device)
+            actor_module.eval()
+            with torch.no_grad():
+                audit_losses, returned_times, returned_noises = get_cfm_values(
+                    actor_module,
+                    audit_observations,
+                    n_action_samples,
+                    audit_times,
+                    audit_noises,
+                )
+            audit_losses = audit_losses.permute(1, 0, 2).cpu()
+            audit_times_stored = returned_times.permute(1, 0, 2).cpu()
+            audit_noises_stored = returned_noises.permute(1, 0, 2, 3).cpu()
+            audit_local_indices = torch.arange(required_chunks)
+            audit_parameters = extragradient_trainable_parameters(actor_module)
+            base_parameters = snapshot_extragradient_parameters(audit_parameters)
+            audit_learning_rate = float(optimizer_actor.param_groups[0]["lr"])
+            batch_size = required_chunks // 2
+            batch_results = []
+
+            for audit_batch in range(2):
+                batch_slice = slice(
+                    audit_batch * batch_size, (audit_batch + 1) * batch_size
+                )
+                stored_indices = selected_indices[batch_slice]
+                heldout_indices = audit_local_indices[batch_slice]
+                gae_weights = b_advantages[stored_indices, 0].float()
+                gae_weights = (gae_weights - gae_weights.mean()) / (
+                    gae_weights.std() + 1e-8
+                )
+                outcome_weights = b_mc_returns[stored_indices, 0].float()
+                outcome_weights = outcome_weights - outcome_weights.mean()
+
+                restore_extragradient_parameters(audit_parameters, base_parameters)
+                stored_pre_ratios, official_gradient = replay_audit_gradient(
+                    stored_indices,
+                    gae_weights,
+                    b_actions=b_actions,
+                    b_cfm_losses=b_cfm_losses,
+                    b_cfm_loss_ts=b_cfm_loss_ts,
+                    b_cfm_loss_epsilons=b_cfm_loss_epsilons,
+                    b_cfm_value_invalid=b_cfm_value_invalid,
+                    b_obs_images=b_obs_images,
+                    b_obs_state=b_obs_state,
+                )
+                heldout_pre_ratios, outcome_pre_gradient = replay_audit_gradient(
+                    heldout_indices,
+                    outcome_weights,
+                    b_actions=audit_actions,
+                    b_cfm_losses=audit_losses,
+                    b_cfm_loss_ts=audit_times_stored,
+                    b_cfm_loss_epsilons=audit_noises_stored,
+                    b_cfm_value_invalid=audit_invalid,
+                    b_obs_images=audit_images,
+                    b_obs_state=audit_states,
+                )
+                heldout_gae_pre_ratios, _ = replay_audit_objective(
+                    heldout_indices,
+                    gae_weights,
+                    b_actions=audit_actions,
+                    b_cfm_losses=audit_losses,
+                    b_cfm_loss_ts=audit_times_stored,
+                    b_cfm_loss_epsilons=audit_noises_stored,
+                    b_cfm_value_invalid=audit_invalid,
+                    b_obs_images=audit_images,
+                    b_obs_state=audit_states,
+                )
+                pre_surrogate = float(
+                    (gae_weights.to(device)[:, None] * heldout_gae_pre_ratios)
+                    .mean()
+                    .item()
+                )
+
+                control_step = fresh_adamw_step(
+                    audit_parameters,
+                    official_gradient,
+                    learning_rate=audit_learning_rate,
+                    betas=tuple(cfg.optimizer_betas_actor),
+                    eps=1e-5,
+                    weight_decay=1e-6,
+                    max_grad_norm=cfg.max_grad_norm,
+                )
+                control_displacement = extragradient_displacement_vector(
+                    audit_parameters, base_parameters
+                )
+                control_post_ratios, control_post_outcome_gradient = (
+                    replay_audit_gradient(
+                        heldout_indices,
+                        outcome_weights,
+                        b_actions=audit_actions,
+                        b_cfm_losses=audit_losses,
+                        b_cfm_loss_ts=audit_times_stored,
+                        b_cfm_loss_epsilons=audit_noises_stored,
+                        b_cfm_value_invalid=audit_invalid,
+                        b_obs_images=audit_images,
+                        b_obs_state=audit_states,
+                    )
+                )
+                control_gae_ratios, _ = replay_audit_objective(
+                    heldout_indices,
+                    gae_weights,
+                    b_actions=audit_actions,
+                    b_cfm_losses=audit_losses,
+                    b_cfm_loss_ts=audit_times_stored,
+                    b_cfm_loss_epsilons=audit_noises_stored,
+                    b_cfm_value_invalid=audit_invalid,
+                    b_obs_images=audit_images,
+                    b_obs_state=audit_states,
+                )
+                control_surrogate = float(
+                    (gae_weights.to(device)[:, None] * control_gae_ratios)
+                    .mean()
+                    .item()
+                )
+
+                restore_extragradient_parameters(audit_parameters, base_parameters)
+                if not extragradient_parameters_equal_snapshot(
+                    audit_parameters, base_parameters
+                ):
+                    raise RuntimeError(
+                        "AdamW extragradient control restoration was not bitwise exact"
+                    )
+                virtual_step = fresh_adamw_step(
+                    audit_parameters,
+                    official_gradient,
+                    learning_rate=audit_learning_rate,
+                    betas=tuple(cfg.optimizer_betas_actor),
+                    eps=1e-5,
+                    weight_decay=1e-6,
+                    max_grad_norm=cfg.max_grad_norm,
+                )
+                _, lookahead_gradient = replay_audit_gradient(
+                    stored_indices,
+                    gae_weights,
+                    b_actions=b_actions,
+                    b_cfm_losses=b_cfm_losses,
+                    b_cfm_loss_ts=b_cfm_loss_ts,
+                    b_cfm_loss_epsilons=b_cfm_loss_epsilons,
+                    b_cfm_value_invalid=b_cfm_value_invalid,
+                    b_obs_images=b_obs_images,
+                    b_obs_state=b_obs_state,
+                )
+                restore_extragradient_parameters(audit_parameters, base_parameters)
+                restored_exactly = extragradient_parameters_equal_snapshot(
+                    audit_parameters, base_parameters
+                )
+                if not restored_exactly or optimizer_actor.state:
+                    raise RuntimeError(
+                        "AdamW extragradient lookahead restoration was not exact"
+                    )
+                candidate_step = fresh_adamw_step(
+                    audit_parameters,
+                    lookahead_gradient,
+                    learning_rate=audit_learning_rate,
+                    betas=tuple(cfg.optimizer_betas_actor),
+                    eps=1e-5,
+                    weight_decay=1e-6,
+                    max_grad_norm=cfg.max_grad_norm,
+                )
+                candidate_displacement = extragradient_displacement_vector(
+                    audit_parameters, base_parameters
+                )
+                candidate_post_ratios, candidate_post_outcome_gradient = (
+                    replay_audit_gradient(
+                        heldout_indices,
+                        outcome_weights,
+                        b_actions=audit_actions,
+                        b_cfm_losses=audit_losses,
+                        b_cfm_loss_ts=audit_times_stored,
+                        b_cfm_loss_epsilons=audit_noises_stored,
+                        b_cfm_value_invalid=audit_invalid,
+                        b_obs_images=audit_images,
+                        b_obs_state=audit_states,
+                    )
+                )
+                candidate_gae_ratios, _ = replay_audit_objective(
+                    heldout_indices,
+                    gae_weights,
+                    b_actions=audit_actions,
+                    b_cfm_losses=audit_losses,
+                    b_cfm_loss_ts=audit_times_stored,
+                    b_cfm_loss_epsilons=audit_noises_stored,
+                    b_cfm_value_invalid=audit_invalid,
+                    b_obs_images=audit_images,
+                    b_obs_state=audit_states,
+                )
+                candidate_surrogate = float(
+                    (gae_weights.to(device)[:, None] * candidate_gae_ratios)
+                    .mean()
+                    .item()
+                )
+
+                gradients = (
+                    official_gradient,
+                    lookahead_gradient,
+                    outcome_pre_gradient,
+                    control_post_outcome_gradient,
+                    candidate_post_outcome_gradient,
+                )
+                if any(
+                    not torch.isfinite(gradient).all() or gradient.norm().item() <= 0
+                    for gradient in gradients
+                ):
+                    raise RuntimeError(
+                        "AdamW extragradient audit produced an invalid gradient"
+                    )
+                control_displacement_norm = float(control_displacement.norm().item())
+                candidate_displacement_norm = float(
+                    candidate_displacement.norm().item()
+                )
+                if min(control_displacement_norm, candidate_displacement_norm) <= 0:
+                    raise RuntimeError(
+                        "AdamW extragradient audit produced a zero displacement"
+                    )
+                control_update_cosine = stable_vector_cosine(
+                    control_displacement, -outcome_pre_gradient
+                )
+                candidate_update_cosine = stable_vector_cosine(
+                    candidate_displacement, -outcome_pre_gradient
+                )
+                control_post_cosine = stable_vector_cosine(
+                    control_post_outcome_gradient, outcome_pre_gradient
+                )
+                candidate_post_cosine = stable_vector_cosine(
+                    candidate_post_outcome_gradient, outcome_pre_gradient
+                )
+                control_surrogate_gain = control_surrogate - pre_surrogate
+                candidate_surrogate_gain = candidate_surrogate - pre_surrogate
+                displacement_ratio = (
+                    candidate_displacement_norm / control_displacement_norm
+                )
+                passed = (
+                    candidate_update_cosine >= control_update_cosine + 0.05
+                    and candidate_post_cosine >= control_post_cosine + 0.05
+                    and candidate_surrogate_gain > 0
+                    and (
+                        control_surrogate_gain <= 0
+                        or candidate_surrogate_gain >= 0.8 * control_surrogate_gain
+                    )
+                    and 0.5 <= displacement_ratio <= 1.5
+                )
+                batch_results.append(
+                    {
+                        "batch": audit_batch,
+                        "num_chunks": batch_size,
+                        "stored_pre_ratio_mean": float(
+                            stored_pre_ratios.mean().item()
+                        ),
+                        "heldout_pre_ratio_mean": float(
+                            heldout_pre_ratios.mean().item()
+                        ),
+                        "control_post_ratio_mean": float(
+                            control_post_ratios.mean().item()
+                        ),
+                        "candidate_post_ratio_mean": float(
+                            candidate_post_ratios.mean().item()
+                        ),
+                        "official_gradient_norm": float(
+                            official_gradient.norm().item()
+                        ),
+                        "lookahead_gradient_norm": float(
+                            lookahead_gradient.norm().item()
+                        ),
+                        "outcome_reference_gradient_norm": float(
+                            outcome_pre_gradient.norm().item()
+                        ),
+                        "control_update_outcome_cosine": control_update_cosine,
+                        "candidate_update_outcome_cosine": candidate_update_cosine,
+                        "candidate_update_cosine_gain": (
+                            candidate_update_cosine - control_update_cosine
+                        ),
+                        "control_post_outcome_gradient_cosine": control_post_cosine,
+                        "candidate_post_outcome_gradient_cosine": candidate_post_cosine,
+                        "candidate_post_cosine_gain": (
+                            candidate_post_cosine - control_post_cosine
+                        ),
+                        "pre_heldout_gae_surrogate": pre_surrogate,
+                        "control_heldout_gae_surrogate_gain": control_surrogate_gain,
+                        "candidate_heldout_gae_surrogate_gain": candidate_surrogate_gain,
+                        "candidate_control_displacement_norm_ratio": displacement_ratio,
+                        "control_step": control_step,
+                        "virtual_step": virtual_step,
+                        "candidate_step": candidate_step,
+                        "restored_bitwise_exact": restored_exactly,
+                        "passed": passed,
+                    }
+                )
+                restore_extragradient_parameters(audit_parameters, base_parameters)
+
+            restored_after_audit = extragradient_parameters_equal_snapshot(
+                audit_parameters, base_parameters
+            )
+            if not restored_after_audit or optimizer_actor.state:
+                raise RuntimeError(
+                    "AdamW extragradient audit changed the live actor or optimizer"
+                )
+            audit_result = {
+                "iteration": iteration,
+                "num_eligible_chunks": int(eligible_indices.numel()),
+                "num_chunks_audited": required_chunks,
+                "num_batches": 2,
+                "cfm_samples": n_action_samples,
+                "learning_rate": audit_learning_rate,
+                "actor_optimizer_state_entries": len(optimizer_actor.state),
+                "live_actor_restored_bitwise_exact": restored_after_audit,
+                "batches": batch_results,
+                "passed": all(result["passed"] for result in batch_results),
+            }
+            audit_output_path = (
+                Path(cfg.adamw_extragradient_audit_output_json)
+                if cfg.adamw_extragradient_audit_output_json is not None
+                else run_dir / "adamw_extragradient_audit.json"
+            )
+            audit_output_path.parent.mkdir(parents=True, exist_ok=True)
+            audit_output_path.write_text(
+                json.dumps(audit_result, indent=2, sort_keys=True) + "\n"
+            )
+            logger.info(
+                "AdamW extragradient audit: %s",
+                json.dumps(audit_result, sort_keys=True),
+            )
+            actor_module.train()
+            if cfg.freeze_vision_encoder:
+                actor_module.model.vision_encoder.eval()
 
         if (
             cfg.advantage_stratified_mc_audit
