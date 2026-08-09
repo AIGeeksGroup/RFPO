@@ -1,0 +1,14 @@
+{
+  "checkpoint_count": 4,
+  "copied_tensor_count": 0,
+  "floating_tensor_count": 35,
+  "max_source_to_average_l2": 0.21644190461346238,
+  "mean_source_to_average_l2": 0.17873573856256667,
+  "method": "uniform_policy_checkpoint_average",
+  "source_checkpoints": [
+    "/mnt/data/users/haoyu/workspace/outputs/fpo-control/results/square_h43_control_osmesa_seed20260916/checkpoints/step_10240",
+    "/mnt/data/users/haoyu/workspace/outputs/fpo-control/results/square_h43_control_osmesa_seed20260916/checkpoints/step_15360",
+    "/mnt/data/users/haoyu/workspace/outputs/fpo-control/results/square_h43_control_osmesa_seed20260916/checkpoints/step_20480",
+    "/mnt/data/users/haoyu/workspace/outputs/fpo-control/results/square_h43_control_osmesa_seed20260916/checkpoints/step_25600"
+  ]
+}

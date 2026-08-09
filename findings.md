@@ -270,6 +270,13 @@ midpoint-5 improved zero-source success from 14/20 to 16/20 but reduced Gaussian
 non-degradation gate. A closer approximation to the high-NFE flow endpoint is therefore not
 intrinsically a better closed-loop action for the released policy.
 
+Uniformly averaging all four actor-update checkpoints from the H43 Square control trajectory also
+failed. The finite 35-tensor average improved zero-source success from 7/20 to 8/20 but reduced
+Gaussian-source success from 5/20 to 3/20, leaving pooled success down from 12/40 to 11/40. Together
+with BC-to-final interpolation and rollout-local Adam, this shows that smoothing the short online
+trajectory repeatedly favors modal deterministic behavior rather than preserving useful source
+diversity.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -323,6 +330,7 @@ intrinsically a better closed-loop action for the released policy.
 - Zero-endpoint PCGrad repeats the same sub-threshold pattern across Can and Square: it preserves zero-source success and adds only one random-source success in each balanced 20-episode screen. Endpoint conflict protection is therefore closed as a reward-improvement route without confirmation or tuning.
 - Restoring a short-finetuned Square checkpoint from 16 to 8 executed actions improved Gaussian-source success by 2/20 but reduced zero-source success by 3/20 and pooled success by 1/40. More frequent visual feedback changes the source-mode tradeoff rather than providing a stable policy improvement.
 - Clearing actor AdamW state at each new Square rollout is active and behaviorally consequential: it improved zero-source success by 4/20 but reduced Gaussian-source success by 3/20, yielding only +1/40 pooled. Stale cross-rollout moments are not simply harmful; they help retain stochastic-source behavior.
+- Uniform averaging within the actor-update trajectory repeats the same tradeoff: zero success rose by 1/20 while Gaussian-source success fell by 2/20. Weight-space smoothing is closed alongside BC-to-final interpolation.
 
 ## Lessons and Constraints
 
@@ -345,4 +353,4 @@ intrinsically a better closed-loop action for the released policy.
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, rank-based GAE weighting, terminal-sign filtering, fixed and KL-adaptive lower actor learning rates, full-batch gradient accumulation, BC/FPO++ midpoint interpolation, explicit Gaussian-bridge distillation, antithetic endpoint averaging, shorter receding-horizon execution, temporally correlated Gaussian inference, advantage-sign and endpoint-anchor gradient surgery, temporal per-timestep clipping, coordinate-wise median and geometric-median gradient aggregation, PPO-RB ratio rollback, equal-NFE midpoint sampling, checkpoint-native Square execution horizon restoration, and rollout-local Adam are closed as reward-improvement routes. Reflow and midpoint retain geometry/sampling-fidelity value only. The next candidate must improve reward without trading away Gaussian-source exploration.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, rank-based GAE weighting, terminal-sign filtering, fixed and KL-adaptive lower actor learning rates, full-batch gradient accumulation, BC/FPO++ midpoint interpolation, within-trajectory SWA, explicit Gaussian-bridge distillation, antithetic endpoint averaging, shorter receding-horizon execution, temporally correlated Gaussian inference, advantage-sign and endpoint-anchor gradient surgery, temporal per-timestep clipping, coordinate-wise median and geometric-median gradient aggregation, PPO-RB ratio rollback, equal-NFE midpoint sampling, checkpoint-native Square execution horizon restoration, and rollout-local Adam are closed as reward-improvement routes. Reflow and midpoint retain geometry/sampling-fidelity value only. The next candidate must improve reward without trading away Gaussian-source exploration.

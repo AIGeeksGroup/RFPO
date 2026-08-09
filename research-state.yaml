@@ -348,7 +348,7 @@ hypotheses:
     priority: high
   - id: H44
     statement: "Uniform averaging of all actor-update checkpoints from one short Square FPO++ trajectory improves random-source success without degrading zero-source behavior."
-    status: active
+    status: refuted
     motivation: "SWA can smooth one optimization trajectory without source-specific inference or checkpoint selection; H25 tested only a BC-to-final midpoint rather than within-trajectory averaging."
     parent: H40
     priority: high
@@ -367,7 +367,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 143
+  total_runs: 148
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -1210,11 +1210,45 @@ experiments:
       action_steps: 16
       balanced_episodes_per_env: true
       renderer: osmesa
+    - run: square_h44_swa_from_h43_control
+      metric: checkpoint_generation
+      value: 1
+      source_steps: [10240, 15360, 20480, 25600]
+      floating_tensor_count: 35
+      all_finite: true
+    - run: square_h44_final_zero_balanced20_seed20260919
+      metric: success_rate
+      value: 0.35
+      episodes: 20
+      action_steps: 16
+      balanced_episodes_per_env: true
+      renderer: osmesa
+    - run: square_h44_final_random_balanced20_seed20260919
+      metric: success_rate
+      value: 0.25
+      episodes: 20
+      action_steps: 16
+      balanced_episodes_per_env: true
+      renderer: osmesa
+    - run: square_h44_swa_zero_balanced20_seed20260919
+      metric: success_rate
+      value: 0.40
+      episodes: 20
+      action_steps: 16
+      balanced_episodes_per_env: true
+      renderer: osmesa
+    - run: square_h44_swa_random_balanced20_seed20260919
+      metric: success_rate
+      value: 0.15
+      episodes: 20
+      action_steps: 16
+      balanced_episodes_per_env: true
+      renderer: osmesa
 
 outer_loop:
   cycle: 30
-  last_direction: "Evaluate H44's uniform average of all actor-update checkpoints from the frozen H43 official-control trajectory."
-  last_reflection: "H42-H43 expose opposing zero/random movements. SWA is a coefficient-free way to smooth one online trajectory without source-specific decisions or changing training."
+  last_direction: "H44 is closed; synthesize a new training-time candidate that targets Gaussian-source reward without modal-policy smoothing."
+  last_reflection: "Uniform actor-trajectory averaging improved zero success by 1/20 but reduced random success by 2/20 and pooled success by 1/40. Across H25, H43, and H44, smoothing the online trajectory repeatedly trades stochastic-source behavior for the deterministic mode."
 
 workspace:
   findings: "findings.md"
