@@ -67,6 +67,14 @@ literature:
       title: "ReFPO: Reflow Regularization for Flow Matching Policy Gradients"
       year: 2026
       relevance: "Specifies an unweighted current-CFM regularizer for reducing fixed-batch FPO proxy-ratio volatility without additional flow evaluations."
+    - id: yang2026_vine
+      title: "VINE: Taming Generative Control Policies for Reinforcement Learning"
+      year: 2026
+      relevance: "Reconstructs interpolation states for stable action-value-gradient BPTT, but requires twin-Q and replay infrastructure absent from FPO++."
+    - id: hamid2025_polychromic
+      title: "Polychromic Objectives for Reinforcement Learning"
+      year: 2025
+      relevance: "Uses multiple continuations from common intermediate states to form Monte Carlo set advantages without relying on a learned value at vine states."
     - id: garg2021_heavy_tailed_ppo
       title: "On Proximal Policy Optimization's Heavy-tailed Gradients"
       year: 2021
@@ -484,6 +492,12 @@ hypotheses:
     statement: "ReFPO's unweighted current-CFM regularizer reduces fixed-batch FPO++ ratio drift while retaining useful surrogate progress and outcome-gradient direction."
     status: refuted
     motivation: "A subsequent paper specifies a direct fixed-batch regularizer distinct from H2's failed offline-reflow gradient-disagreement mechanism; it can be falsified in one paired actor-update audit without a long training run."
+    parent: H2
+    priority: high
+  - id: H62
+    statement: "Replay-exact Square vine rollouts yield reproducible local action-chunk return rankings across independent continuation-noise blocks."
+    status: planned
+    motivation: "Existing critic and trajectory-level estimators are unreliable; common-state branch returns may isolate local sparse-reward action credit without learning a Q function."
     parent: H2
     priority: high
 
@@ -1874,9 +1888,9 @@ experiments:
       renderer: osmesa
 
 outer_loop:
-  cycle: 47
-  last_direction: "Refute current-CFM ReFPO regularization at the published MuJoCo coefficient and return to a distinct reward-aware hypothesis."
-  last_reflection: "ReFPO retained surrogate progress and weakly reduced ratio dispersion, but failed every locked ratio and clipping threshold and degraded one outcome-gradient batch. Do not tune the anchor or run reward training; the next candidate must target reward credit or exploration rather than flow geometry or generic behavior anchoring."
+  cycle: 48
+  last_direction: "Audit replay-exact branch returns as a critic-free local credit signal before implementing any new actor update."
+  last_reflection: "Direct VINE is a value-gradient twin-Q method rather than value-free credit assignment and is too coupled for a clean pilot. Polychromic vine sampling suggests a smaller prerequisite: test whether multiple continuations from exact Square prefixes rank Gaussian flow actions reproducibly across future-noise blocks."
 
 workspace:
   findings: "findings.md"
