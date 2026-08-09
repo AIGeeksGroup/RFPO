@@ -76,6 +76,12 @@ from src.adaptive_lr import adapt_learning_rate_from_kl
 from src.rollout_local_optimizer import clear_optimizer_state
 from src.stratified_minibatches import advantage_sign_stratified_permutation
 from src.potential_shaping import collection_fingerprint, potential_shaping_term
+from src.surgical_finetuning import (
+    actor_parameter_movement,
+    configure_actor_trainable_scope,
+    optimizer_parameter_names,
+    snapshot_actor_parameters,
+)
 
 # ---- Multiprocessing start method (CUDA compat) ------------------------------
 try:
@@ -132,6 +138,7 @@ class FlowPPOConfig:
 
     # FPO
     freeze_vision_encoder: bool = True
+    actor_trainable_scope: Literal["all", "output_head"] = "all"
     do_chunk_level_ppo: bool = True
     do_average_cfm_loss_in_chunk: bool = False
     n_action_samples: int = 16
@@ -1166,6 +1173,19 @@ def main(cfg: FlowPPOConfig):
         for p in actor.model.vision_encoder.parameters():
             p.requires_grad = False
 
+    actor_scope_manifest = configure_actor_trainable_scope(
+        actor, cfg.actor_trainable_scope
+    )
+    actor_initial_parameters = snapshot_actor_parameters(actor)
+    logger.info(
+        "[Rank %d] Actor trainable scope %s: %d/%d parameters (%.4f%%)",
+        rank,
+        cfg.actor_trainable_scope,
+        actor_scope_manifest["trainable_parameter_count"],
+        actor_scope_manifest["total_parameter_count"],
+        100 * actor_scope_manifest["trainable_fraction"],
+    )
+
     endpoint_anchor_model = None
     if cfg.zero_endpoint_pcgrad_train:
         endpoint_anchor_model = copy.deepcopy(actor.model).eval()
@@ -1291,7 +1311,7 @@ def main(cfg: FlowPPOConfig):
                 f"Image keys: {image_keys} | Image shape: ({img_c},{img_h},{img_w}) | n_images={n_images}")
 
     # ----------------- Optimizers / sched ----------------
-    params_actor = actor.parameters()
+    params_actor = [parameter for parameter in actor.parameters() if parameter.requires_grad]
     optimizer_actor = optim.AdamW(
         params_actor,
         lr=cfg.learning_rate_actor,
@@ -1299,6 +1319,9 @@ def main(cfg: FlowPPOConfig):
         eps=1e-5,
         weight_decay=1e-6,
     )
+    actor_optimizer_names = optimizer_parameter_names(actor_module, optimizer_actor)
+    if set(actor_optimizer_names) != set(actor_scope_manifest["trainable_names"]):
+        raise RuntimeError("actor optimizer membership differs from trainable actor parameters")
     lr_scheduler_actor = get_scheduler(
         name=cfg.lr_scheduler_name,
         optimizer=optimizer_actor,
@@ -3710,6 +3733,7 @@ def main(cfg: FlowPPOConfig):
         early_stop_pre_gradients = None
         early_stop_pre_surrogates = None
         early_stop_pre_results = None
+        early_stop_pre_endpoints = None
         early_stop_epoch_results = []
         early_stop_positive_chunks_available = None
         if (
@@ -3771,6 +3795,15 @@ def main(cfg: FlowPPOConfig):
             early_stop_obs["action"] = early_stop_actions.to(device)
             actor_module.eval()
             with torch.no_grad():
+                normalized_early_stop_obs = actor_module.normalize_inputs(
+                    copy.deepcopy(early_stop_obs)
+                )
+                early_stop_conditioning = actor_module.model.encode_observations(
+                    normalized_early_stop_obs
+                )
+                early_stop_pre_endpoints = actor_zero_source_endpoint(
+                    early_stop_conditioning
+                ).detach()
                 early_stop_losses, returned_times, returned_noises = get_cfm_values(
                     actor_module,
                     early_stop_obs,
@@ -4792,6 +4825,19 @@ def main(cfg: FlowPPOConfig):
                         b_obs_images=early_stop_images,
                         b_obs_state=early_stop_states,
                     )
+                    with torch.no_grad():
+                        post_endpoint = actor_zero_source_endpoint(
+                            early_stop_conditioning[batch_slice]
+                        )
+                        endpoint_drift_mse = float(
+                            (
+                                post_endpoint
+                                - early_stop_pre_endpoints[batch_slice]
+                            )
+                            .square()
+                            .mean()
+                            .item()
+                        )
                     surrogate = float(
                         (batch_weights[:, None] * post_ratios).mean().item()
                     )
@@ -4808,6 +4854,7 @@ def main(cfg: FlowPPOConfig):
                             ),
                             "gradient_cosine_to_preupdate": gradient_cosine,
                             "gradient_norm": float(post_gradient.norm().item()),
+                            "zero_source_endpoint_drift_mse": endpoint_drift_mse,
                             "ratio_mean": float(post_ratios.mean().item()),
                             "surrogate": surrogate,
                             "surrogate_gain": (
@@ -4998,6 +5045,9 @@ def main(cfg: FlowPPOConfig):
                 active_fractions,
                 cfg.heldout_ratio_early_stop_threshold,
             )
+            actor_movement = actor_parameter_movement(
+                actor_module, actor_initial_parameters
+            )
             early_stop_result = {
                 "iteration": iteration,
                 "num_positive_chunks_available": early_stop_positive_chunks_available,
@@ -5017,6 +5067,9 @@ def main(cfg: FlowPPOConfig):
                 "adaptive_actor_lr": cfg.adaptive_actor_lr,
                 "adaptive_actor_lr_target_kl": cfg.adaptive_actor_lr_target_kl,
                 "actor_lr_at_policy_update_start": actor_lr_at_policy_update_start,
+                "actor_trainable_scope": actor_scope_manifest,
+                "actor_optimizer_parameter_names": actor_optimizer_names,
+                "actor_parameter_movement": actor_movement,
                 "adaptive_actor_lr_events": adaptive_lr_events,
                 "preupdate_batches": early_stop_pre_results,
                 "selected_epoch": selected_epoch,
