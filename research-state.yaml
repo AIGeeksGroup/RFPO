@@ -414,6 +414,12 @@ hypotheses:
     motivation: "H50 rules out a cheap privileged critic, while the released wrapper discards bounded reach, grasp, lift, and hover progress that can be converted into policy-invariant local credit."
     parent: H40
     priority: high
+  - id: H52
+    statement: "Output-head-only FPO++ preserves useful Square surrogate progress while reducing full-model gradient rotation and endpoint drift."
+    status: proposed
+    motivation: "The final velocity head is only about 0.88% of the non-visual Square actor; surgical adaptation may avoid distorting pretrained flow features under scarce sparse-reward updates."
+    parent: H40
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -1579,9 +1585,9 @@ experiments:
       renderer: osmesa
 
 outer_loop:
-  cycle: 36
-  last_direction: "Close H51 after its independent confirmation reversed the Gaussian-source gain; select a distinct next intervention before further runs."
-  last_reflection: "H51's confirmation changed Gaussian success by -5/50 and pooled success by -4/100 despite valid paired training. Screen plus confirmation ties exactly at 58/140, showing that the initial gain was seed noise rather than a stable reward improvement."
+  cycle: 37
+  last_direction: "Audit H52 output-head-only FPO++ as a parameter-subspace intervention before any reward run."
+  last_reflection: "H51's confirmation changed Gaussian success by -5/50 and pooled success by -4/100 despite valid paired training. A distinct hypothesis is that scarce on-policy reward should adapt only the 0.88% velocity head rather than distort the full pretrained flow representation."
 
 workspace:
   findings: "findings.md"
