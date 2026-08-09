@@ -38,6 +38,8 @@ def main():
         or candidate["integration_method"] != "midpoint"
     ):
         raise ValueError("expected Euler control and midpoint candidate")
+    if control["sampling_steps"] != 64 or candidate["sampling_steps"] != 32:
+        raise ValueError("expected Euler-64 control and midpoint-32 candidate")
 
     modes = sorted(set(control["modes"]) & set(candidate["modes"]))
     if modes != ["random", "zero"]:
@@ -46,6 +48,19 @@ def main():
     mode_results = {}
     pooled_differences = []
     for mode in modes:
+        for condition_name, artifact in (
+            ("control", control),
+            ("candidate", candidate),
+        ):
+            mode_artifact = artifact["modes"][mode]
+            if not mode_artifact["actions_finite"]:
+                raise ValueError(f"{condition_name} {mode} produced non-finite actions")
+            if mode_artifact["episodes"] != artifact["episodes_per_mode"]:
+                raise ValueError(f"{condition_name} {mode} episode count is incomplete")
+            if len(mode_artifact["episode_returns"]) != artifact["episodes_per_mode"]:
+                raise ValueError(f"{condition_name} {mode} return array is incomplete")
+            if len(mode_artifact["episode_lengths"]) != artifact["episodes_per_mode"]:
+                raise ValueError(f"{condition_name} {mode} length array is incomplete")
         control_returns = np.asarray(
             control["modes"][mode]["episode_returns"], dtype=np.float64
         )

@@ -166,6 +166,28 @@ def main():
                 }
             results[mode] = mode_result
 
+    gates = {
+        "zero_finite": results["zero"]["finite"],
+        "random_finite": results["random"]["finite"],
+        "zero_mse_ratio_at_most_0_25": results["zero"]["mse_ratio"] <= 0.25,
+        "random_mse_ratio_at_most_0_25": results["random"]["mse_ratio"] <= 0.25,
+        "control_nfe_exact": all(
+            result["control_nfe"] == 64 for result in results.values()
+        ),
+        "candidate_nfe_exact": all(
+            result["candidate_nfe"] == 64 for result in results.values()
+        ),
+        "reference_nfe_exact": all(
+            result["reference_nfe"] == 256 for result in results.values()
+        ),
+        "std_ratio_in_range": 0.98
+        <= results["random"]["diversity_ratios"]["mean_element_std"]
+        <= 1.02,
+        "pairwise_ratio_in_range": 0.98
+        <= results["random"]["diversity_ratios"]["mean_pairwise_distance"]
+        <= 1.02,
+    }
+
     output = {
         "checkpoint": str(Path(args.checkpoint).resolve()),
         "task": args.task,
@@ -173,6 +195,8 @@ def main():
         "num_observations": args.num_envs,
         "rollout_steps": args.rollout_steps,
         "results": results,
+        "gates": gates,
+        "passed": all(gates.values()),
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(output, indent=2) + "\n")
