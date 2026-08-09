@@ -416,7 +416,7 @@ hypotheses:
     priority: high
   - id: H52
     statement: "Output-head-only FPO++ preserves useful Square surrogate progress while reducing full-model gradient rotation and endpoint drift."
-    status: proposed
+    status: refuted
     motivation: "The final velocity head is only about 0.88% of the non-visual Square actor; surgical adaptation may avoid distorting pretrained flow features under scarce sparse-reward updates."
     parent: H40
     priority: high
@@ -435,7 +435,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 188
+  total_runs: 190
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -1583,11 +1583,37 @@ experiments:
       combined_screen_and_confirmation_candidate_successes: 58
       passed: false
       renderer: osmesa
+    - run: square_h52_control_audit_v4_osmesa_seed20260981
+      metric: heldout_surgical_finetuning_audit
+      value: 12988528
+      trainable_parameters: 12988528
+      positive_chunks_available: 213
+      chunks_audited: 64
+      epoch10_gradient_cosine: [0.1629698873, 0.3430063128]
+      epoch10_surrogate_gain: [0.0442158878, 0.0250317901]
+      epoch10_zero_endpoint_drift_mse: [0.0030632915, 0.0027389007]
+      frozen_parameters_bitwise_unchanged: true
+      renderer: osmesa
+    - run: square_h52_candidate_audit_v4_osmesa_seed20260981
+      metric: heldout_surgical_finetuning_audit
+      value: 114800
+      trainable_parameters: 114800
+      fraction_of_control_trainable_parameters: 0.00883857
+      positive_chunks_available: 213
+      chunks_audited: 64
+      epoch10_gradient_cosine: [0.7217873335, 0.7157713771]
+      epoch10_surrogate_gain: [0.0009230152, 0.0005636439]
+      surrogate_gain_retention: [0.02087519, 0.02251712]
+      epoch10_zero_endpoint_drift_mse: [0.0000322797, 0.0000270829]
+      endpoint_drift_retention: [0.01053759, 0.00988822]
+      frozen_parameters_bitwise_unchanged: true
+      passed: false
+      renderer: osmesa
 
 outer_loop:
   cycle: 37
-  last_direction: "Audit H52 output-head-only FPO++ as a parameter-subspace intervention before any reward run."
-  last_reflection: "H51's confirmation changed Gaussian success by -5/50 and pooled success by -4/100 despite valid paired training. A distinct hypothesis is that scarce on-policy reward should adapt only the 0.88% velocity head rather than distort the full pretrained flow representation."
+  last_direction: "Close H52 after it retained only about 2% of control surrogate gain; select a genuinely distinct intervention before further runs."
+  last_reflection: "Output-head-only FPO++ raised held-out gradient cosine and reduced endpoint drift by about 99%, but its surrogate progress collapsed to 2.09-2.25% of control. Parameter restriction made the update nearly inert rather than improving the stability-learning tradeoff."
 
 workspace:
   findings: "findings.md"

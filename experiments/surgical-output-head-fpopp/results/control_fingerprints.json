@@ -1,0 +1,14 @@
+[
+  {
+    "fingerprint": "3a7088ec34eab18eb49bdc6ff8745fa38dfd892c35c75d51918fe9d9bb863efd",
+    "iteration": 1,
+    "sparse_reward_sum": 1.0,
+    "terminal_count": 1
+  },
+  {
+    "fingerprint": "e78abb953dd09212b7b737347b370588c8ca48f1275ba476ebf19ca696ffcd86",
+    "iteration": 2,
+    "sparse_reward_sum": 3.0,
+    "terminal_count": 3
+  }
+]
