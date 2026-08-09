@@ -20,6 +20,7 @@ parser.add_argument("--num-envs", type=int, default=50)
 parser.add_argument("--episodes", type=int, default=50)
 parser.add_argument("--seed", type=int, default=20261061)
 parser.add_argument("--source-seed", type=int, default=20261060)
+parser.add_argument("--secondary-source-seed", type=int)
 parser.add_argument(
     "--integration-method", choices=("euler", "midpoint"), required=True
 )
@@ -27,7 +28,7 @@ parser.add_argument("--sampling-steps", type=int, required=True)
 parser.add_argument(
     "--eval-modes",
     nargs="+",
-    choices=("zero", "random", "antithetic"),
+    choices=("zero", "random", "iid_pair", "antithetic"),
     default=("zero", "random"),
 )
 parser.add_argument("--output", type=Path, required=True)
@@ -53,7 +54,7 @@ from isaaclab.envs import DirectMARLEnv, multi_agent_to_single_agent
 from isaaclab_tasks.utils.parse_cfg import parse_env_cfg
 
 from isaaclab_fpo import FpoRslRlVecEnvWrapper
-from isaaclab_fpo.antithetic_inference import antithetic_action
+from isaaclab_fpo.antithetic_inference import antithetic_action, paired_source_action
 from isaaclab_fpo.runners import OnPolicyRunner
 from isaaclab_fpo.task_cfgs import TASK_CONFIGS
 
@@ -80,7 +81,11 @@ def evaluate_mode(runner, env, mode):
     source_hash = hashlib.sha256()
     source_value_count = 0
     source_sequence = None
-    if mode in ("random", "antithetic"):
+    secondary_source_hash = hashlib.sha256()
+    secondary_source_value_count = 0
+    secondary_source_sequence = None
+    stochastic_modes = ("random", "iid_pair", "antithetic")
+    if mode in stochastic_modes:
         source_generator = torch.Generator(device=runner.device)
         source_generator.manual_seed(args.source_seed)
         source_sequence = torch.randn(
@@ -97,6 +102,25 @@ def evaluate_mode(runner, env, mode):
         source_hash.update(source_values.tobytes())
         source_value_count = source_sequence.numel()
         del source_values
+        if mode == "iid_pair":
+            secondary_generator = torch.Generator(device=runner.device)
+            secondary_generator.manual_seed(args.secondary_source_seed)
+            secondary_source_sequence = torch.randn(
+                max_steps,
+                args.num_envs,
+                runner.alg.policy.num_actions,
+                device=runner.device,
+                dtype=obs.dtype,
+                generator=secondary_generator,
+            )
+            secondary_values = (
+                secondary_source_sequence.detach().cpu().contiguous().numpy()
+            )
+            secondary_source_hash.update(str(secondary_values.dtype).encode())
+            secondary_source_hash.update(str(secondary_values.shape).encode())
+            secondary_source_hash.update(secondary_values.tobytes())
+            secondary_source_value_count = secondary_source_sequence.numel()
+            del secondary_values
 
     runner.eval_mode()
     for step in range(max_steps):
@@ -106,12 +130,19 @@ def evaluate_mode(runner, env, mode):
                 if runner.cfg.empirical_normalization
                 else obs
             )
-            if mode in ("random", "antithetic"):
+            if mode in stochastic_modes:
                 source = source_sequence[step]
                 if mode == "random":
                     actions = runner.alg.policy.act_inference(norm_obs, source=source)
-                else:
+                elif mode == "antithetic":
                     actions = antithetic_action(runner.alg.policy, norm_obs, source)
+                else:
+                    actions = paired_source_action(
+                        runner.alg.policy,
+                        norm_obs,
+                        source,
+                        secondary_source_sequence[step],
+                    )
             else:
                 actions = runner.alg.policy.act_inference(norm_obs, eval_mode=mode)
         actions_finite = actions_finite and bool(torch.isfinite(actions).all())
@@ -147,7 +178,14 @@ def evaluate_mode(runner, env, mode):
             source_hash.hexdigest() if source_value_count else None
         ),
         "source_value_count": source_value_count,
-        "endpoint_count_per_action": 2 if mode == "antithetic" else 1,
+        "secondary_source_stream_sha256": (
+            secondary_source_hash.hexdigest() if secondary_source_value_count else None
+        ),
+        "secondary_source_value_count": secondary_source_value_count,
+        "endpoint_count_per_action": 2 if mode in ("iid_pair", "antithetic") else 1,
+        "nfe_per_action": args.sampling_steps
+        * (2 if args.integration_method == "midpoint" else 1)
+        * (2 if mode in ("iid_pair", "antithetic") else 1),
     }
 
 
@@ -155,6 +193,8 @@ def main():
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
     random.seed(args.seed)
+    if args.secondary_source_seed is None:
+        args.secondary_source_seed = args.source_seed + 1
 
     env_cfg = parse_env_cfg(args.task, device=args.device, num_envs=args.num_envs)
     agent_cfg = TASK_CONFIGS[args.task]()
@@ -176,6 +216,7 @@ def main():
         "task": args.task,
         "seed": args.seed,
         "source_seed": args.source_seed,
+        "secondary_source_seed": args.secondary_source_seed,
         "num_envs": args.num_envs,
         "episodes_per_mode": args.episodes,
         "integration_method": args.integration_method,
