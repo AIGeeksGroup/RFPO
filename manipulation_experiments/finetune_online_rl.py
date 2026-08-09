@@ -74,6 +74,7 @@ from src.terminal_consistency_filter import terminal_consistent_weights
 from src.ratio_rollback import rollback_clipped_ratio_loss
 from src.adaptive_lr import adapt_learning_rate_from_kl
 from src.rollout_local_optimizer import clear_optimizer_state
+from src.stratified_minibatches import advantage_sign_stratified_permutation
 
 # ---- Multiprocessing start method (CUDA compat) ------------------------------
 try:
@@ -212,6 +213,7 @@ class FlowPPOConfig:
     bc_anchor_pcgrad_audit_output_json: Optional[str] = None
     zero_endpoint_pcgrad_train: bool = False
     rollout_local_actor_optimizer: bool = False
+    advantage_sign_stratified_minibatches: bool = False
     rollout_zero_fraction: float = 0.0
     rollout_tempered_fraction: float = 0.0
     rollout_tempered_scale: float = 0.5
@@ -1365,6 +1367,7 @@ def main(cfg: FlowPPOConfig):
     direct_advantage_training_losses: list[float] = []
     endpoint_pcgrad_training_history: list[dict[str, Any]] = []
     rollout_local_optimizer_history: list[dict[str, Any]] = []
+    stratified_minibatch_history: list[dict[str, Any]] = []
 
     obs_state_stored = torch.zeros((steps_per_iteration, num_envs_per_process, joint_pos_dim))
     actions_stored = torch.zeros((steps_per_iteration, num_envs_per_process, action_dim))
@@ -4280,7 +4283,31 @@ def main(cfg: FlowPPOConfig):
         for epoch in trange(cfg.update_epochs, desc=f"[Rank {rank}] Policy update", disable=(rank != 0)):
             early_stop = False
             adaptive_epoch_event_start = len(adaptive_lr_events)
-            np.random.shuffle(b_inds)
+            if (
+                cfg.advantage_sign_stratified_minibatches
+                and iteration > cfg.n_iterations_train_only_value
+            ):
+                b_inds, stratified_metrics = advantage_sign_stratified_permutation(
+                    b_advantages[:, 0].detach().cpu().numpy(),
+                    cfg.num_minibatches,
+                    np.random,
+                )
+                stratified_event = {
+                    "iteration": iteration,
+                    "epoch": epoch + 1,
+                    **stratified_metrics,
+                }
+                stratified_minibatch_history.append(stratified_event)
+                if rank == 0:
+                    stratified_path = run_dir / "advantage_sign_stratified_minibatches.json"
+                    stratified_path.write_text(
+                        json.dumps(
+                            stratified_minibatch_history, indent=2, sort_keys=True
+                        )
+                        + "\n"
+                    )
+            else:
+                np.random.shuffle(b_inds)
             accumulation_counter = 0
             optimizer_actor.zero_grad(set_to_none=True)
             optimizer_critic.zero_grad(set_to_none=True)
