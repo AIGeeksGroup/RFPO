@@ -13,8 +13,8 @@ esac
 
 export NUM_ENVS=16
 export DATA_COLLECTION_STEPS=320
-# finetune_online_rl counts action chunks, not raw environment interactions.
-export TOTAL_TIMESTEPS=640
+# The trainer counts action chunks and executes range(1, num_iterations).
+export TOTAL_TIMESTEPS=960
 export EVAL_EPISODES=1
 export ROLLOUT_FREQ=None
 export ZERO_ENDPOINT_PCGRAD_TRAIN=False
@@ -24,7 +24,7 @@ export POTENTIAL_STAGE_SHAPING=False
 export COLLECTION_FINGERPRINT_AUDIT=True
 export SEED=20260981
 export MASTER_PORT="${MASTER_PORT:-29500}"
-export RUN_NAME="square_h52_${CONDITION}_audit_v2_osmesa_seed${SEED}"
+export RUN_NAME="square_h52_${CONDITION}_audit_v3_osmesa_seed${SEED}"
 
 export EXTRA_TRAIN_ARGS="--actor-trainable-scope $ACTOR_TRAINABLE_SCOPE --heldout-ratio-early-stop-audit True --heldout-ratio-early-stop-audit-iteration 2 --heldout-ratio-early-stop-audit-chunks 64"
 
