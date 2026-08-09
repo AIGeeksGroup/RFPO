@@ -46,6 +46,13 @@ treated only as supporting coverage, not as a count of relevant papers.
   symmetric augmented command conditioning addresses tracking symmetry rather
   than paired latent endpoints.
 
+An OpenAlex citation-neighborhood query for Jia et al. used work ID
+`W4417097706` and `filter=cites:W4417097706` with `per_page=100`. OpenAlex
+reported zero citing works and supplied zero indexed references for the work.
+Because the source is a recent preprint, this empty neighborhood is treated as
+an indexing limitation rather than evidence that no follow-up or cited prior
+work exists.
+
 ## Defensible novelty boundary
 
 The contribution can be framed around control-specific evidence: closed-loop
