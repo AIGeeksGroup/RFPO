@@ -37,6 +37,7 @@ flow map.
 
 ## Frozen evidence
 
+- Official Go2 baseline reproduction: `experiments/baseline-go2`.
 - Go2 equal-total-NFE and independent-policy studies: H69, H70, H73.
 - Go2 affine mechanism: H75.
 - Go2 batched throughput: H71.

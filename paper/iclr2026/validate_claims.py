@@ -10,6 +10,9 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 TEXT = " ".join((HERE / "main.tex").read_text(encoding="utf-8").split())
+BASELINE_TEXT = " ".join(
+    (ROOT / "experiments/baseline-go2/analysis.md").read_text(encoding="utf-8").split()
+)
 
 
 def load(relative: str) -> dict:
@@ -28,6 +31,15 @@ mechanism = load("experiments/go2-antithetic-affine-mechanism/results/analysis.j
 spot = load("experiments/spot-antithetic-cross-task/results/analysis.json")
 throughput = load("experiments/go2-antithetic-batched-throughput/results/benchmark.json")
 rollout = load("experiments/go2-mirrored-rollout-variance/results/analysis.json")
+
+for manuscript_value, baseline_value in (
+    ("$40.620$", "40.6197"),
+    ("$41.529$", "41.5294"),
+    ("$40.523$", "40.5234"),
+):
+    require(manuscript_value, "official Go2 reproduction")
+    if baseline_value not in BASELINE_TEXT:
+        raise AssertionError(f"missing baseline evidence value: {baseline_value}")
 
 random_effect = policy["estimands"]["antithetic32_minus_random64_equal_total_nfe"]
 iid_effect = policy["estimands"]["antithetic64_minus_iid_pair64_equal_pair_nfe"]

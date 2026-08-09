@@ -163,6 +163,14 @@ released hyperparameters. We evaluate the fixed final checkpoint
 evaluation return. The primary independent unit for cross-policy claims is the
 training seed, not the thousands of nested simulator episodes.
 
+Before changing inference, the official seed-42 run reproduced the reported
+approximately 40-return regime: final training return was $40.620$, while the
+fixed final checkpoint obtained $41.529$ with zero-source evaluation and
+$40.523$ with random-source evaluation. The runner completed all 1500 training
+iterations and evaluated all 31 saved checkpoints with 4096 episodes per source
+mode and checkpoint. Subsequent method comparisons use fixed final checkpoints
+rather than selecting the best evaluation iteration.
+
 Within a policy, comparisons are paired by initial environment state. Random,
 IID-pair, and symmetric modes share the complete primary source stream; IID
 uses a separately seeded secondary stream. The three new Go2 policies use 512
@@ -399,6 +407,7 @@ hard-coded result values.
     \toprule
     Claim & Artifact directory \\
     \midrule
+    Official Go2 reproduction & \texttt{experiments/baseline-go2} \\
     Four-policy return effects & \texttt{experiments/go2-antithetic-cross-policy-summary} \\
     Independent Go2 policies & \texttt{experiments/go2-antithetic-independent-seeds} \\
     Equal-total-NFE seed 42 & \texttt{experiments/go2-antithetic-equal-total-nfe} \\
