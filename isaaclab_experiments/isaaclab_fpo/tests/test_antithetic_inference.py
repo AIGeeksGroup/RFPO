@@ -1,7 +1,11 @@
 import pytest
 import torch
 
-from isaaclab_fpo.antithetic_inference import antithetic_action, paired_source_action
+from isaaclab_fpo.antithetic_inference import (
+    antithetic_action,
+    antithetic_action_batched,
+    paired_source_action,
+)
 
 
 class QuadraticPolicy:
@@ -33,6 +37,20 @@ def test_antithetic_action_rejects_nonfinite_source():
         antithetic_action(
             QuadraticPolicy(), torch.zeros(1, 2), torch.tensor([[0.0, float("nan")]])
         )
+
+
+def test_batched_antithetic_action_uses_one_doubled_call():
+    policy = QuadraticPolicy()
+    observations = torch.tensor([[1.0, 2.0], [3.0, 4.0]])
+    source = torch.tensor([[0.5, -1.0], [2.0, -0.25]])
+
+    result = antithetic_action_batched(policy, observations, source)
+
+    assert len(policy.sources) == 1
+    assert torch.equal(policy.sources[0], torch.cat((source, -source), dim=0))
+    positive = observations + source + 0.25 * source.square()
+    negative = observations - source + 0.25 * source.square()
+    assert torch.equal(result, (positive + negative) * 0.5)
 
 
 def test_paired_source_action_averages_independent_endpoints():
