@@ -96,6 +96,7 @@ def evaluate_mode(runner, env, mode):
         source_hash.update(str(source_values.shape).encode())
         source_hash.update(source_values.tobytes())
         source_value_count = source_sequence.numel()
+        del source_values
 
     runner.eval_mode()
     for step in range(max_steps):
