@@ -320,7 +320,7 @@ hypotheses:
     priority: high
   - id: H40
     statement: "The released Square base checkpoint provides a non-saturated balanced reward regime suitable for short paired FPO++ method screens."
-    status: active
+    status: supported
     motivation: "Can step 1000 is reward-starved for short training while step 6000 screens can saturate; the paper reports roughly 28.6% Square base success and meaningful FPO++ gains, and the released checkpoint is already available on the server."
     parent: H0
     priority: high
@@ -339,7 +339,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 123
+  total_runs: 125
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -1054,11 +1054,25 @@ experiments:
       positive_chunks: 102
       audited_chunks: 64
       paired_preupdate: true
+    - run: square_base_zero_balanced20_seed20260912
+      metric: success_rate
+      value: 0.45
+      episodes: 20
+      average_episode_length: 319.8
+      balanced_episodes_per_env: true
+      renderer: osmesa
+    - run: square_base_random_balanced20_seed20260912
+      metric: success_rate
+      value: 0.35
+      episodes: 20
+      average_episode_length: 345.3
+      balanced_episodes_per_env: true
+      renderer: osmesa
 
 outer_loop:
   cycle: 27
-  last_direction: "Validate the released Square checkpoint as a balanced non-saturated small-scale method-screening regime before registering another training intervention."
-  last_reflection: "H39 closes fixed/adaptive step-size control. Appendix D.5 discourages entropy regularization for manipulation, while Square offers reported headroom and existing local assets without a large training commitment."
+  last_direction: "Register and smoke-test a Square-specific paired FPO++ continuation protocol before evaluating the first reward-improvement candidate."
+  last_reflection: "H40 scored 9/20 zero and 7/20 random with balanced accounting, supporting Square as a non-saturated OSMesa screening regime while providing no method-improvement evidence."
 
 workspace:
   findings: "findings.md"

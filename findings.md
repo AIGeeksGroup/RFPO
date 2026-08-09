@@ -319,6 +319,7 @@ intrinsically a better closed-loop action for the released policy.
 - A second-order sampler can exploit the existing flow field without retraining: midpoint-5 nearly matches the Euler-64 endpoint at the same NFE as Euler-10 and preserves Gaussian-source diversity. Reward transfer must still be established independently.
 - Higher endpoint fidelity is not a sufficient reward objective: midpoint-5's deterministic +2/20 was exactly offset by a Gaussian-source -2/20 in balanced Can evaluation.
 - The released `x1_pred` KL-adaptive LR controller does preserve more active ratios, but in manipulation it immediately collapses to the transferred lower LR bound, retains only 27-32% of control surrogate progress, and fails to improve held-out direction consistently. Adaptive step-size reduction is closed alongside fixed low LR.
+- Balanced Square evaluation gives both zero and random inference meaningful success and headroom (45% and 35%), making it a better short reward screen than sparse step-1000 or saturated step-6000 Can.
 
 ## Lessons and Constraints
 
@@ -335,7 +336,7 @@ intrinsically a better closed-loop action for the released policy.
 - Which reward-aware FPO++ mechanism can improve Can success without relying on unstable BC-source exploration changes?
 - A frozen BC velocity-field anchor strongly conflicts with FPO++ and prevents drift, but global PCGrad retains only 34-46% of one-step surrogate gain. Generic flow-space behavior protection is too broad; a deterministic endpoint anchor is the next narrower test.
 - Narrowing the anchor to the deterministic zero-source action endpoint passes the fixed-batch mechanism audit, but H30 could not test reward superiority because its matched control saturated at 20/20 in both modes.
-- Which non-saturated, inexpensive evaluation regime best predicts official-scale Can improvements without returning to the sparse step-1000 training bottleneck?
+- Does a gain in the non-saturated Square screen survive an independent seed and healthy-EGL confirmation?
 - Which training-time intervention remains distinct from the closed source, estimator, critic, optimizer, interpolation, and inference-averaging routes?
 
 ## Optimization Trajectory

@@ -1,0 +1,13 @@
+Evaluation Summary
+================================================================================
+Environment: Square
+Checkpoint: latest
+Run ID: None
+Episodes: 20
+Balanced Episodes Per Env: True
+Sampling Mode: random
+Action Steps: 8
+Success Rate: 35.00% +/- 47.70%
+Average Return: 0.350 +/- 0.477
+FPS: 165.6
+================================================================================
