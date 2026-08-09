@@ -47,6 +47,10 @@ literature:
       title: "On Proximal Policy Optimization's Heavy-tailed Gradients"
       year: 2021
       relevance: "Motivates geometric median-of-means aggregation of complete PPO gradient vectors."
+    - id: izmailov2018_swa
+      title: "Averaging Weights Leads to Wider Optima and Better Generalization"
+      year: 2018
+      relevance: "Motivates uniform averaging of policy checkpoints along one online optimization trajectory."
   open_problems:
     - "FPO++ uses many Euler steps; it is unknown whether conditional reflow improves control return or only sampling efficiency."
     - "The relation between flow curvature, CFM ratio variance, and policy-update stability is not established."
@@ -340,6 +344,12 @@ hypotheses:
     statement: "Resetting actor AdamW moments at each new Square rollout prevents stale cross-rollout statistics from distorting FPO++ updates and improves random-source success without degrading zero-source behavior."
     status: refuted
     motivation: "The released loop carries Adam moments across independently collected on-policy rollouts; prior optimizer tests changed within-rollout update behavior but did not isolate this nonstationary boundary."
+    parent: H40
+    priority: high
+  - id: H44
+    statement: "Uniform averaging of all actor-update checkpoints from one short Square FPO++ trajectory improves random-source success without degrading zero-source behavior."
+    status: active
+    motivation: "SWA can smooth one optimization trajectory without source-specific inference or checkpoint selection; H25 tested only a BC-to-final midpoint rather than within-trajectory averaging."
     parent: H40
     priority: high
 
@@ -1202,9 +1212,9 @@ experiments:
       renderer: osmesa
 
 outer_loop:
-  cycle: 29
-  last_direction: "Run an outer-loop synthesis focused on preserving Gaussian exploration while improving deterministic behavior; optimizer-reset variants are closed."
-  last_reflection: "H43's active optimizer reset improved zero success by 4/20 but reduced random success by 3/20, producing only +1/40 pooled. Cross-rollout moments control the source-mode tradeoff but are not a stable improvement target by themselves."
+  cycle: 30
+  last_direction: "Evaluate H44's uniform average of all actor-update checkpoints from the frozen H43 official-control trajectory."
+  last_reflection: "H42-H43 expose opposing zero/random movements. SWA is a coefficient-free way to smooth one online trajectory without source-specific decisions or changing training."
 
 workspace:
   findings: "findings.md"
