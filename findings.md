@@ -356,6 +356,7 @@ rollout and are not the dominant bottleneck under this budget.
 - Global flow straightening and within-observation flow ranking both improve their geometry targets without improving reward: corrected lower-curvature best-of-two reduced Square random success by 3/20 despite a 12.62% curvature reduction.
 - Extending Square rollouts to the full 400-step horizon converts censored initial failures into observed terminals, but at equal interaction budget it leaves random success unchanged and reduces deterministic and pooled success.
 - RFS identifies a new intervention boundary after the flow-actor routes were exhausted: keep the pretrained velocity field frozen and optimize explicit latent-source and output-residual distributions with a standard PPO likelihood ratio.
+- Joint RFS modulation is active but not sufficient on Square: despite bitwise base freezing and nonzero updates in both branches, it reduced mean and sampled success by two points each. Its 224-dimensional exact joint PPO ratio clipped 73-76% of minibatch samples, unlike H33's inactive temporal-clipping premise in FPO++.
 
 ## Lessons and Constraints
 
@@ -376,6 +377,7 @@ rollout and are not the dominant bottleneck under this budget.
 - Which intervention can change reward-relevant exploration on Square rather than merely preserve the deterministic endpoint?
 - Which training-time intervention remains distinct from the closed source, estimator, critic, optimizer, interpolation, and inference-averaging routes?
 - Can joint source-latent and bounded residual modulation improve Square reward while keeping the released flow actor bitwise frozen?
+- Does temporally factorizing RFS's explicit PPO ratio restore usable updates under its observed high-dimensional clipping, or is the modulation direction itself harmful?
 
 ## Optimization Trajectory
 

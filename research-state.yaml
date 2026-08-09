@@ -380,7 +380,7 @@ hypotheses:
     priority: high
   - id: H48
     statement: "A frozen Square flow actor jointly modulated by a PPO-trained source-latent policy and bounded residual-action policy improves pooled deterministic/stochastic success."
-    status: active
+    status: refuted
     motivation: "RFS separates global latent exploration and local output correction while preserving the pretrained flow field and using an exact explicit-policy PPO ratio."
     parent: H40
     priority: high
@@ -399,7 +399,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 164
+  total_runs: 170
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -1407,11 +1407,31 @@ experiments:
       balanced_episodes_per_env: true
       deterministic_environment_seeds: true
       renderer: osmesa
+    - run: square_h48_control_mean_balanced20_seed20260925
+      metric: success_rate
+      value: 0.50
+      episodes: 20
+      renderer: osmesa
+    - run: square_h48_control_sampled_balanced20_seed20260925
+      metric: success_rate
+      value: 0.50
+      episodes: 20
+      renderer: osmesa
+    - run: square_h48_candidate_mean_balanced20_seed20260925
+      metric: success_rate
+      value: 0.40
+      episodes: 20
+      renderer: osmesa
+    - run: square_h48_candidate_sampled_balanced20_seed20260925
+      metric: success_rate
+      value: 0.40
+      episodes: 20
+      renderer: osmesa
 
 outer_loop:
   cycle: 34
-  last_direction: "Test RFS-style frozen input/output policy modulation with an exact chunk-level PPO ratio before considering heavier density-transport or value-gradient methods."
-  last_reflection: "H47 exposed all initial Square failure terminals but changed success from 16/40 to 14/40. RFS is a distinct boundary because it freezes the flow actor and learns reward-directed latent and residual controls outside the CFM surrogate."
+  last_direction: "Audit temporal factorization of the high-dimensional RFS PPO ratio before any second modulation-policy reward run."
+  last_reflection: "H48 kept the base actor frozen and updated both modulation branches, but reduced both Square modes by 2/20. Its exact 224-dimensional joint ratio clipped 73-76% of minibatch samples, exposing a specific optimization bottleneck rather than evidence for scale tuning."
 
 workspace:
   findings: "findings.md"
