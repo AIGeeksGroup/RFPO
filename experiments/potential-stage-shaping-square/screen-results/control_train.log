@@ -1,0 +1,294 @@
+[robosuite WARNING] No private macro file found! (macros.py:57)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:58)
+[robosuite WARNING] To setup, run: python /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/scripts/setup_macros.py (macros.py:59)
+[robosuite WARNING] Could not import robosuite_models. Some robots may not be available. If you want to use these robots, please install robosuite_models from source (https://github.com/ARISE-Initiative/robosuite_models) or through pip install. (__init__.py:30)
+2026-08-09 12:11:40,655 | INFO | [0/1] Using device: cuda:0
+/home/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/miniconda3/envs/fpo_manipulation/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py:4631: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+[rank0]:[W809 12:11:40.316874311 ProcessGroupNCCL.cpp:4718] [PG ID 0 PG GUID 0 Rank 0]  using GPU 0 as device used by this process is currently unknown. This can potentially cause a hang if this rank to GPU mapping is incorrect. You can pecify device_id in init_process_group() to force use of a particular device.
+2026-08-09 12:11:41,479 | INFO | Run directory: /home/haoyu/workspace/outputs/fpo-control/results/square_h51_control_osmesa_seed20260974
+2026-08-09 12:11:41,481 | INFO | Random seed set to 20260974
+2026-08-09 12:11:41,482 | INFO | [Global] Policy directory: /home/haoyu/workspace/code/fpo-control/manipulation_experiments/downloaded_checkpoints/trc7rbt0_step_110000/policy
+2026-08-09 12:11:41,790 | INFO | [Rank 0] Image features: ['observation.images.agentview']
+2026-08-09 12:11:41,791 | INFO | [Rank 0] State features: ['observation.state']
+2026-08-09 12:11:41,791 | INFO | [Rank 0] Using image features from checkpoint config: ['observation.images.agentview']
+2026-08-09 12:11:41,791 | INFO | [Rank 0] Constructing FlowMatchingPolicy from config...
+[ViT Init] Inferred image size from dataset: 84x84
+2026-08-09 12:11:41,873 | INFO | [Rank 0] Loaded policy from checkpoint
+2026-08-09 12:11:41,882 | INFO | Loaded and applied EMA weights from checkpoint
+2026-08-09 12:11:41,882 | WARNING | Only if you are training from scratch, otherwise you should use the same n_action_steps as the base policy (8)
+2026-08-09 12:11:41,882 | INFO | [Rank 0] Overriding n_action_steps to 16 from base policy 8
+2026-08-09 12:11:41,882 | INFO | [Rank 0] Overriding sampling_steps to 10 from base policy 10
+2026-08-09 12:11:41,882 | INFO | [Rank 0] Overriding cfm_loss_use_huber to True from base policy False
+2026-08-09 12:11:41,882 | INFO | [Rank 0] Overriding cfm_loss_huber_delta to 1.0 from base policy 0.5
+2026-08-09 12:11:41,882 | INFO | [Rank 0] Overriding cfm_loss_weight_from_t to constant from base policy constant
+2026-08-09 12:11:41,882 | INFO | [Rank 0] Overriding sde_sigma to 0.0 in actor config from base policy None
+2026-08-09 12:11:41,929 | INFO | [Rank 0] Freezing vision encoder
+2026-08-09 12:11:41,929 | INFO | [Rank 0] Removing EMA model for DDP compatibility
+2026-08-09 12:11:41,931 | INFO | [Rank 0] Actor: DistributedDataParallel
+2026-08-09 12:11:41,932 | INFO | [Rank 0] N action steps: 16, prediction horizon: 16
+2026-08-09 12:11:41,932 | INFO | [Rank 0] Critic: DistributedDataParallel(
+  (module): Critic(
+    (mlp): Sequential(
+      (0): Linear(in_features=10377, out_features=512, bias=True)
+      (1): ReLU()
+      (2): Linear(in_features=512, out_features=256, bias=True)
+      (3): ReLU()
+      (4): Linear(in_features=256, out_features=1, bias=True)
+    )
+  )
+)
+2026-08-09 12:11:41,932 | INFO | [Rank 0] Handling 16 envs | Local batch: 320 | Minibatch: 40
+2026-08-09 12:11:41,932 | INFO | [Rank 0] Grad accum steps: 1 | Effective MB: 40 (base: 40)
+num_visible_gpus: 1 [1] render_override: 
+2026-08-09 12:11:41,932 | INFO | Production mode: using gymnasium.vector.AsyncVectorEnv
+2026-08-09 12:11:41,932 | INFO | Video key: agentview
+2026-08-09 12:11:41,932 | INFO | Using image observation keys: ['agentview']
+[robosuite INFO] Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json (composite_controller_factory.py:121)
+2026-08-09 12:11:41,932 | INFO | Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json
+render_gpu_device_id: 1
+2026-08-09 12:11:43,702 | INFO | Successfully created NutAssemblySquare environment via robosuite.make() with cameras at 84x84
+2026-08-09 12:11:43,702 | INFO | Configured cameras: ['agentview']
+[robosuite WARNING] No private macro file found! (macros.py:57)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:58)
+[robosuite WARNING] To setup, run: python /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/scripts/setup_macros.py (macros.py:59)
+[robosuite WARNING] No private macro file found! (macros.py:57)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:58)
+[robosuite WARNING] To setup, run: python /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/scripts/setup_macros.py (macros.py:59)
+[robosuite WARNING] No private macro file found! (macros.py:57)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:58)
+[robosuite WARNING] To setup, run: python /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/scripts/setup_macros.py (macros.py:59)
+[robosuite WARNING] Could not import robosuite_models. Some robots may not be available. If you want to use these robots, please install robosuite_models from source (https://github.com/ARISE-Initiative/robosuite_models) or through pip install. (__init__.py:30)
+[robosuite WARNING] No private macro file found! (macros.py:57)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:58)
+[robosuite WARNING] To setup, run: python /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/scripts/setup_macros.py (macros.py:59)
+[robosuite WARNING] No private macro file found! (macros.py:57)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:58)
+[robosuite WARNING] To setup, run: python /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/scripts/setup_macros.py (macros.py:59)
+[robosuite WARNING] No private macro file found! (macros.py:57)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:58)
+[robosuite WARNING] To setup, run: python /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/scripts/setup_macros.py (macros.py:59)
+[robosuite WARNING] No private macro file found! (macros.py:57)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:58)
+[robosuite WARNING] To setup, run: python /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/scripts/setup_macros.py (macros.py:59)
+[robosuite WARNING] No private macro file found! (macros.py:57)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:58)
+[robosuite WARNING] To setup, run: python /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/scripts/setup_macros.py (macros.py:59)
+[robosuite WARNING] No private macro file found! (macros.py:57)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:58)
+[robosuite WARNING] To setup, run: python /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/scripts/setup_macros.py (macros.py:59)
+[robosuite WARNING] No private macro file found! (macros.py:57)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:58)
+[robosuite WARNING] To setup, run: python /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/scripts/setup_macros.py (macros.py:59)
+[robosuite WARNING] No private macro file found! (macros.py:57)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:58)
+[robosuite WARNING] To setup, run: python /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/scripts/setup_macros.py (macros.py:59)
+[robosuite WARNING] No private macro file found! (macros.py:57)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:58)
+[robosuite WARNING] To setup, run: python /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/scripts/setup_macros.py (macros.py:59)
+[robosuite WARNING] No private macro file found! (macros.py:57)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:58)
+[robosuite WARNING] To setup, run: python /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/scripts/setup_macros.py (macros.py:59)
+[robosuite WARNING] Could not import robosuite_models. Some robots may not be available. If you want to use these robots, please install robosuite_models from source (https://github.com/ARISE-Initiative/robosuite_models) or through pip install. (__init__.py:30)
+[robosuite WARNING] Could not import robosuite_models. Some robots may not be available. If you want to use these robots, please install robosuite_models from source (https://github.com/ARISE-Initiative/robosuite_models) or through pip install. (__init__.py:30)
+[robosuite WARNING] No private macro file found! (macros.py:57)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:58)
+[robosuite WARNING] To setup, run: python /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/scripts/setup_macros.py (macros.py:59)
+[robosuite WARNING] No private macro file found! (macros.py:57)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:58)
+[robosuite WARNING] To setup, run: python /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/scripts/setup_macros.py (macros.py:59)
+[robosuite WARNING] No private macro file found! (macros.py:57)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:58)
+[robosuite WARNING] To setup, run: python /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/scripts/setup_macros.py (macros.py:59)
+[robosuite WARNING] Could not import robosuite_models. Some robots may not be available. If you want to use these robots, please install robosuite_models from source (https://github.com/ARISE-Initiative/robosuite_models) or through pip install. (__init__.py:30)
+[robosuite WARNING] Could not import robosuite_models. Some robots may not be available. If you want to use these robots, please install robosuite_models from source (https://github.com/ARISE-Initiative/robosuite_models) or through pip install. (__init__.py:30)
+2026-08-09 12:11:51,967 | INFO | Video key: agentview
+2026-08-09 12:11:51,978 | INFO | Using image observation keys: ['agentview']
+[robosuite INFO] Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json (composite_controller_factory.py:121)
+2026-08-09 12:11:51,985 | INFO | Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json
+[robosuite WARNING] Could not import robosuite_models. Some robots may not be available. If you want to use these robots, please install robosuite_models from source (https://github.com/ARISE-Initiative/robosuite_models) or through pip install. (__init__.py:30)
+[robosuite WARNING] Could not import robosuite_models. Some robots may not be available. If you want to use these robots, please install robosuite_models from source (https://github.com/ARISE-Initiative/robosuite_models) or through pip install. (__init__.py:30)
+[robosuite WARNING] Could not import robosuite_models. Some robots may not be available. If you want to use these robots, please install robosuite_models from source (https://github.com/ARISE-Initiative/robosuite_models) or through pip install. (__init__.py:30)
+[robosuite WARNING] Could not import robosuite_models. Some robots may not be available. If you want to use these robots, please install robosuite_models from source (https://github.com/ARISE-Initiative/robosuite_models) or through pip install. (__init__.py:30)
+[robosuite WARNING] Could not import robosuite_models. Some robots may not be available. If you want to use these robots, please install robosuite_models from source (https://github.com/ARISE-Initiative/robosuite_models) or through pip install. (__init__.py:30)
+[robosuite WARNING] Could not import robosuite_models. Some robots may not be available. If you want to use these robots, please install robosuite_models from source (https://github.com/ARISE-Initiative/robosuite_models) or through pip install. (__init__.py:30)
+[robosuite WARNING] Could not import robosuite_models. Some robots may not be available. If you want to use these robots, please install robosuite_models from source (https://github.com/ARISE-Initiative/robosuite_models) or through pip install. (__init__.py:30)
+[robosuite WARNING] Could not import robosuite_models. Some robots may not be available. If you want to use these robots, please install robosuite_models from source (https://github.com/ARISE-Initiative/robosuite_models) or through pip install. (__init__.py:30)
+[robosuite WARNING] Could not import robosuite_models. Some robots may not be available. If you want to use these robots, please install robosuite_models from source (https://github.com/ARISE-Initiative/robosuite_models) or through pip install. (__init__.py:30)
+[robosuite WARNING] Could not import robosuite_models. Some robots may not be available. If you want to use these robots, please install robosuite_models from source (https://github.com/ARISE-Initiative/robosuite_models) or through pip install. (__init__.py:30)
+[robosuite WARNING] Could not import robosuite_models. Some robots may not be available. If you want to use these robots, please install robosuite_models from source (https://github.com/ARISE-Initiative/robosuite_models) or through pip install. (__init__.py:30)
+2026-08-09 12:11:52,728 | INFO | Video key: agentview
+2026-08-09 12:11:52,728 | INFO | Using image observation keys: ['agentview']
+[robosuite INFO] Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json (composite_controller_factory.py:121)
+2026-08-09 12:11:52,728 | INFO | Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json
+2026-08-09 12:11:52,822 | INFO | Video key: agentview
+2026-08-09 12:11:52,822 | INFO | Using image observation keys: ['agentview']
+[robosuite INFO] Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json (composite_controller_factory.py:121)
+2026-08-09 12:11:52,823 | INFO | Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json
+2026-08-09 12:11:53,912 | INFO | Successfully created NutAssemblySquare environment via robosuite.make() with cameras at 84x84
+2026-08-09 12:11:53,912 | INFO | Configured cameras: ['agentview']
+2026-08-09 12:11:54,256 | INFO | Video key: agentview
+2026-08-09 12:11:54,256 | INFO | Using image observation keys: ['agentview']
+[robosuite INFO] Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json (composite_controller_factory.py:121)
+2026-08-09 12:11:54,256 | INFO | Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json
+2026-08-09 12:11:54,505 | INFO | Successfully created NutAssemblySquare environment via robosuite.make() with cameras at 84x84
+2026-08-09 12:11:54,505 | INFO | Configured cameras: ['agentview']
+2026-08-09 12:11:54,615 | INFO | Successfully created NutAssemblySquare environment via robosuite.make() with cameras at 84x84
+2026-08-09 12:11:54,615 | INFO | Configured cameras: ['agentview']
+2026-08-09 12:11:54,762 | INFO | Video key: agentview
+2026-08-09 12:11:54,762 | INFO | Using image observation keys: ['agentview']
+[robosuite INFO] Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json (composite_controller_factory.py:121)
+2026-08-09 12:11:54,762 | INFO | Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json
+2026-08-09 12:11:55,142 | INFO | Video key: agentview
+2026-08-09 12:11:55,143 | INFO | Using image observation keys: ['agentview']
+[robosuite INFO] Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json (composite_controller_factory.py:121)
+2026-08-09 12:11:55,143 | INFO | Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json
+2026-08-09 12:11:55,618 | INFO | Video key: agentview
+2026-08-09 12:11:55,618 | INFO | Using image observation keys: ['agentview']
+[robosuite INFO] Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json (composite_controller_factory.py:121)
+2026-08-09 12:11:55,618 | INFO | Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json
+2026-08-09 12:11:55,844 | INFO | Video key: agentview
+2026-08-09 12:11:55,844 | INFO | Using image observation keys: ['agentview']
+[robosuite INFO] Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json (composite_controller_factory.py:121)
+2026-08-09 12:11:55,844 | INFO | Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json
+2026-08-09 12:11:55,854 | INFO | Video key: agentview
+2026-08-09 12:11:55,854 | INFO | Using image observation keys: ['agentview']
+[robosuite INFO] Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json (composite_controller_factory.py:121)
+2026-08-09 12:11:55,854 | INFO | Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json
+2026-08-09 12:11:55,882 | INFO | Video key: agentview
+2026-08-09 12:11:55,882 | INFO | Using image observation keys: ['agentview']
+[robosuite INFO] Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json (composite_controller_factory.py:121)
+2026-08-09 12:11:55,882 | INFO | Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json
+2026-08-09 12:11:55,889 | INFO | Video key: agentview
+2026-08-09 12:11:55,889 | INFO | Using image observation keys: ['agentview']
+[robosuite INFO] Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json (composite_controller_factory.py:121)
+2026-08-09 12:11:55,889 | INFO | Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json
+2026-08-09 12:11:55,922 | INFO | Video key: agentview
+2026-08-09 12:11:55,922 | INFO | Using image observation keys: ['agentview']
+[robosuite INFO] Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json (composite_controller_factory.py:121)
+2026-08-09 12:11:55,923 | INFO | Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json
+2026-08-09 12:11:55,923 | INFO | Video key: agentview
+2026-08-09 12:11:55,923 | INFO | Using image observation keys: ['agentview']
+[robosuite INFO] Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json (composite_controller_factory.py:121)
+2026-08-09 12:11:55,923 | INFO | Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json
+2026-08-09 12:11:55,932 | INFO | Video key: agentview
+2026-08-09 12:11:55,932 | INFO | Using image observation keys: ['agentview']
+[robosuite INFO] Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json (composite_controller_factory.py:121)
+2026-08-09 12:11:55,933 | INFO | Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json
+2026-08-09 12:11:55,936 | INFO | Video key: agentview
+2026-08-09 12:11:55,936 | INFO | Using image observation keys: ['agentview']
+[robosuite INFO] Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json (composite_controller_factory.py:121)
+2026-08-09 12:11:55,936 | INFO | Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json
+2026-08-09 12:11:55,941 | INFO | Video key: agentview
+2026-08-09 12:11:55,941 | INFO | Using image observation keys: ['agentview']
+[robosuite INFO] Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json (composite_controller_factory.py:121)
+2026-08-09 12:11:55,941 | INFO | Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json
+2026-08-09 12:11:56,060 | INFO | Successfully created NutAssemblySquare environment via robosuite.make() with cameras at 84x84
+2026-08-09 12:11:56,060 | INFO | Configured cameras: ['agentview']
+2026-08-09 12:11:56,565 | INFO | Successfully created NutAssemblySquare environment via robosuite.make() with cameras at 84x84
+2026-08-09 12:11:56,565 | INFO | Configured cameras: ['agentview']
+2026-08-09 12:11:56,932 | INFO | Successfully created NutAssemblySquare environment via robosuite.make() with cameras at 84x84
+2026-08-09 12:11:56,933 | INFO | Configured cameras: ['agentview']
+2026-08-09 12:11:57,436 | INFO | Successfully created NutAssemblySquare environment via robosuite.make() with cameras at 84x84
+2026-08-09 12:11:57,436 | INFO | Configured cameras: ['agentview']
+2026-08-09 12:11:57,668 | INFO | Successfully created NutAssemblySquare environment via robosuite.make() with cameras at 84x84
+2026-08-09 12:11:57,668 | INFO | Configured cameras: ['agentview']
+2026-08-09 12:11:57,728 | INFO | Successfully created NutAssemblySquare environment via robosuite.make() with cameras at 84x84
+2026-08-09 12:11:57,728 | INFO | Configured cameras: ['agentview']
+2026-08-09 12:11:57,745 | INFO | Successfully created NutAssemblySquare environment via robosuite.make() with cameras at 84x84
+2026-08-09 12:11:57,745 | INFO | Configured cameras: ['agentview']
+2026-08-09 12:11:57,747 | INFO | Successfully created NutAssemblySquare environment via robosuite.make() with cameras at 84x84
+2026-08-09 12:11:57,747 | INFO | Configured cameras: ['agentview']
+2026-08-09 12:11:57,749 | INFO | Successfully created NutAssemblySquare environment via robosuite.make() with cameras at 84x84
+2026-08-09 12:11:57,749 | INFO | Configured cameras: ['agentview']
+2026-08-09 12:11:57,763 | INFO | Successfully created NutAssemblySquare environment via robosuite.make() with cameras at 84x84
+2026-08-09 12:11:57,763 | INFO | Configured cameras: ['agentview']
+2026-08-09 12:11:57,763 | INFO | Successfully created NutAssemblySquare environment via robosuite.make() with cameras at 84x84
+2026-08-09 12:11:57,764 | INFO | Configured cameras: ['agentview']
+2026-08-09 12:11:57,777 | INFO | Successfully created NutAssemblySquare environment via robosuite.make() with cameras at 84x84
+2026-08-09 12:11:57,777 | INFO | Configured cameras: ['agentview']
+2026-08-09 12:11:57,799 | INFO | Successfully created NutAssemblySquare environment via robosuite.make() with cameras at 84x84
+2026-08-09 12:11:57,799 | INFO | Configured cameras: ['agentview']
+2026-08-09 12:11:59,298 | INFO | Created 16 vectorized Square environments
+2026-08-09 12:11:59,298 | INFO | Set video key to 'agentview' for video recording
+2026-08-09 12:11:59,303 | INFO | [Rank 0] Mixed-source rollout: 0 zero-source and 16 scale-1 Gaussian environments
+2026-08-09 12:11:59,303 | INFO | [Rank 0] Initialized action buffers for 16 environments
+2026-08-09 12:11:59,303 | INFO | [Rank 0] Obs state dim: 9 | Action dim: 7 | Image keys: ['observation.images.agentview'] | Image shape: (3,84,84) | n_images=1
+2026-08-09 12:11:59,303 | INFO | [Rank 0] Total timesteps: 25600, batch size: 320 | MB: 40, iterations: 80
+2026-08-09 12:12:00,361 | INFO | Created observation keys: ['observation.state', 'observation.images.agentview']
+2026-08-09 12:12:00,381 | INFO | Created observation keys: ['observation.state', 'observation.images.agentview']
+2026-08-09 12:12:00,416 | INFO | Created observation keys: ['observation.state', 'observation.images.agentview']
+2026-08-09 12:12:00,424 | INFO | Created observation keys: ['observation.state', 'observation.images.agentview']
+2026-08-09 12:12:00,425 | INFO | Created observation keys: ['observation.state', 'observation.images.agentview']
+2026-08-09 12:12:00,469 | INFO | Created observation keys: ['observation.state', 'observation.images.agentview']
+2026-08-09 12:12:00,492 | INFO | Created observation keys: ['observation.state', 'observation.images.agentview']
+2026-08-09 12:12:00,496 | INFO | Created observation keys: ['observation.state', 'observation.images.agentview']
+2026-08-09 12:12:00,515 | INFO | Created observation keys: ['observation.state', 'observation.images.agentview']
+2026-08-09 12:12:00,515 | INFO | Created observation keys: ['observation.state', 'observation.images.agentview']
+2026-08-09 12:12:00,550 | INFO | Created observation keys: ['observation.state', 'observation.images.agentview']
+2026-08-09 12:12:00,571 | INFO | Created observation keys: ['observation.state', 'observation.images.agentview']
+2026-08-09 12:12:00,574 | INFO | Created observation keys: ['observation.state', 'observation.images.agentview']
+2026-08-09 12:12:00,591 | INFO | Created observation keys: ['observation.state', 'observation.images.agentview']
+2026-08-09 12:12:00,616 | INFO | Created observation keys: ['observation.state', 'observation.images.agentview']
+2026-08-09 12:12:01,032 | INFO | Created observation keys: ['observation.state', 'observation.images.agentview']
+2026-08-09 12:12:01,054 | INFO | [Rank 0] Starting the main training loop
+2026-08-09 12:12:01,054 | INFO | Iteration: 1/80 | Global step (approx): 0/25600
+2026-08-09 12:12:02,600 | INFO | [Rank 0] Starting data collection...
+/home/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/miniconda3/envs/fpo_manipulation/lib/python3.10/contextlib.py:103: FutureWarning: `torch.backends.cuda.sdp_kernel()` is deprecated. In the future, this context manager will be removed. Please see `torch.nn.attention.sdpa_kernel()` for the new context manager, with updated signature.
+  self.gen = func(*args, **kwds)
+2026-08-09 12:12:13,856 | INFO | [Rank 0] step=100/320, sps_local=142.15, SR=0.00% from 0 episodes
+2026-08-09 12:12:27,120 | INFO | [Rank 0] step=200/320, sps_local=130.50, SR=100.00% from 4 episodes
+2026-08-09 12:12:36,480 | INFO | [Rank 0] step=300/320, sps_local=141.67, SR=100.00% from 5 episodes
+2026-08-09 12:12:37,982 | INFO | [Rank 0] SR: 100.00% from 5 episodes | SPS_local(rank0 est): 144.71
+2026-08-09 12:12:37,982 | INFO | [Rank 0] Source SR: guided=0.00% (0/0) | random=100.00% (5/5)
+2026-08-09 12:12:37,983 | INFO | [Rank 0] Valid CFM action fraction: 98.95% (5066/5120)
+[Rank 0] Policy update:   0%|          | 0/10 [00:00<?, ?it/s][rank0]:[W809 12:12:38.545477714 reducer.cpp:1430] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+[Rank 0] Policy update:  10%|█         | 1/10 [00:00<00:03,  2.54it/s][Rank 0] Policy update:  20%|██        | 2/10 [00:00<00:02,  3.88it/s][Rank 0] Policy update:  30%|███       | 3/10 [00:00<00:01,  4.69it/s][Rank 0] Policy update:  40%|████      | 4/10 [00:00<00:01,  5.20it/s][Rank 0] Policy update:  50%|█████     | 5/10 [00:01<00:00,  5.52it/s][Rank 0] Policy update:  60%|██████    | 6/10 [00:01<00:00,  5.76it/s][Rank 0] Policy update:  70%|███████   | 7/10 [00:01<00:00,  5.91it/s][Rank 0] Policy update:  80%|████████  | 8/10 [00:01<00:00,  5.87it/s][Rank 0] Policy update:  90%|█████████ | 9/10 [00:01<00:00,  5.82it/s][Rank 0] Policy update: 100%|██████████| 10/10 [00:01<00:00,  5.72it/s][Rank 0] Policy update: 100%|██████████| 10/10 [00:01<00:00,  5.30it/s]
+2026-08-09 12:12:39,960 | INFO | [iter      1/80] SR: 100.00% | SPS_local_est: 137 | pg_loss: -0.0000 | v_loss: 0.0005 | total_loss: 0.0005 | valid_cfm: 98.95%
+2026-08-09 12:12:40,168 | INFO | Checkpoint saved @ /home/haoyu/workspace/outputs/fpo-control/results/square_h51_control_osmesa_seed20260974/checkpoints/step_5120
+2026-08-09 12:12:40,169 | INFO | Iteration: 2/80 | Global step (approx): 5120/25600
+2026-08-09 12:12:41,911 | INFO | [Rank 0] Starting data collection...
+2026-08-09 12:12:50,002 | INFO | [Rank 0] step=100/320, sps_local=197.74, SR=0.00% from 0 episodes
+2026-08-09 12:12:58,326 | INFO | [Rank 0] step=200/320, sps_local=194.94, SR=0.00% from 0 episodes
+2026-08-09 12:13:09,155 | INFO | [Rank 0] step=300/320, sps_local=176.19, SR=100.00% from 2 episodes
+2026-08-09 12:13:10,729 | INFO | [Rank 0] SR: 100.00% from 2 episodes | SPS_local(rank0 est): 177.67
+2026-08-09 12:13:10,729 | INFO | [Rank 0] Source SR: guided=0.00% (0/0) | random=100.00% (2/2)
+2026-08-09 12:13:10,729 | INFO | [Rank 0] Valid CFM action fraction: 98.55% (5046/5120)
+[Rank 0] Policy update:   0%|          | 0/10 [00:00<?, ?it/s][Rank 0] Policy update:  10%|█         | 1/10 [00:00<00:01,  4.98it/s][Rank 0] Policy update:  20%|██        | 2/10 [00:00<00:01,  5.33it/s][Rank 0] Policy update:  30%|███       | 3/10 [00:00<00:01,  5.48it/s][Rank 0] Policy update:  40%|████      | 4/10 [00:00<00:01,  5.54it/s][Rank 0] Policy update:  50%|█████     | 5/10 [00:00<00:00,  5.56it/s][Rank 0] Policy update:  60%|██████    | 6/10 [00:01<00:00,  5.56it/s][Rank 0] Policy update:  70%|███████   | 7/10 [00:01<00:00,  5.57it/s][Rank 0] Policy update:  80%|████████  | 8/10 [00:01<00:00,  5.61it/s][Rank 0] Policy update:  90%|█████████ | 9/10 [00:01<00:00,  5.64it/s][Rank 0] Policy update: 100%|██████████| 10/10 [00:01<00:00,  5.67it/s][Rank 0] Policy update: 100%|██████████| 10/10 [00:01<00:00,  5.57it/s]
+2026-08-09 12:13:12,616 | INFO | [iter      2/80] SR: 100.00% | SPS_local_est: 150 | pg_loss: -0.0065 | v_loss: 0.0004 | total_loss: -0.0060 | valid_cfm: 98.55%
+2026-08-09 12:13:13,029 | INFO | Checkpoint saved @ /home/haoyu/workspace/outputs/fpo-control/results/square_h51_control_osmesa_seed20260974/checkpoints/step_10240
+2026-08-09 12:13:13,030 | INFO | Iteration: 3/80 | Global step (approx): 10240/25600
+2026-08-09 12:13:14,509 | INFO | [Rank 0] Starting data collection...
+2026-08-09 12:13:22,343 | INFO | [Rank 0] step=100/320, sps_local=204.24, SR=0.00% from 0 episodes
+2026-08-09 12:13:33,898 | INFO | [Rank 0] step=200/320, sps_local=165.05, SR=100.00% from 3 episodes
+2026-08-09 12:13:44,249 | INFO | [Rank 0] step=300/320, sps_local=161.40, SR=100.00% from 5 episodes
+2026-08-09 12:13:45,839 | INFO | [Rank 0] SR: 100.00% from 5 episodes | SPS_local(rank0 est): 163.43
+2026-08-09 12:13:45,839 | INFO | [Rank 0] Source SR: guided=0.00% (0/0) | random=100.00% (5/5)
+2026-08-09 12:13:45,839 | INFO | [Rank 0] Valid CFM action fraction: 97.95% (5015/5120)
+[Rank 0] Policy update:   0%|          | 0/10 [00:00<?, ?it/s][Rank 0] Policy update:  10%|█         | 1/10 [00:00<00:01,  5.48it/s][Rank 0] Policy update:  20%|██        | 2/10 [00:00<00:01,  5.54it/s][Rank 0] Policy update:  30%|███       | 3/10 [00:00<00:01,  5.60it/s][Rank 0] Policy update:  40%|████      | 4/10 [00:00<00:01,  5.67it/s][Rank 0] Policy update:  50%|█████     | 5/10 [00:00<00:00,  5.70it/s][Rank 0] Policy update:  60%|██████    | 6/10 [00:01<00:00,  5.66it/s][Rank 0] Policy update:  70%|███████   | 7/10 [00:01<00:00,  5.69it/s][Rank 0] Policy update:  80%|████████  | 8/10 [00:01<00:00,  5.70it/s][Rank 0] Policy update:  90%|█████████ | 9/10 [00:01<00:00,  5.70it/s][Rank 0] Policy update: 100%|██████████| 10/10 [00:01<00:00,  5.71it/s][Rank 0] Policy update: 100%|██████████| 10/10 [00:01<00:00,  5.68it/s]
+2026-08-09 12:13:47,695 | INFO | [iter      3/80] SR: 100.00% | SPS_local_est: 151 | pg_loss: -0.0056 | v_loss: 0.0003 | total_loss: -0.0052 | valid_cfm: 97.95%
+2026-08-09 12:13:48,122 | INFO | Checkpoint saved @ /home/haoyu/workspace/outputs/fpo-control/results/square_h51_control_osmesa_seed20260974/checkpoints/step_15360
+2026-08-09 12:13:48,122 | INFO | Iteration: 4/80 | Global step (approx): 15360/25600
+2026-08-09 12:13:49,718 | INFO | [Rank 0] Starting data collection...
+2026-08-09 12:13:57,689 | INFO | [Rank 0] step=100/320, sps_local=200.71, SR=0.00% from 0 episodes
+2026-08-09 12:14:11,248 | INFO | [Rank 0] step=200/320, sps_local=148.63, SR=100.00% from 5 episodes
+2026-08-09 12:14:22,117 | INFO | [Rank 0] step=300/320, sps_local=148.15, SR=100.00% from 7 episodes
+2026-08-09 12:14:23,585 | INFO | [Rank 0] SR: 100.00% from 7 episodes | SPS_local(rank0 est): 151.18
+2026-08-09 12:14:23,586 | INFO | [Rank 0] Source SR: guided=0.00% (0/0) | random=100.00% (7/7)
+2026-08-09 12:14:23,586 | INFO | [Rank 0] Valid CFM action fraction: 96.52% (4942/5120)
+[Rank 0] Policy update:   0%|          | 0/10 [00:00<?, ?it/s][Rank 0] Policy update:  10%|█         | 1/10 [00:00<00:01,  5.49it/s][Rank 0] Policy update:  20%|██        | 2/10 [00:00<00:01,  5.61it/s][Rank 0] Policy update:  30%|███       | 3/10 [00:00<00:01,  5.69it/s][Rank 0] Policy update:  40%|████      | 4/10 [00:00<00:01,  5.68it/s][Rank 0] Policy update:  50%|█████     | 5/10 [00:00<00:00,  5.72it/s][Rank 0] Policy update:  60%|██████    | 6/10 [00:01<00:00,  5.75it/s][Rank 0] Policy update:  70%|███████   | 7/10 [00:01<00:00,  5.77it/s][Rank 0] Policy update:  80%|████████  | 8/10 [00:01<00:00,  5.77it/s][Rank 0] Policy update:  90%|█████████ | 9/10 [00:01<00:00,  5.79it/s][Rank 0] Policy update: 100%|██████████| 10/10 [00:01<00:00,  5.78it/s][Rank 0] Policy update: 100%|██████████| 10/10 [00:01<00:00,  5.74it/s]
+2026-08-09 12:14:25,416 | INFO | [iter      4/80] SR: 100.00% | SPS_local_est: 149 | pg_loss: -0.0064 | v_loss: 0.0011 | total_loss: -0.0053 | valid_cfm: 96.52%
+2026-08-09 12:14:25,822 | INFO | Checkpoint saved @ /home/haoyu/workspace/outputs/fpo-control/results/square_h51_control_osmesa_seed20260974/checkpoints/step_20480
+2026-08-09 12:14:25,823 | INFO | Iteration: 5/80 | Global step (approx): 20480/25600
+2026-08-09 12:14:27,627 | INFO | [Rank 0] Starting data collection...
+2026-08-09 12:14:35,509 | INFO | [Rank 0] step=100/320, sps_local=202.98, SR=0.00% from 0 episodes
+2026-08-09 12:14:45,666 | INFO | [Rank 0] step=200/320, sps_local=177.39, SR=100.00% from 2 episodes
+2026-08-09 12:14:56,199 | INFO | [Rank 0] step=300/320, sps_local=167.99, SR=100.00% from 4 episodes
+2026-08-09 12:14:57,838 | INFO | [Rank 0] SR: 100.00% from 4 episodes | SPS_local(rank0 est): 169.47
+2026-08-09 12:14:57,838 | INFO | [Rank 0] Source SR: guided=0.00% (0/0) | random=100.00% (4/4)
+2026-08-09 12:14:57,839 | INFO | [Rank 0] Valid CFM action fraction: 96.00% (4915/5120)
+[Rank 0] Policy update:   0%|          | 0/10 [00:00<?, ?it/s][Rank 0] Policy update:  10%|█         | 1/10 [00:00<00:01,  6.38it/s][Rank 0] Policy update:  20%|██        | 2/10 [00:00<00:01,  6.29it/s][Rank 0] Policy update:  30%|███       | 3/10 [00:00<00:01,  6.01it/s][Rank 0] Policy update:  40%|████      | 4/10 [00:00<00:00,  6.22it/s][Rank 0] Policy update:  50%|█████     | 5/10 [00:00<00:00,  6.43it/s][Rank 0] Policy update:  60%|██████    | 6/10 [00:00<00:00,  6.58it/s][Rank 0] Policy update:  70%|███████   | 7/10 [00:01<00:00,  6.42it/s][Rank 0] Policy update:  80%|████████  | 8/10 [00:01<00:00,  6.42it/s][Rank 0] Policy update:  90%|█████████ | 9/10 [00:01<00:00,  6.51it/s][Rank 0] Policy update: 100%|██████████| 10/10 [00:01<00:00,  6.73it/s][Rank 0] Policy update: 100%|██████████| 10/10 [00:01<00:00,  6.49it/s]
+2026-08-09 12:14:59,462 | INFO | [iter      5/80] SR: 100.00% | SPS_local_est: 151 | pg_loss: -0.0031 | v_loss: 0.0004 | total_loss: -0.0027 | valid_cfm: 96.00%
+2026-08-09 12:14:59,787 | INFO | Checkpoint saved @ /home/haoyu/workspace/outputs/fpo-control/results/square_h51_control_osmesa_seed20260974/checkpoints/step_25600
+2026-08-09 12:14:59,788 | INFO | Training finished!
+[W809 12:15:02.463636436 CudaIPCTypes.cpp:16] Producer process has been terminated before all shared CUDA tensors released. See Note [Sharing CUDA tensors]

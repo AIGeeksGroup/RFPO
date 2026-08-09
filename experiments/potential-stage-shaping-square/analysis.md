@@ -1,4 +1,4 @@
-# H51 Stage A Analysis: Potential-Based Square Shaping
+# H51 Analysis: Potential-Based Square Shaping
 
 ## Result
 
@@ -28,10 +28,34 @@ At the same time, most failed-episode transitions expose local progress or regre
 Stage A is mechanism evidence only. It authorizes the already-preregistered five-iteration paired
 training screen; it is not reward-improvement or official-renderer benchmark evidence.
 
+## Stage B Paired Screen
+
+Both methods completed the locked five iterations and 25,600 environment interactions from the
+released Square checkpoint. The first two collection fingerprints matched exactly; fingerprints
+diverged only after the candidate update could affect behavior. All five candidate shaping records
+contained 5,120 finite terms. Active shaping ranged from 70.76% to 79.82% per iteration.
+
+| Evaluation mode | Control | Candidate | Delta | Locked gate | Outcome |
+|---|---:|---:|---:|---:|---|
+| Zero source | 12/20 (60%) | 13/20 (65%) | +1/20 | >= -1/20 | Pass |
+| Gaussian source | 9/20 (45%) | 12/20 (60%) | +3/20 | >= +2/20 | Pass |
+| Pooled | 21/40 (52.5%) | 25/40 (62.5%) | +4/40 | >= +3/40 | Pass |
+
+The candidate passed every preregistered screen gate. This is positive small-sample reward evidence
+and authorizes a separately committed independent confirmation. It is not yet a stable improvement:
+the screen contains only 20 episodes per cell, uses OSMesa rather than the official EGL renderer,
+and shares one training/evaluation seed pair.
+
 ## Artifacts
 
 - `results/config.json`
 - `results/results.json`
 - `results/records.jsonl`
 - `results/run.log`
-
+- `screen-results/control_collection_fingerprints.json`
+- `screen-results/candidate_collection_fingerprints.json`
+- `screen-results/candidate_potential_shaping_history.json`
+- `screen-results/*_train.log`
+- `screen-results/*_summary.txt`
+- `screen-results/control_{zero,random}.log`
+- `screen-results/candidate_{zero,random}.log`

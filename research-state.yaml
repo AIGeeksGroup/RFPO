@@ -429,7 +429,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 176
+  total_runs: 182
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -1495,11 +1495,51 @@ experiments:
       negative_fraction: 0.5278581068
       passed: true
       renderer: osmesa
+    - run: square_h51_control_osmesa_seed20260974
+      metric: paired_short_training
+      value: 25600
+      iterations: 5
+      interactions: 25600
+      renderer: osmesa
+    - run: square_h51_candidate_osmesa_seed20260974
+      metric: paired_short_training
+      value: 25600
+      iterations: 5
+      interactions: 25600
+      shaping_terms_per_iteration: 5120
+      finite: true
+      renderer: osmesa
+    - run: square_h51_control_zero_balanced20_seed20260975
+      metric: success_rate
+      value: 0.60
+      episodes: 20
+      successes: 12
+      renderer: osmesa
+    - run: square_h51_control_random_balanced20_seed20260975
+      metric: success_rate
+      value: 0.45
+      episodes: 20
+      successes: 9
+      renderer: osmesa
+    - run: square_h51_candidate_zero_balanced20_seed20260975
+      metric: success_rate
+      value: 0.65
+      episodes: 20
+      successes: 13
+      renderer: osmesa
+    - run: square_h51_candidate_random_balanced20_seed20260975
+      metric: success_rate
+      value: 0.60
+      episodes: 20
+      successes: 12
+      pooled_delta_successes: 4
+      passed: true
+      renderer: osmesa
 
 outer_loop:
   cycle: 36
-  last_direction: "Run the preregistered five-iteration H51 paired Square screen after the potential audit passed."
-  last_reflection: "H51's complete-episode telescoping residual was 3.75e-16, while 76.02% of failed-episode nonterminal transitions carried active signed shaping. The signal is valid and nontrivial, authorizing only the locked short paired training screen."
+  last_direction: "Freeze and run an independent-seed H51 confirmation after the paired Square reward screen passed all three gates."
+  last_reflection: "H51 improved zero success by 1/20, Gaussian-source success by 3/20, and pooled success by 4/40 after valid paired training. The small OSMesa screen is positive but not stable evidence until an independently seeded training and evaluation pair confirms it."
 
 workspace:
   findings: "findings.md"
