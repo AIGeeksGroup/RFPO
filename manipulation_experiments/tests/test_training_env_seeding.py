@@ -52,3 +52,22 @@ def test_training_builds_distinct_reproducible_environment_seeds():
 
     assert isinstance(seeds, ast.ListComp)
     assert "cfg.seed + global_env_offset + env_id" in ast.unparse(seeds)
+
+
+def test_evaluation_builds_distinct_reproducible_environment_seeds():
+    tree = parsed("eval_checkpoint.py")
+    evaluation_call = next(
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "create_vectorized_env"
+    )
+    seeds = next(
+        keyword.value for keyword in evaluation_call.keywords if keyword.arg == "seeds"
+    )
+
+    assert isinstance(seeds, ast.IfExp)
+    assert "cfg.seed is not None" in ast.unparse(seeds.test)
+    assert "cfg.seed + env_id" in ast.unparse(seeds.body)
+    assert isinstance(seeds.orelse, ast.Constant) and seeds.orelse.value is None

@@ -643,6 +643,11 @@ def main(cfg: EvalCheckpointConfig):
         video_key=cfg.camera_name,
         debug=cfg.debug,
         expected_image_keys=cfg.image_observation_keys,
+        seeds=(
+            [cfg.seed + env_id for env_id in range(cfg.eval_num_envs)]
+            if cfg.seed is not None
+            else None
+        ),
         # expected_image_keys=["agentview_image"] # cfg.image_observation_keys,
     )
 

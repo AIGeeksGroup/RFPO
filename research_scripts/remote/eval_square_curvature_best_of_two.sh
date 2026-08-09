@@ -6,6 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/common.sh"
 
 MODE="${MODE:-}"
+RUN_SUFFIX="${RUN_SUFFIX:-}"
 case "$MODE" in
   smoke)
     SAMPLING_MODE=curvature_best_of_two
@@ -42,7 +43,7 @@ export LD_LIBRARY_PATH="$OSMESA_LIB${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 export MUJOCO_GL=osmesa
 export PYOPENGL_PLATFORM=osmesa
 
-RUN_NAME="square_h46_${MODE}_osmesa_seed${SEED}"
+RUN_NAME="square_h46_${MODE}_osmesa_seed${SEED}${RUN_SUFFIX}"
 OUTPUT_DIR="$RUNTIME_ROOT/results/$RUN_NAME"
 LOG_PATH="$RUNTIME_ROOT/logs/$RUN_NAME.log"
 if [[ -e "$OUTPUT_DIR" || -e "$LOG_PATH" ]]; then
