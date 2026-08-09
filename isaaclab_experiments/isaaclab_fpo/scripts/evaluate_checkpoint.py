@@ -25,7 +25,10 @@ parser.add_argument(
 )
 parser.add_argument("--sampling-steps", type=int, required=True)
 parser.add_argument(
-    "--eval-modes", nargs="+", choices=("zero", "random"), default=("zero", "random")
+    "--eval-modes",
+    nargs="+",
+    choices=("zero", "random", "antithetic"),
+    default=("zero", "random"),
 )
 parser.add_argument("--output", type=Path, required=True)
 AppLauncher.add_app_launcher_args(parser)
@@ -50,6 +53,7 @@ from isaaclab.envs import DirectMARLEnv, multi_agent_to_single_agent
 from isaaclab_tasks.utils.parse_cfg import parse_env_cfg
 
 from isaaclab_fpo import FpoRslRlVecEnvWrapper
+from isaaclab_fpo.antithetic_inference import antithetic_action
 from isaaclab_fpo.runners import OnPolicyRunner
 from isaaclab_fpo.task_cfgs import TASK_CONFIGS
 
@@ -73,16 +77,42 @@ def evaluate_mode(runner, env, mode):
     episode_lengths = torch.zeros(args.num_envs, dtype=torch.long, device=runner.device)
     max_steps = int(env.max_episode_length) * 2
     actions_finite = True
+    source_hash = hashlib.sha256()
+    source_value_count = 0
+    source_sequence = None
+    if mode in ("random", "antithetic"):
+        source_generator = torch.Generator(device=runner.device)
+        source_generator.manual_seed(args.source_seed)
+        source_sequence = torch.randn(
+            max_steps,
+            args.num_envs,
+            runner.alg.policy.num_actions,
+            device=runner.device,
+            dtype=obs.dtype,
+            generator=source_generator,
+        )
+        source_values = source_sequence.detach().cpu().contiguous().numpy()
+        source_hash.update(str(source_values.dtype).encode())
+        source_hash.update(str(source_values.shape).encode())
+        source_hash.update(source_values.tobytes())
+        source_value_count = source_sequence.numel()
 
     runner.eval_mode()
-    for _ in range(max_steps):
+    for step in range(max_steps):
         with torch.inference_mode():
             norm_obs = (
                 runner.obs_normalizer(obs)
                 if runner.cfg.empirical_normalization
                 else obs
             )
-            actions = runner.alg.policy.act_inference(norm_obs, eval_mode=mode)
+            if mode in ("random", "antithetic"):
+                source = source_sequence[step]
+                if mode == "random":
+                    actions = runner.alg.policy.act_inference(norm_obs, source=source)
+                else:
+                    actions = antithetic_action(runner.alg.policy, norm_obs, source)
+            else:
+                actions = runner.alg.policy.act_inference(norm_obs, eval_mode=mode)
         actions_finite = actions_finite and bool(torch.isfinite(actions).all())
         obs, step_rewards, dones, _ = env.step(actions.to(env.device))
         obs = obs.to(runner.device)
@@ -112,6 +142,11 @@ def evaluate_mode(runner, env, mode):
         "actions_finite": actions_finite,
         "episodes": len(values),
         "initial_observation_sha256": initial_obs_hash.hexdigest(),
+        "source_stream_sha256": (
+            source_hash.hexdigest() if source_value_count else None
+        ),
+        "source_value_count": source_value_count,
+        "endpoint_count_per_action": 2 if mode == "antithetic" else 1,
     }
 
 
