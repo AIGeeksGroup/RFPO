@@ -3,6 +3,7 @@
 # ruff: noqa: E402
 
 import argparse
+import hashlib
 import json
 import math
 import random
@@ -60,6 +61,11 @@ def evaluate_mode(runner, env, mode):
 
     obs, _ = env.reset()
     obs = obs.to(runner.device)
+    initial_obs = obs.detach().cpu().contiguous().numpy()
+    initial_obs_hash = hashlib.sha256()
+    initial_obs_hash.update(str(initial_obs.dtype).encode())
+    initial_obs_hash.update(str(initial_obs.shape).encode())
+    initial_obs_hash.update(initial_obs.tobytes())
     rewards = torch.zeros(args.num_envs, device=runner.device)
     lengths = torch.zeros(args.num_envs, dtype=torch.long, device=runner.device)
     completed = torch.zeros(args.num_envs, dtype=torch.bool, device=runner.device)
@@ -105,6 +111,7 @@ def evaluate_mode(runner, env, mode):
         "mean_length": float(lens.mean()),
         "actions_finite": actions_finite,
         "episodes": len(values),
+        "initial_observation_sha256": initial_obs_hash.hexdigest(),
     }
 
 
