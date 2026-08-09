@@ -125,7 +125,9 @@ def analyze(results_dir):
     iid_comparison = comparisons["antithetic32_minus_iid_pair32"]
     deployment = comparisons["antithetic32_minus_zero32"]
     primary_gates = {
-        "healthy_zero64_mean_at_least_250": returns["zero64"].mean() >= 250.0,
+        "healthy_zero64_mean_at_least_250": bool(
+            returns["zero64"].mean() >= 250.0
+        ),
         "all_pairing_and_return_validity": True,
         "equal_random_iid_antithetic_total_nfe": (
             records["random64"]["nfe_per_action"]
