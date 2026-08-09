@@ -1,0 +1,13 @@
+{
+  "hypothesis": "H74",
+  "training_seed": 42,
+  "task": "Isaac-Velocity-Flat-Spot-v0",
+  "num_envs": 4096,
+  "iterations": 1500,
+  "post_training_checkpoint_sweep": false,
+  "run_dir": "/mnt/data/users/haoyu/workspace/code/fpo-control/isaaclab_experiments/logs/isaaclab_fpo/spot_flat_flow/2026-08-09_21-09-38_spot_h74_seed42",
+  "final_checkpoint": "/mnt/data/users/haoyu/workspace/code/fpo-control/isaaclab_experiments/logs/isaaclab_fpo/spot_flat_flow/2026-08-09_21-09-38_spot_h74_seed42/model_1499.pt",
+  "final_checkpoint_sha256": "e17d15f9484e101f5bf39d87e74b3e6f277dd67b9f670f02eb75b57a22ba06a8",
+  "final_checkpoint_bytes": 17097570,
+  "passed": true
+}

@@ -1,0 +1,129 @@
+[Warning] [simulation_app.simulation_app] Modules: ['omni.kit_app'] were loaded before SimulationApp was started and might not be loaded correctly.
+[Warning] [simulation_app.simulation_app] Please check to make sure no extra omniverse or pxr modules are imported before the call to SimulationApp(...)
+Loading user config located at: '/mnt/data/users/haoyu/workspace/code/fpo-control/isaaclab_experiments/thirdparty/miniconda3/envs/isaaclab_fpo/lib/python3.10/site-packages/omni/data/Kit/Isaac-Sim/4.5/user.config.json'
+[Info] [carb] Logging to file: /mnt/data/users/haoyu/workspace/code/fpo-control/isaaclab_experiments/thirdparty/miniconda3/envs/isaaclab_fpo/lib/python3.10/site-packages/omni/logs/Kit/Isaac-Sim/4.5/kit_20260809_210931.log
+2026-08-09 13:09:31 [0ms] [Warning] [omni.kit.app.plugin] No crash reporter present, dumps uploading isn't available.
+2026-08-09 13:09:31 [10ms] [Warning] [omni.ext.plugin] [ext: rendering_modes] Extensions config 'extension.toml' doesn't exist '/mnt/data/users/haoyu/workspace/code/fpo-control/isaaclab_experiments/thirdparty/IsaacLab/apps/rendering_modes' or '/mnt/data/users/haoyu/workspace/code/fpo-control/isaaclab_experiments/thirdparty/IsaacLab/apps/rendering_modes/config'
+2026-08-09 13:09:31 [278ms] [Warning] [omni.usd_config.extension] Enable omni.materialx.libs extension to use MaterialX
+2026-08-09 13:09:31 [516ms] [Warning] [omni.platforminfo.plugin] failed to open the default display.  Can't verify X Server version.
+2026-08-09 13:09:32 [752ms] [Warning] [omni.datastore] OmniHub is inaccessible
+2026-08-09 13:09:32 [794ms] [Warning] [omni.isaac.dynamic_control] omni.isaac.dynamic_control is deprecated as of Isaac Sim 4.5. No action is needed from end-users.
+2026-08-09 13:09:37 [5,778ms] [Warning] [carb.cudainterop.plugin] CUDA_VISIBLE_DEVICES environment variable is set.
+2026-08-09 13:09:37 [5,778ms] [Warning] [carb.cudainterop.plugin] Note CUDA device enumeration and Omniverse device enumeration are different.
+2026-08-09 13:09:37 [5,778ms] [Warning] [carb.cudainterop.plugin] Setting CUDA_VISIBLE_DEVICES can lead to undesired behavior or crashes.
+2026-08-09 13:09:37 [5,782ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA H200
+2026-08-09 13:09:37 [5,782ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-08-09 13:09:37 [5,783ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA H200
+2026-08-09 13:09:37 [5,783ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-08-09 13:09:37 [5,784ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA H200
+2026-08-09 13:09:37 [5,784ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-08-09 13:09:37 [5,785ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA H200
+2026-08-09 13:09:37 [5,785ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-08-09 13:09:37 [5,785ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA H200
+2026-08-09 13:09:37 [5,785ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-08-09 13:09:37 [5,786ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA H200
+2026-08-09 13:09:37 [5,786ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-08-09 13:09:37 [5,787ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA H200
+2026-08-09 13:09:37 [5,787ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-08-09 13:09:37 [5,787ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA H200
+2026-08-09 13:09:37 [5,787ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-08-09 13:09:37 [5,787ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA H200
+2026-08-09 13:09:37 [5,787ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-08-09 13:09:37 [5,787ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA H200
+2026-08-09 13:09:37 [5,787ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-08-09 13:09:37 [5,787ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA H200
+2026-08-09 13:09:37 [5,787ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-08-09 13:09:37 [5,787ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA H200
+2026-08-09 13:09:37 [5,787ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-08-09 13:09:37 [5,787ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA H200
+2026-08-09 13:09:37 [5,787ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-08-09 13:09:37 [5,787ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA H200
+2026-08-09 13:09:37 [5,787ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+
+|---------------------------------------------------------------------------------------------|
+| Driver Version: 580.126.20    | Graphics API: Vulkan
+|=============================================================================================|
+| GPU | Name                             | Active | LDA | GPU Memory | Vendor-ID | LUID       |
+|     |                                  |        |     |            | Device-ID | UUID       |
+|     |                                  |        |     |            | Bus-ID    |            |
+|---------------------------------------------------------------------------------------------|
+| 0   | NVIDIA H200                      | Yes: 0 |     | 143771  MB | 10de      | 0          |
+|     |                                  |        |     |            | 2335      | cde2e28e.. |
+|     |                                  |        |     |            | 16        |            |
+|---------------------------------------------------------------------------------------------|
+| 1   | NVIDIA H200                      |        |     | 143771  MB | 10de      | 0          |
+|     |                                  |        |     |            | 2335      | 04a9a9be.. |
+|     |                                  |        |     |            | 17        |            |
+|---------------------------------------------------------------------------------------------|
+| 2   | NVIDIA H200                      |        |     | 143771  MB | 10de      | 0          |
+|     |                                  |        |     |            | 2335      | f8cd977f.. |
+|     |                                  |        |     |            | 40        |            |
+|---------------------------------------------------------------------------------------------|
+| 3   | NVIDIA H200                      |        |     | 143771  MB | 10de      | 0          |
+|     |                                  |        |     |            | 2335      | eba08ce9.. |
+|     |                                  |        |     |            | 41        |            |
+|---------------------------------------------------------------------------------------------|
+| 4   | NVIDIA H200                      |        |     | 143771  MB | 10de      | 0          |
+|     |                                  |        |     |            | 2335      | 38095f57.. |
+|     |                                  |        |     |            | 96        |            |
+|---------------------------------------------------------------------------------------------|
+| 5   | NVIDIA H200                      |        |     | 143771  MB | 10de      | 0          |
+|     |                                  |        |     |            | 2335      | cbbbe2fc.. |
+|     |                                  |        |     |            | 97        |            |
+|---------------------------------------------------------------------------------------------|
+| 6   | NVIDIA H200                      |        |     | 143771  MB | 10de      | 0          |
+|     |                                  |        |     |            | 2335      | d832ca5c.. |
+|     |                                  |        |     |            | c0        |            |
+|---------------------------------------------------------------------------------------------|
+| 7   | NVIDIA H200                      |        |     | 143771  MB | 10de      | 0          |
+|     |                                  |        |     |            | 2335      | c97fbf11.. |
+|     |                                  |        |     |            | c1        |            |
+|=============================================================================================|
+| OS: 22.04.5 LTS (Jammy Jellyfish) ubuntu, Version: 22.04.5, Kernel: 5.15.0-126-generic
+| Processor: Intel(R) Xeon(R) Platinum 8468
+| Bare Metal Cores: 96 | Bare Metal Logical Cores: 192
+| Core Usage Quota: 144
+|---------------------------------------------------------------------------------------------|
+| Total Memory (MB): 1638400 | Free Memory: 1592870
+| Total Page/Swap (MB): 0 | Free Page/Swap: 0
+|---------------------------------------------------------------------------------------------|
+2026-08-09 13:09:37 [6,627ms] [Warning] [gpu.foundation.plugin] ECC is enabled on physical device 0
+2026-08-09 13:09:56 [25,098ms] [Warning] [omni.usd] Warning: in GetNodeDiscoveryResults at line 136 of /builds/omniverse/usd-ci/USD/pxr/usd/usdShade/shaderDefUtils.cpp -- Unable to resolve info:sourceAsset </UsdPreviewSurface.info:mdl:sourceAsset> with value @UsdPreviewSurface.mdl@.
+
+2026-08-09 13:09:56 [25,099ms] [Warning] [omni.usd] Warning: in GetNodeDiscoveryResults at line 136 of /builds/omniverse/usd-ci/USD/pxr/usd/usdShade/shaderDefUtils.cpp -- Unable to resolve info:sourceAsset </UsdUVTexture.info:mdl:sourceAsset> with value @UsdPreviewSurface.mdl@.
+
+2026-08-09 13:09:56 [25,099ms] [Warning] [omni.usd] Warning: in GetNodeDiscoveryResults at line 136 of /builds/omniverse/usd-ci/USD/pxr/usd/usdShade/shaderDefUtils.cpp -- Unable to resolve info:sourceAsset </UsdPrimvarReader_float.info:mdl:sourceAsset> with value @UsdPreviewSurface.mdl@.
+
+2026-08-09 13:09:56 [25,099ms] [Warning] [omni.usd] Warning: in GetNodeDiscoveryResults at line 136 of /builds/omniverse/usd-ci/USD/pxr/usd/usdShade/shaderDefUtils.cpp -- Unable to resolve info:sourceAsset </UsdPrimvarReader_float2.info:mdl:sourceAsset> with value @UsdPreviewSurface.mdl@.
+
+2026-08-09 13:09:56 [25,099ms] [Warning] [omni.usd] Warning: in GetNodeDiscoveryResults at line 136 of /builds/omniverse/usd-ci/USD/pxr/usd/usdShade/shaderDefUtils.cpp -- Unable to resolve info:sourceAsset </UsdPrimvarReader_float3.info:mdl:sourceAsset> with value @UsdPreviewSurface.mdl@.
+
+2026-08-09 13:09:56 [25,099ms] [Warning] [omni.usd] Warning: in GetNodeDiscoveryResults at line 136 of /builds/omniverse/usd-ci/USD/pxr/usd/usdShade/shaderDefUtils.cpp -- Unable to resolve info:sourceAsset </UsdPrimvarReader_float4.info:mdl:sourceAsset> with value @UsdPreviewSurface.mdl@.
+
+2026-08-09 13:09:56 [25,099ms] [Warning] [omni.usd] Warning: in GetNodeDiscoveryResults at line 136 of /builds/omniverse/usd-ci/USD/pxr/usd/usdShade/shaderDefUtils.cpp -- Unable to resolve info:sourceAsset </UsdPrimvarReader_int.info:mdl:sourceAsset> with value @UsdPreviewSurface.mdl@.
+
+2026-08-09 13:09:56 [25,100ms] [Warning] [omni.usd] Warning: in GetNodeDiscoveryResults at line 136 of /builds/omniverse/usd-ci/USD/pxr/usd/usdShade/shaderDefUtils.cpp -- Unable to resolve info:sourceAsset </UsdPrimvarReader_string.info:mdl:sourceAsset> with value @UsdPreviewSurface.mdl@.
+
+2026-08-09 13:09:56 [25,100ms] [Warning] [omni.usd] Warning: in GetNodeDiscoveryResults at line 136 of /builds/omniverse/usd-ci/USD/pxr/usd/usdShade/shaderDefUtils.cpp -- Unable to resolve info:sourceAsset </UsdPrimvarReader_normal.info:mdl:sourceAsset> with value @UsdPreviewSurface.mdl@.
+
+2026-08-09 13:09:56 [25,100ms] [Warning] [omni.usd] Warning: in GetNodeDiscoveryResults at line 136 of /builds/omniverse/usd-ci/USD/pxr/usd/usdShade/shaderDefUtils.cpp -- Unable to resolve info:sourceAsset </UsdPrimvarReader_point.info:mdl:sourceAsset> with value @UsdPreviewSurface.mdl@.
+
+2026-08-09 13:09:56 [25,100ms] [Warning] [omni.usd] Warning: in GetNodeDiscoveryResults at line 136 of /builds/omniverse/usd-ci/USD/pxr/usd/usdShade/shaderDefUtils.cpp -- Unable to resolve info:sourceAsset </UsdPrimvarReader_vector.info:mdl:sourceAsset> with value @UsdPreviewSurface.mdl@.
+
+2026-08-09 13:09:56 [25,100ms] [Warning] [omni.usd] Warning: in GetNodeDiscoveryResults at line 136 of /builds/omniverse/usd-ci/USD/pxr/usd/usdShade/shaderDefUtils.cpp -- Unable to resolve info:sourceAsset </UsdPrimvarReader_matrix.info:mdl:sourceAsset> with value @UsdPreviewSurface.mdl@.
+
+2026-08-09 13:09:56 [25,100ms] [Warning] [omni.usd] Warning: in GetNodeDiscoveryResults at line 136 of /builds/omniverse/usd-ci/USD/pxr/usd/usdShade/shaderDefUtils.cpp -- Unable to resolve info:sourceAsset </UsdTransform2d.info:mdl:sourceAsset> with value @UsdPreviewSurface.mdl@.
+
+{
+  "hypothesis": "H74",
+  "training_seed": 42,
+  "task": "Isaac-Velocity-Flat-Spot-v0",
+  "num_envs": 4096,
+  "iterations": 1500,
+  "post_training_checkpoint_sweep": false,
+  "run_dir": "/mnt/data/users/haoyu/workspace/code/fpo-control/isaaclab_experiments/logs/isaaclab_fpo/spot_flat_flow/2026-08-09_21-09-38_spot_h74_seed42",
+  "final_checkpoint": "/mnt/data/users/haoyu/workspace/code/fpo-control/isaaclab_experiments/logs/isaaclab_fpo/spot_flat_flow/2026-08-09_21-09-38_spot_h74_seed42/model_1499.pt",
+  "final_checkpoint_sha256": "e17d15f9484e101f5bf39d87e74b3e6f277dd67b9f670f02eb75b57a22ba06a8",
+  "final_checkpoint_bytes": 17097570,
+  "passed": true
+}

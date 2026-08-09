@@ -580,7 +580,7 @@ hypotheses:
     priority: high
   - id: H74
     statement: "Equal-total-NFE antithetic projection beats both random64 and IID-pair32 on a fully trained official Spot FPO++ policy."
-    status: active
+    status: refuted
     motivation: "Four Go2 training seeds support a stable effect, but publication-level generality requires transfer across robot morphology and the distinct official Spot optimizer configuration before broader task expansion."
     parent: H73
     priority: high
@@ -2273,11 +2273,35 @@ experiments:
       deployment_mean_gain: -0.0234114462
       deployment_student_t_95: [-0.0935551136, 0.0467322212]
       retrospective_no_gate: true
+    - run: spot_h74_antithetic_cross_task_seed42
+      metric: equal_total_nfe_antithetic32_minus_random64_return
+      value: 13.7804402614
+      training_seed: 42
+      training_environments: 4096
+      training_iterations: 1500
+      episodes_per_method: 256
+      total_evaluation_episodes: 1280
+      zero64_mean: 331.8136393400
+      zero32_mean: 331.7036920640
+      random64_mean: 314.0020862107
+      iid_pair32_mean: 325.1116075748
+      antithetic32_mean: 327.7825264721
+      antithetic32_minus_random64_bootstrap_95: [5.5764180124, 22.3729233203]
+      antithetic32_minus_iid_pair32: 2.6709188973
+      antithetic32_minus_iid_pair32_bootstrap_95: [-5.7173850728, 10.6640311165]
+      antithetic32_minus_zero32: -3.9211655918
+      antithetic32_minus_zero32_bootstrap_95: [-8.5999351357, -0.4225994379]
+      initial_observation_hashes_match: true
+      primary_source_stream_hashes_match: true
+      equal_random_iid_antithetic_total_nfe: true
+      passed: false
+      deployment_passed: false
+      renderer: egl
 
 outer_loop:
-  cycle: 65
-  last_direction: "Run one medium official Spot cross-task screen before committing to multi-seed Spot/H1/G1 training, with random64, antithetic32, zero32, and zero64 controls."
-  last_reflection: "H76 treats the four official Go2 training seeds as the independent units. Equal-total-NFE gain averages +0.9448 with policy-level t interval [0.8515, 1.0381], and antithetic-minus-IID averages +0.5655 [0.2907, 0.8403]. The exact four-of-four sign test is only p=0.0625, so report strong magnitude and consistency with explicit small-seed uncertainty. H74 remains the cross-task gate."
+  cycle: 66
+  last_direction: "Stop Spot/H1/G1 expansion after H74 fails the equal-IID attribution gate; reassess whether a distinct control contribution can clear a small mechanism screen before any more official training."
+  last_reflection: "H74 transfers recovery over the official random source to Spot (+13.78 [5.58, 22.37]) but not the antithetic-specific advantage over an equal-NFE IID pair (+2.67 [-5.72, 10.66]); antithetic32 is also worse than zero32 (-3.92 [-8.60, -0.42]). The current evidence is a strong Go2 result with partial cross-task transfer, not yet a main-conference method claim."
 
 workspace:
   findings: "findings.md"

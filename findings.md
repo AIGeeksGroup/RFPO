@@ -399,6 +399,15 @@ positive in both comparisons, although the exact one-sided sign test is `p=0.062
 policies. Antithetic32-minus-zero32 remained null at -0.0234 [-0.0936, 0.0467]. These results support
 effect magnitude and consistency while retaining explicit small-training-seed uncertainty.
 
+The official Spot cross-task screen showed partial rather than attribution-complete transfer. The
+fixed seed-42 policy was healthy at 331.814 zero64 return. At equal 64 total NFE, antithetic32
+improved random64 from 314.002 to 327.783, a +13.780 gain with paired-bootstrap 95% [5.576,
+22.373]. However, IID-pair32 already reached 325.112, so the antithetic-specific +2.671 point
+estimate had interval [-5.717, 10.664] and failed the locked gate. Antithetic32 also trailed the
+simpler zero32 policy by -3.921 [-8.600, -0.423]. This supports cross-task stochastic-source
+recovery but not cross-task symmetry attribution or deterministic deployment superiority; the
+protocol therefore stops Spot and blocks H1/G1 expansion.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -415,6 +424,7 @@ effect magnitude and consistency while retaining explicit small-training-seed un
 - H73 preserves the full random-source recovery after halving each symmetric solve: all three new seeds gain 0.89-1.01 return at the same total 64 NFE as random64, with no advantage over zero32.
 - H75 directly confirms the proposed mechanism across four policies: `z/-z` action displacements are nearly opposite (mean cosine -0.9693), and symmetric averaging leaves only 12.40% residual versus 70.99% for IID averaging.
 - A policy-level analysis avoids pseudoreplication: the equal-total-NFE gain remains +0.9448 [0.8515, 1.0381] across four seeds under a t model, while the exact sign test remains p=0.0625 and must temper generalization claims.
+- Spot transfers the gain over one random source but not the antithetic-over-IID attribution: generic two-sample averaging explains most of the cross-task recovery, and zero32 remains better.
 - WarmPrior (arXiv:2605.13959) offers a more direct reward-improvement hypothesis for chunked manipulation: center the flow source on recent actions and retain residual Gaussian noise for exploration.
 - WarmPrior cannot be grafted onto a Gaussian-trained FPO checkpoint at inference time; training-time source adaptation is necessary on Can.
 - A short 100-update training-time adaptation is also insufficient: it preserves neither deterministic success nor random exploration.
@@ -502,7 +512,7 @@ effect magnitude and consistency while retaining explicit small-training-seed un
 
 ## Open Questions
 
-- Does equal-total-NFE antithetic projection retain its random-source gain and zero-source parity across independently trained policies and official locomotion tasks?
+- Which control-specific mechanism can improve the deterministic or equal-IID baseline on more than one official task, rather than only recovering stochastic-source variance?
 
 - Does conditional reflow preserve the multimodal exploration that gives flow policies their advantage?
 - Is there a reward-relevant confidence signal available from the frozen flow policy that is distinct from path straightness?
