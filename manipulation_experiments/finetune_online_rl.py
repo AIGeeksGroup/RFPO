@@ -73,6 +73,7 @@ from src.median_microbatch_gradient import (
 from src.terminal_consistency_filter import terminal_consistent_weights
 from src.ratio_rollback import rollback_clipped_ratio_loss
 from src.adaptive_lr import adapt_learning_rate_from_kl
+from src.rollout_local_optimizer import clear_optimizer_state
 
 # ---- Multiprocessing start method (CUDA compat) ------------------------------
 try:
@@ -210,6 +211,7 @@ class FlowPPOConfig:
     bc_anchor_pcgrad_anchor_mode: Literal["velocity", "zero_endpoint"] = "velocity"
     bc_anchor_pcgrad_audit_output_json: Optional[str] = None
     zero_endpoint_pcgrad_train: bool = False
+    rollout_local_actor_optimizer: bool = False
     rollout_zero_fraction: float = 0.0
     rollout_tempered_fraction: float = 0.0
     rollout_tempered_scale: float = 0.5
@@ -1362,6 +1364,7 @@ def main(cfg: FlowPPOConfig):
     training_cum_time = 0.0
     direct_advantage_training_losses: list[float] = []
     endpoint_pcgrad_training_history: list[dict[str, Any]] = []
+    rollout_local_optimizer_history: list[dict[str, Any]] = []
 
     obs_state_stored = torch.zeros((steps_per_iteration, num_envs_per_process, joint_pos_dim))
     actions_stored = torch.zeros((steps_per_iteration, num_envs_per_process, action_dim))
@@ -4226,6 +4229,39 @@ def main(cfg: FlowPPOConfig):
                 actor_module.model.vision_encoder.eval()
 
         # ---------- Policy update ----------
+        if (
+            cfg.rollout_local_actor_optimizer
+            and iteration > cfg.n_iterations_train_only_value
+        ):
+            reset_event = {
+                "iteration": iteration,
+                "learning_rate": float(optimizer_actor.param_groups[0]["lr"]),
+                **clear_optimizer_state(optimizer_actor),
+            }
+            first_actor_iteration = cfg.n_iterations_train_only_value + 1
+            if iteration == first_actor_iteration:
+                if reset_event["state_entries_before"] != 0:
+                    raise RuntimeError(
+                        "first rollout-local actor update unexpectedly had optimizer state"
+                    )
+            elif reset_event["state_entries_before"] == 0:
+                raise RuntimeError(
+                    "rollout-local actor optimizer had no state from the prior update"
+                )
+            if reset_event["state_entries_after"] != 0:
+                raise RuntimeError("rollout-local actor optimizer state was not cleared")
+            rollout_local_optimizer_history.append(reset_event)
+            if rank == 0:
+                reset_path = run_dir / "rollout_local_actor_optimizer.json"
+                reset_path.write_text(
+                    json.dumps(rollout_local_optimizer_history, indent=2, sort_keys=True)
+                    + "\n"
+                )
+            logger.info(
+                "Rollout-local actor optimizer reset: %s",
+                json.dumps(reset_event, sort_keys=True),
+            )
+
         b_inds = np.arange(local_batch_size)
         clipfracs = []
         endpoint_pcgrad_step_metrics = []

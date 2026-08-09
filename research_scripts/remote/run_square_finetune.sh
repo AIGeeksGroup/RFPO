@@ -23,6 +23,7 @@ TOTAL_TIMESTEPS="${TOTAL_TIMESTEPS:-25600}"
 EVAL_EPISODES="${EVAL_EPISODES:-1}"
 ROLLOUT_FREQ="${ROLLOUT_FREQ:-None}"
 ZERO_ENDPOINT_PCGRAD_TRAIN="${ZERO_ENDPOINT_PCGRAD_TRAIN:-False}"
+ROLLOUT_LOCAL_ACTOR_OPTIMIZER="${ROLLOUT_LOCAL_ACTOR_OPTIMIZER:-False}"
 SEED="${SEED:-20260913}"
 MASTER_PORT="${MASTER_PORT:-29500}"
 RUN_NAME="${RUN_NAME:-square_fpopp_seed${SEED}_$(timestamp)}"
@@ -77,5 +78,6 @@ torchrun --nproc_per_node=1 --master_port "$MASTER_PORT" finetune_online_rl.py \
   --clamp-old-cfm-loss None \
   --trust-region-mode ppo \
   --zero-endpoint-pcgrad-train "$ZERO_ENDPOINT_PCGRAD_TRAIN" \
+  --rollout-local-actor-optimizer "$ROLLOUT_LOCAL_ACTOR_OPTIMIZER" \
   --seed "$SEED" \
   2>&1 | tee "$LOG_PATH"
