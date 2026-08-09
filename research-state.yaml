@@ -314,7 +314,7 @@ hypotheses:
     priority: high
   - id: H39
     statement: "The released FPO++ x1-prediction KL-adaptive learning-rate controller preserves held-out Can policy-gradient direction through ten actor epochs without sacrificing most surrogate progress."
-    status: active
+    status: refuted
     motivation: "H18 observes destructive within-update gradient rotation and H23 shows that a fixed lower LR loses progress without preserving direction; Appendix D.2 and the released motion-tracking implementation provide a measured-divergence controller that changes LR only when policy movement leaves a target band."
     parent: H18
     priority: high
@@ -333,7 +333,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 120
+  total_runs: 123
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -1026,11 +1026,33 @@ experiments:
       value: 0.10
       episodes: 20
       balanced_episodes_per_env: true
+    - run: can_step6000_kl_adaptive_lr_control_seed20260911
+      metric: epoch10_heldout_gradient_cosine
+      values: [0.1866116, 0.5648977]
+      positive_active_fractions: [0.2773438, 0.2226562]
+      surrogate_gains: [0.0307811, 0.0309248]
+      positive_chunks: 102
+      audited_chunks: 64
+      paired_preupdate: true
+    - run: can_step6000_kl_adaptive_lr_adaptive_seed20260911
+      metric: epoch10_heldout_gradient_cosine
+      values: [0.3376796, 0.6340925]
+      cosine_gains: [0.1510680, 0.0691948]
+      positive_active_fractions: [0.4062500, 0.3906250]
+      active_fraction_gains: [0.1289062, 0.1679688]
+      surrogate_gains: [0.0084229, 0.0097953]
+      surrogate_gain_retention: [0.2736373, 0.3167456]
+      lr_event_counts: {hold: 1, increase: 0, decrease: 79}
+      final_learning_rate: 0.000001
+      max_kl_proxy: 0.0026542
+      positive_chunks: 102
+      audited_chunks: 64
+      paired_preupdate: true
 
 outer_loop:
-  cycle: 26
-  last_direction: "Audit the repository-defined x1-prediction KL-adaptive actor learning rate on the established step-6000 held-out gradient failure before any reward training."
-  last_reflection: "H38b closed endpoint-fidelity-only inference changes. H18/H23 favor divergence-conditioned step control over another fixed optimizer reduction, and Appendix D.2 plus the released locomotion code define a testable controller."
+  cycle: 27
+  last_direction: "Select a reward-relevant candidate distinct from fixed/adaptive step-size control and active-ratio preservation; do not tune the refuted H39 controller."
+  last_reflection: "H39 raised held-out active ratios but retained only 27-32% of surrogate progress, failed one replicated direction gate, and never increased LR. Divergence-triggered LR reduction behaves like the already-refuted fixed low-LR route in manipulation."
 
 workspace:
   findings: "findings.md"
