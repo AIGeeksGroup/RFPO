@@ -458,6 +458,12 @@ hypotheses:
     motivation: "H8-H10 changed complete source trajectories and H56 changed only executed outputs; neither tests whether gripper latent noise contaminates the coupled flow while preserving arm exploration."
     parent: null
     priority: high
+  - id: H58
+    statement: "Substituting the zero-source gripper output into an otherwise unchanged Gaussian-source arm chunk improves released Can random-source success."
+    status: proposed
+    motivation: "H57's two no-loss rescues do not reveal whether zero gripper latent helped through the gripper decision or coupled arm changes; output-coordinate substitution isolates that mechanism exactly."
+    parent: null
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -1747,8 +1753,8 @@ experiments:
 
 outer_loop:
   cycle: 43
-  last_direction: "Close H57 after its valid +2/20 random-source gain misses the locked +3/20 gate; retain the no-loss seed rescues only as a directional clue."
-  last_reflection: "Zeroing the gripper latent preserved exact unit-Gaussian arm sources and rescued two sparse random-source failures without losses, but 3/20 total successes are insufficient under the frozen gate. Gripper-source variance and mixture neighbors remain closed."
+  last_direction: "Test H58 by preserving Gaussian-source arm outputs bitwise and substituting only the same-observation zero-source gripper trajectory."
+  last_reflection: "H57's sub-threshold rescues may arise from either the gripper decision or coupled arm-output changes. H58 is the minimal output-level causal isolation and reuses H57's exact control, seeds, and stateless source keys."
 
 workspace:
   findings: "findings.md"
