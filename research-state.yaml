@@ -330,6 +330,12 @@ hypotheses:
     motivation: "H29 passed its Can mechanism audit and H30b produced small same-direction gains but was underpowered by a saturated control; H40 establishes non-saturated Square headroom in both source modes."
     parent: H29
     priority: high
+  - id: H42
+    statement: "Restoring a short-finetuned Square checkpoint from 16 to its pretrained 8-action execution horizon improves random-source success without degrading zero-source behavior."
+    status: active
+    motivation: "H41 exposed a task-specific execution mismatch: the released Square checkpoint defaults to 8 actions while the official FPO++ command evaluates 16; restoring the native horizon directly increases visual feedback and is testable without training."
+    parent: H40
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -1117,9 +1123,9 @@ experiments:
       balanced_episodes_per_env: true
 
 outer_loop:
-  cycle: 27
-  last_direction: "Run an outer-loop synthesis before selecting a method distinct from endpoint anchoring and the closed optimizer/source routes."
-  last_reflection: "H41 retained zero success and gained only one random success on Square, repeating H30b's sub-threshold pattern; zero-endpoint PCGrad is closed without confirmation or tuning."
+  cycle: 28
+  last_direction: "Evaluate H42's frozen Square control checkpoint at official 16-step versus checkpoint-native 8-step execution before any new training."
+  last_reflection: "Endpoint anchoring is closed after repeated sub-threshold reward gains. H41 exposed a Square-specific 8-versus-16 execution boundary that can be tested coefficient-free and without training."
 
 workspace:
   findings: "findings.md"
