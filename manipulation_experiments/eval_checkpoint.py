@@ -77,6 +77,7 @@ class EvalCheckpointConfig:
             "antithetic_average",
             "correlated_random",
             "curvature_best_of_two",
+            "temporal_chunk_ensemble",
         ]
     ] = None
     """Explicit evaluation source mode; overrides zero_sampling when set."""
@@ -181,6 +182,7 @@ def _run_rollouts(
         "antithetic_average",
         "correlated_random",
         "curvature_best_of_two",
+        "temporal_chunk_ensemble",
     ] = "random",
     source_temporal_correlation: float = 0.9,
     balanced_episodes_per_env: bool = False,
@@ -240,7 +242,7 @@ def _run_rollouts(
         with torch.inference_mode():
             action, _ = policy.select_action(
                 obs,
-                zero_sampling=sampling_mode == "zero",
+                zero_sampling=sampling_mode in {"zero", "temporal_chunk_ensemble"},
                 antithetic_sampling=sampling_mode == "antithetic_average",
                 temporal_source_correlation=(
                     source_temporal_correlation
@@ -248,6 +250,7 @@ def _run_rollouts(
                     else 0.0
                 ),
                 curvature_best_of_two=sampling_mode == "curvature_best_of_two",
+                temporal_chunk_ensemble=sampling_mode == "temporal_chunk_ensemble",
             )
             if not torch.isfinite(action).all():
                 raise FloatingPointError(f"non-finite action produced in {sampling_mode} mode")
@@ -796,6 +799,58 @@ def main(cfg: EvalCheckpointConfig):
         if cfg.curvature_require_both_branches and min(selected_counts) == 0:
             raise RuntimeError("curvature selection did not use both candidate branches")
         logger.info("Curvature selection audit saved to: %s", audit_path)
+
+    if sampling_mode == "temporal_chunk_ensemble":
+        records = policy.temporal_chunk_ensemble_records
+        blended = [record for record in records if record["blended"]]
+        feedback_fractions = [
+            record["feedback_fraction"]
+            for record in blended
+            if record["feedback_fraction"] is not None
+        ]
+        audit = {
+            "record_count": len(records),
+            "blended_record_count": len(blended),
+            "all_finite": all(record["all_finite"] for record in records),
+            "all_first_chunks_unmodified": all(
+                record["first_chunk_unmodified"]
+                for record in records
+                if not record["blended"]
+            ),
+            "all_weights_locked": all(
+                record["old_weight"] > 0.49 and record["new_weight"] > 0.49
+                for record in blended
+            ),
+            "max_reconstruction_abs": max(
+                (record["reconstruction_max_abs"] for record in blended),
+                default=float("inf"),
+            ),
+            "median_raw_new_boundary_jump": float(np.median([
+                record["raw_new_boundary_jump"] for record in blended
+            ])) if blended else float("nan"),
+            "median_ensemble_boundary_jump": float(np.median([
+                record["ensemble_boundary_jump"] for record in blended
+            ])) if blended else float("nan"),
+            "median_feedback_fraction": float(np.median(feedback_fractions))
+            if feedback_fractions else float("nan"),
+            "records": records,
+        }
+        audit["passed"] = bool(
+            blended
+            and audit["all_finite"]
+            and audit["all_first_chunks_unmodified"]
+            and audit["all_weights_locked"]
+            and audit["max_reconstruction_abs"] <= 1e-7
+            and audit["median_ensemble_boundary_jump"]
+            < audit["median_raw_new_boundary_jump"]
+            and 0.49 <= audit["median_feedback_fraction"] <= 0.51
+        )
+        audit_path = run_dir / "temporal_chunk_ensemble.json"
+        with open(audit_path, "w") as f:
+            json.dump(audit, f, indent=2)
+        if not audit["passed"]:
+            raise RuntimeError("temporal chunk ensemble failed its locked mechanism audit")
+        logger.info("Temporal chunk ensemble audit saved to: %s", audit_path)
 
     # Clean up
     env.close()

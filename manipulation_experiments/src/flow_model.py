@@ -26,6 +26,11 @@ from .flow_net_unet import FlowMatchingUnetModel
 from .flow_net_residual_mlp import FlowMatchingResidualMLPModel
 from .noise_injection_network import NoiseInjectionNetwork
 from .source_priors import apply_previous_action_prior, update_ar1_gaussian_source
+from .temporal_chunk_ensemble import (
+    ACT_NEW_WEIGHT,
+    ACT_OLD_WEIGHT,
+    ensemble_overlapping_chunks,
+)
 
 
 # Helper functions for vision encoder
@@ -138,10 +143,14 @@ class FlowMatchingPolicy(PreTrainedPolicy):
             env_id: deque([], maxlen=self.config.n_action_steps) for env_id in range(self.num_envs)
         }
         self.temporal_source_buffers = {env_id: None for env_id in range(self.num_envs)}
+        self.temporal_chunk_continuations = {
+            env_id: None for env_id in range(self.num_envs)
+        }
         self.mdp_x_t_path_buffers = {
             env_id: deque([], maxlen=self.config.n_action_steps) for env_id in range(self.num_envs)
         }
         self.curvature_selection_records: list[dict[str, object]] = []
+        self.temporal_chunk_ensemble_records: list[dict[str, object]] = []
             
     def get_optim_params(self) -> dict:
         """Get optimizer parameters with different learning rates for backbone and other parts."""
@@ -173,6 +182,7 @@ class FlowMatchingPolicy(PreTrainedPolicy):
                 self.mdp_x_t_path_buffers = {}
                 self.previous_action_buffers = {}
                 self.temporal_source_buffers = {}
+                self.temporal_chunk_continuations = {}
 
             else:
                 # Reset all buffers
@@ -181,6 +191,7 @@ class FlowMatchingPolicy(PreTrainedPolicy):
                     self.mdp_x_t_path_buffers[env_id] = deque([], maxlen=self.config.n_action_steps)
                     self.previous_action_buffers[env_id] = deque([], maxlen=self.config.n_action_steps)
                     self.temporal_source_buffers[env_id] = None
+                    self.temporal_chunk_continuations[env_id] = None
         else:
             # Reset only specified environment buffers
             if not isinstance(env_ids, torch.Tensor):
@@ -192,6 +203,7 @@ class FlowMatchingPolicy(PreTrainedPolicy):
                     self.mdp_x_t_path_buffers[env_id] = deque([], maxlen=self.config.n_action_steps)
                     self.previous_action_buffers[env_id] = deque([], maxlen=self.config.n_action_steps)
                     self.temporal_source_buffers[env_id] = None
+                    self.temporal_chunk_continuations[env_id] = None
     def step_ema(self):
         """Update the EMA model with current model parameters."""
         if self.ema_model is not None:
@@ -226,6 +238,7 @@ class FlowMatchingPolicy(PreTrainedPolicy):
         source_sampling_scale: Tensor | None = None,
         temporal_source_correlation: float = 0.0,
         curvature_best_of_two: bool = False,
+        temporal_chunk_ensemble: bool = False,
     ) -> Tensor:
         """Select actions for multiple environments with separate buffers.
         
@@ -260,6 +273,23 @@ class FlowMatchingPolicy(PreTrainedPolicy):
                 raise ValueError("curvature best-of-two requires the Gaussian source prior")
             if self.config.integration_method != "euler":
                 raise ValueError("curvature best-of-two is locked to Euler integration")
+        if temporal_chunk_ensemble:
+            if (
+                not zero_sampling
+                or sde_sampling
+                or antithetic_sampling
+                or zero_sampling_mask is not None
+                or source_sampling_scale is not None
+                or temporal_source_correlation > 0
+                or curvature_best_of_two
+            ):
+                raise ValueError(
+                    "temporal chunk ensemble is locked to standalone zero sampling"
+                )
+            if self.config.horizon != 2 * self.config.n_action_steps:
+                raise ValueError(
+                    "temporal chunk ensemble requires horizon == 2 * n_action_steps"
+                )
         if not 0.0 <= temporal_source_correlation < 1.0:
             raise ValueError("temporal_source_correlation must be in [0, 1)")
         if temporal_source_correlation > 0:
@@ -427,7 +457,79 @@ class FlowMatchingPolicy(PreTrainedPolicy):
                     previous_actions=previous_actions,
                     has_previous_actions=has_previous_actions,
                 )
-            action_chunks = action_chunks[:, :self.config.n_action_steps, :] # in future, the n_action_steps can be different from prediction horizon
+            if temporal_chunk_ensemble:
+                ensembled_chunks = []
+                for i, env_id in enumerate(envs_needing_actions):
+                    current_prediction = action_chunks[i]
+                    old_continuation = self.temporal_chunk_continuations[env_id]
+                    result = ensemble_overlapping_chunks(
+                        current_prediction,
+                        old_continuation,
+                        action_steps=self.config.n_action_steps,
+                    )
+                    self.temporal_chunk_continuations[env_id] = (
+                        result.continuation.clone()
+                    )
+                    record: dict[str, object] = {
+                        "env_id": env_id,
+                        "blended": result.blended,
+                        "first_chunk_unmodified": bool(
+                            torch.equal(
+                                result.executed,
+                                current_prediction[: self.config.n_action_steps],
+                            )
+                        ) if not result.blended else None,
+                        "all_finite": bool(
+                            torch.isfinite(result.executed).all()
+                            and torch.isfinite(result.continuation).all()
+                        ),
+                        "old_weight": ACT_OLD_WEIGHT,
+                        "new_weight": ACT_NEW_WEIGHT,
+                    }
+                    if result.blended:
+                        raw_new = current_prediction[: self.config.n_action_steps]
+                        reconstruction = (
+                            ACT_OLD_WEIGHT * old_continuation
+                            + ACT_NEW_WEIGHT * raw_new
+                        )
+                        disagreement = torch.linalg.vector_norm(
+                            raw_new - old_continuation
+                        )
+                        feedback_shift = torch.linalg.vector_norm(
+                            result.executed - old_continuation
+                        )
+                        history = self.previous_action_buffers[env_id]
+                        if len(history) != self.config.n_action_steps:
+                            raise RuntimeError(
+                                "temporal chunk ensemble requires one complete executed history"
+                            )
+                        previous_last = history[-1]
+                        record.update(
+                            {
+                                "reconstruction_max_abs": float(
+                                    (result.executed - reconstruction).abs().max().item()
+                                ),
+                                "old_new_disagreement": float(disagreement.item()),
+                                "feedback_fraction": float(
+                                    (feedback_shift / disagreement).item()
+                                ) if disagreement.item() > 0 else None,
+                                "raw_new_boundary_jump": float(
+                                    torch.linalg.vector_norm(
+                                        raw_new[0] - previous_last
+                                    ).item()
+                                ),
+                                "ensemble_boundary_jump": float(
+                                    torch.linalg.vector_norm(
+                                        result.executed[0] - previous_last
+                                    ).item()
+                                ),
+                            }
+                        )
+                    self.temporal_chunk_ensemble_records.append(record)
+                    ensembled_chunks.append(result.executed)
+                action_chunks = torch.stack(ensembled_chunks)
+            else:
+                action_chunks = action_chunks[:, :self.config.n_action_steps, :] # in future, the n_action_steps can be different from prediction horizon
             mdp_x_t_path = mdp_x_t_path[:, :, :self.config.n_action_steps, :] # in future, the n_action_steps can be different from prediction horizon
             assert mdp_x_t_path.shape[1] == self.config.sampling_steps, "mdp_x_t_path second axis should be the flow sampling steps"
             assert action_chunks.shape[1] == self.config.n_action_steps, "action_chunks second axis should be the number of action steps"
