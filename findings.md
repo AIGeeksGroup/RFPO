@@ -346,6 +346,14 @@ The antithetic-over-IID direction also persisted earlier in the same Go2 trainin
 This supports progressive recovery of the central policy under symmetry projection, while leaving
 independent-seed generality and deterministic-policy superiority unresolved.
 
+The doubled-inference-cost limitation can be removed without losing return on the final seed-42
+policy. Two Euler-32 antithetic endpoints use the same total 64 NFE/action as one Euler-64 random
+endpoint, yet improved paired return from 40.591 to 41.572 (+0.981), with bootstrap 95% [0.954,
+1.008]. This reduced-step result was statistically indistinguishable from the 128-NFE Euler-64
+antithetic result (+0.0026, 95% [-0.0023, 0.0080]) and from zero64 (-0.0045, 95% [-0.0264,
+0.0204]). H70 therefore supports same-compute recovery of central-policy performance, not
+superiority over deterministic zero-source deployment.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -356,6 +364,7 @@ independent-seed generality and deterministic-policy superiority unresolved.
 - Jia et al. (arXiv:2506.06185) already establish antithetic initial noise and approximate affine antisymmetry in diffusion and normalizing flows; the publishable novelty must come from closed-loop control evidence, equal-compute action projection, and efficiency/training advances.
 - The stronger deployment claim remains open because H67's antithetic-minus-zero interval crosses zero despite a positive point estimate.
 - Across one training trajectory, antithetic pairing beats IID pairing from checkpoints 500 through 1499, while its deficit to zero collapses as the policy matures.
+- H70 eliminates the twofold NFE penalty on seed 42: two 32-step symmetric solves match the 64-step symmetric solve and recover the roughly one-point random-source deficit at the same total NFE as the baseline.
 - WarmPrior (arXiv:2605.13959) offers a more direct reward-improvement hypothesis for chunked manipulation: center the flow source on recent actions and retain residual Gaussian noise for exploration.
 - WarmPrior cannot be grafted onto a Gaussian-trained FPO checkpoint at inference time; training-time source adaptation is necessary on Can.
 - A short 100-update training-time adaptation is also insufficient: it preserves neither deterministic success nor random exploration.
@@ -442,6 +451,8 @@ independent-seed generality and deterministic-policy superiority unresolved.
 - Keep inference-only warm starts separate from faithful WarmPrior training in claims and experiment labels.
 
 ## Open Questions
+
+- Does equal-total-NFE antithetic projection retain its random-source gain and zero-source parity across independently trained policies and official locomotion tasks?
 
 - Does conditional reflow preserve the multimodal exploration that gives flow policies their advantage?
 - Is there a reward-relevant confidence signal available from the frozen flow policy that is distinct from path straightness?

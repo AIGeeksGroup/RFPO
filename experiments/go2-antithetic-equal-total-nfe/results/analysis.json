@@ -1,0 +1,58 @@
+{
+  "hypothesis": "H70",
+  "episodes_per_method": 256,
+  "total_completed_episodes": 1024,
+  "bootstrap_seed": 20261602,
+  "bootstrap_samples": 20000,
+  "mean_returns": {
+    "zero64": 41.57649163901806,
+    "random64": 40.59061434864998,
+    "antithetic32": 41.57196205854416,
+    "antithetic64": 41.56939363479614
+  },
+  "comparisons": {
+    "antithetic32_minus_random64": {
+      "gain": 0.9813477098941803,
+      "sem": 0.013974456039423244,
+      "bootstrap_95": [
+        0.9541909679770469,
+        1.0084997970610856
+      ]
+    },
+    "antithetic32_minus_zero64": {
+      "gain": -0.004529580473899841,
+      "sem": 0.012022590513227882,
+      "bootstrap_95": [
+        -0.02637311667203903,
+        0.020430328324437107
+      ]
+    },
+    "antithetic32_minus_antithetic64": {
+      "gain": 0.0025684237480163574,
+      "sem": 0.002662732205860688,
+      "bootstrap_95": [
+        -0.0023250069469213487,
+        0.008025848120450972
+      ]
+    },
+    "antithetic64_minus_random64": {
+      "gain": 0.9787792861461639,
+      "sem": 0.014118840925919625,
+      "bootstrap_95": [
+        0.9512674145400524,
+        1.0061915826052428
+      ]
+    }
+  },
+  "primary_gates": {
+    "all_pairing_and_return_validity": true,
+    "equal_random64_antithetic32_total_nfe": true,
+    "antithetic32_minus_random64_point_positive": true,
+    "antithetic32_minus_random64_lower_positive": true
+  },
+  "deployment_gates": {
+    "antithetic32_minus_zero64_lower_positive": false
+  },
+  "passed": true,
+  "deployment_passed": false
+}

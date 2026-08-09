@@ -556,7 +556,7 @@ hypotheses:
     priority: high
   - id: H70
     statement: "Two Euler-32 antithetic endpoints improve Go2 return over one Euler-64 random endpoint at the same total 64 NFE/action."
-    status: active
+    status: supported
     motivation: "The closest antithetic-noise literature weakens pairing novelty and H66 doubles compute; preserving the control gain at equal total NFE would create a stronger efficiency contribution."
     parent: H67
     priority: high
@@ -2108,11 +2108,35 @@ experiments:
       validity_passed: true
       passed: true
       renderer: egl
+    - run: go2_h70_antithetic_equal_total_nfe_seed20261600
+      metric: equal_total_nfe_antithetic32_minus_random64_paired_return
+      value: 0.9813477099
+      environments_per_method: 256
+      total_episodes: 1024
+      zero64_mean: 41.5764916390
+      random64_mean: 40.5906143486
+      antithetic32_mean: 41.5719620585
+      antithetic64_mean: 41.5693936348
+      antithetic32_minus_random64_sem: 0.0139744560
+      antithetic32_minus_random64_bootstrap_95: [0.9541909680, 1.0084997971]
+      antithetic32_minus_zero64: -0.0045295805
+      antithetic32_minus_zero64_bootstrap_95: [-0.0263731167, 0.0204303283]
+      antithetic32_minus_antithetic64: 0.0025684237
+      antithetic32_minus_antithetic64_bootstrap_95: [-0.0023250069, 0.0080258481]
+      random64_nfe_per_action: 64
+      antithetic32_nfe_per_action: 64
+      antithetic64_nfe_per_action: 128
+      initial_observation_hashes_match: true
+      primary_source_stream_hashes_match: true
+      validity_passed: true
+      passed: true
+      deployment_passed: false
+      renderer: egl
 
 outer_loop:
-  cycle: 58
-  last_direction: "Train and evaluate independent official Go2 seeds, retaining equal-compute IID attribution and matched zero/random reporting."
-  last_reflection: "H68 found positive antithetic-over-IID gains at checkpoints 500, 1000, and 1499, with the two new checkpoints pooling to +0.5891 [0.0223, 1.0377]. The gap to zero shrank from -2.197 at iteration 500 to -0.048 at 1000 and a suggestive +0.255 at 1499. Stage generalization passes, but independent-model generality and best-deployment superiority remain open."
+  cycle: 59
+  last_direction: "Finish H69 independent-policy attribution, then confirm the H70 equal-total-NFE result across those policies before expanding to other official locomotion tasks."
+  last_reflection: "H70 removes H66's doubled-compute limitation on seed 42: two Euler-32 antithetic endpoints beat one Euler-64 random endpoint by +0.9813 at the same 64 total NFE, with bootstrap 95% [0.9542, 1.0085]. Euler-32 and Euler-64 antithetic returns were statistically indistinguishable, and antithetic32 matched zero64 rather than beating it. Independent-model generality is now the critical gate."
 
 workspace:
   findings: "findings.md"
