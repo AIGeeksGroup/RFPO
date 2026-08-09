@@ -384,6 +384,12 @@ hypotheses:
     motivation: "RFS separates global latent exploration and local output correction while preserving the pretrained flow field and using an exact explicit-policy PPO ratio."
     parent: H40
     priority: high
+  - id: H49
+    statement: "Temporally factorizing RFS's explicit PPO ratio preserves its on-policy gradient while reducing the high joint-ratio clipping enough to improve Square reward."
+    status: active
+    motivation: "H48 clipped 72.6-76.0% of 224-dimensional joint ratios; unlike H33's inactive FPO premise, RFS has a measured clipping bottleneck at the exact explicit-policy likelihood."
+    parent: H48
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."

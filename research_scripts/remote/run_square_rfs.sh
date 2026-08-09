@@ -16,6 +16,7 @@ SQUARE_CHECKPOINT="${SQUARE_CHECKPOINT:-$CHECKPOINT_ROOT/trc7rbt0_step_110000}"
 SEED="${SEED:-20260924}"
 COLLECTION_STEPS="${COLLECTION_STEPS:-320}"
 TOTAL_TIMESTEPS="${TOTAL_TIMESTEPS:-25600}"
+RATIO_MODE="${RATIO_MODE:-joint}"
 RUN_NAME="${RUN_NAME:-square_h48_rfs_osmesa_seed${SEED}}"
 OUTPUT_DIR="${OUTPUT_DIR:-$RUNTIME_ROOT/results/$RUN_NAME}"
 LOG_PATH="${LOG_PATH:-$RUNTIME_ROOT/logs/$RUN_NAME.log}"
@@ -43,4 +44,5 @@ python train_residual_flow_steering.py \
   --n-action-steps 16 \
   --collection-steps "$COLLECTION_STEPS" \
   --total-timesteps "$TOTAL_TIMESTEPS" \
+  --ratio-mode "$RATIO_MODE" \
   2>&1 | tee "$LOG_PATH"

@@ -23,6 +23,7 @@ from src.residual_flow_steering import (
     ResidualFlowSteeringPolicy,
     assert_frozen_parameters_unchanged,
     clipped_ppo_loss,
+    temporal_clipped_ppo_loss,
 )
 
 
@@ -58,6 +59,7 @@ class Config:
     residual_scale: float = 0.1
     eval_episodes: int = 20
     deterministic: bool = False
+    ratio_mode: Literal["joint", "temporal"] = "joint"
 
 
 class ValueNetwork(nn.Module):
@@ -141,6 +143,7 @@ def finish_transition(active: dict, env_id: int, done: bool) -> dict:
         "latent_raw": active["latent_raw"][env_id].cpu(),
         "residual_raw": active["residual_raw"][env_id].cpu(),
         "old_log_prob": active["old_log_prob"][env_id].cpu(),
+        "old_log_prob_steps": active["old_log_prob_steps"][env_id].cpu(),
         "value": active["value"][env_id].cpu(),
         "reward": active["reward"][env_id].cpu(),
         "duration": duration,
@@ -176,6 +179,7 @@ def start_plans(
         active["latent_raw"][env_id] = modulation.latent_raw[local_id]
         active["residual_raw"][env_id] = modulation.residual_raw[local_id]
         active["old_log_prob"][env_id] = modulation.log_prob[local_id]
+        active["old_log_prob_steps"][env_id] = modulation.log_prob_steps[local_id]
         active["value"][env_id] = value(conditioning[local_id : local_id + 1])[0]
         active["actions"][env_id] = actions[local_id]
         active["reward"][env_id] = torch.zeros((), device=conditioning.device)
@@ -189,6 +193,7 @@ def empty_active(num_envs: int) -> dict:
         "latent_raw": [None] * num_envs,
         "residual_raw": [None] * num_envs,
         "old_log_prob": [None] * num_envs,
+        "old_log_prob_steps": [None] * num_envs,
         "value": [None] * num_envs,
         "actions": [None] * num_envs,
         "reward": [None] * num_envs,
@@ -255,6 +260,7 @@ def stack_batch(transitions: list[dict], device: torch.device) -> dict[str, Tens
         "latent_raw",
         "residual_raw",
         "old_log_prob",
+        "old_log_prob_steps",
         "advantage",
         "return",
     )
@@ -274,12 +280,20 @@ def ppo_update(cfg, policy, value, policy_optimizer, value_optimizer, batch):
                 batch["latent_raw"][indices],
                 batch["residual_raw"][indices],
             )
-            policy_loss, clip_fraction = clipped_ppo_loss(
-                evaluated.log_prob,
-                batch["old_log_prob"][indices],
-                advantages[indices],
-                cfg.clip_coef,
-            )
+            if cfg.ratio_mode == "joint":
+                policy_loss, clip_fraction = clipped_ppo_loss(
+                    evaluated.log_prob,
+                    batch["old_log_prob"][indices],
+                    advantages[indices],
+                    cfg.clip_coef,
+                )
+            else:
+                policy_loss, clip_fraction = temporal_clipped_ppo_loss(
+                    evaluated.log_prob_steps,
+                    batch["old_log_prob_steps"][indices],
+                    advantages[indices],
+                    cfg.clip_coef,
+                )
             policy_objective = policy_loss - cfg.entropy_coef * evaluated.entropy.mean()
             value_loss = 0.5 * (
                 value(batch["observation"][indices]) - batch["return"][indices]

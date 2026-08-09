@@ -6,6 +6,7 @@ from src.residual_flow_steering import (
     ResidualFlowSteeringPolicy,
     assert_frozen_parameters_unchanged,
     clipped_ppo_loss,
+    temporal_clipped_ppo_loss,
 )
 
 
@@ -52,3 +53,29 @@ def test_frozen_parameter_guard_detects_changes() -> None:
         module.weight[0, 0] += 1
     with pytest.raises(RuntimeError, match="parameters changed"):
         assert_frozen_parameters_unchanged(module, reference)
+
+
+def test_temporal_and_joint_ppo_have_same_on_policy_gradient() -> None:
+    torch.manual_seed(11)
+    policy = ResidualFlowSteeringPolicy(5, horizon=4, action_dim=3)
+    observations = torch.randn(9, 5)
+    sampled = policy.sample(observations)
+    advantages = torch.randn(9)
+
+    joint = policy.evaluate_actions(observations, sampled.latent_raw, sampled.residual_raw)
+    joint_loss, _ = clipped_ppo_loss(
+        joint.log_prob, sampled.log_prob.detach(), advantages, clip_coef=0.2
+    )
+    joint_gradients = torch.autograd.grad(joint_loss, tuple(policy.parameters()))
+
+    temporal = policy.evaluate_actions(observations, sampled.latent_raw, sampled.residual_raw)
+    temporal_loss, _ = temporal_clipped_ppo_loss(
+        temporal.log_prob_steps,
+        sampled.log_prob_steps.detach(),
+        advantages,
+        clip_coef=0.2,
+    )
+    temporal_gradients = torch.autograd.grad(temporal_loss, tuple(policy.parameters()))
+
+    for joint_gradient, temporal_gradient in zip(joint_gradients, temporal_gradients, strict=True):
+        assert torch.allclose(joint_gradient, temporal_gradient, atol=2e-5, rtol=2e-5)

@@ -14,6 +14,7 @@ class RFSAction:
     latent_raw: Tensor
     residual_raw: Tensor
     log_prob: Tensor
+    log_prob_steps: Tensor
     entropy: Tensor
 
 
@@ -96,8 +97,15 @@ class ResidualFlowSteeringPolicy(nn.Module):
                 f"{tuple(latent_raw.shape)} and {tuple(residual_raw.shape)}"
             )
         latent_dist, residual_dist = self._distributions(observations)
-        log_prob = latent_dist.log_prob(latent_raw).sum(-1)
-        log_prob = log_prob + residual_dist.log_prob(residual_raw).sum(-1)
+        batch_size = observations.shape[0]
+        latent_log_prob = latent_dist.log_prob(latent_raw).reshape(
+            batch_size, self.horizon, self.action_dim
+        )
+        residual_log_prob = residual_dist.log_prob(residual_raw).reshape(
+            batch_size, self.horizon, self.action_dim
+        )
+        log_prob_steps = latent_log_prob.sum(-1) + residual_log_prob.sum(-1)
+        log_prob = log_prob_steps.sum(-1)
         entropy = latent_dist.entropy().sum(-1) + residual_dist.entropy().sum(-1)
         chunk_shape = (observations.shape[0], self.horizon, self.action_dim)
         return RFSAction(
@@ -106,6 +114,7 @@ class ResidualFlowSteeringPolicy(nn.Module):
             latent_raw=latent_raw,
             residual_raw=residual_raw,
             log_prob=log_prob,
+            log_prob_steps=log_prob_steps,
             entropy=entropy,
         )
 
@@ -123,6 +132,27 @@ def clipped_ppo_loss(
     unclipped = ratio * advantages
     clipped = ratio.clamp(1.0 - clip_coef, 1.0 + clip_coef) * advantages
     loss = -torch.minimum(unclipped, clipped).mean()
+    clip_fraction = ((ratio - 1.0).abs() > clip_coef).float().mean()
+    return loss, clip_fraction
+
+
+def temporal_clipped_ppo_loss(
+    new_log_prob_steps: Tensor,
+    old_log_prob_steps: Tensor,
+    advantages: Tensor,
+    clip_coef: float,
+) -> tuple[Tensor, Tensor]:
+    if new_log_prob_steps.shape != old_log_prob_steps.shape:
+        raise ValueError("new and old temporal log probabilities must have matching shapes")
+    if new_log_prob_steps.ndim != 2 or advantages.shape != new_log_prob_steps.shape[:1]:
+        raise ValueError("temporal PPO expects (batch, horizon) ratios and (batch,) advantages")
+    if clip_coef <= 0:
+        raise ValueError("clip_coef must be positive")
+    log_ratio = new_log_prob_steps - old_log_prob_steps
+    ratio = log_ratio.clamp(-20.0, 20.0).exp()
+    weighted = ratio * advantages[:, None]
+    clipped = ratio.clamp(1.0 - clip_coef, 1.0 + clip_coef) * advantages[:, None]
+    loss = -torch.minimum(weighted, clipped).sum(-1).mean()
     clip_fraction = ((ratio - 1.0).abs() > clip_coef).float().mean()
     return loss, clip_fraction
 
