@@ -554,6 +554,12 @@ hypotheses:
     motivation: "Same-trajectory checkpoint consistency cannot establish model-seed generality; three fixed final checkpoints provide the minimum publication-stage independent confirmation."
     parent: H67
     priority: high
+  - id: H70
+    statement: "Two Euler-32 antithetic endpoints improve Go2 return over one Euler-64 random endpoint at the same total 64 NFE/action."
+    status: active
+    motivation: "The closest antithetic-noise literature weakens pairing novelty and H66 doubles compute; preserving the control gain at equal total NFE would create a stronger efficiency contribution."
+    parent: H67
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
