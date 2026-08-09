@@ -454,7 +454,7 @@ hypotheses:
     priority: high
   - id: H57
     statement: "Keeping a unit-Gaussian arm source while zeroing only the gripper latent improves released Can step-1000 random-source success."
-    status: proposed
+    status: refuted
     motivation: "H8-H10 changed complete source trajectories and H56 changed only executed outputs; neither tests whether gripper latent noise contaminates the coupled flow while preserving arm exploration."
     parent: null
     priority: high
@@ -1728,11 +1728,27 @@ experiments:
       validity_passed: true
       passed: false
       renderer: osmesa
+    - run: can_h57_factorized_source_audit_seed20261031
+      metric: random_source_success_rate
+      value: 0.15
+      successes: 3
+      episodes: 20
+      control_successes: 1
+      success_gain: 2
+      common_source_key_count: 734
+      arm_source_hashes_exact: true
+      arm_source_mean: 0.007583954
+      arm_source_std: 0.999477345
+      candidate_gripper_source_zero: true
+      initial_observation_hashes_exact: true
+      validity_passed: true
+      passed: false
+      renderer: osmesa
 
 outer_loop:
-  cycle: 42
-  last_direction: "Test H57 with stateless common Gaussian arm sources and a zero gripper latent against the released Can step-1000 random-source benchmark."
-  last_reflection: "H56 rejects binary output projection, but it does not isolate the upstream effect of gripper latent noise inside the coupled flow. A coordinate-factorized source preserves the benchmark's Gaussian arm exploration and is the cheapest prerequisite before any hybrid discrete/continuous architecture."
+  cycle: 43
+  last_direction: "Close H57 after its valid +2/20 random-source gain misses the locked +3/20 gate; retain the no-loss seed rescues only as a directional clue."
+  last_reflection: "Zeroing the gripper latent preserved exact unit-Gaussian arm sources and rescued two sparse random-source failures without losses, but 3/20 total successes are insufficient under the frozen gate. Gripper-source variance and mixture neighbors remain closed."
 
 workspace:
   findings: "findings.md"
