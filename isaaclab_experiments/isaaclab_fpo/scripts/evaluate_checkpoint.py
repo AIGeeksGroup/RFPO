@@ -28,7 +28,14 @@ parser.add_argument("--sampling-steps", type=int, required=True)
 parser.add_argument(
     "--eval-modes",
     nargs="+",
-    choices=("zero", "random", "iid_pair", "antithetic"),
+    choices=(
+        "zero",
+        "random",
+        "negative_random",
+        "secondary_random",
+        "iid_pair",
+        "antithetic",
+    ),
     default=("zero", "random"),
 )
 parser.add_argument("--output", type=Path, required=True)
@@ -55,6 +62,7 @@ from isaaclab_tasks.utils.parse_cfg import parse_env_cfg
 
 from isaaclab_fpo import FpoRslRlVecEnvWrapper
 from isaaclab_fpo.antithetic_inference import antithetic_action, paired_source_action
+from isaaclab_fpo.mirrored_rollouts import select_rollout_source
 from isaaclab_fpo.runners import OnPolicyRunner
 from isaaclab_fpo.task_cfgs import TASK_CONFIGS
 
@@ -84,7 +92,16 @@ def evaluate_mode(runner, env, mode):
     secondary_source_hash = hashlib.sha256()
     secondary_source_value_count = 0
     secondary_source_sequence = None
-    stochastic_modes = ("random", "iid_pair", "antithetic")
+    actual_source_hash = hashlib.sha256()
+    actual_source_value_count = 0
+    actual_source_sequence = None
+    stochastic_modes = (
+        "random",
+        "negative_random",
+        "secondary_random",
+        "iid_pair",
+        "antithetic",
+    )
     if mode in stochastic_modes:
         source_generator = torch.Generator(device=runner.device)
         source_generator.manual_seed(args.source_seed)
@@ -102,7 +119,7 @@ def evaluate_mode(runner, env, mode):
         source_hash.update(source_values.tobytes())
         source_value_count = source_sequence.numel()
         del source_values
-        if mode == "iid_pair":
+        if mode in ("iid_pair", "secondary_random"):
             secondary_generator = torch.Generator(device=runner.device)
             secondary_generator.manual_seed(args.secondary_source_seed)
             secondary_source_sequence = torch.randn(
@@ -121,6 +138,18 @@ def evaluate_mode(runner, env, mode):
             secondary_source_hash.update(secondary_values.tobytes())
             secondary_source_value_count = secondary_source_sequence.numel()
             del secondary_values
+        if mode in ("random", "negative_random", "secondary_random"):
+            actual_source_sequence = select_rollout_source(
+                mode, source_sequence, secondary_source_sequence
+            )
+            actual_values = (
+                actual_source_sequence.detach().cpu().contiguous().numpy()
+            )
+            actual_source_hash.update(str(actual_values.dtype).encode())
+            actual_source_hash.update(str(actual_values.shape).encode())
+            actual_source_hash.update(actual_values.tobytes())
+            actual_source_value_count = actual_source_sequence.numel()
+            del actual_values
 
     runner.eval_mode()
     for step in range(max_steps):
@@ -132,8 +161,10 @@ def evaluate_mode(runner, env, mode):
             )
             if mode in stochastic_modes:
                 source = source_sequence[step]
-                if mode == "random":
-                    actions = runner.alg.policy.act_inference(norm_obs, source=source)
+                if mode in ("random", "negative_random", "secondary_random"):
+                    actions = runner.alg.policy.act_inference(
+                        norm_obs, source=actual_source_sequence[step]
+                    )
                 elif mode == "antithetic":
                     actions = antithetic_action(runner.alg.policy, norm_obs, source)
                 else:
@@ -178,6 +209,15 @@ def evaluate_mode(runner, env, mode):
             source_hash.hexdigest() if source_value_count else None
         ),
         "source_value_count": source_value_count,
+        "actual_source_stream_sha256": (
+            actual_source_hash.hexdigest() if actual_source_value_count else None
+        ),
+        "actual_source_value_count": actual_source_value_count,
+        "source_negation_exact": (
+            bool(torch.equal(actual_source_sequence, -source_sequence))
+            if mode == "negative_random"
+            else None
+        ),
         "secondary_source_stream_sha256": (
             secondary_source_hash.hexdigest() if secondary_source_value_count else None
         ),
