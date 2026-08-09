@@ -39,6 +39,14 @@ literature:
       title: "Kickstarting Deep Reinforcement Learning"
       year: 2018
       relevance: "Motivates retaining a fixed pretrained teacher as an auxiliary behavior objective during RL."
+    - id: lei2026_rldt
+      title: "Reinforcement Learning for Flow-Matching Policies with Density Transport"
+      year: 2026
+      relevance: "Motivates value-aware SVGD transport, but requires a reliable double-Q critic and has no public code as of 2026-08-09."
+    - id: pinto2017_asymmetric_actor_critic
+      title: "Asymmetric Actor Critic for Image-Based Robot Learning"
+      year: 2017
+      relevance: "Motivates using simulator state only in the training critic while preserving visual policy inputs."
     - id: wang2020_truly_ppo
       title: "Truly Proximal Policy Optimization"
       year: 2020
@@ -389,6 +397,12 @@ hypotheses:
     status: refuted
     motivation: "H48 clipped 72.6-76.0% of 224-dimensional joint ratios; unlike H33's inactive FPO premise, RFS has a measured clipping bottleneck at the exact explicit-policy likelihood."
     parent: H48
+    priority: high
+  - id: H50
+    statement: "A simulator-state Square critic ranks complete-episode discounted success more accurately than the official critic trained on frozen visual conditioning."
+    status: active
+    motivation: "H19 showed that target calibration alone does not fix critic ranking, while RLDT and other value-guided methods require a trustworthy critic before policy transport."
+    parent: H40
     priority: high
 
 experiments:
@@ -1445,9 +1459,9 @@ experiments:
       renderer: osmesa
 
 outer_loop:
-  cycle: 34
-  last_direction: "Close RFS modulation and inspect RLDT or another value-aware density-transport method with available official code before implementation."
-  last_reflection: "H49 reduced RFS clipping by 57.56 points and preserved exact on-policy gradients, yet worsened pooled success from 20/40 to 11/40. Joint clipping was not the main failure cause; stronger modulation updates were more harmful."
+  cycle: 35
+  last_direction: "Audit simulator-state value learning before implementing RLDT or another critic-guided policy transport method."
+  last_reflection: "RLDT has no public implementation and changes too many expensive components at once. H19 and H48-H49 show that stronger policy updates are not useful until reward-relevant value ranking is independently validated."
 
 workspace:
   findings: "findings.md"
