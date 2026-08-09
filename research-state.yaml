@@ -432,7 +432,7 @@ hypotheses:
     priority: high
   - id: H54
     statement: "A fixed ACT-inspired ensemble of the previous unused continuation and current visual prefix reduces chunk-boundary discontinuity and improves released Can step-1000 deterministic success."
-    status: proposed
+    status: refuted
     motivation: "The policy predicts 16 actions but discards the last eight at each official eight-step replan; overlapping predictions provide a feedback-preserving smoothing mechanism without more policy calls."
     parent: null
     priority: high
@@ -451,7 +451,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 191
+  total_runs: 194
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -1643,11 +1643,43 @@ experiments:
       validity_passed: true
       passed: false
       renderer: osmesa
+    - run: can_h54_mechanism_smoke_seed20261001
+      metric: temporal_chunk_ensemble_mechanism
+      value: 0.087410897
+      replans: 76
+      blended_replans: 73
+      median_raw_new_boundary_jump: 0.143651962
+      median_ensemble_boundary_jump: 0.087410897
+      median_feedback_fraction: 0.497500032
+      reconstruction_max_abs: 0.0
+      passed: true
+      renderer: osmesa
+    - run: can_h54_control_zero_balanced20_seed20261001
+      metric: success_rate
+      value: 0.8
+      successes: 16
+      episodes: 20
+      balanced_episodes_per_env: true
+      renderer: osmesa
+    - run: can_h54_candidate_zero_balanced20_seed20261001
+      metric: success_rate
+      value: 0.8
+      successes: 16
+      episodes: 20
+      balanced_episodes_per_env: true
+      replans: 603
+      blended_replans: 578
+      median_raw_new_boundary_jump: 0.181135125
+      median_ensemble_boundary_jump: 0.119872749
+      median_feedback_fraction: 0.497500032
+      reconstruction_max_abs: 0.0
+      passed: false
+      renderer: osmesa
 
 outer_loop:
   cycle: 39
-  last_direction: "Test H54 as a fixed ACT-inspired overlap ensemble before adding learned gates, variable cadence, or new training objectives."
-  last_reflection: "H53 closes direct local parameter search at this budget. The next test moves outside training and uses the released policy's discarded overlapping continuation, with mechanism gates for both boundary smoothing and retained visual feedback before reward screening."
+  last_direction: "Refute H54 after a valid 16/20 versus 16/20 Can screen; do not tune overlap weights or add a learned gate without an independent predictive signal."
+  last_reflection: "Fixed overlap ensembling reduced full-screen median chunk-boundary jump by 33.82% while retaining a 49.75% new-observation contribution, yet deterministic Can success tied exactly. Continuity at the official chunk boundary is not the limiting reward mechanism."
 
 workspace:
   findings: "findings.md"

@@ -1,0 +1,84 @@
+[robosuite WARNING] No private macro file found! (macros.py:57)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:58)
+[robosuite WARNING] To setup, run: python /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/scripts/setup_macros.py (macros.py:59)
+[robosuite WARNING] Could not import robosuite_models. Some robots may not be available. If you want to use these robots, please install robosuite_models from source (https://github.com/ARISE-Initiative/robosuite_models) or through pip install. (__init__.py:30)
+2026-08-09 14:19:11,823 | INFO | ================================================================================
+2026-08-09 14:19:11,823 | INFO | Evaluation sampling mode: temporal_chunk_ensemble
+2026-08-09 14:19:11,823 | INFO | Checkpoint Evaluation
+2026-08-09 14:19:11,823 | INFO | ================================================================================
+2026-08-09 14:19:11,824 | INFO | Random seed set to 20261001
+2026-08-09 14:19:11,824 | INFO | Output directory: /home/haoyu/workspace/outputs/fpo-control/results/can_h54_mechanism_smoke_seed20261001
+2026-08-09 14:19:11,824 | INFO | Using local checkpoint: downloaded_checkpoints/95j3noe4_step_1000
+2026-08-09 14:19:11,824 | INFO | Loading policy from downloaded_checkpoints/95j3noe4_step_1000/policy...
+2026-08-09 14:19:11,824 | INFO | Loading config from downloaded_checkpoints/95j3noe4_step_1000/policy/config.json...
+2026-08-09 14:19:11,824 | INFO | Image features: ['observation.images.robot0_eye_in_hand']
+2026-08-09 14:19:11,824 | INFO | State features: ['observation.state']
+2026-08-09 14:19:11,824 | INFO | Constructing FlowMatchingPolicy from config...
+2026-08-09 14:19:11,910 | INFO | Loading model weights from downloaded_checkpoints/95j3noe4_step_1000/policy/model.safetensors...
+2026-08-09 14:19:12,371 | INFO | Loaded and applied EMA weights from checkpoint
+2026-08-09 14:19:12,371 | INFO | Policy loaded successfully
+2026-08-09 14:19:12,371 | INFO | Policy config: horizon=16, n_action_steps=8, sampling_steps=10
+2026-08-09 14:19:12,377 | INFO | Creating evaluation environment: Can
+2026-08-09 14:19:12,377 | INFO | Using image features from checkpoint config: ['observation.images.robot0_eye_in_hand']
+2026-08-09 14:19:12,377 | INFO | Production mode: using gymnasium.vector.AsyncVectorEnv
+2026-08-09 14:19:12,377 | INFO | Video key: agentview
+2026-08-09 14:19:12,377 | INFO | Using image observation keys: ['robot0_eye_in_hand']
+[robosuite INFO] Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json (composite_controller_factory.py:121)
+2026-08-09 14:19:12,377 | INFO | Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json
+2026-08-09 14:19:14,142 | INFO | Successfully created PickPlaceCan environment via robosuite.make() with cameras at 84x84
+2026-08-09 14:19:14,142 | INFO | Configured cameras: ['robot0_eye_in_hand']
+[ViT Init] Inferred image size from dataset: 84x84
+num_visible_gpus: 1 [1] render_override: None
+render_gpu_device_id: 1
+[robosuite WARNING] No private macro file found! (macros.py:57)
+[robosuite WARNING] No private macro file found! (macros.py:57)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:58)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:58)
+[robosuite WARNING] To setup, run: python /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/scripts/setup_macros.py (macros.py:59)
+[robosuite WARNING] To setup, run: python /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/scripts/setup_macros.py (macros.py:59)
+[robosuite WARNING] Could not import robosuite_models. Some robots may not be available. If you want to use these robots, please install robosuite_models from source (https://github.com/ARISE-Initiative/robosuite_models) or through pip install. (__init__.py:30)
+[robosuite WARNING] Could not import robosuite_models. Some robots may not be available. If you want to use these robots, please install robosuite_models from source (https://github.com/ARISE-Initiative/robosuite_models) or through pip install. (__init__.py:30)
+2026-08-09 14:19:20,883 | INFO | Video key: agentview
+2026-08-09 14:19:20,883 | INFO | Using image observation keys: ['robot0_eye_in_hand']
+[robosuite INFO] Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json (composite_controller_factory.py:121)
+2026-08-09 14:19:20,883 | INFO | Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json
+2026-08-09 14:19:20,895 | INFO | Video key: agentview
+2026-08-09 14:19:20,895 | INFO | Using image observation keys: ['robot0_eye_in_hand']
+[robosuite INFO] Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json (composite_controller_factory.py:121)
+2026-08-09 14:19:20,895 | INFO | Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json
+2026-08-09 14:19:22,599 | INFO | Successfully created PickPlaceCan environment via robosuite.make() with cameras at 84x84
+2026-08-09 14:19:22,599 | INFO | Configured cameras: ['robot0_eye_in_hand']
+2026-08-09 14:19:22,615 | INFO | Successfully created PickPlaceCan environment via robosuite.make() with cameras at 84x84
+2026-08-09 14:19:22,615 | INFO | Configured cameras: ['robot0_eye_in_hand']
+2026-08-09 14:19:23,686 | INFO | Created 2 vectorized Can environments
+2026-08-09 14:19:23,687 | INFO | Set video key to 'agentview' for video recording
+2026-08-09 14:19:23,687 | INFO | ================================================================================
+2026-08-09 14:19:23,687 | INFO | Starting Evaluation
+2026-08-09 14:19:23,687 | INFO | ================================================================================
+2026-08-09 14:19:23,687 | INFO | Running rollouts with environment: Can
+2026-08-09 14:19:23,687 | INFO | Starting evaluation: 2 episodes using 2 parallel environments
+2026-08-09 14:19:24,757 | INFO | Created observation keys: ['observation.state', 'observation.images.robot0_eye_in_hand']
+2026-08-09 14:19:24,864 | INFO | Created observation keys: ['observation.state', 'observation.images.robot0_eye_in_hand']
+/home/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/miniconda3/envs/fpo_manipulation/lib/python3.10/contextlib.py:103: FutureWarning: `torch.backends.cuda.sdp_kernel()` is deprecated. In the future, this context manager will be removed. Please see `torch.nn.attention.sdpa_kernel()` for the new context manager, with updated signature.
+  self.gen = func(*args, **kwds)
+2026-08-09 14:19:50,333 | INFO | Evaluation completed: 2 episodes, 1 successes (50.0%) for task **Can**
+2026-08-09 14:19:50,333 | INFO | Success stats across environments: mean=0.50 +/- 0.50
+2026-08-09 14:19:50,333 | INFO | Average return: 0.500 +/- 0.500
+2026-08-09 14:19:50,333 | INFO | Average episode length: 232.0 +/- 67.0
+2026-08-09 14:19:50,333 | INFO | Performance: 600 total steps in 26.6s
+2026-08-09 14:19:50,333 | INFO | Average FPS: 22.5 frames/sec | Episodes/sec: 0.08
+2026-08-09 14:19:50,333 | INFO | ================================================================================
+2026-08-09 14:19:50,333 | INFO | Evaluation Summary
+2026-08-09 14:19:50,333 | INFO | ================================================================================
+2026-08-09 14:19:50,333 | INFO | Environment: Can
+2026-08-09 14:19:50,333 | INFO | Checkpoint: latest
+2026-08-09 14:19:50,334 | INFO | Episodes: 2
+2026-08-09 14:19:50,334 | INFO | Success Rate: 50.00% +/- 50.00%
+2026-08-09 14:19:50,334 | INFO | Average Return: 0.500 +/- 0.500
+2026-08-09 14:19:50,334 | INFO | FPS: 22.5
+2026-08-09 14:19:50,334 | INFO | ================================================================================
+2026-08-09 14:19:50,334 | INFO | Summary saved to: /home/haoyu/workspace/outputs/fpo-control/results/can_h54_mechanism_smoke_seed20261001/eval_summary_Can_latest_temporal_chunk_ensemble.txt
+2026-08-09 14:19:50,336 | INFO | Temporal chunk ensemble audit saved to: /home/haoyu/workspace/outputs/fpo-control/results/can_h54_mechanism_smoke_seed20261001/temporal_chunk_ensemble.json
+render_gpu_device_id: 1
+render_gpu_device_id: 1
+2026-08-09 14:19:51,723 | INFO | Evaluation completed successfully!

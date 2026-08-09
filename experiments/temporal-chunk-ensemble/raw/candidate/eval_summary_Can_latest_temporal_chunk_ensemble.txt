@@ -1,0 +1,13 @@
+Evaluation Summary
+================================================================================
+Environment: Can
+Checkpoint: latest
+Run ID: None
+Episodes: 20
+Balanced Episodes Per Env: True
+Sampling Mode: temporal_chunk_ensemble
+Action Steps: 8
+Success Rate: 80.00% +/- 14.14%
+Average Return: 0.800 +/- 0.400
+FPS: 36.8
+================================================================================
