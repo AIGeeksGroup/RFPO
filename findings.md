@@ -384,6 +384,7 @@ cannot be replaced by this cheap critic substitution.
 - Hard gripper-support projection is active but reward-neutral on released Can. It materially changed 67.55% of executed gripper commands while preserving arm coordinates and initial states exactly, yet all 20 common-seed outcomes remained identical to control; intermediate gripper magnitudes are not the limiting failure mechanism.
 - Coordinate-factorized source noise produced a positive but sub-threshold random-source signal: zeroing only the gripper latent preserved exact unit-Gaussian arm sources and changed 1/20 control success to 3/20, with two rescues and no losses. The +2/20 gain misses the locked +3 gate and is not stable benchmark evidence.
 - Deterministic gripper substitution does not isolate a reward gain from H57's clue. Keeping every Gaussian arm output bitwise and replacing only the zero-source gripper trajectory changed which single seed succeeded but tied control at 1/20; gripper-specific output post-processing is closed.
+- ReFPO's published `lambda=0.04` current-CFM regularizer is active but too weak to stabilize the audited FPO++ update. It retained 102.64%/93.20% of surrogate gain while reducing ratio standard deviation by only 9.22%/11.15%, left clip fraction within 0.00/1.95 points of control, and worsened one outcome-gradient cosine beyond tolerance. Current-CFM anchoring is closed before reward training or coefficient tuning.
 
 ## Lessons and Constraints
 
@@ -391,6 +392,7 @@ cannot be replaced by this cheap critic substitution.
 - Do not label the first 48k-step Can iteration an actor update: it is critic-only, and a meaningful short FPO++ screen requires at least two iterations.
 - Same-observation best-of-two endpoint/path ranking remains closed; H59 instead tested an exact AdamW extragradient correction of the first genuine actor update.
 - Exact one-step AdamW extragradient is also closed: it actively changed the update at comparable displacement, but failed both outcome-direction gates and collapsed held-out surrogate progress in both audited batches.
+- Generic online flow anchoring is closed by both H2 and H61: offline reflow did not improve cross-Monte-Carlo gradient agreement, and direct current-CFM regularization did not materially control fixed-batch ratio drift at the published coefficient.
 - The official manipulation main benchmark is not zero-only: Figure 4 and the released evaluator report zero and Gaussian random sampling for every checkpoint. The zero-only `best` artifact is a convenience selection rule, not the complete paper metric, so historical zero/random tradeoffs remain closed.
 - The released Go2 post-evaluator has a minimum-one-episode-per-environment rule. With 4096 environments, each nominal `eval_episodes=10` checkpoint metric actually averages 4096 episodes; the reproduced final returns are unchanged, but the earlier 10-episode description was incorrect.
 - Use short validation runs before full 1500-iteration or multi-seed jobs.

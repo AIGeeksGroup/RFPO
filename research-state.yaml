@@ -482,7 +482,7 @@ hypotheses:
     priority: high
   - id: H61
     statement: "ReFPO's unweighted current-CFM regularizer reduces fixed-batch FPO++ ratio drift while retaining useful surrogate progress and outcome-gradient direction."
-    status: planned
+    status: refuted
     motivation: "A subsequent paper specifies a direct fixed-batch regularizer distinct from H2's failed offline-reflow gradient-disagreement mechanism; it can be falsified in one paired actor-update audit without a long training run."
     parent: H2
     priority: high
@@ -501,7 +501,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 197
+  total_runs: 199
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -1840,11 +1840,43 @@ experiments:
       validity_passed: true
       passed: false
       renderer: egl
+    - run: can_h61_refpo_control_osmesa_seed20261061
+      metric: fixed_batch_ratio_drift_control
+      value: 0.2484282320
+      eligible_chunks: 223
+      chunks_audited: 64
+      batches: 2
+      median_absolute_log_ratios: [0.1218586266, 0.1406641006]
+      ratio_stds: [0.2556996047, 0.2411568612]
+      clip_fractions: [0.91015625, 0.93359375]
+      surrogate_gains: [0.1673265439, 0.1769839814]
+      outcome_gradient_cosines: [0.3299362176, 0.4423478742]
+      exact_preupdate_pairing: true
+      validity_passed: true
+      renderer: osmesa
+    - run: can_h61_refpo_candidate_osmesa_seed20261061
+      metric: fixed_batch_ratio_drift_candidate
+      value: 0.2232017964
+      coefficient: 0.04
+      eligible_chunks: 223
+      chunks_audited: 64
+      batches: 2
+      median_absolute_log_ratios: [0.1173772216, 0.1273837388]
+      ratio_stds: [0.2321274728, 0.2142761201]
+      clip_fractions: [0.91015625, 0.9140625]
+      surrogate_gains: [0.1717478973, 0.1649414143]
+      outcome_gradient_cosines: [0.4351167763, 0.4126272956]
+      weighted_cfm_to_gae_gradient_norm_ratios: [0.0028153733, 0.0024985546]
+      objective_extra_actor_forwards: 0
+      exact_preupdate_pairing: true
+      validity_passed: true
+      passed: false
+      renderer: osmesa
 
 outer_loop:
-  cycle: 46
-  last_direction: "Audit equal-NFE midpoint integration on the reproduced final Go2 checkpoint before any new training."
-  last_reflection: "The official manipulation main figure reports zero and random sampling side by side, so zero-only historical gains remain tradeoffs. Dense-reward Go2 can test whether the supported flow-geometry mechanism has reward value without the current EGL blocker."
+  cycle: 47
+  last_direction: "Refute current-CFM ReFPO regularization at the published MuJoCo coefficient and return to a distinct reward-aware hypothesis."
+  last_reflection: "ReFPO retained surrogate progress and weakly reduced ratio dispersion, but failed every locked ratio and clipping threshold and degraded one outcome-gradient batch. Do not tune the anchor or run reward training; the next candidate must target reward credit or exploration rather than flow geometry or generic behavior anchoring."
 
 workspace:
   findings: "findings.md"
