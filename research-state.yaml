@@ -566,6 +566,12 @@ hypotheses:
     motivation: "H70 establishes equal NFE, but the current helper launches its two endpoint solves sequentially; a publication-level efficiency claim should include measured policy latency."
     parent: H70
     priority: high
+  - id: H72
+    statement: "Euler-32 antithetic projection beats an Euler-32 zero-source control, isolating symmetric-source reward value from reduced integration depth."
+    status: active
+    motivation: "H70 matches zero64 and H71 is faster than random64, but zero32 could be an even cheaper deterministic deployment baseline; this strong control must precede a practical efficiency claim."
+    parent: H70
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
