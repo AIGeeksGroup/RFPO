@@ -357,6 +357,7 @@ rollout and are not the dominant bottleneck under this budget.
 - Extending Square rollouts to the full 400-step horizon converts censored initial failures into observed terminals, but at equal interaction budget it leaves random success unchanged and reduces deterministic and pooled success.
 - RFS identifies a new intervention boundary after the flow-actor routes were exhausted: keep the pretrained velocity field frozen and optimize explicit latent-source and output-residual distributions with a standard PPO likelihood ratio.
 - Joint RFS modulation is active but not sufficient on Square: despite bitwise base freezing and nonzero updates in both branches, it reduced mean and sampled success by two points each. Its 224-dimensional exact joint PPO ratio clipped 73-76% of minibatch samples, unlike H33's inactive temporal-clipping premise in FPO++.
+- Temporally factorized RFS ratios cut clipping by 57.56 points and preserve the exact on-policy gradient, but larger effective modulation updates worsened pooled success to 11/40. High joint clipping was protective rather than the dominant failure; RFS modulation is closed at this budget.
 
 ## Lessons and Constraints
 
@@ -378,6 +379,7 @@ rollout and are not the dominant bottleneck under this budget.
 - Which training-time intervention remains distinct from the closed source, estimator, critic, optimizer, interpolation, and inference-averaging routes?
 - Can joint source-latent and bounded residual modulation improve Square reward while keeping the released flow actor bitwise frozen?
 - Does temporally factorizing RFS's explicit PPO ratio restore usable updates under its observed high-dimensional clipping, or is the modulation direction itself harmful?
+- Can a value-aware action-density transport method improve exploration without directly moving the pretrained flow field or learning a harmful additive modulation?
 
 ## Optimization Trajectory
 

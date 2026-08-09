@@ -386,7 +386,7 @@ hypotheses:
     priority: high
   - id: H49
     statement: "Temporally factorizing RFS's explicit PPO ratio preserves its on-policy gradient while reducing the high joint-ratio clipping enough to improve Square reward."
-    status: active
+    status: refuted
     motivation: "H48 clipped 72.6-76.0% of 224-dimensional joint ratios; unlike H33's inactive FPO premise, RFS has a measured clipping bottleneck at the exact explicit-policy likelihood."
     parent: H48
     priority: high
@@ -405,7 +405,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 170
+  total_runs: 174
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -1433,11 +1433,21 @@ experiments:
       value: 0.40
       episodes: 20
       renderer: osmesa
+    - run: square_h49_candidate_mean_balanced20_seed20260925
+      metric: success_rate
+      value: 0.25
+      episodes: 20
+      renderer: osmesa
+    - run: square_h49_candidate_sampled_balanced20_seed20260925
+      metric: success_rate
+      value: 0.30
+      episodes: 20
+      renderer: osmesa
 
 outer_loop:
   cycle: 34
-  last_direction: "Audit temporal factorization of the high-dimensional RFS PPO ratio before any second modulation-policy reward run."
-  last_reflection: "H48 kept the base actor frozen and updated both modulation branches, but reduced both Square modes by 2/20. Its exact 224-dimensional joint ratio clipped 73-76% of minibatch samples, exposing a specific optimization bottleneck rather than evidence for scale tuning."
+  last_direction: "Close RFS modulation and inspect RLDT or another value-aware density-transport method with available official code before implementation."
+  last_reflection: "H49 reduced RFS clipping by 57.56 points and preserved exact on-policy gradients, yet worsened pooled success from 20/40 to 11/40. Joint clipping was not the main failure cause; stronger modulation updates were more harmful."
 
 workspace:
   findings: "findings.md"
