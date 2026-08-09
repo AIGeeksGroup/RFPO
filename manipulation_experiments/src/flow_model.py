@@ -21,6 +21,10 @@ from src.factorized_source import (
     build_stateless_gaussian_sources,
     zero_gripper_source,
 )
+from src.hybrid_gripper_output import (
+    build_hybrid_output_audit_records,
+    substitute_deterministic_gripper,
+)
 from src.rollout_bookkeeping import apply_source_sampling_scale, apply_zero_sampling_mask
 
 from .flow_model_config import FlowMatchingConfig
@@ -158,6 +162,7 @@ class FlowMatchingPolicy(PreTrainedPolicy):
         self.curvature_selection_records: list[dict[str, object]] = []
         self.temporal_chunk_ensemble_records: list[dict[str, object]] = []
         self.factorized_source_records: list[dict[str, object]] = []
+        self.hybrid_gripper_output_records: list[dict[str, object]] = []
             
     def get_optim_params(self) -> dict:
         """Get optimizer parameters with different learning rates for backbone and other parts."""
@@ -252,6 +257,7 @@ class FlowMatchingPolicy(PreTrainedPolicy):
         initial_action_steps: int | None = None,
         stateless_source_seed: int | None = None,
         zero_gripper_source_latent: bool = False,
+        deterministic_gripper_output: bool = False,
     ) -> Tensor:
         """Select actions for multiple environments with separate buffers.
         
@@ -315,6 +321,14 @@ class FlowMatchingPolicy(PreTrainedPolicy):
         if zero_gripper_source_latent and stateless_source_seed is None:
             raise ValueError(
                 "zero gripper source latent requires a stateless source seed"
+            )
+        if deterministic_gripper_output and stateless_source_seed is None:
+            raise ValueError(
+                "deterministic gripper output requires a stateless source seed"
+            )
+        if deterministic_gripper_output and zero_gripper_source_latent:
+            raise ValueError(
+                "deterministic gripper output cannot be combined with zero gripper source latent"
             )
         if stateless_source_seed is not None:
             if stateless_source_seed < 0:
@@ -510,9 +524,28 @@ class FlowMatchingPolicy(PreTrainedPolicy):
                         plan_indices,
                     )
                 )
-                action_chunks, mdp_x_t_path = self.predict_action_chunk(
+                gaussian_actions, gaussian_path = self.predict_action_chunk(
                     sub_batch, source_noise=used_source
                 )
+                if deterministic_gripper_output:
+                    deterministic_actions, _ = self.predict_action_chunk(
+                        dict(sub_batch), source_noise=torch.zeros_like(raw_source)
+                    )
+                    action_chunks = substitute_deterministic_gripper(
+                        gaussian_actions, deterministic_actions
+                    )
+                    self.hybrid_gripper_output_records.extend(
+                        build_hybrid_output_audit_records(
+                            gaussian_actions,
+                            deterministic_actions,
+                            action_chunks,
+                            envs_needing_actions,
+                            plan_indices,
+                        )
+                    )
+                else:
+                    action_chunks = gaussian_actions
+                mdp_x_t_path = gaussian_path
             else:
                 action_chunks, mdp_x_t_path = self.predict_action_chunk(
                     sub_batch,
