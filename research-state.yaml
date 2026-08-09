@@ -1,7 +1,7 @@
 project:
   title: "Reproducing and Improving FPO++ for Robot Control"
   question: "Can the official FPO++ benchmark results be reproduced, and can straighter conditional policy flows improve return or sampling efficiency?"
-  status: complete
+  status: active
   started: "2026-08-08"
   domain: "robot reinforcement learning and flow policies"
 
@@ -531,6 +531,12 @@ hypotheses:
     status: supported
     motivation: "The final actor has a repeatable roughly one-point zero/random return gap, while H26's pooled antithetic Can result exactly tied zero behavior; dense paired Go2 return can test whether symmetric transport reliably recovers central-policy performance."
     parent: H26
+    priority: high
+  - id: H67
+    statement: "Exact antithetic source pairing improves Go2 return over an IID two-source endpoint average at the same 128 NFE/action."
+    status: active
+    motivation: "H66 must be separated from generic test-time averaging and compared with the stronger zero-source deployment policy before it can support a paper claim."
+    parent: H66
     priority: high
 
 experiments:
@@ -2035,9 +2041,9 @@ experiments:
       renderer: egl
 
 outer_loop:
-  cycle: 55
-  last_direction: "Conclude the requested reproduction-and-improvement objective with H66 supported at official Go2 scale."
-  last_reflection: "H66 confirmed independently on 4,096 environments: random return improved by 0.9157 with bootstrap 95% [0.8160, 1.0150], exact initial/source pairing, and unchanged zero actions. The final random control independently matches the reproduced 40.523 benchmark result. Symmetric source ensembling therefore supplies a stable reward improvement at the explicit cost of doubling Gaussian inference NFE from 64 to 128."
+  cycle: 56
+  last_direction: "Reopen the project for publication-level validation, beginning with equal-compute attribution and matched zero-source evaluation before broader runs."
+  last_reflection: "H66 is statistically stable against one random endpoint, but publication value remains unresolved because it doubles NFE and may only recover toward the already stronger zero-source policy. H67 therefore compares antithetic and IID two-endpoint averages at exact equal compute and reports a matched zero policy before any cross-seed or cross-task expansion."
 
 workspace:
   findings: "findings.md"
