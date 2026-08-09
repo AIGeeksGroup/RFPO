@@ -442,7 +442,7 @@ hypotheses:
     priority: high
   - id: H55
     statement: "Can success varies across common-seed first-chunk phase shifts enough to provide oracle headroom for a learned adaptive continuation policy."
-    status: proposed
+    status: refuted
     motivation: "H27 rejects globally shorter execution and H54 rejects fixed overlap averaging, but neither tests whether the official eight-step boundaries miss precision-critical task stages."
     parent: null
     priority: high
@@ -1685,11 +1685,25 @@ experiments:
       reconstruction_max_abs: 0.0
       passed: false
       renderer: osmesa
+    - run: can_h55_phase_audit_seed20261010
+      metric: phase_shift_hindsight_oracle_gain
+      value: 2
+      phases: [8, 1, 2, 3, 4, 5, 6, 7]
+      episodes: 160
+      per_phase_successes: [15, 17, 16, 16, 16, 15, 14, 16]
+      control_successes: 15
+      oracle_successes: 17
+      oracle_gain: 2
+      phase_sensitive_seed_count: 3
+      initial_observation_hashes_exact: true
+      validity_passed: true
+      passed: false
+      renderer: osmesa
 
 outer_loop:
-  cycle: 40
-  last_direction: "Test H55 as a common-seed phase-shift prerequisite before implementing a BCP continuation head."
-  last_reflection: "H27 and H54 reject global frequency and fixed smoothing, but leave timing alignment unresolved. BCP provides an exact-likelihood adaptive-horizon route, yet its published training is too heavy to justify until a cheap phase oracle demonstrates reward-relevant headroom on Can."
+  cycle: 41
+  last_direction: "Close BCP after H55 fails its phase-sensitivity and oracle-headroom prerequisites; select a distinct reward-relevant hypothesis outside execution timing."
+  last_reflection: "The valid H55 audit found only three phase-sensitive seeds and a +2/20 hindsight upper bound. This is insufficient to justify BCP's continuation-head and GRPO cost, so adaptive execution timing is closed alongside global cadence and fixed overlap smoothing."
 
 workspace:
   findings: "findings.md"

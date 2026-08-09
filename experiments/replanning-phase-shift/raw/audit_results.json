@@ -1,0 +1,1446 @@
+{
+  "metadata": {
+    "local_checkpoint_path": "downloaded_checkpoints/95j3noe4_step_1000",
+    "output_dir": "/home/haoyu/workspace/outputs/fpo-control/results/can_h55_phase_audit_seed20261010",
+    "mode": "audit",
+    "device": "cuda",
+    "debug": false,
+    "camera_size": 84,
+    "checkpoint_name": "95j3noe4_step_1000",
+    "phases": [
+      8,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "environment_seeds": [
+      20261010,
+      20261011,
+      20261012,
+      20261013,
+      20261014,
+      20261015,
+      20261016,
+      20261017,
+      20261018,
+      20261019,
+      20261020,
+      20261021,
+      20261022,
+      20261023,
+      20261024,
+      20261025,
+      20261026,
+      20261027,
+      20261028,
+      20261029
+    ],
+    "sampling_mode": "zero",
+    "sampling_steps": 10,
+    "integration_method": "euler",
+    "renderer_claim": "OSMesa mechanism screen; not official EGL or real robot"
+  },
+  "records": [
+    {
+      "phase": 8,
+      "initial_observation_hashes": [
+        "62de62da1208fd8e755e07e8a702451566ec3ff763a2c894ca7a9ec930ea99b3",
+        "745b8cd20c4325781fc162bd0f0fd586f1c91125f483ad647fb1fe17a1a75050",
+        "71bbb0b8bbd9acaf322f261f64ebc911e6a7343f9a4b45dc7a0fa69eb9f9f6c1",
+        "6faa17dfd66ef725a407dda927454ba574e6f532b1725bf81fd82803f2e7cf43",
+        "a487106032a81143ffcdca6f41edacaf31e035fe79b94ed4e9ecd413169e751f",
+        "91631989d3b984a888ef587f93d0b2be5dafce836a923aced1f6fbc038c0db90",
+        "6baab8fecea6929a63bea21e0844d12d77884b2418934920b1f83a18c1d50638",
+        "a1d05a658b0015f3a26fc8532dbd15deb113fce726f1e866b54fb448bb016684",
+        "f3e64a14b964b18b057b9e506a235d517ae969a03336b657afff8b622ff6d2ef",
+        "03ff933a4036902b892da7845d8742497e1d11421db3afd74b6447b98d1e9621",
+        "86bb46e9fd580ff03d0ade4c9773e3e1a10ea178ebccb5eb90220cb2469ff1e6",
+        "8d8c2afe759a70b58c6034f882a49cc6494d6bdc5005b5fd4a782db305b87700",
+        "c56fd7d747e085029d8f0f691090845bcc9559507404cc1b23ca9ec7b3dcb899",
+        "308e6c3c4dd6b1bc157b5350c3c47fc2e9e28e1898c3c35a5fa38c00ac43a4df",
+        "3efab4109751005a5fc24a35236c077cfe2251813c2da96e03904c77b7cfea0b",
+        "7e397013b4e33c1ec7da8e0ef4bac94706b941fdae5c7b2d5c45b1587cdc7bc8",
+        "dd6b905ed6fda5a94925c33ff7349865dd3b504a32b3a4ccefbe8c2436cd59f2",
+        "96b7b098cd786fcb44da68ef1c766437d9e0665f040cf326e1997f6157d97e5f",
+        "3571cf57e119b5ab5d957e87ab360c8c999021df7f31bd3b8eac6e70e529f036",
+        "6f8e0ca265463edbc5fcd5263543f1e6e35f07bf1884c6921666acdc05a2f039"
+      ],
+      "episodes": [
+        {
+          "environment_seed": 20261010,
+          "success": 1,
+          "return": 1.0,
+          "length": 139
+        },
+        {
+          "environment_seed": 20261011,
+          "success": 1,
+          "return": 1.0,
+          "length": 158
+        },
+        {
+          "environment_seed": 20261012,
+          "success": 1,
+          "return": 1.0,
+          "length": 182
+        },
+        {
+          "environment_seed": 20261013,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261014,
+          "success": 1,
+          "return": 1.0,
+          "length": 169
+        },
+        {
+          "environment_seed": 20261015,
+          "success": 1,
+          "return": 1.0,
+          "length": 240
+        },
+        {
+          "environment_seed": 20261016,
+          "success": 1,
+          "return": 1.0,
+          "length": 170
+        },
+        {
+          "environment_seed": 20261017,
+          "success": 1,
+          "return": 1.0,
+          "length": 172
+        },
+        {
+          "environment_seed": 20261018,
+          "success": 1,
+          "return": 1.0,
+          "length": 207
+        },
+        {
+          "environment_seed": 20261019,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261020,
+          "success": 1,
+          "return": 1.0,
+          "length": 187
+        },
+        {
+          "environment_seed": 20261021,
+          "success": 1,
+          "return": 1.0,
+          "length": 170
+        },
+        {
+          "environment_seed": 20261022,
+          "success": 1,
+          "return": 1.0,
+          "length": 155
+        },
+        {
+          "environment_seed": 20261023,
+          "success": 1,
+          "return": 1.0,
+          "length": 139
+        },
+        {
+          "environment_seed": 20261024,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261025,
+          "success": 1,
+          "return": 1.0,
+          "length": 153
+        },
+        {
+          "environment_seed": 20261026,
+          "success": 1,
+          "return": 1.0,
+          "length": 193
+        },
+        {
+          "environment_seed": 20261027,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261028,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261029,
+          "success": 1,
+          "return": 1.0,
+          "length": 202
+        }
+      ],
+      "elapsed_seconds": 51.624872234184295
+    },
+    {
+      "phase": 1,
+      "initial_observation_hashes": [
+        "62de62da1208fd8e755e07e8a702451566ec3ff763a2c894ca7a9ec930ea99b3",
+        "745b8cd20c4325781fc162bd0f0fd586f1c91125f483ad647fb1fe17a1a75050",
+        "71bbb0b8bbd9acaf322f261f64ebc911e6a7343f9a4b45dc7a0fa69eb9f9f6c1",
+        "6faa17dfd66ef725a407dda927454ba574e6f532b1725bf81fd82803f2e7cf43",
+        "a487106032a81143ffcdca6f41edacaf31e035fe79b94ed4e9ecd413169e751f",
+        "91631989d3b984a888ef587f93d0b2be5dafce836a923aced1f6fbc038c0db90",
+        "6baab8fecea6929a63bea21e0844d12d77884b2418934920b1f83a18c1d50638",
+        "a1d05a658b0015f3a26fc8532dbd15deb113fce726f1e866b54fb448bb016684",
+        "f3e64a14b964b18b057b9e506a235d517ae969a03336b657afff8b622ff6d2ef",
+        "03ff933a4036902b892da7845d8742497e1d11421db3afd74b6447b98d1e9621",
+        "86bb46e9fd580ff03d0ade4c9773e3e1a10ea178ebccb5eb90220cb2469ff1e6",
+        "8d8c2afe759a70b58c6034f882a49cc6494d6bdc5005b5fd4a782db305b87700",
+        "c56fd7d747e085029d8f0f691090845bcc9559507404cc1b23ca9ec7b3dcb899",
+        "308e6c3c4dd6b1bc157b5350c3c47fc2e9e28e1898c3c35a5fa38c00ac43a4df",
+        "3efab4109751005a5fc24a35236c077cfe2251813c2da96e03904c77b7cfea0b",
+        "7e397013b4e33c1ec7da8e0ef4bac94706b941fdae5c7b2d5c45b1587cdc7bc8",
+        "dd6b905ed6fda5a94925c33ff7349865dd3b504a32b3a4ccefbe8c2436cd59f2",
+        "96b7b098cd786fcb44da68ef1c766437d9e0665f040cf326e1997f6157d97e5f",
+        "3571cf57e119b5ab5d957e87ab360c8c999021df7f31bd3b8eac6e70e529f036",
+        "6f8e0ca265463edbc5fcd5263543f1e6e35f07bf1884c6921666acdc05a2f039"
+      ],
+      "episodes": [
+        {
+          "environment_seed": 20261010,
+          "success": 1,
+          "return": 1.0,
+          "length": 143
+        },
+        {
+          "environment_seed": 20261011,
+          "success": 1,
+          "return": 1.0,
+          "length": 178
+        },
+        {
+          "environment_seed": 20261012,
+          "success": 1,
+          "return": 1.0,
+          "length": 182
+        },
+        {
+          "environment_seed": 20261013,
+          "success": 1,
+          "return": 1.0,
+          "length": 218
+        },
+        {
+          "environment_seed": 20261014,
+          "success": 1,
+          "return": 1.0,
+          "length": 168
+        },
+        {
+          "environment_seed": 20261015,
+          "success": 1,
+          "return": 1.0,
+          "length": 251
+        },
+        {
+          "environment_seed": 20261016,
+          "success": 1,
+          "return": 1.0,
+          "length": 171
+        },
+        {
+          "environment_seed": 20261017,
+          "success": 1,
+          "return": 1.0,
+          "length": 175
+        },
+        {
+          "environment_seed": 20261018,
+          "success": 1,
+          "return": 1.0,
+          "length": 200
+        },
+        {
+          "environment_seed": 20261019,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261020,
+          "success": 1,
+          "return": 1.0,
+          "length": 200
+        },
+        {
+          "environment_seed": 20261021,
+          "success": 1,
+          "return": 1.0,
+          "length": 167
+        },
+        {
+          "environment_seed": 20261022,
+          "success": 1,
+          "return": 1.0,
+          "length": 165
+        },
+        {
+          "environment_seed": 20261023,
+          "success": 1,
+          "return": 1.0,
+          "length": 139
+        },
+        {
+          "environment_seed": 20261024,
+          "success": 1,
+          "return": 1.0,
+          "length": 205
+        },
+        {
+          "environment_seed": 20261025,
+          "success": 1,
+          "return": 1.0,
+          "length": 154
+        },
+        {
+          "environment_seed": 20261026,
+          "success": 1,
+          "return": 1.0,
+          "length": 186
+        },
+        {
+          "environment_seed": 20261027,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261028,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261029,
+          "success": 1,
+          "return": 1.0,
+          "length": 192
+        }
+      ],
+      "elapsed_seconds": 58.142474316991866
+    },
+    {
+      "phase": 2,
+      "initial_observation_hashes": [
+        "62de62da1208fd8e755e07e8a702451566ec3ff763a2c894ca7a9ec930ea99b3",
+        "745b8cd20c4325781fc162bd0f0fd586f1c91125f483ad647fb1fe17a1a75050",
+        "71bbb0b8bbd9acaf322f261f64ebc911e6a7343f9a4b45dc7a0fa69eb9f9f6c1",
+        "6faa17dfd66ef725a407dda927454ba574e6f532b1725bf81fd82803f2e7cf43",
+        "a487106032a81143ffcdca6f41edacaf31e035fe79b94ed4e9ecd413169e751f",
+        "91631989d3b984a888ef587f93d0b2be5dafce836a923aced1f6fbc038c0db90",
+        "6baab8fecea6929a63bea21e0844d12d77884b2418934920b1f83a18c1d50638",
+        "a1d05a658b0015f3a26fc8532dbd15deb113fce726f1e866b54fb448bb016684",
+        "f3e64a14b964b18b057b9e506a235d517ae969a03336b657afff8b622ff6d2ef",
+        "03ff933a4036902b892da7845d8742497e1d11421db3afd74b6447b98d1e9621",
+        "86bb46e9fd580ff03d0ade4c9773e3e1a10ea178ebccb5eb90220cb2469ff1e6",
+        "8d8c2afe759a70b58c6034f882a49cc6494d6bdc5005b5fd4a782db305b87700",
+        "c56fd7d747e085029d8f0f691090845bcc9559507404cc1b23ca9ec7b3dcb899",
+        "308e6c3c4dd6b1bc157b5350c3c47fc2e9e28e1898c3c35a5fa38c00ac43a4df",
+        "3efab4109751005a5fc24a35236c077cfe2251813c2da96e03904c77b7cfea0b",
+        "7e397013b4e33c1ec7da8e0ef4bac94706b941fdae5c7b2d5c45b1587cdc7bc8",
+        "dd6b905ed6fda5a94925c33ff7349865dd3b504a32b3a4ccefbe8c2436cd59f2",
+        "96b7b098cd786fcb44da68ef1c766437d9e0665f040cf326e1997f6157d97e5f",
+        "3571cf57e119b5ab5d957e87ab360c8c999021df7f31bd3b8eac6e70e529f036",
+        "6f8e0ca265463edbc5fcd5263543f1e6e35f07bf1884c6921666acdc05a2f039"
+      ],
+      "episodes": [
+        {
+          "environment_seed": 20261010,
+          "success": 1,
+          "return": 1.0,
+          "length": 139
+        },
+        {
+          "environment_seed": 20261011,
+          "success": 1,
+          "return": 1.0,
+          "length": 163
+        },
+        {
+          "environment_seed": 20261012,
+          "success": 1,
+          "return": 1.0,
+          "length": 189
+        },
+        {
+          "environment_seed": 20261013,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261014,
+          "success": 1,
+          "return": 1.0,
+          "length": 165
+        },
+        {
+          "environment_seed": 20261015,
+          "success": 1,
+          "return": 1.0,
+          "length": 266
+        },
+        {
+          "environment_seed": 20261016,
+          "success": 1,
+          "return": 1.0,
+          "length": 176
+        },
+        {
+          "environment_seed": 20261017,
+          "success": 1,
+          "return": 1.0,
+          "length": 174
+        },
+        {
+          "environment_seed": 20261018,
+          "success": 1,
+          "return": 1.0,
+          "length": 193
+        },
+        {
+          "environment_seed": 20261019,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261020,
+          "success": 1,
+          "return": 1.0,
+          "length": 185
+        },
+        {
+          "environment_seed": 20261021,
+          "success": 1,
+          "return": 1.0,
+          "length": 171
+        },
+        {
+          "environment_seed": 20261022,
+          "success": 1,
+          "return": 1.0,
+          "length": 162
+        },
+        {
+          "environment_seed": 20261023,
+          "success": 1,
+          "return": 1.0,
+          "length": 140
+        },
+        {
+          "environment_seed": 20261024,
+          "success": 1,
+          "return": 1.0,
+          "length": 211
+        },
+        {
+          "environment_seed": 20261025,
+          "success": 1,
+          "return": 1.0,
+          "length": 146
+        },
+        {
+          "environment_seed": 20261026,
+          "success": 1,
+          "return": 1.0,
+          "length": 180
+        },
+        {
+          "environment_seed": 20261027,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261028,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261029,
+          "success": 1,
+          "return": 1.0,
+          "length": 211
+        }
+      ],
+      "elapsed_seconds": 54.85970148211345
+    },
+    {
+      "phase": 3,
+      "initial_observation_hashes": [
+        "62de62da1208fd8e755e07e8a702451566ec3ff763a2c894ca7a9ec930ea99b3",
+        "745b8cd20c4325781fc162bd0f0fd586f1c91125f483ad647fb1fe17a1a75050",
+        "71bbb0b8bbd9acaf322f261f64ebc911e6a7343f9a4b45dc7a0fa69eb9f9f6c1",
+        "6faa17dfd66ef725a407dda927454ba574e6f532b1725bf81fd82803f2e7cf43",
+        "a487106032a81143ffcdca6f41edacaf31e035fe79b94ed4e9ecd413169e751f",
+        "91631989d3b984a888ef587f93d0b2be5dafce836a923aced1f6fbc038c0db90",
+        "6baab8fecea6929a63bea21e0844d12d77884b2418934920b1f83a18c1d50638",
+        "a1d05a658b0015f3a26fc8532dbd15deb113fce726f1e866b54fb448bb016684",
+        "f3e64a14b964b18b057b9e506a235d517ae969a03336b657afff8b622ff6d2ef",
+        "03ff933a4036902b892da7845d8742497e1d11421db3afd74b6447b98d1e9621",
+        "86bb46e9fd580ff03d0ade4c9773e3e1a10ea178ebccb5eb90220cb2469ff1e6",
+        "8d8c2afe759a70b58c6034f882a49cc6494d6bdc5005b5fd4a782db305b87700",
+        "c56fd7d747e085029d8f0f691090845bcc9559507404cc1b23ca9ec7b3dcb899",
+        "308e6c3c4dd6b1bc157b5350c3c47fc2e9e28e1898c3c35a5fa38c00ac43a4df",
+        "3efab4109751005a5fc24a35236c077cfe2251813c2da96e03904c77b7cfea0b",
+        "7e397013b4e33c1ec7da8e0ef4bac94706b941fdae5c7b2d5c45b1587cdc7bc8",
+        "dd6b905ed6fda5a94925c33ff7349865dd3b504a32b3a4ccefbe8c2436cd59f2",
+        "96b7b098cd786fcb44da68ef1c766437d9e0665f040cf326e1997f6157d97e5f",
+        "3571cf57e119b5ab5d957e87ab360c8c999021df7f31bd3b8eac6e70e529f036",
+        "6f8e0ca265463edbc5fcd5263543f1e6e35f07bf1884c6921666acdc05a2f039"
+      ],
+      "episodes": [
+        {
+          "environment_seed": 20261010,
+          "success": 1,
+          "return": 1.0,
+          "length": 148
+        },
+        {
+          "environment_seed": 20261011,
+          "success": 1,
+          "return": 1.0,
+          "length": 171
+        },
+        {
+          "environment_seed": 20261012,
+          "success": 1,
+          "return": 1.0,
+          "length": 190
+        },
+        {
+          "environment_seed": 20261013,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261014,
+          "success": 1,
+          "return": 1.0,
+          "length": 169
+        },
+        {
+          "environment_seed": 20261015,
+          "success": 1,
+          "return": 1.0,
+          "length": 291
+        },
+        {
+          "environment_seed": 20261016,
+          "success": 1,
+          "return": 1.0,
+          "length": 174
+        },
+        {
+          "environment_seed": 20261017,
+          "success": 1,
+          "return": 1.0,
+          "length": 168
+        },
+        {
+          "environment_seed": 20261018,
+          "success": 1,
+          "return": 1.0,
+          "length": 197
+        },
+        {
+          "environment_seed": 20261019,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261020,
+          "success": 1,
+          "return": 1.0,
+          "length": 182
+        },
+        {
+          "environment_seed": 20261021,
+          "success": 1,
+          "return": 1.0,
+          "length": 152
+        },
+        {
+          "environment_seed": 20261022,
+          "success": 1,
+          "return": 1.0,
+          "length": 156
+        },
+        {
+          "environment_seed": 20261023,
+          "success": 1,
+          "return": 1.0,
+          "length": 139
+        },
+        {
+          "environment_seed": 20261024,
+          "success": 1,
+          "return": 1.0,
+          "length": 208
+        },
+        {
+          "environment_seed": 20261025,
+          "success": 1,
+          "return": 1.0,
+          "length": 153
+        },
+        {
+          "environment_seed": 20261026,
+          "success": 1,
+          "return": 1.0,
+          "length": 192
+        },
+        {
+          "environment_seed": 20261027,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261028,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261029,
+          "success": 1,
+          "return": 1.0,
+          "length": 204
+        }
+      ],
+      "elapsed_seconds": 60.00206807395443
+    },
+    {
+      "phase": 4,
+      "initial_observation_hashes": [
+        "62de62da1208fd8e755e07e8a702451566ec3ff763a2c894ca7a9ec930ea99b3",
+        "745b8cd20c4325781fc162bd0f0fd586f1c91125f483ad647fb1fe17a1a75050",
+        "71bbb0b8bbd9acaf322f261f64ebc911e6a7343f9a4b45dc7a0fa69eb9f9f6c1",
+        "6faa17dfd66ef725a407dda927454ba574e6f532b1725bf81fd82803f2e7cf43",
+        "a487106032a81143ffcdca6f41edacaf31e035fe79b94ed4e9ecd413169e751f",
+        "91631989d3b984a888ef587f93d0b2be5dafce836a923aced1f6fbc038c0db90",
+        "6baab8fecea6929a63bea21e0844d12d77884b2418934920b1f83a18c1d50638",
+        "a1d05a658b0015f3a26fc8532dbd15deb113fce726f1e866b54fb448bb016684",
+        "f3e64a14b964b18b057b9e506a235d517ae969a03336b657afff8b622ff6d2ef",
+        "03ff933a4036902b892da7845d8742497e1d11421db3afd74b6447b98d1e9621",
+        "86bb46e9fd580ff03d0ade4c9773e3e1a10ea178ebccb5eb90220cb2469ff1e6",
+        "8d8c2afe759a70b58c6034f882a49cc6494d6bdc5005b5fd4a782db305b87700",
+        "c56fd7d747e085029d8f0f691090845bcc9559507404cc1b23ca9ec7b3dcb899",
+        "308e6c3c4dd6b1bc157b5350c3c47fc2e9e28e1898c3c35a5fa38c00ac43a4df",
+        "3efab4109751005a5fc24a35236c077cfe2251813c2da96e03904c77b7cfea0b",
+        "7e397013b4e33c1ec7da8e0ef4bac94706b941fdae5c7b2d5c45b1587cdc7bc8",
+        "dd6b905ed6fda5a94925c33ff7349865dd3b504a32b3a4ccefbe8c2436cd59f2",
+        "96b7b098cd786fcb44da68ef1c766437d9e0665f040cf326e1997f6157d97e5f",
+        "3571cf57e119b5ab5d957e87ab360c8c999021df7f31bd3b8eac6e70e529f036",
+        "6f8e0ca265463edbc5fcd5263543f1e6e35f07bf1884c6921666acdc05a2f039"
+      ],
+      "episodes": [
+        {
+          "environment_seed": 20261010,
+          "success": 1,
+          "return": 1.0,
+          "length": 148
+        },
+        {
+          "environment_seed": 20261011,
+          "success": 1,
+          "return": 1.0,
+          "length": 165
+        },
+        {
+          "environment_seed": 20261012,
+          "success": 1,
+          "return": 1.0,
+          "length": 185
+        },
+        {
+          "environment_seed": 20261013,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261014,
+          "success": 1,
+          "return": 1.0,
+          "length": 161
+        },
+        {
+          "environment_seed": 20261015,
+          "success": 1,
+          "return": 1.0,
+          "length": 248
+        },
+        {
+          "environment_seed": 20261016,
+          "success": 1,
+          "return": 1.0,
+          "length": 171
+        },
+        {
+          "environment_seed": 20261017,
+          "success": 1,
+          "return": 1.0,
+          "length": 173
+        },
+        {
+          "environment_seed": 20261018,
+          "success": 1,
+          "return": 1.0,
+          "length": 199
+        },
+        {
+          "environment_seed": 20261019,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261020,
+          "success": 1,
+          "return": 1.0,
+          "length": 192
+        },
+        {
+          "environment_seed": 20261021,
+          "success": 1,
+          "return": 1.0,
+          "length": 159
+        },
+        {
+          "environment_seed": 20261022,
+          "success": 1,
+          "return": 1.0,
+          "length": 151
+        },
+        {
+          "environment_seed": 20261023,
+          "success": 1,
+          "return": 1.0,
+          "length": 137
+        },
+        {
+          "environment_seed": 20261024,
+          "success": 1,
+          "return": 1.0,
+          "length": 217
+        },
+        {
+          "environment_seed": 20261025,
+          "success": 1,
+          "return": 1.0,
+          "length": 148
+        },
+        {
+          "environment_seed": 20261026,
+          "success": 1,
+          "return": 1.0,
+          "length": 189
+        },
+        {
+          "environment_seed": 20261027,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261028,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261029,
+          "success": 1,
+          "return": 1.0,
+          "length": 205
+        }
+      ],
+      "elapsed_seconds": 53.86187125975266
+    },
+    {
+      "phase": 5,
+      "initial_observation_hashes": [
+        "62de62da1208fd8e755e07e8a702451566ec3ff763a2c894ca7a9ec930ea99b3",
+        "745b8cd20c4325781fc162bd0f0fd586f1c91125f483ad647fb1fe17a1a75050",
+        "71bbb0b8bbd9acaf322f261f64ebc911e6a7343f9a4b45dc7a0fa69eb9f9f6c1",
+        "6faa17dfd66ef725a407dda927454ba574e6f532b1725bf81fd82803f2e7cf43",
+        "a487106032a81143ffcdca6f41edacaf31e035fe79b94ed4e9ecd413169e751f",
+        "91631989d3b984a888ef587f93d0b2be5dafce836a923aced1f6fbc038c0db90",
+        "6baab8fecea6929a63bea21e0844d12d77884b2418934920b1f83a18c1d50638",
+        "a1d05a658b0015f3a26fc8532dbd15deb113fce726f1e866b54fb448bb016684",
+        "f3e64a14b964b18b057b9e506a235d517ae969a03336b657afff8b622ff6d2ef",
+        "03ff933a4036902b892da7845d8742497e1d11421db3afd74b6447b98d1e9621",
+        "86bb46e9fd580ff03d0ade4c9773e3e1a10ea178ebccb5eb90220cb2469ff1e6",
+        "8d8c2afe759a70b58c6034f882a49cc6494d6bdc5005b5fd4a782db305b87700",
+        "c56fd7d747e085029d8f0f691090845bcc9559507404cc1b23ca9ec7b3dcb899",
+        "308e6c3c4dd6b1bc157b5350c3c47fc2e9e28e1898c3c35a5fa38c00ac43a4df",
+        "3efab4109751005a5fc24a35236c077cfe2251813c2da96e03904c77b7cfea0b",
+        "7e397013b4e33c1ec7da8e0ef4bac94706b941fdae5c7b2d5c45b1587cdc7bc8",
+        "dd6b905ed6fda5a94925c33ff7349865dd3b504a32b3a4ccefbe8c2436cd59f2",
+        "96b7b098cd786fcb44da68ef1c766437d9e0665f040cf326e1997f6157d97e5f",
+        "3571cf57e119b5ab5d957e87ab360c8c999021df7f31bd3b8eac6e70e529f036",
+        "6f8e0ca265463edbc5fcd5263543f1e6e35f07bf1884c6921666acdc05a2f039"
+      ],
+      "episodes": [
+        {
+          "environment_seed": 20261010,
+          "success": 1,
+          "return": 1.0,
+          "length": 138
+        },
+        {
+          "environment_seed": 20261011,
+          "success": 1,
+          "return": 1.0,
+          "length": 165
+        },
+        {
+          "environment_seed": 20261012,
+          "success": 1,
+          "return": 1.0,
+          "length": 184
+        },
+        {
+          "environment_seed": 20261013,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261014,
+          "success": 1,
+          "return": 1.0,
+          "length": 167
+        },
+        {
+          "environment_seed": 20261015,
+          "success": 1,
+          "return": 1.0,
+          "length": 254
+        },
+        {
+          "environment_seed": 20261016,
+          "success": 1,
+          "return": 1.0,
+          "length": 166
+        },
+        {
+          "environment_seed": 20261017,
+          "success": 1,
+          "return": 1.0,
+          "length": 183
+        },
+        {
+          "environment_seed": 20261018,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261019,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261020,
+          "success": 1,
+          "return": 1.0,
+          "length": 186
+        },
+        {
+          "environment_seed": 20261021,
+          "success": 1,
+          "return": 1.0,
+          "length": 165
+        },
+        {
+          "environment_seed": 20261022,
+          "success": 1,
+          "return": 1.0,
+          "length": 152
+        },
+        {
+          "environment_seed": 20261023,
+          "success": 1,
+          "return": 1.0,
+          "length": 141
+        },
+        {
+          "environment_seed": 20261024,
+          "success": 1,
+          "return": 1.0,
+          "length": 210
+        },
+        {
+          "environment_seed": 20261025,
+          "success": 1,
+          "return": 1.0,
+          "length": 163
+        },
+        {
+          "environment_seed": 20261026,
+          "success": 1,
+          "return": 1.0,
+          "length": 183
+        },
+        {
+          "environment_seed": 20261027,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261028,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261029,
+          "success": 1,
+          "return": 1.0,
+          "length": 207
+        }
+      ],
+      "elapsed_seconds": 54.74739495664835
+    },
+    {
+      "phase": 6,
+      "initial_observation_hashes": [
+        "62de62da1208fd8e755e07e8a702451566ec3ff763a2c894ca7a9ec930ea99b3",
+        "745b8cd20c4325781fc162bd0f0fd586f1c91125f483ad647fb1fe17a1a75050",
+        "71bbb0b8bbd9acaf322f261f64ebc911e6a7343f9a4b45dc7a0fa69eb9f9f6c1",
+        "6faa17dfd66ef725a407dda927454ba574e6f532b1725bf81fd82803f2e7cf43",
+        "a487106032a81143ffcdca6f41edacaf31e035fe79b94ed4e9ecd413169e751f",
+        "91631989d3b984a888ef587f93d0b2be5dafce836a923aced1f6fbc038c0db90",
+        "6baab8fecea6929a63bea21e0844d12d77884b2418934920b1f83a18c1d50638",
+        "a1d05a658b0015f3a26fc8532dbd15deb113fce726f1e866b54fb448bb016684",
+        "f3e64a14b964b18b057b9e506a235d517ae969a03336b657afff8b622ff6d2ef",
+        "03ff933a4036902b892da7845d8742497e1d11421db3afd74b6447b98d1e9621",
+        "86bb46e9fd580ff03d0ade4c9773e3e1a10ea178ebccb5eb90220cb2469ff1e6",
+        "8d8c2afe759a70b58c6034f882a49cc6494d6bdc5005b5fd4a782db305b87700",
+        "c56fd7d747e085029d8f0f691090845bcc9559507404cc1b23ca9ec7b3dcb899",
+        "308e6c3c4dd6b1bc157b5350c3c47fc2e9e28e1898c3c35a5fa38c00ac43a4df",
+        "3efab4109751005a5fc24a35236c077cfe2251813c2da96e03904c77b7cfea0b",
+        "7e397013b4e33c1ec7da8e0ef4bac94706b941fdae5c7b2d5c45b1587cdc7bc8",
+        "dd6b905ed6fda5a94925c33ff7349865dd3b504a32b3a4ccefbe8c2436cd59f2",
+        "96b7b098cd786fcb44da68ef1c766437d9e0665f040cf326e1997f6157d97e5f",
+        "3571cf57e119b5ab5d957e87ab360c8c999021df7f31bd3b8eac6e70e529f036",
+        "6f8e0ca265463edbc5fcd5263543f1e6e35f07bf1884c6921666acdc05a2f039"
+      ],
+      "episodes": [
+        {
+          "environment_seed": 20261010,
+          "success": 1,
+          "return": 1.0,
+          "length": 140
+        },
+        {
+          "environment_seed": 20261011,
+          "success": 1,
+          "return": 1.0,
+          "length": 174
+        },
+        {
+          "environment_seed": 20261012,
+          "success": 1,
+          "return": 1.0,
+          "length": 184
+        },
+        {
+          "environment_seed": 20261013,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261014,
+          "success": 1,
+          "return": 1.0,
+          "length": 161
+        },
+        {
+          "environment_seed": 20261015,
+          "success": 1,
+          "return": 1.0,
+          "length": 248
+        },
+        {
+          "environment_seed": 20261016,
+          "success": 1,
+          "return": 1.0,
+          "length": 174
+        },
+        {
+          "environment_seed": 20261017,
+          "success": 1,
+          "return": 1.0,
+          "length": 175
+        },
+        {
+          "environment_seed": 20261018,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261019,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261020,
+          "success": 1,
+          "return": 1.0,
+          "length": 176
+        },
+        {
+          "environment_seed": 20261021,
+          "success": 1,
+          "return": 1.0,
+          "length": 170
+        },
+        {
+          "environment_seed": 20261022,
+          "success": 1,
+          "return": 1.0,
+          "length": 168
+        },
+        {
+          "environment_seed": 20261023,
+          "success": 1,
+          "return": 1.0,
+          "length": 142
+        },
+        {
+          "environment_seed": 20261024,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261025,
+          "success": 1,
+          "return": 1.0,
+          "length": 175
+        },
+        {
+          "environment_seed": 20261026,
+          "success": 1,
+          "return": 1.0,
+          "length": 184
+        },
+        {
+          "environment_seed": 20261027,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261028,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261029,
+          "success": 1,
+          "return": 1.0,
+          "length": 207
+        }
+      ],
+      "elapsed_seconds": 50.244715275242925
+    },
+    {
+      "phase": 7,
+      "initial_observation_hashes": [
+        "62de62da1208fd8e755e07e8a702451566ec3ff763a2c894ca7a9ec930ea99b3",
+        "745b8cd20c4325781fc162bd0f0fd586f1c91125f483ad647fb1fe17a1a75050",
+        "71bbb0b8bbd9acaf322f261f64ebc911e6a7343f9a4b45dc7a0fa69eb9f9f6c1",
+        "6faa17dfd66ef725a407dda927454ba574e6f532b1725bf81fd82803f2e7cf43",
+        "a487106032a81143ffcdca6f41edacaf31e035fe79b94ed4e9ecd413169e751f",
+        "91631989d3b984a888ef587f93d0b2be5dafce836a923aced1f6fbc038c0db90",
+        "6baab8fecea6929a63bea21e0844d12d77884b2418934920b1f83a18c1d50638",
+        "a1d05a658b0015f3a26fc8532dbd15deb113fce726f1e866b54fb448bb016684",
+        "f3e64a14b964b18b057b9e506a235d517ae969a03336b657afff8b622ff6d2ef",
+        "03ff933a4036902b892da7845d8742497e1d11421db3afd74b6447b98d1e9621",
+        "86bb46e9fd580ff03d0ade4c9773e3e1a10ea178ebccb5eb90220cb2469ff1e6",
+        "8d8c2afe759a70b58c6034f882a49cc6494d6bdc5005b5fd4a782db305b87700",
+        "c56fd7d747e085029d8f0f691090845bcc9559507404cc1b23ca9ec7b3dcb899",
+        "308e6c3c4dd6b1bc157b5350c3c47fc2e9e28e1898c3c35a5fa38c00ac43a4df",
+        "3efab4109751005a5fc24a35236c077cfe2251813c2da96e03904c77b7cfea0b",
+        "7e397013b4e33c1ec7da8e0ef4bac94706b941fdae5c7b2d5c45b1587cdc7bc8",
+        "dd6b905ed6fda5a94925c33ff7349865dd3b504a32b3a4ccefbe8c2436cd59f2",
+        "96b7b098cd786fcb44da68ef1c766437d9e0665f040cf326e1997f6157d97e5f",
+        "3571cf57e119b5ab5d957e87ab360c8c999021df7f31bd3b8eac6e70e529f036",
+        "6f8e0ca265463edbc5fcd5263543f1e6e35f07bf1884c6921666acdc05a2f039"
+      ],
+      "episodes": [
+        {
+          "environment_seed": 20261010,
+          "success": 1,
+          "return": 1.0,
+          "length": 149
+        },
+        {
+          "environment_seed": 20261011,
+          "success": 1,
+          "return": 1.0,
+          "length": 166
+        },
+        {
+          "environment_seed": 20261012,
+          "success": 1,
+          "return": 1.0,
+          "length": 180
+        },
+        {
+          "environment_seed": 20261013,
+          "success": 1,
+          "return": 1.0,
+          "length": 226
+        },
+        {
+          "environment_seed": 20261014,
+          "success": 1,
+          "return": 1.0,
+          "length": 164
+        },
+        {
+          "environment_seed": 20261015,
+          "success": 1,
+          "return": 1.0,
+          "length": 244
+        },
+        {
+          "environment_seed": 20261016,
+          "success": 1,
+          "return": 1.0,
+          "length": 178
+        },
+        {
+          "environment_seed": 20261017,
+          "success": 1,
+          "return": 1.0,
+          "length": 167
+        },
+        {
+          "environment_seed": 20261018,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261019,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261020,
+          "success": 1,
+          "return": 1.0,
+          "length": 191
+        },
+        {
+          "environment_seed": 20261021,
+          "success": 1,
+          "return": 1.0,
+          "length": 166
+        },
+        {
+          "environment_seed": 20261022,
+          "success": 1,
+          "return": 1.0,
+          "length": 161
+        },
+        {
+          "environment_seed": 20261023,
+          "success": 1,
+          "return": 1.0,
+          "length": 139
+        },
+        {
+          "environment_seed": 20261024,
+          "success": 1,
+          "return": 1.0,
+          "length": 223
+        },
+        {
+          "environment_seed": 20261025,
+          "success": 1,
+          "return": 1.0,
+          "length": 155
+        },
+        {
+          "environment_seed": 20261026,
+          "success": 1,
+          "return": 1.0,
+          "length": 176
+        },
+        {
+          "environment_seed": 20261027,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261028,
+          "success": 0,
+          "return": 0.0,
+          "length": 300
+        },
+        {
+          "environment_seed": 20261029,
+          "success": 1,
+          "return": 1.0,
+          "length": 210
+        }
+      ],
+      "elapsed_seconds": 55.4852816388011
+    }
+  ],
+  "outcome_matrix": [
+    [
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1
+    ],
+    [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1
+    ],
+    [
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1
+    ],
+    [
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1
+    ],
+    [
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1
+    ],
+    [
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1
+    ],
+    [
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1
+    ],
+    [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1
+    ]
+  ],
+  "analysis": {
+    "phase_order": [
+      8,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "seed_count": 20,
+    "per_phase_successes": {
+      "8": 15,
+      "1": 17,
+      "2": 16,
+      "3": 16,
+      "4": 16,
+      "5": 15,
+      "6": 14,
+      "7": 16
+    },
+    "control_phase": 8,
+    "control_successes": 15,
+    "oracle_successes": 17,
+    "oracle_gain": 2,
+    "phase_sensitive_seed_count": 3,
+    "phase_sensitive_seed_indices": [
+      3,
+      8,
+      14
+    ],
+    "initial_observation_hashes_exact": true,
+    "passed": false
+  }
+}
