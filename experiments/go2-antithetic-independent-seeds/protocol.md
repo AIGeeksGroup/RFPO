@@ -15,6 +15,9 @@ Go2 configuration:
 - 1,500 iterations
 - official FPO++ hyperparameters and Euler-64 inference configuration
 - fixed final checkpoint `model_1499.pt`; no checkpoint selection
+- disable the runner's post-training sweep over all 31 saved checkpoints because
+  H69 performs its separately seeded fixed-final evaluation; this flag does not
+  affect training or checkpoint creation
 
 Training must finish with finite metrics and a complete final checkpoint. No run
 is excluded for low return.
@@ -50,4 +53,3 @@ and equal-compute attribution; it does not invalidate H69's primary hypothesis.
 The existing seed-42 H67 result is reported descriptively but is not included in
 the three-seed confirmatory gates. Cross-task experiments are authorized only if
 the primary H69 claim passes.
-
