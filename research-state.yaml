@@ -312,6 +312,12 @@ hypotheses:
     motivation: "H38 reduced source-matched Euler-64 endpoint error by more than 98% under both source regimes at unchanged measured NFE and diversity; closed-loop reward transfer is the remaining question."
     parent: H38
     priority: high
+  - id: H39
+    statement: "The released FPO++ x1-prediction KL-adaptive learning-rate controller preserves held-out Can policy-gradient direction through ten actor epochs without sacrificing most surrogate progress."
+    status: active
+    motivation: "H18 observes destructive within-update gradient rotation and H23 shows that a fixed lower LR loses progress without preserving direction; Appendix D.2 and the released motion-tracking implementation provide a measured-divergence controller that changes LR only when policy movement leaves a target band."
+    parent: H18
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -1023,8 +1029,8 @@ experiments:
 
 outer_loop:
   cycle: 26
-  last_direction: "Pivot away from endpoint-fidelity-only inference changes and select a reward-relevant candidate distinct from the closed source, solver, critic, estimator, clipping, and robust-aggregation routes."
-  last_reflection: "H38b tied pooled reward because midpoint's +2/20 zero-source gain was offset by -2/20 random. Numerical fidelity is real but not aligned with both benchmark modes; do not tune the solver after this locked failure."
+  last_direction: "Audit the repository-defined x1-prediction KL-adaptive actor learning rate on the established step-6000 held-out gradient failure before any reward training."
+  last_reflection: "H38b closed endpoint-fidelity-only inference changes. H18/H23 favor divergence-conditioned step control over another fixed optimizer reduction, and Appendix D.2 plus the released locomotion code define a testable controller."
 
 workspace:
   findings: "findings.md"
