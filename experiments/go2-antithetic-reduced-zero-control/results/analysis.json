@@ -1,0 +1,35 @@
+{
+  "hypothesis": "H72",
+  "episodes_per_method": 256,
+  "bootstrap_seed": 20261612,
+  "bootstrap_samples": 20000,
+  "mean_returns": {
+    "zero64": 41.57649163901806,
+    "antithetic32": 41.57196205854416,
+    "zero32": 41.58819857239723
+  },
+  "comparisons": {
+    "antithetic32_minus_zero32": {
+      "gain": -0.01623651385307312,
+      "sem": 0.011742585376093054,
+      "bootstrap_95": [
+        -0.03680888824164867,
+        0.009007364511489861
+      ]
+    },
+    "zero32_minus_zero64": {
+      "gain": 0.011706933379173279,
+      "sem": 0.00694667193511793,
+      "bootstrap_95": [
+        -0.0005128983408212661,
+        0.026515427604317656
+      ]
+    }
+  },
+  "gates": {
+    "all_pairing_and_return_validity": true,
+    "antithetic32_minus_zero32_point_positive": false,
+    "antithetic32_minus_zero32_lower_positive": false
+  },
+  "passed": false
+}

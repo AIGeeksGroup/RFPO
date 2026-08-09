@@ -568,7 +568,7 @@ hypotheses:
     priority: high
   - id: H72
     statement: "Euler-32 antithetic projection beats an Euler-32 zero-source control, isolating symmetric-source reward value from reduced integration depth."
-    status: active
+    status: refuted
     motivation: "H70 matches zero64 and H71 is faster than random64, but zero32 could be an even cheaper deterministic deployment baseline; this strong control must precede a practical efficiency claim."
     parent: H70
     priority: high
@@ -2163,11 +2163,25 @@ experiments:
       antithetic32_batched_peak_incremental_cuda_bytes: 2556928
       actor_parameters_unchanged: true
       passed: true
+    - run: go2_h72_antithetic_reduced_zero_control_seed20261600
+      metric: antithetic32_minus_zero32_paired_return
+      value: -0.0162365139
+      environments_per_method: 256
+      zero64_mean: 41.5764916390
+      zero32_mean: 41.5881985724
+      antithetic32_mean: 41.5719620585
+      antithetic32_minus_zero32_sem: 0.0117425854
+      antithetic32_minus_zero32_bootstrap_95: [-0.0368088882, 0.0090073645]
+      zero32_minus_zero64: 0.0117069334
+      zero32_minus_zero64_bootstrap_95: [-0.0005128983, 0.0265154276]
+      initial_observation_hashes_match: true
+      validity_passed: true
+      passed: false
 
 outer_loop:
-  cycle: 60
+  cycle: 61
   last_direction: "Finish H69 independent-policy attribution, then confirm the H70 equal-total-NFE result across those policies before expanding to other official locomotion tasks."
-  last_reflection: "H70 removes H66's doubled-compute limitation, and H71 removes its practical batched-throughput limitation at official Go2 parallelism. On one H200, batched antithetic32 was 1.194x faster than sequential antithetic inference and used only 0.888x random64 latency, with maximum action difference 4.77e-7. This is policy-only batch throughput; independent-model generality remains the critical gate."
+  last_reflection: "H72 supplies the missing strong deployment baseline: zero32 scored 41.5882 and statistically matched both zero64 and antithetic32, so antithetic projection is not the best low-latency deployment on seed 42. H71 remains a valid batching optimization, while H70 must be framed specifically as equal-NFE recovery of the official stochastic-source deficit. H69 independent-policy generality now determines whether that narrower benchmark contribution survives."
 
 workspace:
   findings: "findings.md"
