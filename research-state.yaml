@@ -39,6 +39,10 @@ literature:
       title: "Kickstarting Deep Reinforcement Learning"
       year: 2018
       relevance: "Motivates retaining a fixed pretrained teacher as an auxiliary behavior objective during RL."
+    - id: zhao2023_act
+      title: "Learning Fine-Grained Bimanual Manipulation with Low-Cost Hardware"
+      year: 2023
+      relevance: "Motivates temporally ensembling overlapping action-chunk predictions."
     - id: lei2026_rldt
       title: "Reinforcement Learning for Flow-Matching Policies with Density Transport"
       year: 2026
@@ -425,6 +429,12 @@ hypotheses:
     status: refuted
     motivation: "H0-H52 repeatedly fail inside the critic/GAE/implicit-ratio chain; direct episodic parameter search removes value estimation, temporal credit assignment, and flow-density surrogates."
     parent: H40
+    priority: high
+  - id: H54
+    statement: "A fixed ACT-inspired ensemble of the previous unused continuation and current visual prefix reduces chunk-boundary discontinuity and improves released Can step-1000 deterministic success."
+    status: proposed
+    motivation: "The policy predicts 16 actions but discards the last eight at each official eight-step replan; overlapping predictions provide a feedback-preserving smoothing mechanism without more policy calls."
+    parent: null
     priority: high
 
 experiments:
@@ -1635,9 +1645,9 @@ experiments:
       renderer: osmesa
 
 outer_loop:
-  cycle: 38
-  last_direction: "Refute H53 after valid complete-episode finite differences reversed across Square seed blocks; do not implement or tune parameter-space ES."
-  last_reflection: "Direct episodic success avoids the critic/GAE/CFM-ratio chain, but in the locked fixed subspace its direction scores correlated -0.500 across replicas and transferred negatively in both top-quartile checks. Sparse binary reward is not a reproducible local parameter-ranking signal at this budget."
+  cycle: 39
+  last_direction: "Test H54 as a fixed ACT-inspired overlap ensemble before adding learned gates, variable cadence, or new training objectives."
+  last_reflection: "H53 closes direct local parameter search at this budget. The next test moves outside training and uses the released policy's discarded overlapping continuation, with mechanism gates for both boundary smoothing and retained visual feedback before reward screening."
 
 workspace:
   findings: "findings.md"
