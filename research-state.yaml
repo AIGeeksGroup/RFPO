@@ -326,7 +326,7 @@ hypotheses:
     priority: high
   - id: H41
     statement: "Zero-endpoint PCGrad improves short-horizon Square FPO++ random-source success without materially degrading zero-source behavior."
-    status: active
+    status: refuted
     motivation: "H29 passed its Can mechanism audit and H30b produced small same-direction gains but was underpowered by a saturated control; H40 establishes non-saturated Square headroom in both source modes."
     parent: H29
     priority: high
@@ -345,7 +345,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 125
+  total_runs: 132
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -1074,11 +1074,52 @@ experiments:
       average_episode_length: 345.3
       balanced_episodes_per_env: true
       renderer: osmesa
+    - run: square_h41_candidate_smoke_osmesa_seed20260913
+      metric: pipeline_completion
+      value: 1
+      iterations: 2
+      formal: false
+    - run: square_h41_control_osmesa_seed20260913
+      metric: training_completion
+      value: 1
+      iterations: 5
+      completed_successes_by_iteration: [9, 4, 4, 3, 6]
+    - run: square_h41_candidate_osmesa_seed20260913
+      metric: projection_active_fraction
+      value: 0.1375
+      iterations: 5
+      active_steps: 44
+      audited_steps: 320
+      completed_successes_by_iteration: [9, 4, 2, 5, 7]
+    - run: square_h41_control_zero_balanced20_seed20260914
+      metric: success_rate
+      value: 0.45
+      episodes: 20
+      action_steps: 16
+      balanced_episodes_per_env: true
+    - run: square_h41_control_random_balanced20_seed20260914
+      metric: success_rate
+      value: 0.25
+      episodes: 20
+      action_steps: 16
+      balanced_episodes_per_env: true
+    - run: square_h41_candidate_zero_balanced20_seed20260914
+      metric: success_rate
+      value: 0.45
+      episodes: 20
+      action_steps: 16
+      balanced_episodes_per_env: true
+    - run: square_h41_candidate_random_balanced20_seed20260914
+      metric: success_rate
+      value: 0.30
+      episodes: 20
+      action_steps: 16
+      balanced_episodes_per_env: true
 
 outer_loop:
   cycle: 27
-  last_direction: "Smoke-test and then execute H41's locked paired Square zero-endpoint PCGrad continuation screen."
-  last_reflection: "H40 scored 9/20 zero and 7/20 random with balanced accounting, supporting Square as a non-saturated OSMesa screening regime while providing no method-improvement evidence."
+  last_direction: "Run an outer-loop synthesis before selecting a method distinct from endpoint anchoring and the closed optimizer/source routes."
+  last_reflection: "H41 retained zero success and gained only one random success on Square, repeating H30b's sub-threshold pattern; zero-endpoint PCGrad is closed without confirmation or tuning."
 
 workspace:
   findings: "findings.md"

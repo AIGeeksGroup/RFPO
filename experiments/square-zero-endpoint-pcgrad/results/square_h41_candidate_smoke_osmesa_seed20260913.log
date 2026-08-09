@@ -1,0 +1,103 @@
+[robosuite WARNING] No private macro file found! (macros.py:57)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:58)
+[robosuite WARNING] To setup, run: python /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/scripts/setup_macros.py (macros.py:59)
+[robosuite WARNING] Could not import robosuite_models. Some robots may not be available. If you want to use these robots, please install robosuite_models from source (https://github.com/ARISE-Initiative/robosuite_models) or through pip install. (__init__.py:30)
+2026-08-09 08:29:46,797 | INFO | [0/1] Using device: cuda:0
+/home/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/miniconda3/envs/fpo_manipulation/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py:4631: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+[rank0]:[W809 08:29:46.430480039 ProcessGroupNCCL.cpp:4718] [PG ID 0 PG GUID 0 Rank 0]  using GPU 0 as device used by this process is currently unknown. This can potentially cause a hang if this rank to GPU mapping is incorrect. You can pecify device_id in init_process_group() to force use of a particular device.
+2026-08-09 08:29:47,560 | INFO | Run directory: /home/haoyu/workspace/outputs/fpo-control/results/square_h41_candidate_smoke_osmesa_seed20260913
+2026-08-09 08:29:47,561 | INFO | Random seed set to 20260913
+2026-08-09 08:29:47,561 | INFO | [Global] Policy directory: /home/haoyu/workspace/code/fpo-control/manipulation_experiments/downloaded_checkpoints/trc7rbt0_step_110000/policy
+2026-08-09 08:29:47,879 | INFO | [Rank 0] Image features: ['observation.images.agentview']
+2026-08-09 08:29:47,879 | INFO | [Rank 0] State features: ['observation.state']
+2026-08-09 08:29:47,879 | INFO | [Rank 0] Using image features from checkpoint config: ['observation.images.agentview']
+2026-08-09 08:29:47,879 | INFO | [Rank 0] Constructing FlowMatchingPolicy from config...
+[ViT Init] Inferred image size from dataset: 84x84
+2026-08-09 08:29:47,966 | INFO | [Rank 0] Loaded policy from checkpoint
+2026-08-09 08:29:47,974 | INFO | Loaded and applied EMA weights from checkpoint
+2026-08-09 08:29:47,974 | WARNING | Only if you are training from scratch, otherwise you should use the same n_action_steps as the base policy (8)
+2026-08-09 08:29:47,974 | INFO | [Rank 0] Overriding n_action_steps to 16 from base policy 8
+2026-08-09 08:29:47,974 | INFO | [Rank 0] Overriding sampling_steps to 10 from base policy 10
+2026-08-09 08:29:47,974 | INFO | [Rank 0] Overriding cfm_loss_use_huber to True from base policy False
+2026-08-09 08:29:47,974 | INFO | [Rank 0] Overriding cfm_loss_huber_delta to 1.0 from base policy 0.5
+2026-08-09 08:29:47,974 | INFO | [Rank 0] Overriding cfm_loss_weight_from_t to constant from base policy constant
+2026-08-09 08:29:47,974 | INFO | [Rank 0] Overriding sde_sigma to 0.0 in actor config from base policy None
+2026-08-09 08:29:48,022 | INFO | [Rank 0] Freezing vision encoder
+2026-08-09 08:29:48,024 | INFO | [Rank 0] Removing EMA model for DDP compatibility
+2026-08-09 08:29:48,027 | INFO | [Rank 0] Actor: DistributedDataParallel
+2026-08-09 08:29:48,027 | INFO | [Rank 0] N action steps: 16, prediction horizon: 16
+2026-08-09 08:29:48,027 | INFO | [Rank 0] Critic: DistributedDataParallel(
+  (module): Critic(
+    (mlp): Sequential(
+      (0): Linear(in_features=10377, out_features=512, bias=True)
+      (1): ReLU()
+      (2): Linear(in_features=512, out_features=256, bias=True)
+      (3): ReLU()
+      (4): Linear(in_features=256, out_features=1, bias=True)
+    )
+  )
+)
+2026-08-09 08:29:48,027 | INFO | [Rank 0] Handling 2 envs | Local batch: 8 | Minibatch: 1
+2026-08-09 08:29:48,027 | INFO | [Rank 0] Grad accum steps: 1 | Effective MB: 1 (base: 1)
+num_visible_gpus: 1 [1] render_override: 
+2026-08-09 08:29:48,027 | INFO | Production mode: using gymnasium.vector.AsyncVectorEnv
+2026-08-09 08:29:48,027 | INFO | Video key: agentview
+2026-08-09 08:29:48,028 | INFO | Using image observation keys: ['agentview']
+[robosuite INFO] Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json (composite_controller_factory.py:121)
+2026-08-09 08:29:48,028 | INFO | Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json
+render_gpu_device_id: 1
+2026-08-09 08:29:49,857 | INFO | Successfully created NutAssemblySquare environment via robosuite.make() with cameras at 84x84
+2026-08-09 08:29:49,857 | INFO | Configured cameras: ['agentview']
+[robosuite WARNING] No private macro file found! (macros.py:57)
+[robosuite WARNING] No private macro file found! (macros.py:57)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:58)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:58)
+[robosuite WARNING] To setup, run: python /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/scripts/setup_macros.py (macros.py:59)
+[robosuite WARNING] To setup, run: python /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/scripts/setup_macros.py (macros.py:59)
+[robosuite WARNING] Could not import robosuite_models. Some robots may not be available. If you want to use these robots, please install robosuite_models from source (https://github.com/ARISE-Initiative/robosuite_models) or through pip install. (__init__.py:30)
+[robosuite WARNING] Could not import robosuite_models. Some robots may not be available. If you want to use these robots, please install robosuite_models from source (https://github.com/ARISE-Initiative/robosuite_models) or through pip install. (__init__.py:30)
+2026-08-09 08:29:57,016 | INFO | Video key: agentview
+2026-08-09 08:29:57,016 | INFO | Using image observation keys: ['agentview']
+[robosuite INFO] Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json (composite_controller_factory.py:121)
+2026-08-09 08:29:57,016 | INFO | Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json
+2026-08-09 08:29:57,016 | INFO | Video key: agentview
+2026-08-09 08:29:57,017 | INFO | Using image observation keys: ['agentview']
+[robosuite INFO] Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json (composite_controller_factory.py:121)
+2026-08-09 08:29:57,017 | INFO | Loading controller configuration from: /mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/robosuite/robosuite/controllers/config/robots/default_panda.json
+2026-08-09 08:29:58,858 | INFO | Successfully created NutAssemblySquare environment via robosuite.make() with cameras at 84x84
+2026-08-09 08:29:58,858 | INFO | Configured cameras: ['agentview']
+2026-08-09 08:29:58,859 | INFO | Successfully created NutAssemblySquare environment via robosuite.make() with cameras at 84x84
+2026-08-09 08:29:58,859 | INFO | Configured cameras: ['agentview']
+2026-08-09 08:30:00,093 | INFO | Created 2 vectorized Square environments
+2026-08-09 08:30:00,094 | INFO | Set video key to 'agentview' for video recording
+2026-08-09 08:30:00,098 | INFO | [Rank 0] Mixed-source rollout: 0 zero-source and 2 scale-1 Gaussian environments
+2026-08-09 08:30:00,098 | INFO | [Rank 0] Initialized action buffers for 2 environments
+2026-08-09 08:30:00,098 | INFO | [Rank 0] Obs state dim: 9 | Action dim: 7 | Image keys: ['observation.images.agentview'] | Image shape: (3,84,84) | n_images=1
+2026-08-09 08:30:00,099 | INFO | [Rank 0] Total timesteps: 256, batch size: 8 | MB: 1, iterations: 32
+2026-08-09 08:30:01,115 | INFO | Created observation keys: ['observation.state', 'observation.images.agentview']
+2026-08-09 08:30:01,126 | INFO | Created observation keys: ['observation.state', 'observation.images.agentview']
+2026-08-09 08:30:01,128 | INFO | [Rank 0] Starting the main training loop
+2026-08-09 08:30:01,128 | INFO | Iteration: 1/32 | Global step (approx): 0/256
+2026-08-09 08:30:02,185 | INFO | [Rank 0] Starting data collection...
+/home/haoyu/workspace/code/fpo-control/manipulation_experiments/thirdparty/miniconda3/envs/fpo_manipulation/lib/python3.10/contextlib.py:103: FutureWarning: `torch.backends.cuda.sdp_kernel()` is deprecated. In the future, this context manager will be removed. Please see `torch.nn.attention.sdpa_kernel()` for the new context manager, with updated signature.
+  self.gen = func(*args, **kwds)
+2026-08-09 08:30:06,856 | INFO | [Rank 0] SR: 0.00% from 0 episodes | SPS_local(rank0 est): 27.41
+2026-08-09 08:30:06,856 | INFO | [Rank 0] Source SR: guided=0.00% (0/0) | random=0.00% (0/0)
+2026-08-09 08:30:06,856 | INFO | [Rank 0] Valid CFM action fraction: 100.00% (128/128)
+[Rank 0] Policy update:   0%|          | 0/10 [00:00<?, ?it/s][rank0]:[W809 08:30:06.336067773 reducer.cpp:1430] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+/mnt/data/users/haoyu/workspace/code/fpo-control/manipulation_experiments/finetune_online_rl.py:4448: UserWarning: std(): degrees of freedom is <= 0. Correction should be strictly less than the reduction factor (input numel divided by output numel). (Triggered internally at /pytorch/aten/src/ATen/native/ReduceOps.cpp:1839.)
+  adv_std = mb_advantages.std()
+[Rank 0] Policy update:  10%|█         | 1/10 [00:00<00:02,  3.65it/s][Rank 0] Policy update:  30%|███       | 3/10 [00:00<00:00,  8.93it/s][Rank 0] Policy update:  50%|█████     | 5/10 [00:00<00:00, 12.07it/s][Rank 0] Policy update:  70%|███████   | 7/10 [00:00<00:00, 14.11it/s][Rank 0] Policy update:  90%|█████████ | 9/10 [00:00<00:00, 15.35it/s][Rank 0] Policy update: 100%|██████████| 10/10 [00:00<00:00, 12.98it/s]
+2026-08-09 08:30:07,653 | INFO | [iter      1/32] SR: 0.00% | SPS_local_est: 23 | pg_loss: 0.0000 | v_loss: 0.0000 | total_loss: 0.0000 | valid_cfm: 100.00%
+2026-08-09 08:30:07,859 | INFO | Checkpoint saved @ /home/haoyu/workspace/outputs/fpo-control/results/square_h41_candidate_smoke_osmesa_seed20260913/checkpoints/step_128
+2026-08-09 08:30:07,859 | INFO | Iteration: 2/32 | Global step (approx): 128/256
+2026-08-09 08:30:09,024 | INFO | [Rank 0] Starting data collection...
+2026-08-09 08:30:12,664 | INFO | [Rank 0] SR: 0.00% from 0 episodes | SPS_local(rank0 est): 35.16
+2026-08-09 08:30:12,665 | INFO | [Rank 0] Source SR: guided=0.00% (0/0) | random=0.00% (0/0)
+2026-08-09 08:30:12,665 | INFO | [Rank 0] Valid CFM action fraction: 100.00% (128/128)
+[Rank 0] Policy update:   0%|          | 0/10 [00:00<?, ?it/s][Rank 0] Policy update:  10%|█         | 1/10 [00:00<00:01,  6.87it/s][Rank 0] Policy update:  20%|██        | 2/10 [00:00<00:01,  7.70it/s][Rank 0] Policy update:  30%|███       | 3/10 [00:00<00:00,  7.99it/s][Rank 0] Policy update:  40%|████      | 4/10 [00:00<00:00,  8.17it/s][Rank 0] Policy update:  50%|█████     | 5/10 [00:00<00:00,  8.36it/s][Rank 0] Policy update:  60%|██████    | 6/10 [00:00<00:00,  8.47it/s][Rank 0] Policy update:  70%|███████   | 7/10 [00:00<00:00,  8.45it/s][Rank 0] Policy update:  80%|████████  | 8/10 [00:00<00:00,  8.41it/s][Rank 0] Policy update:  90%|█████████ | 9/10 [00:01<00:00,  8.40it/s][Rank 0] Policy update: 100%|██████████| 10/10 [00:01<00:00,  8.41it/s][Rank 0] Policy update: 100%|██████████| 10/10 [00:01<00:00,  8.27it/s]
+2026-08-09 08:30:13,888 | INFO | Zero-endpoint PCGrad training: iteration=2 active=0.00% mean_cosine=0.000000 mean_norm_retention=0.00%
+2026-08-09 08:30:13,890 | INFO | [iter      2/32] SR: 0.00% | SPS_local_est: 24 | pg_loss: 0.0000 | v_loss: 0.0000 | total_loss: 0.0000 | valid_cfm: 100.00%
+2026-08-09 08:30:14,289 | INFO | Checkpoint saved @ /home/haoyu/workspace/outputs/fpo-control/results/square_h41_candidate_smoke_osmesa_seed20260913/checkpoints/step_256
+2026-08-09 08:30:14,290 | INFO | Training finished!
