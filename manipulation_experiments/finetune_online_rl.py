@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import logging
 import multiprocessing as mp
@@ -72,6 +73,7 @@ from src.median_microbatch_gradient import (
 )
 from src.terminal_consistency_filter import terminal_consistent_weights
 from src.ratio_rollback import rollback_clipped_ratio_loss
+from src.refpo import masked_cfm_mean
 from src.adaptive_lr import adapt_learning_rate_from_kl
 from src.rollout_local_optimizer import clear_optimizer_state
 from src.stratified_minibatches import advantage_sign_stratified_permutation
@@ -156,6 +158,11 @@ class FlowPPOConfig:
     rollback_alpha: float = 0.3
     clamp_logratio: Optional[float] = None
     cfm_loss_weight_from_t: str = "constant"
+    reflow_regularization_coefficient: float = 0.0
+    refpo_fixed_batch_audit: bool = False
+    refpo_fixed_batch_audit_iteration: int = 2
+    refpo_fixed_batch_audit_chunks: int = 64
+    refpo_fixed_batch_audit_output_json: Optional[str] = None
     advantage_weighting: Literal["signed", "ess_softmax"] = "signed"
     advantage_weight_ess_fraction: float = 0.5
     advantage_normalization_scope: Literal["minibatch", "rollout"] = "minibatch"
@@ -351,6 +358,16 @@ def calculate_advantage(
 def clamp_ste(x, min=None, max=None):
     clamped = x.clamp(min=min, max=max)
     return x + (clamped - x).detach()
+
+
+def tensor_fingerprint(*tensors: torch.Tensor) -> str:
+    digest = hashlib.sha256()
+    for tensor in tensors:
+        value = tensor.detach().cpu().contiguous()
+        digest.update(str(value.dtype).encode("ascii"))
+        digest.update(str(tuple(value.shape)).encode("ascii"))
+        digest.update(value.numpy().tobytes())
+    return digest.hexdigest()
 
 
 def _annotate_frame(
@@ -797,6 +814,22 @@ def main(cfg: FlowPPOConfig):
             raise ValueError("held-out ratio early-stop audit requires an even chunk count")
         if not 0.0 < cfg.heldout_ratio_early_stop_threshold <= 1.0:
             raise ValueError("held-out ratio early-stop threshold must be in (0, 1]")
+    if cfg.reflow_regularization_coefficient < 0:
+        raise ValueError("Reflow regularization coefficient must be nonnegative")
+    if cfg.reflow_regularization_coefficient > 0 and cfg.loss_mode != "fpo":
+        raise ValueError("Reflow regularization requires FPO loss mode")
+    if cfg.refpo_fixed_batch_audit:
+        if cfg.loss_mode != "fpo" or not cfg.do_chunk_level_ppo:
+            raise ValueError("ReFPO fixed-batch audit requires chunk-level FPO")
+        if world_size != 1:
+            raise ValueError("ReFPO fixed-batch audit currently requires one process")
+        if min(
+            cfg.refpo_fixed_batch_audit_iteration,
+            cfg.refpo_fixed_batch_audit_chunks,
+        ) < 1:
+            raise ValueError("ReFPO fixed-batch audit settings must be positive")
+        if cfg.refpo_fixed_batch_audit_chunks % 2:
+            raise ValueError("ReFPO fixed-batch audit requires an even chunk count")
     if cfg.adamw_extragradient_audit:
         if cfg.loss_mode != "fpo" or not cfg.do_chunk_level_ppo:
             raise ValueError("AdamW extragradient audit requires chunk-level FPO")
@@ -1591,6 +1624,63 @@ def main(cfg: FlowPPOConfig):
         if not torch.isfinite(ratios).all() or not torch.isfinite(vector).all():
             raise RuntimeError("success replay audit produced non-finite ratios or gradients")
         return ratios.detach().cpu(), vector
+
+    def replay_cfm_gradient(
+        chunk_indices: torch.Tensor,
+        *,
+        b_actions: torch.Tensor,
+        b_cfm_loss_ts: torch.Tensor,
+        b_cfm_loss_epsilons: torch.Tensor,
+        b_cfm_value_invalid: torch.Tensor,
+        b_obs_images: dict[str, torch.Tensor],
+        b_obs_state: torch.Tensor,
+    ) -> tuple[float, torch.Tensor]:
+        """Compute the unweighted fixed-draw CFM loss and gradient used by ReFPO."""
+        audit_actions = b_actions[chunk_indices].to(device)
+        audit_times = b_cfm_loss_ts[chunk_indices].to(device)
+        audit_noises = b_cfm_loss_epsilons[chunk_indices].to(device)
+        audit_valid = 1.0 - b_cfm_value_invalid[chunk_indices].to(device)
+        audit_obs = {
+            key: value[chunk_indices, 0].to(device)
+            for key, value in b_obs_images.items()
+        }
+        audit_obs["observation.state"] = b_obs_state[chunk_indices, 0].to(device)
+        audit_obs["action"] = audit_actions
+
+        fixed_times = audit_times.permute(0, 2, 1).reshape(
+            -1, n_action_steps, 1
+        )
+        if not (fixed_times[:, 0, 0] == fixed_times[:, -1, 0]).all():
+            raise RuntimeError("ReFPO audit received inconsistent CFM times")
+        fixed_times = fixed_times[:, 0:1, :]
+        fixed_noises = audit_noises.permute(0, 2, 1, 3).reshape(
+            -1, n_action_steps, action_dim
+        )
+        current_losses, _, _ = get_cfm_values(
+            actor_module,
+            audit_obs,
+            n_action_samples,
+            fixed_times,
+            fixed_noises,
+        )
+        current_losses = current_losses.permute(1, 0, 2)
+        cfm_loss = masked_cfm_mean(current_losses, audit_valid)
+        parameters = [
+            parameter for parameter in actor_module.parameters() if parameter.requires_grad
+        ]
+        gradients = torch.autograd.grad(cfm_loss, parameters, allow_unused=True)
+        vector = torch.cat(
+            [
+                (torch.zeros_like(parameter) if gradient is None else gradient)
+                .detach()
+                .flatten()
+                .cpu()
+                for parameter, gradient in zip(parameters, gradients, strict=True)
+            ]
+        )
+        if not torch.isfinite(cfm_loss) or not torch.isfinite(vector).all():
+            raise RuntimeError("ReFPO audit produced non-finite CFM loss or gradient")
+        return float(cfm_loss.item()), vector
 
     def actor_velocity_field(
         observation_conditioning: torch.Tensor,
@@ -3896,6 +3986,202 @@ def main(cfg: FlowPPOConfig):
             )
             actor_module.train()
 
+        refpo_audit_tensors = None
+        refpo_pre_results = None
+        refpo_epoch_results = []
+        refpo_pairing_fingerprint = None
+        refpo_eligible_chunks = None
+        if (
+            cfg.refpo_fixed_batch_audit
+            and iteration == cfg.refpo_fixed_batch_audit_iteration
+        ):
+            eligible_mask = (
+                (b_cfm_value_invalid.sum(dim=1) == 0)
+                & b_mc_valid[:, 0].bool()
+                & torch.isfinite(b_advantages[:, 0])
+                & torch.isfinite(b_mc_returns[:, 0])
+            )
+            eligible_indices = torch.where(eligible_mask)[0]
+            refpo_eligible_chunks = int(eligible_indices.numel())
+            required_chunks = cfg.refpo_fixed_batch_audit_chunks
+            if eligible_indices.numel() < required_chunks:
+                raise RuntimeError(
+                    "ReFPO fixed-batch audit requires "
+                    f"{required_chunks} fully valid labeled chunks, "
+                    f"found {eligible_indices.numel()}"
+                )
+            audit_generator = torch.Generator().manual_seed(
+                cfg.seed + iteration * 13007
+            )
+            selected_indices = eligible_indices[
+                torch.randperm(
+                    eligible_indices.numel(), generator=audit_generator
+                )[:required_chunks]
+            ]
+            audit_actions = b_actions[selected_indices]
+            audit_images = {
+                key: value[selected_indices] for key, value in b_obs_images.items()
+            }
+            audit_states = b_obs_state[selected_indices]
+            audit_invalid = b_cfm_value_invalid[selected_indices]
+            audit_times, audit_noises = sample_cfm_variables(
+                batch_size=required_chunks,
+                num_samples=n_action_samples,
+                horizon=n_action_steps,
+                action_dim=action_dim,
+                mode="iid",
+                time_generator=torch.Generator(device=device).manual_seed(
+                    cfg.seed + 725_242
+                ),
+                noise_generator=torch.Generator(device=device).manual_seed(
+                    cfg.seed + 725_243
+                ),
+                device=device,
+                dtype=audit_actions.dtype,
+            )
+            audit_observations = {
+                key: value[:, 0].to(device) for key, value in audit_images.items()
+            }
+            audit_observations["observation.state"] = audit_states[:, 0].to(device)
+            audit_observations["action"] = audit_actions.to(device)
+            actor_module.eval()
+            with torch.no_grad():
+                audit_losses, returned_times, returned_noises = get_cfm_values(
+                    actor_module,
+                    audit_observations,
+                    n_action_samples,
+                    audit_times,
+                    audit_noises,
+                )
+            audit_losses = audit_losses.permute(1, 0, 2).cpu()
+            audit_times_stored = returned_times.permute(1, 0, 2).cpu()
+            audit_noises_stored = returned_noises.permute(1, 0, 2, 3).cpu()
+            audit_local_indices = torch.arange(required_chunks)
+            batch_size = required_chunks // 2
+            gae_weight_batches = []
+            outcome_weight_batches = []
+            refpo_pre_gae_gradients = []
+            refpo_pre_outcome_gradients = []
+            refpo_pre_surrogates = []
+            refpo_pre_results = []
+
+            for audit_batch in range(2):
+                batch_slice = slice(
+                    audit_batch * batch_size, (audit_batch + 1) * batch_size
+                )
+                stored_indices = selected_indices[batch_slice]
+                local_indices = audit_local_indices[batch_slice]
+                gae_weights = b_advantages[stored_indices, 0].float()
+                gae_weights = (gae_weights - gae_weights.mean()) / (
+                    gae_weights.std() + 1e-8
+                )
+                outcome_weights = b_mc_returns[stored_indices, 0].float()
+                outcome_weights = outcome_weights - outcome_weights.mean()
+                if outcome_weights.norm().item() <= 0:
+                    raise RuntimeError(
+                        "ReFPO audit outcome weights are constant in an audit batch"
+                    )
+                gae_weight_batches.append(gae_weights)
+                outcome_weight_batches.append(outcome_weights)
+                pre_ratios, gae_gradient = replay_audit_gradient(
+                    local_indices,
+                    gae_weights,
+                    b_actions=audit_actions,
+                    b_cfm_losses=audit_losses,
+                    b_cfm_loss_ts=audit_times_stored,
+                    b_cfm_loss_epsilons=audit_noises_stored,
+                    b_cfm_value_invalid=audit_invalid,
+                    b_obs_images=audit_images,
+                    b_obs_state=audit_states,
+                )
+                _, outcome_gradient = replay_audit_gradient(
+                    local_indices,
+                    outcome_weights,
+                    b_actions=audit_actions,
+                    b_cfm_losses=audit_losses,
+                    b_cfm_loss_ts=audit_times_stored,
+                    b_cfm_loss_epsilons=audit_noises_stored,
+                    b_cfm_value_invalid=audit_invalid,
+                    b_obs_images=audit_images,
+                    b_obs_state=audit_states,
+                )
+                cfm_loss, cfm_gradient = replay_cfm_gradient(
+                    local_indices,
+                    b_actions=audit_actions,
+                    b_cfm_loss_ts=audit_times_stored,
+                    b_cfm_loss_epsilons=audit_noises_stored,
+                    b_cfm_value_invalid=audit_invalid,
+                    b_obs_images=audit_images,
+                    b_obs_state=audit_states,
+                )
+                gradients = (gae_gradient, outcome_gradient, cfm_gradient)
+                if any(gradient.norm().item() <= 0 for gradient in gradients):
+                    raise RuntimeError("ReFPO audit produced a zero pre-update gradient")
+                pre_surrogate = float(
+                    (gae_weights[:, None] * pre_ratios).mean().item()
+                )
+                refpo_pre_gae_gradients.append(gae_gradient)
+                refpo_pre_outcome_gradients.append(outcome_gradient)
+                refpo_pre_surrogates.append(pre_surrogate)
+                refpo_pre_results.append(
+                    {
+                        "batch": audit_batch,
+                        "ratio_mean": float(pre_ratios.mean().item()),
+                        "ratio_std": float(pre_ratios.std(unbiased=False).item()),
+                        "surrogate": pre_surrogate,
+                        "gae_gradient_norm": float(gae_gradient.norm().item()),
+                        "outcome_gradient_norm": float(
+                            outcome_gradient.norm().item()
+                        ),
+                        "unweighted_cfm_loss": cfm_loss,
+                        "unweighted_cfm_gradient_norm": float(
+                            cfm_gradient.norm().item()
+                        ),
+                        "gae_cfm_gradient_cosine": stable_vector_cosine(
+                            gae_gradient, cfm_gradient
+                        ),
+                        "weighted_cfm_to_gae_gradient_norm_ratio": float(
+                            cfg.reflow_regularization_coefficient
+                            * cfm_gradient.norm().item()
+                            / gae_gradient.norm().item()
+                        ),
+                    }
+                )
+
+            refpo_pairing_fingerprint = tensor_fingerprint(
+                selected_indices,
+                audit_actions,
+                audit_states,
+                b_advantages[selected_indices, 0],
+                b_mc_returns[selected_indices, 0],
+                audit_losses,
+                audit_times_stored,
+                audit_noises_stored,
+                *refpo_pre_gae_gradients,
+                *refpo_pre_outcome_gradients,
+            )
+            refpo_audit_tensors = (
+                audit_local_indices,
+                gae_weight_batches,
+                outcome_weight_batches,
+                audit_actions,
+                audit_losses,
+                audit_times_stored,
+                audit_noises_stored,
+                audit_invalid,
+                audit_images,
+                audit_states,
+            )
+            logger.info(
+                "ReFPO fixed-batch audit prepared: chunks=%d eligible=%d fingerprint=%s",
+                required_chunks,
+                refpo_eligible_chunks,
+                refpo_pairing_fingerprint,
+            )
+            actor_module.train()
+            if cfg.freeze_vision_encoder:
+                actor_module.model.vision_encoder.eval()
+
         if (
             cfg.adamw_extragradient_audit
             and iteration == cfg.adamw_extragradient_audit_iteration
@@ -4888,6 +5174,7 @@ def main(cfg: FlowPPOConfig):
                         nn.utils.clip_grad_norm_(success_critic.parameters(), cfg.max_grad_norm)
                         optimizer_success_critic.step()
 
+                reflow_loss = torch.zeros((), device=device)
                 if cfg.loss_mode == "fpo":
                     # CFM losses
                     obs_chunk2 = {k: mb_obs_images[k][:, 0] for k in mb_obs_images.keys()}
@@ -4942,6 +5229,9 @@ def main(cfg: FlowPPOConfig):
                             }
                         )
                     curr_cfm_loss = curr_cfm_loss.permute(1, 0, 2)
+                    reflow_loss = masked_cfm_mean(
+                        curr_cfm_loss, valid_idx_mask_in_chunk
+                    )
 
                     old_cfm_loss = mb_cfm_losses.reshape(mb_cfm_losses.shape[0], -1, n_groups, group_size)
                     curr_cfm_loss = curr_cfm_loss.reshape(curr_cfm_loss.shape[0], -1, n_groups, group_size)
@@ -5100,7 +5390,13 @@ def main(cfg: FlowPPOConfig):
 
                 # Total loss
                 entropy_loss = -entropy.mean() if cfg.learn_sde_sigma and isinstance(entropy, torch.Tensor) else 0.0
-                policy_loss = pg_loss + cfg.entropy_loss_coef * entropy_loss if iteration > cfg.n_iterations_train_only_value else 0.0
+                policy_loss = (
+                    pg_loss
+                    + cfg.reflow_regularization_coefficient * reflow_loss
+                    + cfg.entropy_loss_coef * entropy_loss
+                    if iteration > cfg.n_iterations_train_only_value
+                    else 0.0
+                )
                 loss = (policy_loss + v_loss * cfg.vf_coef) / cfg.gradient_accumulation_steps
                 loss.backward()
                 if (
@@ -5309,6 +5605,121 @@ def main(cfg: FlowPPOConfig):
                 if cfg.freeze_vision_encoder:
                     actor_module.model.vision_encoder.eval()
 
+            if refpo_audit_tensors is not None:
+                (
+                    audit_local_indices,
+                    gae_weight_batches,
+                    outcome_weight_batches,
+                    audit_actions,
+                    audit_losses,
+                    audit_times_stored,
+                    audit_noises_stored,
+                    audit_invalid,
+                    audit_images,
+                    audit_states,
+                ) = refpo_audit_tensors
+                actor_module.eval()
+                epoch_batch_results = []
+                audit_batch_size = audit_local_indices.numel() // 2
+                for audit_batch in range(2):
+                    batch_slice = slice(
+                        audit_batch * audit_batch_size,
+                        (audit_batch + 1) * audit_batch_size,
+                    )
+                    batch_indices = audit_local_indices[batch_slice]
+                    gae_weights = gae_weight_batches[audit_batch]
+                    outcome_weights = outcome_weight_batches[audit_batch]
+                    post_ratios, gae_gradient = replay_audit_gradient(
+                        batch_indices,
+                        gae_weights,
+                        b_actions=audit_actions,
+                        b_cfm_losses=audit_losses,
+                        b_cfm_loss_ts=audit_times_stored,
+                        b_cfm_loss_epsilons=audit_noises_stored,
+                        b_cfm_value_invalid=audit_invalid,
+                        b_obs_images=audit_images,
+                        b_obs_state=audit_states,
+                    )
+                    _, outcome_gradient = replay_audit_gradient(
+                        batch_indices,
+                        outcome_weights,
+                        b_actions=audit_actions,
+                        b_cfm_losses=audit_losses,
+                        b_cfm_loss_ts=audit_times_stored,
+                        b_cfm_loss_epsilons=audit_noises_stored,
+                        b_cfm_value_invalid=audit_invalid,
+                        b_obs_images=audit_images,
+                        b_obs_state=audit_states,
+                    )
+                    cfm_loss, cfm_gradient = replay_cfm_gradient(
+                        batch_indices,
+                        b_actions=audit_actions,
+                        b_cfm_loss_ts=audit_times_stored,
+                        b_cfm_loss_epsilons=audit_noises_stored,
+                        b_cfm_value_invalid=audit_invalid,
+                        b_obs_images=audit_images,
+                        b_obs_state=audit_states,
+                    )
+                    gradients = (gae_gradient, outcome_gradient, cfm_gradient)
+                    if any(
+                        not torch.isfinite(gradient).all()
+                        or gradient.norm().item() <= 0
+                        for gradient in gradients
+                    ):
+                        raise RuntimeError(
+                            "ReFPO audit produced an invalid post-update gradient"
+                        )
+                    surrogate = float(
+                        (gae_weights[:, None] * post_ratios).mean().item()
+                    )
+                    absolute_log_ratios = post_ratios.log().abs()
+                    epoch_batch_results.append(
+                        {
+                            "batch": audit_batch,
+                            "ratio_mean": float(post_ratios.mean().item()),
+                            "ratio_std": float(
+                                post_ratios.std(unbiased=False).item()
+                            ),
+                            "median_absolute_log_ratio": float(
+                                absolute_log_ratios.median().item()
+                            ),
+                            "clip_fraction": float(
+                                (
+                                    (post_ratios - 1.0).abs() > cfg.clip_coef
+                                )
+                                .float()
+                                .mean()
+                                .item()
+                            ),
+                            "surrogate": surrogate,
+                            "surrogate_gain": (
+                                surrogate - refpo_pre_surrogates[audit_batch]
+                            ),
+                            "gae_gradient_norm": float(
+                                gae_gradient.norm().item()
+                            ),
+                            "outcome_gradient_norm": float(
+                                outcome_gradient.norm().item()
+                            ),
+                            "outcome_gradient_cosine_to_preupdate": (
+                                stable_vector_cosine(
+                                    outcome_gradient,
+                                    refpo_pre_outcome_gradients[audit_batch],
+                                )
+                            ),
+                            "unweighted_cfm_loss": cfm_loss,
+                            "unweighted_cfm_gradient_norm": float(
+                                cfm_gradient.norm().item()
+                            ),
+                        }
+                    )
+                refpo_epoch_results.append(
+                    {"epoch": epoch + 1, "batches": epoch_batch_results}
+                )
+                actor_module.train()
+                if cfg.freeze_vision_encoder:
+                    actor_module.model.vision_encoder.eval()
+
             if early_stop:
                 break
 
@@ -5441,6 +5852,35 @@ def main(cfg: FlowPPOConfig):
             critic.train()
             if cfg.freeze_vision_encoder:
                 actor_module.model.vision_encoder.eval()
+
+        if refpo_audit_tensors is not None:
+            refpo_result = {
+                "iteration": iteration,
+                "reflow_regularization_coefficient": (
+                    cfg.reflow_regularization_coefficient
+                ),
+                "objective_extra_actor_forwards": 0,
+                "num_eligible_chunks": refpo_eligible_chunks,
+                "num_chunks_audited": cfg.refpo_fixed_batch_audit_chunks,
+                "num_batches": 2,
+                "cfm_samples": n_action_samples,
+                "pairing_fingerprint": refpo_pairing_fingerprint,
+                "preupdate_batches": refpo_pre_results,
+                "epochs": refpo_epoch_results,
+            }
+            refpo_output_path = (
+                Path(cfg.refpo_fixed_batch_audit_output_json)
+                if cfg.refpo_fixed_batch_audit_output_json is not None
+                else run_dir / "refpo_fixed_batch_audit.json"
+            )
+            refpo_output_path.parent.mkdir(parents=True, exist_ok=True)
+            refpo_output_path.write_text(
+                json.dumps(refpo_result, indent=2, sort_keys=True) + "\n"
+            )
+            logger.info(
+                "ReFPO fixed-batch audit: %s",
+                json.dumps(refpo_result, sort_keys=True),
+            )
 
         if early_stop_audit_tensors is not None:
             active_fractions = [
