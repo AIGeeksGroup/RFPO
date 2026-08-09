@@ -12,6 +12,14 @@ case "$CONDITION" in
   *) echo "Set CONDITION to control or candidate" >&2; exit 2 ;;
 esac
 
+OSMESA_ROOT="${FPO_OSMESA_ROOT:-$HOME/workspace/scratch/fpo-osmesa/osmesa-root}"
+OSMESA_LIB="$OSMESA_ROOT/usr/lib/x86_64-linux-gnu"
+if [[ ! -f "$OSMESA_LIB/libOSMesa.so.8" ]]; then
+  echo "Missing OSMesa runtime: $OSMESA_LIB/libOSMesa.so.8" >&2
+  exit 1
+fi
+
+export LD_LIBRARY_PATH="$OSMESA_LIB${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 export MUJOCO_GL=osmesa
 export PYOPENGL_PLATFORM=osmesa
 export FPO_RENDER_GPU=""
