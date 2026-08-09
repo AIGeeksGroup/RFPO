@@ -1,0 +1,178 @@
+{
+  "absolute_weight_ess": 8.0,
+  "archived_records_sha256": "d6e6568f2117f88ebb15239a589853882b1653a48471591abac20689b249003c",
+  "formal": true,
+  "negative_advantages": 5,
+  "nonzero_advantages": 8,
+  "num_gaussian_episodes": 32,
+  "num_scenes": 8,
+  "num_zero_reference_episodes": 8,
+  "passed": false,
+  "positive_advantages": 3,
+  "scenes": [
+    {
+      "gaussian_outcomes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "reference_relative_advantages": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "root_seed": 20261080,
+      "zero_reference_length": 400,
+      "zero_reference_success": 0
+    },
+    {
+      "gaussian_outcomes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "reference_relative_advantages": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "root_seed": 20261081,
+      "zero_reference_length": 400,
+      "zero_reference_success": 0
+    },
+    {
+      "gaussian_outcomes": [
+        1,
+        1,
+        0,
+        1
+      ],
+      "reference_relative_advantages": [
+        0.0,
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "root_seed": 20261082,
+      "zero_reference_length": 298,
+      "zero_reference_success": 1
+    },
+    {
+      "gaussian_outcomes": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "reference_relative_advantages": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "root_seed": 20261083,
+      "zero_reference_length": 154,
+      "zero_reference_success": 1
+    },
+    {
+      "gaussian_outcomes": [
+        1,
+        0,
+        1,
+        1
+      ],
+      "reference_relative_advantages": [
+        0.0,
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "root_seed": 20261084,
+      "zero_reference_length": 264,
+      "zero_reference_success": 1
+    },
+    {
+      "gaussian_outcomes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "reference_relative_advantages": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "root_seed": 20261085,
+      "zero_reference_length": 400,
+      "zero_reference_success": 0
+    },
+    {
+      "gaussian_outcomes": [
+        0,
+        1,
+        1,
+        1
+      ],
+      "reference_relative_advantages": [
+        0.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "root_seed": 20261086,
+      "zero_reference_length": 400,
+      "zero_reference_success": 0
+    },
+    {
+      "gaussian_outcomes": [
+        0,
+        1,
+        0,
+        0
+      ],
+      "reference_relative_advantages": [
+        -1.0,
+        0.0,
+        -1.0,
+        -1.0
+      ],
+      "root_seed": 20261087,
+      "zero_reference_length": 237,
+      "zero_reference_success": 1
+    }
+  ],
+  "signal": {
+    "gates": {
+      "absolute_weight_ess": false,
+      "negative_advantage_count": true,
+      "nonzero_advantage_count": false,
+      "positive_advantage_count": false,
+      "zero_reference_failure_support": true,
+      "zero_reference_success_support": true
+    },
+    "passed": false
+  },
+  "source_nonzero_count": 0,
+  "source_value_count": 18032,
+  "validity": {
+    "gates": {
+      "archive_checksum_and_manifest_exact": true,
+      "first_action_chunks_finite": true,
+      "initial_observations_exact": true,
+      "initial_privileged_states_exact": true,
+      "policy_parameters_bitwise_unchanged": true,
+      "reference_advantages_valid": true,
+      "reference_episodes_complete_binary": true,
+      "zero_sources_bitwise_exact": true
+    },
+    "passed": true
+  },
+  "zero_reference_failures": 4,
+  "zero_reference_successes": 4
+}

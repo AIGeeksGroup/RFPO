@@ -1,0 +1,76 @@
+{
+  "absolute_weight_ess": 0.0,
+  "archived_records_sha256": "d6e6568f2117f88ebb15239a589853882b1653a48471591abac20689b249003c",
+  "formal": false,
+  "negative_advantages": 0,
+  "nonzero_advantages": 0,
+  "num_gaussian_episodes": 8,
+  "num_scenes": 2,
+  "num_zero_reference_episodes": 2,
+  "passed": true,
+  "positive_advantages": 0,
+  "scenes": [
+    {
+      "gaussian_outcomes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "reference_relative_advantages": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "root_seed": 20261080,
+      "zero_reference_length": 400,
+      "zero_reference_success": 0
+    },
+    {
+      "gaussian_outcomes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "reference_relative_advantages": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "root_seed": 20261081,
+      "zero_reference_length": 400,
+      "zero_reference_success": 0
+    }
+  ],
+  "signal": {
+    "gates": {
+      "absolute_weight_ess": false,
+      "negative_advantage_count": false,
+      "nonzero_advantage_count": false,
+      "positive_advantage_count": false,
+      "zero_reference_failure_support": true,
+      "zero_reference_success_support": false
+    },
+    "passed": null
+  },
+  "source_nonzero_count": 0,
+  "source_value_count": 5600,
+  "validity": {
+    "gates": {
+      "archive_checksum_and_manifest_exact": true,
+      "first_action_chunks_finite": true,
+      "initial_observations_exact": true,
+      "initial_privileged_states_exact": true,
+      "policy_parameters_bitwise_unchanged": true,
+      "reference_advantages_valid": true,
+      "reference_episodes_complete_binary": true,
+      "zero_sources_bitwise_exact": true
+    },
+    "passed": true
+  },
+  "zero_reference_failures": 2,
+  "zero_reference_successes": 0
+}

@@ -516,7 +516,7 @@ hypotheses:
     priority: high
   - id: H64
     statement: "A same-scene frozen zero-source return yields denser behavior-preserving episodic advantages for Gaussian Square trajectories than an exact group-relative baseline."
-    status: planned
+    status: refuted
     motivation: "H63 proves scene difficulty matters but discards homogeneous Gaussian groups; a deterministic reference rewards stochastic rescues and penalizes stochastic regressions without depending on the sampled Gaussian action."
     parent: H63
     priority: high
@@ -535,7 +535,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 199
+  total_runs: 201
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -1944,11 +1944,29 @@ experiments:
       validity_passed: true
       passed: false
       renderer: osmesa
+    - run: square_h64_deterministic_reference_audit_osmesa_seed20261080
+      metric: deterministic_reference_advantage_signal
+      value: 8.0
+      scenes: 8
+      gaussian_episodes: 32
+      zero_reference_episodes: 8
+      zero_reference_successes: 4
+      zero_reference_failures: 4
+      positive_advantages: 3
+      negative_advantages: 5
+      nonzero_advantages: 8
+      absolute_weight_ess: 8.0
+      source_value_count: 18032
+      source_nonzero_count: 0
+      policy_parameters_bitwise_unchanged: true
+      validity_passed: true
+      passed: false
+      renderer: osmesa
 
 outer_loop:
-  cycle: 52
-  last_direction: "Test a frozen deterministic scene reference that distinguishes Gaussian exploration rescues from regressions without zeroing homogeneous Gaussian groups."
-  last_reflection: "H63's exact group mean removes scene difficulty but also removes every trajectory in homogeneous groups. A zero-source reference is action-independent and behavior-aware: relative returns update only stochastic deviations that change the scene outcome. Eight reference episodes can establish whether this restores enough positive and negative support before any gradient work."
+  cycle: 53
+  last_direction: "Close deterministic-reference terminal advantages before actor integration because they are even sparser than exact group-relative weights."
+  last_reflection: "The zero-source reference has balanced marginal outcomes but matches the within-scene Gaussian majority closely. Only eight of 32 Gaussian trajectories differ from it, reducing H63's nonzero count from 16 to 8 and ESS from 12 to 8. Sparse binary scene-conditioned baselines are now closed; the next direction must obtain denser action-relevant feedback without manufacturing it through more rollout replicas."
 
 workspace:
   findings: "findings.md"

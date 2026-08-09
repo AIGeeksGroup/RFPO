@@ -1,0 +1,20 @@
+{
+  "action_steps": 16,
+  "archived_records_path": "/home/haoyu/workspace/outputs/fpo-control/results/square_h63_group_relative_episodes_audit_osmesa_seed20261080/records.json",
+  "archived_records_sha256": "d6e6568f2117f88ebb15239a589853882b1653a48471591abac20689b249003c",
+  "camera_size": 84,
+  "checkpoint_name": "trc7rbt0_step_110000",
+  "device": "cuda",
+  "episode_horizon": 400,
+  "hypothesis": "H64",
+  "local_checkpoint_path": "/home/haoyu/workspace/code/fpo-control/manipulation_experiments/downloaded_checkpoints/trc7rbt0_step_110000",
+  "locked_archived_records_sha256": "d6e6568f2117f88ebb15239a589853882b1653a48471591abac20689b249003c",
+  "mode": "smoke",
+  "output_dir": "/home/haoyu/workspace/outputs/fpo-control/results/square_h64_deterministic_reference_smoke_osmesa_v1",
+  "renderer_claim": "OSMesa mechanism audit; not an official EGL benchmark",
+  "root_seeds": [
+    20261080,
+    20261081
+  ],
+  "sampling_steps": 10
+}
