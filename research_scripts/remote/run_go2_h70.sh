@@ -4,6 +4,9 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/common.sh"
 
+cd "$PROJECT_ROOT/isaaclab_experiments"
+source source_env.sh
+
 STAGE="${STAGE:-zero64}"
 SOURCE_RUN="${SOURCE_RUN:-$PROJECT_ROOT/isaaclab_experiments/logs/isaaclab_fpo/unitree_go2_flat_flow/2026-08-08_16-24-22_go2_official_seed42_20260808}"
 CHECKPOINT="$SOURCE_RUN/model_1499.pt"
