@@ -526,6 +526,12 @@ hypotheses:
     motivation: "The best zero checkpoint is iteration 1450 while the best random checkpoint is 1499, and the fixed late window occupies a tight parameter neighborhood; averaging may reduce late optimizer-path variance without training or extra inference cost."
     parent: H0
     priority: high
+  - id: H66
+    statement: "Averaging matched z/-z flow endpoints reduces the reproduced final Go2 actor's random-source return deficit while preserving its zero-source action exactly."
+    status: planned
+    motivation: "The final actor has a repeatable roughly one-point zero/random return gap, while H26's pooled antithetic Can result exactly tied zero behavior; dense paired Go2 return can test whether symmetric transport reliably recovers central-policy performance."
+    parent: H26
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -1989,9 +1995,9 @@ experiments:
       renderer: egl
 
 outer_loop:
-  cycle: 54
-  last_direction: "Refute fixed-tail Go2 actor averaging and return to interventions with an explicit reward-improvement mechanism."
-  last_reflection: "H65 validly moved the final actor by 3.51% relative L2 while preserving every other checkpoint payload, but changed zero/random return by only -0.0080/+0.0017. The pooled confidence interval spans zero and the average gain is slightly negative. Late checkpoint variance is functionally neutral rather than a source of complementary reward behavior, so window or soup tuning is not warranted."
+  cycle: 55
+  last_direction: "Test coefficient-free antithetic source ensembling against the measured dense Go2 Gaussian-mode return deficit."
+  last_reflection: "H65 closes reward-neutral late-actor smoothing. The final Go2 actor still has a roughly one-point random-source deficit, and H26's pooled antithetic result tied zero-source Can rather than exceeding it. H66 transfers that centralization mechanism to dense return: first require exact symmetric cancellation and action activity, then demand a paired +0.30 random-return screen before any official-scale confirmation."
 
 workspace:
   findings: "findings.md"
