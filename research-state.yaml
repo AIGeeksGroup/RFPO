@@ -446,6 +446,12 @@ hypotheses:
     motivation: "H27 rejects globally shorter execution and H54 rejects fixed overlap averaging, but neither tests whether the official eight-step boundaries miss precision-critical task stages."
     parent: null
     priority: high
+  - id: H56
+    statement: "Projecting only the released Can policy's gripper action onto {-1, +1} improves deterministic success while preserving arm actions exactly."
+    status: proposed
+    motivation: "The checkpoint's gripper statistics reflect a two-state controller, but continuous flow endpoints are executed directly; this isolates contact semantics from the globally harmful action smoothing tested in H31."
+    parent: null
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -1702,8 +1708,8 @@ experiments:
 
 outer_loop:
   cycle: 41
-  last_direction: "Close BCP after H55 fails its phase-sensitivity and oracle-headroom prerequisites; select a distinct reward-relevant hypothesis outside execution timing."
-  last_reflection: "The valid H55 audit found only three phase-sensitive seeds and a +2/20 hindsight upper bound. This is insufficient to justify BCP's continuation-head and GRPO cost, so adaptive execution timing is closed alongside global cadence and fixed overlap smoothing."
+  last_direction: "Test H56 as a zero-threshold binary projection of only the Can gripper coordinate before considering any learned discrete-action head."
+  last_reflection: "Execution timing is closed, but contact-action semantics remain isolated: the official checkpoint records an approximately unit-variance two-state gripper target while inference executes continuous flow outputs. H56 preserves all six arm coordinates exactly and cheaply tests whether this support mismatch affects reward."
 
 workspace:
   findings: "findings.md"
