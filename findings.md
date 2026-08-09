@@ -383,6 +383,7 @@ cannot be replaced by this cheap critic substitution.
 - Do not label the first 48k-step Can iteration an actor update: it is critic-only, and a meaningful short FPO++ screen requires at least two iterations.
 - Same-observation best-of-two endpoint/path ranking remains closed; H59 instead tested an exact AdamW extragradient correction of the first genuine actor update.
 - Exact one-step AdamW extragradient is also closed: it actively changed the update at comparable displacement, but failed both outcome-direction gates and collapsed held-out surrogate progress in both audited batches.
+- The official manipulation main benchmark is not zero-only: Figure 4 and the released evaluator report zero and Gaussian random sampling for every checkpoint. The zero-only `best` artifact is a convenience selection rule, not the complete paper metric, so historical zero/random tradeoffs remain closed.
 - Use short validation runs before full 1500-iteration or multi-seed jobs.
 - Stop a candidate when it degrades the primary metric beyond seed noise or fails to improve its claimed mechanism.
 - Keep inference-only warm starts separate from faithful WarmPrior training in claims and experiment labels.

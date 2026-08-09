@@ -470,6 +470,12 @@ hypotheses:
     motivation: "The initial GAE gradient is informative, but held-out direction rotates after actor optimization; lower LR and full-batch accumulation did not correct this curvature-induced path error."
     parent: H2
     priority: high
+  - id: H60
+    statement: "At equal 64 velocity-network evaluations, midpoint integration improves the reproduced final Go2 checkpoint's zero- and random-source returns over official Euler integration."
+    status: active
+    motivation: "Rectified-flow geometry and equal-NFE midpoint accuracy are supported, but their Can reward tests were confounded by sparse binary reward and a zero/random tradeoff; Go2 provides dense reward and needs no MuJoCo EGL renderer."
+    parent: H1
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -1798,9 +1804,9 @@ experiments:
       renderer: osmesa
 
 outer_loop:
-  cycle: 45
-  last_direction: "Close exact AdamW extragradient after it collapses held-out surrogate progress and fails outcome-direction gates."
-  last_reflection: "H59 was active and exactly restored the live actor, but candidate update-cosine gains were -0.0715/+0.0298 and held-out surrogate gains collapsed from +0.1146/+0.1035 to +0.0040/-0.0129. Curvature lookahead without new reward information does not solve the update-direction problem."
+  cycle: 46
+  last_direction: "Audit equal-NFE midpoint integration on the reproduced final Go2 checkpoint before any new training."
+  last_reflection: "The official manipulation main figure reports zero and random sampling side by side, so zero-only historical gains remain tradeoffs. Dense-reward Go2 can test whether the supported flow-geometry mechanism has reward value without the current EGL blocker."
 
 workspace:
   findings: "findings.md"
