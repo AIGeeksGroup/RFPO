@@ -284,6 +284,13 @@ success improved from 12/40 to 14/40, one below the locked +3 gate. Stabilizing 
 each sequential Adam step can affect stochastic-source reward, but this screen does not establish a
 stable aggregate gain.
 
+Within-observation curvature selection passed the first Square reward screen. Drawing two independent
+Gaussian chunks and executing the one with lower normalized ODE straightness error raised random
+success from 5/20 to 8/20, exactly meeting the locked +3 gate while leaving zero inference unchanged.
+The formal run selected both exchangeable branches 254 times over 508 replans and lowered curvature
+by 11.58% relative to the pair mean. This is active, non-degenerate screening evidence; an independent
+larger confirmation is still required.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -339,6 +346,7 @@ stable aggregate gain.
 - Clearing actor AdamW state at each new Square rollout is active and behaviorally consequential: it improved zero-source success by 4/20 but reduced Gaussian-source success by 3/20, yielding only +1/40 pooled. Stale cross-rollout moments are not simply harmful; they help retain stochastic-source behavior.
 - Uniform averaging within the actor-update trajectory repeats the same tradeoff: zero success rose by 1/20 while Gaussian-source success fell by 2/20. Weight-space smoothing is closed alongside BC-to-final interpolation.
 - Exact advantage-sign stratification raised Gaussian-source Square success by 3/20 with only a 1/20 zero loss, but pooled gain was 2/40 against the locked 3/40 gate. The directional signal is retained; nearby strata and normalization variants are closed.
+- Global flow straightening and within-observation flow ranking are different hypotheses: reflow's global geometry gain did not survive official-scale reward evaluation, while lower-curvature best-of-two passed one 20-episode Square screen. The latter remains provisional until independent confirmation.
 
 ## Lessons and Constraints
 

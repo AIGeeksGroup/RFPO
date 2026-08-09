@@ -1,0 +1,13 @@
+Evaluation Summary
+================================================================================
+Environment: Square
+Checkpoint: latest
+Run ID: None
+Episodes: 8
+Balanced Episodes Per Env: True
+Sampling Mode: curvature_best_of_two
+Action Steps: 16
+Success Rate: 25.00% +/- 43.30%
+Average Return: 0.250 +/- 0.433
+FPS: 95.4
+================================================================================

@@ -1,0 +1,2239 @@
+{
+  "record_count": 202,
+  "selected_counts": [
+    107,
+    95
+  ],
+  "all_finite": true,
+  "all_selected_minimum": true,
+  "candidate_counts": [
+    2
+  ],
+  "sampling_steps": [
+    10
+  ],
+  "records": [
+    {
+      "env_id": 0,
+      "scores": [
+        0.010351910255849361,
+        0.007339742500334978
+      ],
+      "selected_index": 1,
+      "selected_score": 0.007339742500334978,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 1,
+      "scores": [
+        0.00796815101057291,
+        0.005245589185506105
+      ],
+      "selected_index": 1,
+      "selected_score": 0.005245589185506105,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 2,
+      "scores": [
+        0.004544875584542751,
+        0.0037851338274776936
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0037851338274776936,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 3,
+      "scores": [
+        0.004323188215494156,
+        0.0030838516540825367
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0030838516540825367,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 4,
+      "scores": [
+        0.0033919087145477533,
+        0.004026144742965698
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0033919087145477533,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 5,
+      "scores": [
+        0.003266766667366028,
+        0.0035064066760241985
+      ],
+      "selected_index": 0,
+      "selected_score": 0.003266766667366028,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 6,
+      "scores": [
+        0.005165256094187498,
+        0.004226095043122768
+      ],
+      "selected_index": 1,
+      "selected_score": 0.004226095043122768,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 7,
+      "scores": [
+        0.007123537361621857,
+        0.008381116203963757
+      ],
+      "selected_index": 0,
+      "selected_score": 0.007123537361621857,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 0,
+      "scores": [
+        0.004766460973769426,
+        0.0048314169980585575
+      ],
+      "selected_index": 0,
+      "selected_score": 0.004766460973769426,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 1,
+      "scores": [
+        0.002746689599007368,
+        0.0027404262218624353
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0027404262218624353,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 2,
+      "scores": [
+        0.005623596720397472,
+        0.004843362607061863
+      ],
+      "selected_index": 1,
+      "selected_score": 0.004843362607061863,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 3,
+      "scores": [
+        0.007371911313384771,
+        0.005164076574146748
+      ],
+      "selected_index": 1,
+      "selected_score": 0.005164076574146748,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 4,
+      "scores": [
+        0.004223125521093607,
+        0.003217741148546338
+      ],
+      "selected_index": 1,
+      "selected_score": 0.003217741148546338,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 5,
+      "scores": [
+        0.0026844555977731943,
+        0.003427452640607953
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0026844555977731943,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 6,
+      "scores": [
+        0.002189435763284564,
+        0.0017788202967494726
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0017788202967494726,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 7,
+      "scores": [
+        0.0028723329305648804,
+        0.0026785279624164104
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0026785279624164104,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 0,
+      "scores": [
+        0.0025002211332321167,
+        0.0028051736298948526
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0025002211332321167,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 1,
+      "scores": [
+        0.004414963535964489,
+        0.005051123909652233
+      ],
+      "selected_index": 0,
+      "selected_score": 0.004414963535964489,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 2,
+      "scores": [
+        0.003509566653519869,
+        0.003569559892639518
+      ],
+      "selected_index": 0,
+      "selected_score": 0.003509566653519869,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 3,
+      "scores": [
+        0.003312892746180296,
+        0.003908965736627579
+      ],
+      "selected_index": 0,
+      "selected_score": 0.003312892746180296,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 4,
+      "scores": [
+        0.0031281388364732265,
+        0.0039019137620925903
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0031281388364732265,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 5,
+      "scores": [
+        0.0029890271835029125,
+        0.0018909957725554705
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0018909957725554705,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 6,
+      "scores": [
+        0.003546374849975109,
+        0.002201596973463893
+      ],
+      "selected_index": 1,
+      "selected_score": 0.002201596973463893,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 7,
+      "scores": [
+        0.002372953575104475,
+        0.002548594493418932
+      ],
+      "selected_index": 0,
+      "selected_score": 0.002372953575104475,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 0,
+      "scores": [
+        0.002852392615750432,
+        0.004142765421420336
+      ],
+      "selected_index": 0,
+      "selected_score": 0.002852392615750432,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 1,
+      "scores": [
+        0.0033216385636478662,
+        0.003257349133491516
+      ],
+      "selected_index": 1,
+      "selected_score": 0.003257349133491516,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 2,
+      "scores": [
+        0.0037258740048855543,
+        0.0034084683284163475
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0034084683284163475,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 3,
+      "scores": [
+        0.0027346741408109665,
+        0.005774389021098614
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0027346741408109665,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 4,
+      "scores": [
+        0.002249282319098711,
+        0.002539540408179164
+      ],
+      "selected_index": 0,
+      "selected_score": 0.002249282319098711,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 5,
+      "scores": [
+        0.004003744572401047,
+        0.0036932039074599743
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0036932039074599743,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 6,
+      "scores": [
+        0.001493580173701048,
+        0.0014551648637279868
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0014551648637279868,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 7,
+      "scores": [
+        0.0036147090140730143,
+        0.0031001148745417595
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0031001148745417595,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 0,
+      "scores": [
+        0.003770245937630534,
+        0.002723087789490819
+      ],
+      "selected_index": 1,
+      "selected_score": 0.002723087789490819,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 1,
+      "scores": [
+        0.007216507103294134,
+        0.00927028339356184
+      ],
+      "selected_index": 0,
+      "selected_score": 0.007216507103294134,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 2,
+      "scores": [
+        0.0028952027205377817,
+        0.0023096068762242794
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0023096068762242794,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 3,
+      "scores": [
+        0.00279309437610209,
+        0.0017851812299340963
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0017851812299340963,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 4,
+      "scores": [
+        0.002812210936099291,
+        0.0018279575742781162
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0018279575742781162,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 5,
+      "scores": [
+        0.003787480527535081,
+        0.004104456398636103
+      ],
+      "selected_index": 0,
+      "selected_score": 0.003787480527535081,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 6,
+      "scores": [
+        0.0018617184832692146,
+        0.0013910741545259953
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0013910741545259953,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 7,
+      "scores": [
+        0.006234745029360056,
+        0.004051543772220612
+      ],
+      "selected_index": 1,
+      "selected_score": 0.004051543772220612,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 0,
+      "scores": [
+        0.002693603280931711,
+        0.0016658466774970293
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0016658466774970293,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 1,
+      "scores": [
+        0.006038544699549675,
+        0.006783060263842344
+      ],
+      "selected_index": 0,
+      "selected_score": 0.006038544699549675,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 2,
+      "scores": [
+        0.003626858117058873,
+        0.003292726818472147
+      ],
+      "selected_index": 1,
+      "selected_score": 0.003292726818472147,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 3,
+      "scores": [
+        0.0026164157316088676,
+        0.001863290905021131
+      ],
+      "selected_index": 1,
+      "selected_score": 0.001863290905021131,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 4,
+      "scores": [
+        0.0037474881391972303,
+        0.005624284967780113
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0037474881391972303,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 5,
+      "scores": [
+        0.002642202889546752,
+        0.0023476171772927046
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0023476171772927046,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 6,
+      "scores": [
+        0.0014548649778589606,
+        0.001937237218953669
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0014548649778589606,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 7,
+      "scores": [
+        0.008334696292877197,
+        0.007814731448888779
+      ],
+      "selected_index": 1,
+      "selected_score": 0.007814731448888779,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 0,
+      "scores": [
+        0.0022612339816987514,
+        0.002807928016409278
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0022612339816987514,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 1,
+      "scores": [
+        0.018034961074590683,
+        0.009239790961146355
+      ],
+      "selected_index": 1,
+      "selected_score": 0.009239790961146355,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 2,
+      "scores": [
+        0.004397939424961805,
+        0.004167190287262201
+      ],
+      "selected_index": 1,
+      "selected_score": 0.004167190287262201,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 3,
+      "scores": [
+        0.002791754435747862,
+        0.00274686049669981
+      ],
+      "selected_index": 1,
+      "selected_score": 0.00274686049669981,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 4,
+      "scores": [
+        0.004110367968678474,
+        0.0045119295828044415
+      ],
+      "selected_index": 0,
+      "selected_score": 0.004110367968678474,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 5,
+      "scores": [
+        0.0017283156048506498,
+        0.0023633092641830444
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0017283156048506498,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 6,
+      "scores": [
+        0.0022481894120573997,
+        0.002539116656407714
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0022481894120573997,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 7,
+      "scores": [
+        0.0016506350366398692,
+        0.001808026572689414
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0016506350366398692,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 0,
+      "scores": [
+        0.0016728970222175121,
+        0.0022136748302727938
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0016728970222175121,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 1,
+      "scores": [
+        0.02011820860207081,
+        0.014655664563179016
+      ],
+      "selected_index": 1,
+      "selected_score": 0.014655664563179016,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 2,
+      "scores": [
+        0.0014281700132414699,
+        0.0013919000048190355
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0013919000048190355,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 3,
+      "scores": [
+        0.008006837218999863,
+        0.004887550137937069
+      ],
+      "selected_index": 1,
+      "selected_score": 0.004887550137937069,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 4,
+      "scores": [
+        0.004726293031126261,
+        0.006888306699693203
+      ],
+      "selected_index": 0,
+      "selected_score": 0.004726293031126261,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 5,
+      "scores": [
+        0.0023152995854616165,
+        0.001774890930391848
+      ],
+      "selected_index": 1,
+      "selected_score": 0.001774890930391848,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 6,
+      "scores": [
+        0.0026994850486516953,
+        0.002579135587438941
+      ],
+      "selected_index": 1,
+      "selected_score": 0.002579135587438941,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 7,
+      "scores": [
+        0.004407393280416727,
+        0.003990247379988432
+      ],
+      "selected_index": 1,
+      "selected_score": 0.003990247379988432,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 0,
+      "scores": [
+        0.002428268315270543,
+        0.0016767459455877542
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0016767459455877542,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 1,
+      "scores": [
+        0.011904638260602951,
+        0.007063982076942921
+      ],
+      "selected_index": 1,
+      "selected_score": 0.007063982076942921,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 2,
+      "scores": [
+        0.0030712115112692118,
+        0.00283126812428236
+      ],
+      "selected_index": 1,
+      "selected_score": 0.00283126812428236,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 3,
+      "scores": [
+        0.002678071614354849,
+        0.00397071847692132
+      ],
+      "selected_index": 0,
+      "selected_score": 0.002678071614354849,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 4,
+      "scores": [
+        0.0028391117230057716,
+        0.0027796875219792128
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0027796875219792128,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 5,
+      "scores": [
+        0.0024335829075425863,
+        0.0018311586463823915
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0018311586463823915,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 6,
+      "scores": [
+        0.0014761422062292695,
+        0.002664283849298954
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0014761422062292695,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 7,
+      "scores": [
+        0.0032665978651493788,
+        0.0032349033281207085
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0032349033281207085,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 0,
+      "scores": [
+        0.0014626323245465755,
+        0.0023189124185591936
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0014626323245465755,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 1,
+      "scores": [
+        0.005283804144710302,
+        0.004694600123912096
+      ],
+      "selected_index": 1,
+      "selected_score": 0.004694600123912096,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 2,
+      "scores": [
+        0.003390698693692684,
+        0.0033187775406986475
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0033187775406986475,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 3,
+      "scores": [
+        0.002323274966329336,
+        0.0021433690562844276
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0021433690562844276,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 4,
+      "scores": [
+        0.0028111105784773827,
+        0.003908037208020687
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0028111105784773827,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 5,
+      "scores": [
+        0.0018024640157818794,
+        0.0023730674292892218
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0018024640157818794,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 6,
+      "scores": [
+        0.002022028900682926,
+        0.00139809085521847
+      ],
+      "selected_index": 1,
+      "selected_score": 0.00139809085521847,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 7,
+      "scores": [
+        0.004746854305267334,
+        0.005170812830328941
+      ],
+      "selected_index": 0,
+      "selected_score": 0.004746854305267334,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 0,
+      "scores": [
+        0.0023079949896782637,
+        0.002018782077357173
+      ],
+      "selected_index": 1,
+      "selected_score": 0.002018782077357173,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 1,
+      "scores": [
+        0.0040193055756390095,
+        0.004275467712432146
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0040193055756390095,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 2,
+      "scores": [
+        0.005615598056465387,
+        0.007777038030326366
+      ],
+      "selected_index": 0,
+      "selected_score": 0.005615598056465387,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 3,
+      "scores": [
+        0.003249295288696885,
+        0.003760215127840638
+      ],
+      "selected_index": 0,
+      "selected_score": 0.003249295288696885,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 4,
+      "scores": [
+        0.005252099595963955,
+        0.0027266715187579393
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0027266715187579393,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 5,
+      "scores": [
+        0.0013670354383066297,
+        0.0021124384365975857
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0013670354383066297,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 6,
+      "scores": [
+        0.002466647420078516,
+        0.0021563798654824495
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0021563798654824495,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 7,
+      "scores": [
+        0.0038016093894839287,
+        0.004011849872767925
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0038016093894839287,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 0,
+      "scores": [
+        0.0025013848207890987,
+        0.0022003825288265944
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0022003825288265944,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 1,
+      "scores": [
+        0.005505549721419811,
+        0.004703613929450512
+      ],
+      "selected_index": 1,
+      "selected_score": 0.004703613929450512,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 2,
+      "scores": [
+        0.00535947922617197,
+        0.008193750865757465
+      ],
+      "selected_index": 0,
+      "selected_score": 0.00535947922617197,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 3,
+      "scores": [
+        0.0044210487976670265,
+        0.005854885093867779
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0044210487976670265,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 4,
+      "scores": [
+        0.00290951831266284,
+        0.002402929123491049
+      ],
+      "selected_index": 1,
+      "selected_score": 0.002402929123491049,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 5,
+      "scores": [
+        0.001998723717406392,
+        0.0019044630462303758
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0019044630462303758,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 6,
+      "scores": [
+        0.0022439034655690193,
+        0.002511389087885618
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0022439034655690193,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 7,
+      "scores": [
+        0.0030184572096914053,
+        0.0031071382109075785
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0030184572096914053,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 0,
+      "scores": [
+        0.003579421667382121,
+        0.0017337591852992773
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0017337591852992773,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 1,
+      "scores": [
+        0.004148053005337715,
+        0.0041326722130179405
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0041326722130179405,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 2,
+      "scores": [
+        0.004342183005064726,
+        0.005149197299033403
+      ],
+      "selected_index": 0,
+      "selected_score": 0.004342183005064726,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 3,
+      "scores": [
+        0.0034475659485906363,
+        0.0035849912092089653
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0034475659485906363,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 4,
+      "scores": [
+        0.002461647614836693,
+        0.002806977368891239
+      ],
+      "selected_index": 0,
+      "selected_score": 0.002461647614836693,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 5,
+      "scores": [
+        0.002679091412574053,
+        0.0033384310081601143
+      ],
+      "selected_index": 0,
+      "selected_score": 0.002679091412574053,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 6,
+      "scores": [
+        0.002484380966052413,
+        0.0023795526940375566
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0023795526940375566,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 7,
+      "scores": [
+        0.00599536532536149,
+        0.00557247269898653
+      ],
+      "selected_index": 1,
+      "selected_score": 0.00557247269898653,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 0,
+      "scores": [
+        0.001985987415537238,
+        0.002466609003022313
+      ],
+      "selected_index": 0,
+      "selected_score": 0.001985987415537238,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 1,
+      "scores": [
+        0.00616019032895565,
+        0.004597601015120745
+      ],
+      "selected_index": 1,
+      "selected_score": 0.004597601015120745,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 2,
+      "scores": [
+        0.0050016846507787704,
+        0.00487948302179575
+      ],
+      "selected_index": 1,
+      "selected_score": 0.00487948302179575,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 3,
+      "scores": [
+        0.003473167773336172,
+        0.004778571892529726
+      ],
+      "selected_index": 0,
+      "selected_score": 0.003473167773336172,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 4,
+      "scores": [
+        0.003950308542698622,
+        0.004702819976955652
+      ],
+      "selected_index": 0,
+      "selected_score": 0.003950308542698622,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 5,
+      "scores": [
+        0.005761853419244289,
+        0.003688639495521784
+      ],
+      "selected_index": 1,
+      "selected_score": 0.003688639495521784,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 6,
+      "scores": [
+        0.002245944691821933,
+        0.003179477294906974
+      ],
+      "selected_index": 0,
+      "selected_score": 0.002245944691821933,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 7,
+      "scores": [
+        0.004271626938134432,
+        0.0052190725691616535
+      ],
+      "selected_index": 0,
+      "selected_score": 0.004271626938134432,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 0,
+      "scores": [
+        0.002210151171311736,
+        0.0025459518656134605
+      ],
+      "selected_index": 0,
+      "selected_score": 0.002210151171311736,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 1,
+      "scores": [
+        0.004038402810692787,
+        0.0050508491694927216
+      ],
+      "selected_index": 0,
+      "selected_score": 0.004038402810692787,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 2,
+      "scores": [
+        0.0036026318557560444,
+        0.003298716153949499
+      ],
+      "selected_index": 1,
+      "selected_score": 0.003298716153949499,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 3,
+      "scores": [
+        0.003141217166557908,
+        0.0038220423739403486
+      ],
+      "selected_index": 0,
+      "selected_score": 0.003141217166557908,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 4,
+      "scores": [
+        0.0023023197427392006,
+        0.002514990046620369
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0023023197427392006,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 5,
+      "scores": [
+        0.0023158860858529806,
+        0.0018378437962383032
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0018378437962383032,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 6,
+      "scores": [
+        0.003654063679277897,
+        0.0017749386606737971
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0017749386606737971,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 7,
+      "scores": [
+        0.003846575040370226,
+        0.004871747922152281
+      ],
+      "selected_index": 0,
+      "selected_score": 0.003846575040370226,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 4,
+      "scores": [
+        0.004554940387606621,
+        0.0043805730529129505
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0043805730529129505,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 0,
+      "scores": [
+        0.0018102261237800121,
+        0.0018811236368492246
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0018102261237800121,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 1,
+      "scores": [
+        0.004540005698800087,
+        0.005894404370337725
+      ],
+      "selected_index": 0,
+      "selected_score": 0.004540005698800087,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 2,
+      "scores": [
+        0.006154451984912157,
+        0.0053162360563874245
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0053162360563874245,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 3,
+      "scores": [
+        0.003958112560212612,
+        0.0046712844632565975
+      ],
+      "selected_index": 0,
+      "selected_score": 0.003958112560212612,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 5,
+      "scores": [
+        0.002777030924335122,
+        0.002228391822427511
+      ],
+      "selected_index": 1,
+      "selected_score": 0.002228391822427511,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 6,
+      "scores": [
+        0.002037110272794962,
+        0.0022470676340162754
+      ],
+      "selected_index": 0,
+      "selected_score": 0.002037110272794962,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 7,
+      "scores": [
+        0.004020449239760637,
+        0.005205255933105946
+      ],
+      "selected_index": 0,
+      "selected_score": 0.004020449239760637,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 4,
+      "scores": [
+        0.0031014096457511187,
+        0.003274319926276803
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0031014096457511187,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 0,
+      "scores": [
+        0.0019896223675459623,
+        0.0026546609587967396
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0019896223675459623,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 1,
+      "scores": [
+        0.00514423381537199,
+        0.006091604474931955
+      ],
+      "selected_index": 0,
+      "selected_score": 0.00514423381537199,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 2,
+      "scores": [
+        0.004126242361962795,
+        0.004319614265114069
+      ],
+      "selected_index": 0,
+      "selected_score": 0.004126242361962795,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 3,
+      "scores": [
+        0.003540285862982273,
+        0.004101551603525877
+      ],
+      "selected_index": 0,
+      "selected_score": 0.003540285862982273,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 5,
+      "scores": [
+        0.0035786691587418318,
+        0.0032550920732319355
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0032550920732319355,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 6,
+      "scores": [
+        0.0021083292085677385,
+        0.002374111209064722
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0021083292085677385,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 7,
+      "scores": [
+        0.0035411736462265253,
+        0.0022239761892706156
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0022239761892706156,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 4,
+      "scores": [
+        0.0027367807924747467,
+        0.0025011240504682064
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0025011240504682064,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 0,
+      "scores": [
+        0.01780097931623459,
+        0.004006844945251942
+      ],
+      "selected_index": 1,
+      "selected_score": 0.004006844945251942,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 1,
+      "scores": [
+        0.005398509558290243,
+        0.00703541049733758
+      ],
+      "selected_index": 0,
+      "selected_score": 0.005398509558290243,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 2,
+      "scores": [
+        0.006262377370148897,
+        0.005117014981806278
+      ],
+      "selected_index": 1,
+      "selected_score": 0.005117014981806278,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 3,
+      "scores": [
+        0.003097010077908635,
+        0.005173731595277786
+      ],
+      "selected_index": 0,
+      "selected_score": 0.003097010077908635,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 5,
+      "scores": [
+        0.0025874851271510124,
+        0.003271803492680192
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0025874851271510124,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 6,
+      "scores": [
+        0.0035765240900218487,
+        0.0022953017614781857
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0022953017614781857,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 7,
+      "scores": [
+        0.005104181822389364,
+        0.004063957836478949
+      ],
+      "selected_index": 1,
+      "selected_score": 0.004063957836478949,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 4,
+      "scores": [
+        0.0027359516825526953,
+        0.004296591505408287
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0027359516825526953,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 0,
+      "scores": [
+        0.008301879279315472,
+        0.00556471012532711
+      ],
+      "selected_index": 1,
+      "selected_score": 0.00556471012532711,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 1,
+      "scores": [
+        0.0034205643460154533,
+        0.005327679216861725
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0034205643460154533,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 2,
+      "scores": [
+        0.003942393232136965,
+        0.004989104811102152
+      ],
+      "selected_index": 0,
+      "selected_score": 0.003942393232136965,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 3,
+      "scores": [
+        0.0022362174931913614,
+        0.002734147710725665
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0022362174931913614,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 5,
+      "scores": [
+        0.0033540166914463043,
+        0.002441852120682597
+      ],
+      "selected_index": 1,
+      "selected_score": 0.002441852120682597,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 6,
+      "scores": [
+        0.0025753288064152002,
+        0.0030260891653597355
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0025753288064152002,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 7,
+      "scores": [
+        0.0019804565235972404,
+        0.0022669315803796053
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0019804565235972404,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 4,
+      "scores": [
+        0.0026250111404806376,
+        0.0022735935635864735
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0022735935635864735,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 0,
+      "scores": [
+        0.0037577745970338583,
+        0.003082375042140484
+      ],
+      "selected_index": 1,
+      "selected_score": 0.003082375042140484,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 1,
+      "scores": [
+        0.008099055849015713,
+        0.009274451993405819
+      ],
+      "selected_index": 0,
+      "selected_score": 0.008099055849015713,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 2,
+      "scores": [
+        0.006695817690342665,
+        0.007062601391226053
+      ],
+      "selected_index": 0,
+      "selected_score": 0.006695817690342665,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 3,
+      "scores": [
+        0.002278321422636509,
+        0.002559567103162408
+      ],
+      "selected_index": 0,
+      "selected_score": 0.002278321422636509,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 5,
+      "scores": [
+        0.0035897395573556423,
+        0.005745684262365103
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0035897395573556423,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 6,
+      "scores": [
+        0.0015794917708262801,
+        0.001920275972224772
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0015794917708262801,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 7,
+      "scores": [
+        0.00454754801467061,
+        0.004562143702059984
+      ],
+      "selected_index": 0,
+      "selected_score": 0.00454754801467061,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 4,
+      "scores": [
+        0.004660400561988354,
+        0.0032733469270169735
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0032733469270169735,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 0,
+      "scores": [
+        0.003329887520521879,
+        0.005659338552504778
+      ],
+      "selected_index": 0,
+      "selected_score": 0.003329887520521879,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 1,
+      "scores": [
+        0.005593777168542147,
+        0.008165327832102776
+      ],
+      "selected_index": 0,
+      "selected_score": 0.005593777168542147,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 2,
+      "scores": [
+        0.018254201859235764,
+        0.011515069752931595
+      ],
+      "selected_index": 1,
+      "selected_score": 0.011515069752931595,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 3,
+      "scores": [
+        0.010237586684525013,
+        0.009303652681410313
+      ],
+      "selected_index": 1,
+      "selected_score": 0.009303652681410313,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 5,
+      "scores": [
+        0.004946233704686165,
+        0.001756750512868166
+      ],
+      "selected_index": 1,
+      "selected_score": 0.001756750512868166,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 6,
+      "scores": [
+        0.0022531491704285145,
+        0.002156950533390045
+      ],
+      "selected_index": 1,
+      "selected_score": 0.002156950533390045,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 7,
+      "scores": [
+        0.003340640803799033,
+        0.00319885672070086
+      ],
+      "selected_index": 1,
+      "selected_score": 0.00319885672070086,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 4,
+      "scores": [
+        0.004985267762094736,
+        0.005860398523509502
+      ],
+      "selected_index": 0,
+      "selected_score": 0.004985267762094736,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 0,
+      "scores": [
+        0.005912769120186567,
+        0.005974026396870613
+      ],
+      "selected_index": 0,
+      "selected_score": 0.005912769120186567,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 1,
+      "scores": [
+        0.006075145676732063,
+        0.0066261813044548035
+      ],
+      "selected_index": 0,
+      "selected_score": 0.006075145676732063,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 2,
+      "scores": [
+        0.005258594639599323,
+        0.005389651283621788
+      ],
+      "selected_index": 0,
+      "selected_score": 0.005258594639599323,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 3,
+      "scores": [
+        0.0055328430607914925,
+        0.005384688265621662
+      ],
+      "selected_index": 1,
+      "selected_score": 0.005384688265621662,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 5,
+      "scores": [
+        0.00357449590228498,
+        0.004633687436580658
+      ],
+      "selected_index": 0,
+      "selected_score": 0.00357449590228498,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 6,
+      "scores": [
+        0.002052786760032177,
+        0.0017668779473751783
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0017668779473751783,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 7,
+      "scores": [
+        0.003558030351996422,
+        0.00421830452978611
+      ],
+      "selected_index": 0,
+      "selected_score": 0.003558030351996422,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 4,
+      "scores": [
+        0.007590578403323889,
+        0.0037732485216110945
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0037732485216110945,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 5,
+      "scores": [
+        0.0028047198429703712,
+        0.0031841096933931112
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0028047198429703712,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 0,
+      "scores": [
+        0.012313279323279858,
+        0.008284683339297771
+      ],
+      "selected_index": 1,
+      "selected_score": 0.008284683339297771,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 1,
+      "scores": [
+        0.005491198040544987,
+        0.006682255771011114
+      ],
+      "selected_index": 0,
+      "selected_score": 0.005491198040544987,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 2,
+      "scores": [
+        0.003490496426820755,
+        0.00406643608585
+      ],
+      "selected_index": 0,
+      "selected_score": 0.003490496426820755,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 3,
+      "scores": [
+        0.003890319960191846,
+        0.004618894774466753
+      ],
+      "selected_index": 0,
+      "selected_score": 0.003890319960191846,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 6,
+      "scores": [
+        0.001719977706670761,
+        0.0014951268676668406
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0014951268676668406,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 7,
+      "scores": [
+        0.003374161897227168,
+        0.003073458094149828
+      ],
+      "selected_index": 1,
+      "selected_score": 0.003073458094149828,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 4,
+      "scores": [
+        0.005934137850999832,
+        0.0059805517084896564
+      ],
+      "selected_index": 0,
+      "selected_score": 0.005934137850999832,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 5,
+      "scores": [
+        0.003179893596097827,
+        0.0038204293232411146
+      ],
+      "selected_index": 0,
+      "selected_score": 0.003179893596097827,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 0,
+      "scores": [
+        0.004369639791548252,
+        0.005621485412120819
+      ],
+      "selected_index": 0,
+      "selected_score": 0.004369639791548252,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 1,
+      "scores": [
+        0.005954314023256302,
+        0.006012996658682823
+      ],
+      "selected_index": 0,
+      "selected_score": 0.005954314023256302,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 2,
+      "scores": [
+        0.006294134072959423,
+        0.00952036865055561
+      ],
+      "selected_index": 0,
+      "selected_score": 0.006294134072959423,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 3,
+      "scores": [
+        0.004304125439375639,
+        0.00446497043594718
+      ],
+      "selected_index": 0,
+      "selected_score": 0.004304125439375639,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 6,
+      "scores": [
+        0.002144019352272153,
+        0.0018936871783807874
+      ],
+      "selected_index": 1,
+      "selected_score": 0.0018936871783807874,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 7,
+      "scores": [
+        0.002813262864947319,
+        0.0030511559452861547
+      ],
+      "selected_index": 0,
+      "selected_score": 0.002813262864947319,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 4,
+      "scores": [
+        0.007160812616348267,
+        0.01012386567890644
+      ],
+      "selected_index": 0,
+      "selected_score": 0.007160812616348267,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 5,
+      "scores": [
+        0.004463471006602049,
+        0.005487110465764999
+      ],
+      "selected_index": 0,
+      "selected_score": 0.004463471006602049,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 0,
+      "scores": [
+        0.005674255080521107,
+        0.011276762001216412
+      ],
+      "selected_index": 0,
+      "selected_score": 0.005674255080521107,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 1,
+      "scores": [
+        0.004574168939143419,
+        0.003128343028947711
+      ],
+      "selected_index": 1,
+      "selected_score": 0.003128343028947711,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 2,
+      "scores": [
+        0.0055503821931779385,
+        0.004370096139609814
+      ],
+      "selected_index": 1,
+      "selected_score": 0.004370096139609814,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 3,
+      "scores": [
+        0.002580652479082346,
+        0.003922480158507824
+      ],
+      "selected_index": 0,
+      "selected_score": 0.002580652479082346,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 6,
+      "scores": [
+        0.0026493342593312263,
+        0.001909571117721498
+      ],
+      "selected_index": 1,
+      "selected_score": 0.001909571117721498,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 7,
+      "scores": [
+        0.004096576478332281,
+        0.004119642078876495
+      ],
+      "selected_index": 0,
+      "selected_score": 0.004096576478332281,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 4,
+      "scores": [
+        0.002730670617893338,
+        0.0027621686458587646
+      ],
+      "selected_index": 0,
+      "selected_score": 0.002730670617893338,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    },
+    {
+      "env_id": 5,
+      "scores": [
+        0.0022729330230504274,
+        0.003936425317078829
+      ],
+      "selected_index": 0,
+      "selected_score": 0.0022729330230504274,
+      "candidate_count": 2,
+      "sampling_steps": 10
+    }
+  ]
+}
