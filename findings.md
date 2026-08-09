@@ -284,12 +284,12 @@ success improved from 12/40 to 14/40, one below the locked +3 gate. Stabilizing 
 each sequential Adam step can affect stochastic-source reward, but this screen does not establish a
 stable aggregate gain.
 
-Within-observation curvature selection passed its mechanism audit but its first apparent Square
-reward screen is invalid for protocol decisions. Drawing two independent Gaussian chunks and taking
-the lower-curvature one selected both branches 254 times over 508 replans and lowered curvature by
-11.58% relative to the pair mean. The observed random scores were 5/20 and 8/20, but the evaluation
-entry point did not pass its configured seed to spawned environment constructors. The unchanged
-screen must be rerun with deterministic per-environment seeds before interpreting reward.
+Within-observation curvature selection passed its mechanism audit but failed its corrected Square
+reward screen. The initial unseeded comparison appeared to improve success from 5/20 to 8/20 and was
+invalidated before confirmation. With deterministic per-environment seeds, control scored 7/20 while
+best-of-two scored 4/20. The candidate selected both branches 266/238 times over 504 replans and
+lowered curvature by 12.62%, so the mechanism was active but its ranking signal was anti-correlated
+with the aggregate reward outcome in this screen.
 
 ## Patterns and Insights
 
@@ -346,7 +346,7 @@ screen must be rerun with deterministic per-environment seeds before interpretin
 - Clearing actor AdamW state at each new Square rollout is active and behaviorally consequential: it improved zero-source success by 4/20 but reduced Gaussian-source success by 3/20, yielding only +1/40 pooled. Stale cross-rollout moments are not simply harmful; they help retain stochastic-source behavior.
 - Uniform averaging within the actor-update trajectory repeats the same tradeoff: zero success rose by 1/20 while Gaussian-source success fell by 2/20. Weight-space smoothing is closed alongside BC-to-final interpolation.
 - Exact advantage-sign stratification raised Gaussian-source Square success by 3/20 with only a 1/20 zero loss, but pooled gain was 2/40 against the locked 3/40 gate. The directional signal is retained; nearby strata and normalization variants are closed.
-- Global flow straightening and within-observation flow ranking are different hypotheses: reflow's global geometry gain did not survive official-scale reward evaluation, while lower-curvature best-of-two has passed only its selection-mechanism audit. Its first apparent reward gain used unseeded environment constructors and is invalid pending a corrected rerun.
+- Global flow straightening and within-observation flow ranking both improve their geometry targets without improving reward: corrected lower-curvature best-of-two reduced Square random success by 3/20 despite a 12.62% curvature reduction.
 
 ## Lessons and Constraints
 
@@ -358,7 +358,7 @@ screen must be rerun with deterministic per-environment seeds before interpretin
 ## Open Questions
 
 - Does conditional reflow preserve the multimodal exploration that gives flow policies their advantage?
-- Is curvature correlated with FPO ratio variance or gradient disagreement?
+- Is there a reward-relevant confidence signal available from the frozen flow policy that is distinct from path straightness?
 - Should reflow be an offline post-training stage, an auxiliary online loss, or both?
 - Which reward-aware FPO++ mechanism can improve Can success without relying on unstable BC-source exploration changes?
 - A frozen BC velocity-field anchor strongly conflicts with FPO++ and prevents drift, but global PCGrad retains only 34-46% of one-step surrogate gain. Generic flow-space behavior protection is too broad; a deterministic endpoint anchor is the next narrower test.
@@ -369,4 +369,4 @@ screen must be rerun with deterministic per-environment seeds before interpretin
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, advantage-sign-stratified minibatches, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, rank-based GAE weighting, terminal-sign filtering, fixed and KL-adaptive lower actor learning rates, full-batch gradient accumulation, BC/FPO++ midpoint interpolation, within-trajectory SWA, explicit Gaussian-bridge distillation, antithetic endpoint averaging, shorter receding-horizon execution, temporally correlated Gaussian inference, advantage-sign and endpoint-anchor gradient surgery, temporal per-timestep clipping, coordinate-wise median and geometric-median gradient aggregation, PPO-RB ratio rollback, equal-NFE midpoint sampling, checkpoint-native Square execution horizon restoration, and rollout-local Adam are closed as reward-improvement routes. Reflow and midpoint retain geometry/sampling-fidelity value only. The next candidate must improve reward without trading away Gaussian-source exploration.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, advantage-sign-stratified minibatches, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, rank-based GAE weighting, terminal-sign filtering, fixed and KL-adaptive lower actor learning rates, full-batch gradient accumulation, BC/FPO++ midpoint interpolation, within-trajectory SWA, explicit Gaussian-bridge distillation, antithetic endpoint averaging, curvature-ranked best-of-two, shorter receding-horizon execution, temporally correlated Gaussian inference, advantage-sign and endpoint-anchor gradient surgery, temporal per-timestep clipping, coordinate-wise median and geometric-median gradient aggregation, PPO-RB ratio rollback, equal-NFE midpoint sampling, checkpoint-native Square execution horizon restoration, and rollout-local Adam are closed as reward-improvement routes. Reflow and midpoint retain geometry/sampling-fidelity value only. The next candidate must improve reward without trading away Gaussian-source exploration.

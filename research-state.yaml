@@ -364,7 +364,7 @@ hypotheses:
     priority: high
   - id: H46
     statement: "Selecting the lower-curvature of two same-observation Gaussian Square action chunks improves random-source success without changing the checkpoint or zero-source behavior."
-    status: active
+    status: refuted
     motivation: "Global sampler and trajectory smoothing repeatedly trade zero and Gaussian modes; within-observation ODE straightness offers a coefficient-free policy-confidence signal that can rank stochastic candidates while leaving zero inference untouched."
     parent: H40
     priority: high
@@ -383,7 +383,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 157
+  total_runs: 159
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -1331,11 +1331,30 @@ experiments:
       renderer: osmesa
       valid: false
       invalid_reason: "Evaluation entry point did not pass cfg.seed to environment constructors."
+    - run: square_h46_control_random_balanced20_seed20260922_seeded
+      metric: success_rate
+      value: 0.35
+      episodes: 20
+      action_steps: 16
+      balanced_episodes_per_env: true
+      deterministic_environment_seeds: true
+      renderer: osmesa
+    - run: square_h46_candidate_random_balanced20_seed20260922_seeded
+      metric: success_rate
+      value: 0.20
+      episodes: 20
+      action_steps: 16
+      replanning_records: 504
+      selected_counts: [266, 238]
+      mean_relative_curvature_reduction: 0.1261911675
+      balanced_episodes_per_env: true
+      deterministic_environment_seeds: true
+      renderer: osmesa
 
 outer_loop:
-  cycle: 32
-  last_direction: "Correct deterministic per-environment seeding and rerun the unchanged H46 screen before any confirmation."
-  last_reflection: "The initial H46 mechanism audit is valid, but its 5/20 versus 8/20 reward comparison did not receive the configured environment seeds and is invalid for protocol decisions."
+  cycle: 33
+  last_direction: "Close curvature-ranked inference and select a reward-relevant intervention distinct from the exhausted geometry and source-ranking routes."
+  last_reflection: "The corrected H46 screen reduced curvature by 12.62% but reduced Square random success from 7/20 to 4/20; within-observation straightness is not a useful action-quality proxy for this checkpoint."
 
 workspace:
   findings: "findings.md"
