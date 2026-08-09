@@ -2017,8 +2017,8 @@ experiments:
 
 outer_loop:
   cycle: 55
-  last_direction: "Test coefficient-free antithetic source ensembling against the measured dense Go2 Gaussian-mode return deficit."
-  last_reflection: "H65 closes reward-neutral late-actor smoothing. The final Go2 actor still has a roughly one-point random-source deficit, and H26's pooled antithetic result tied zero-source Can rather than exceeding it. H66 transfers that centralization mechanism to dense return: first require exact symmetric cancellation and action activity, then demand a paired +0.30 random-return screen before any official-scale confirmation."
+  last_direction: "Run the separately frozen 4,096-environment confirmation after H66's +1.36 paired Go2 screen gain."
+  last_reflection: "H66 strongly passed its 256-environment screen with exact initial/source pairing and a bootstrap lower bound above +1.02. The mechanism cancels 87.95% of random endpoint displacement while remaining distinct from zero and preserving zero dispatch exactly. Stable improvement now depends on the independent official-scale seed, with doubled Gaussian inference NFE treated as an explicit cost."
 
 workspace:
   findings: "findings.md"
