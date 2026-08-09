@@ -91,6 +91,14 @@ literature:
       title: "Self-Imitation Learning"
       year: 2018
       relevance: "Motivates reward-conditioned reuse, but H15's success-gradient bias rejects it as the next FPO++ intervention."
+    - id: shao2024_deepseekmath
+      title: "DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models"
+      year: 2024
+      relevance: "Introduces group-relative policy optimization without a learned value baseline."
+    - id: xu2026_bcp
+      title: "Continue or Replan? Bernoulli-Continuation Policy Learning for Adaptive Horizon Execution"
+      year: 2026
+      relevance: "Provides a direct robot chunk-policy precedent for trajectory-level group-relative optimization."
   open_problems:
     - "FPO++ uses many Euler steps; it is unknown whether conditional reflow improves control return or only sampling efficiency."
     - "The relation between flow curvature, CFM ratio variance, and policy-update stability is not established."
@@ -499,6 +507,12 @@ hypotheses:
     status: refuted
     motivation: "Existing critic and trajectory-level estimators are unreliable; common-state branch returns may isolate local sparse-reward action credit without learning a Q function."
     parent: H2
+    priority: high
+  - id: H63
+    statement: "Complete Square trajectory groups from a shared simulator initialization yield dense leave-one-out terminal-success advantages for critic-free FPO++ weighting."
+    status: planned
+    motivation: "H62's intermediate binary suffix outcomes were mostly tied, while Square's roughly 35% full-trajectory random success predicts mixed outcomes in about 80% of four-replica common-scene groups."
+    parent: H40
     priority: high
 
 experiments:
@@ -1908,9 +1922,9 @@ experiments:
       renderer: osmesa
 
 outer_loop:
-  cycle: 49
-  last_direction: "Close replay-exact sparse branch returns before actor integration because their local rankings do not reproduce across continuation-noise blocks."
-  last_reflection: "Exact prefix replay works and Gaussian candidates are active, but terminal success is tied at most Square vine states; the few nonzero differences anticorrelate across independent continuations. A future candidate must supply denser reward-relevant local evidence rather than spend more rollout budget on the same binary branch-return estimator."
+  cycle: 50
+  last_direction: "Audit common-scene group-relative complete-episode success as a denser critic-free FPO++ signal before actor integration."
+  last_reflection: "H62 failed because local suffix outcomes were tied, not because exact common-state construction was impossible. Four full Square trajectories from one initial scene should be mixed about 80% of the time at the observed 35% base success rate; leave-one-out returns then provide an unbiased scene-conditioned baseline without adding a learned critic."
 
 workspace:
   findings: "findings.md"
