@@ -49,7 +49,12 @@ def test_locked_direction_is_deterministic_normalized_and_mirrored():
     apply_mirrored_direction(policy, anchor, first, sign=-1)
     negative = snapshot_parameters(policy)
     for name in PERTURBED_PARAMETER_NAMES:
-        assert torch.allclose(positive[name] - anchor[name], anchor[name] - negative[name])
+        torch.testing.assert_close(
+            positive[name] - anchor[name],
+            anchor[name] - negative[name],
+            rtol=0,
+            atol=torch.finfo(anchor[name].dtype).eps,
+        )
     restore_delta = gaussian_direction(anchor, seed=20261001)
     apply_mirrored_direction(policy, anchor, restore_delta, sign=1)
     from src.parameter_space_es import restore_anchor
