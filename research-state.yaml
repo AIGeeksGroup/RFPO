@@ -1,7 +1,7 @@
 project:
   title: "Reproducing and Improving FPO++ for Robot Control"
   question: "Can the official FPO++ benchmark results be reproduced, and can straighter conditional policy flows improve return or sampling efficiency?"
-  status: active
+  status: complete
   started: "2026-08-08"
   domain: "robot reinforcement learning and flow policies"
 
@@ -528,7 +528,7 @@ hypotheses:
     priority: high
   - id: H66
     statement: "Averaging matched z/-z flow endpoints reduces the reproduced final Go2 actor's random-source return deficit while preserving its zero-source action exactly."
-    status: active
+    status: supported
     motivation: "The final actor has a repeatable roughly one-point zero/random return gap, while H26's pooled antithetic Can result exactly tied zero behavior; dense paired Go2 return can test whether symmetric transport reliably recovers central-policy performance."
     parent: H26
     priority: high
@@ -547,7 +547,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 203
+  total_runs: 204
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -2014,11 +2014,30 @@ experiments:
       validity_passed: true
       passed: true
       renderer: egl
+    - run: go2_h66_antithetic_source_confirmation_seed20261103
+      metric: paired_random_return_gain
+      value: 0.9157131437
+      environments_per_method: 4096
+      total_episodes: 8192
+      control_mean: 40.5208528032
+      candidate_mean: 41.4365659469
+      paired_sem: 0.0511682720
+      paired_bootstrap_95: [0.8159848370, 1.0150136125]
+      equally_weighted_zero_random_gain: 0.4578565719
+      control_nfe_per_action: 64
+      candidate_nfe_per_action: 128
+      source_value_count: 98304000
+      initial_observation_hashes_match: true
+      complete_source_stream_hashes_match: true
+      zero_dispatch_bitwise_exact: true
+      validity_passed: true
+      passed: true
+      renderer: egl
 
 outer_loop:
   cycle: 55
-  last_direction: "Run the separately frozen 4,096-environment confirmation after H66's +1.36 paired Go2 screen gain."
-  last_reflection: "H66 strongly passed its 256-environment screen with exact initial/source pairing and a bootstrap lower bound above +1.02. The mechanism cancels 87.95% of random endpoint displacement while remaining distinct from zero and preserving zero dispatch exactly. Stable improvement now depends on the independent official-scale seed, with doubled Gaussian inference NFE treated as an explicit cost."
+  last_direction: "Conclude the requested reproduction-and-improvement objective with H66 supported at official Go2 scale."
+  last_reflection: "H66 confirmed independently on 4,096 environments: random return improved by 0.9157 with bootstrap 95% [0.8160, 1.0150], exact initial/source pairing, and unchanged zero actions. The final random control independently matches the reproduced 40.523 benchmark result. Symmetric source ensembling therefore supplies a stable reward improvement at the explicit cost of doubling Gaussian inference NFE from 64 to 128."
 
 workspace:
   findings: "findings.md"

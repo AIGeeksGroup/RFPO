@@ -320,13 +320,16 @@ paired bootstrap interval was [-0.0546, 0.0914]. Late checkpoint variation is th
 behaviorally neutral at this resolution rather than complementary reward structure. Fixed-window
 averaging is closed without checkpoint selection, weight tuning, or official-scale confirmation.
 
-Antithetic source ensembling produced the first large dense-Go2 reward signal. On fixed states, the
+Antithetic source ensembling produced a stable dense-Go2 reward improvement. On fixed states, the
 one-pair `z/-z` endpoint mean retained a 3.46% normalized displacement from the zero action while
 reducing the one-sided random displacement to 12.05% of its original size. In a valid 256-
 environment paired screen, random-source return improved from 40.322 to 41.684 (+1.361), with a
-paired bootstrap interval of [1.029, 1.819]. Initial observations and the complete Gaussian source
-stream matched exactly, zero dispatch was bitwise unchanged, and actor parameters did not move. The
-signal requires an independent 4,096-environment confirmation before it is treated as stable.
+paired bootstrap interval of [1.029, 1.819]. The independently seeded 4,096-environment confirmation
+retained a +0.916 gain, improving 40.521 to 41.437 with bootstrap interval [0.816, 1.015]. Initial
+observations and complete Gaussian source streams matched exactly, zero dispatch was bitwise
+unchanged, and actor parameters did not move. This establishes a stable official-scale random-mode
+gain and an exact +0.458 equally weighted two-mode gain, at the explicit cost of doubling Gaussian
+inference from 64 to 128 NFE.
 
 ## Patterns and Insights
 

@@ -1,0 +1,28 @@
+{
+  "hypothesis": "H66-confirmation",
+  "control": "/mnt/data/users/haoyu/workspace/outputs/fpo-control/results/go2_h66_antithetic_source_ensemble/confirmation/random.json",
+  "candidate": "/mnt/data/users/haoyu/workspace/outputs/fpo-control/results/go2_h66_antithetic_source_ensemble/confirmation/antithetic.json",
+  "task": "Isaac-Velocity-Flat-Unitree-Go2-v0",
+  "episodes_per_method": 4096,
+  "total_completed_episodes": 8192,
+  "control_nfe_per_action": 64,
+  "candidate_nfe_per_action": 128,
+  "bootstrap_seed": 20261105,
+  "bootstrap_samples": 20000,
+  "control_mean": 40.52085280319443,
+  "candidate_mean": 41.43656594690401,
+  "paired_mean_gain": 0.9157131437095813,
+  "paired_sem": 0.05116827202192312,
+  "paired_bootstrap_95": [
+    0.8159848369854444,
+    1.0150136125335847
+  ],
+  "gates": {
+    "episode_action_return_validity": true,
+    "initial_observation_hashes_match": true,
+    "complete_source_stream_hashes_match": true,
+    "paired_mean_gain_at_least_0_20": true,
+    "paired_bootstrap_lower_bound_positive": true
+  },
+  "passed": true
+}
