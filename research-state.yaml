@@ -47,6 +47,10 @@ literature:
       title: "Asymmetric Actor Critic for Image-Based Robot Learning"
       year: 2017
       relevance: "Motivates using simulator state only in the training critic while preserving visual policy inputs."
+    - id: ng1999_policy_invariance
+      title: "Policy Invariance Under Reward Transformations: Theory and Application to Reward Shaping"
+      year: 1999
+      relevance: "Motivates potential-based Square stage shaping that changes credit assignment without changing the sparse-success objective."
     - id: wang2020_truly_ppo
       title: "Truly Proximal Policy Optimization"
       year: 2020
@@ -402,6 +406,12 @@ hypotheses:
     statement: "A simulator-state Square critic ranks complete-episode discounted success more accurately than the official critic trained on frozen visual conditioning."
     status: refuted
     motivation: "H19 showed that target calibration alone does not fix critic ranking, while RLDT and other value-guided methods require a trustworthy critic before policy transport."
+    parent: H40
+    priority: high
+  - id: H51
+    statement: "Potential-based RoboSuite stage shaping improves Gaussian-source Square success without degrading zero-source behavior."
+    status: active
+    motivation: "H50 rules out a cheap privileged critic, while the released wrapper discards bounded reach, grasp, lift, and hover progress that can be converted into policy-invariant local credit."
     parent: H40
     priority: high
 
@@ -1474,9 +1484,9 @@ experiments:
       renderer: osmesa
 
 outer_loop:
-  cycle: 35
-  last_direction: "Close the asymmetric critic prerequisite and select a critic-free exploration mechanism before reconsidering full RLDT."
-  last_reflection: "H50's simulator-state critic worsened held-out MSE in both folds and did not reliably improve rank, so privileged value information is not a cheap fix under the official short critic budget. This does not refute RLDT, but removes the justification for a costly code-free port now."
+  cycle: 36
+  last_direction: "Audit policy-invariant Square stage shaping before any additional value-guided or large-scale method."
+  last_reflection: "The official SDE sampler is an already-reported DPPO baseline, while raw dense reward can reward hovering. H51 instead uses RoboSuite stage progress only through a telescoping potential difference and requires a frozen-policy signal audit before short paired training."
 
 workspace:
   findings: "findings.md"
