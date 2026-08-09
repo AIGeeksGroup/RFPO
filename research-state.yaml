@@ -324,6 +324,12 @@ hypotheses:
     motivation: "Can step 1000 is reward-starved for short training while step 6000 screens can saturate; the paper reports roughly 28.6% Square base success and meaningful FPO++ gains, and the released checkpoint is already available on the server."
     parent: H0
     priority: high
+  - id: H41
+    statement: "Zero-endpoint PCGrad improves short-horizon Square FPO++ random-source success without materially degrading zero-source behavior."
+    status: active
+    motivation: "H29 passed its Can mechanism audit and H30b produced small same-direction gains but was underpowered by a saturated control; H40 establishes non-saturated Square headroom in both source modes."
+    parent: H29
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -1071,7 +1077,7 @@ experiments:
 
 outer_loop:
   cycle: 27
-  last_direction: "Register and smoke-test a Square-specific paired FPO++ continuation protocol before evaluating the first reward-improvement candidate."
+  last_direction: "Smoke-test and then execute H41's locked paired Square zero-endpoint PCGrad continuation screen."
   last_reflection: "H40 scored 9/20 zero and 7/20 random with balanced accounting, supporting Square as a non-saturated OSMesa screening regime while providing no method-improvement evidence."
 
 workspace:
