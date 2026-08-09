@@ -336,6 +336,12 @@ hypotheses:
     motivation: "H41 exposed a task-specific execution mismatch: the released Square checkpoint defaults to 8 actions while the official FPO++ command evaluates 16; restoring the native horizon directly increases visual feedback and is testable without training."
     parent: H40
     priority: high
+  - id: H43
+    statement: "Resetting actor AdamW moments at each new Square rollout prevents stale cross-rollout statistics from distorting FPO++ updates and improves random-source success without degrading zero-source behavior."
+    status: active
+    motivation: "The released loop carries Adam moments across independently collected on-policy rollouts; prior optimizer tests changed within-rollout update behavior but did not isolate this nonstationary boundary."
+    parent: H40
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -1151,9 +1157,9 @@ experiments:
       renderer: osmesa
 
 outer_loop:
-  cycle: 28
-  last_direction: "Run an outer-loop synthesis before selecting another training-time intervention; action-horizon changes are closed without tuning."
-  last_reflection: "H42 traded a +2/20 random-source gain for a -3/20 zero-source loss and reduced pooled success by one. Restoring the checkpoint-native horizon is not a stable improvement."
+  cycle: 29
+  last_direction: "Run H43's paired five-iteration Square test of persistent versus rollout-local actor Adam state."
+  last_reflection: "Inference changes repeatedly trade random and zero-source performance. H43 keeps rollout behavior fixed and isolates stale optimizer statistics carried across changing on-policy datasets."
 
 workspace:
   findings: "findings.md"
