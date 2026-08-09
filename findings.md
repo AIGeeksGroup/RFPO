@@ -381,6 +381,7 @@ cannot be replaced by this cheap critic substitution.
 
 - Reproduce released baselines before changing objectives.
 - Do not label the first 48k-step Can iteration an actor update: it is critic-only, and a meaningful short FPO++ screen requires at least two iterations.
+- Same-observation best-of-two endpoint/path ranking remains closed; the next active test is H59's exact AdamW extragradient correction of the first genuine actor update.
 - Use short validation runs before full 1500-iteration or multi-seed jobs.
 - Stop a candidate when it degrades the primary metric beyond seed noise or fails to improve its claimed mechanism.
 - Keep inference-only warm starts separate from faithful WarmPrior training in claims and experiment labels.

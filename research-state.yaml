@@ -464,6 +464,12 @@ hypotheses:
     motivation: "H57's two no-loss rescues do not reveal whether zero gripper latent helped through the gripper decision or coupled arm changes; output-coordinate substitution isolates that mechanism exactly."
     parent: null
     priority: high
+  - id: H59
+    statement: "An exact AdamW extragradient correction improves the first FPO++ actor update's outcome alignment without collapsing surrogate progress."
+    status: active
+    motivation: "The initial GAE gradient is informative, but held-out direction rotates after actor optimization; lower LR and full-batch accumulation did not correct this curvature-induced path error."
+    parent: H2
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -1777,8 +1783,8 @@ experiments:
 
 outer_loop:
   cycle: 45
-  last_direction: "Withdraw the apparent first-iteration FPO++ gain and return to genuine actor-update or formal reproduction work."
-  last_reflection: "The step-48000 actor is bitwise identical to the released step-1000 EMA actor because iteration 1 is critic-only. Its 20/20 score is evaluation variance, so comparing these identical checkpoints at larger scale would waste episodes."
+  last_direction: "Test exact AdamW extragradient as a first-update path correction; do not reopen same-observation ranking or gripper post-processing."
+  last_reflection: "The step-48000 actor identity audit removes the apparent one-iteration gain. Existing audits still show informative initial GAE followed by rapid gradient rotation, while lower LR and full-batch updates fail; H59 targets that measured boundary with a one-step lookahead."
 
 workspace:
   findings: "findings.md"
