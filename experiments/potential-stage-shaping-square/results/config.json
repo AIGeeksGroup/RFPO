@@ -1,0 +1,12 @@
+{
+  "base_policy_local_path": "/home/haoyu/workspace/code/fpo-control/manipulation_experiments/downloaded_checkpoints/trc7rbt0_step_110000",
+  "output_dir": "/home/haoyu/workspace/outputs/fpo-control/results/square_h51_potential_audit_osmesa_seed20260958",
+  "device": "cuda",
+  "seed_start": 20260958,
+  "num_episodes": 16,
+  "num_envs": 16,
+  "camera_size": 84,
+  "sampling_steps": 10,
+  "n_action_steps": 16,
+  "discount": 0.995
+}

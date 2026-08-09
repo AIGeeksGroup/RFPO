@@ -1,0 +1,174 @@
+{
+  "active_fraction": 0.760169654906497,
+  "config": {
+    "base_policy_local_path": "/home/haoyu/workspace/code/fpo-control/manipulation_experiments/downloaded_checkpoints/trc7rbt0_step_110000",
+    "camera_size": 84,
+    "device": "cuda",
+    "discount": 0.995,
+    "n_action_steps": 16,
+    "num_envs": 16,
+    "num_episodes": 16,
+    "output_dir": "/home/haoyu/workspace/outputs/fpo-control/results/square_h51_potential_audit_osmesa_seed20260958",
+    "sampling_steps": 10,
+    "seed_start": 20260958
+  },
+  "episode_results": [
+    {
+      "initial_potential": 0.0008802913888829145,
+      "seed": 20260958,
+      "shaped_return": -0.0008802913888830977,
+      "sparse_return": 0.0,
+      "steps": 400,
+      "success": false,
+      "telescoping_residual": -1.831217469328017e-16
+    },
+    {
+      "initial_potential": 0.005978991657197142,
+      "seed": 20260959,
+      "shaped_return": -0.005978991657197133,
+      "sparse_return": 0.0,
+      "steps": 400,
+      "success": false,
+      "telescoping_residual": 8.673617379884035e-18
+    },
+    {
+      "initial_potential": 0.004642316860197582,
+      "seed": 20260960,
+      "shaped_return": -0.004642316860197452,
+      "sparse_return": 0.0,
+      "steps": 400,
+      "success": false,
+      "telescoping_residual": 1.3010426069826053e-16
+    },
+    {
+      "initial_potential": 0.0007957142759437597,
+      "seed": 20260961,
+      "shaped_return": -0.000795714275944135,
+      "sparse_return": 0.0,
+      "steps": 400,
+      "success": false,
+      "telescoping_residual": -3.7535079211448164e-16
+    },
+    {
+      "initial_potential": 0.0013585955847702392,
+      "seed": 20260962,
+      "shaped_return": -0.0013585955847702728,
+      "sparse_return": 0.0,
+      "steps": 400,
+      "success": false,
+      "telescoping_residual": -3.361026734705064e-17
+    },
+    {
+      "initial_potential": 0.006511084108253751,
+      "seed": 20260963,
+      "shaped_return": -0.006511084108253693,
+      "sparse_return": 0.0,
+      "steps": 400,
+      "success": false,
+      "telescoping_residual": 5.811323644522304e-17
+    },
+    {
+      "initial_potential": 0.01099714990766284,
+      "seed": 20260964,
+      "shaped_return": -0.010997149907662932,
+      "sparse_return": 0.0,
+      "steps": 400,
+      "success": false,
+      "telescoping_residual": -9.194034422677078e-17
+    },
+    {
+      "initial_potential": 0.002854227864819781,
+      "seed": 20260965,
+      "shaped_return": -0.002854227864819783,
+      "sparse_return": 0.0,
+      "steps": 400,
+      "success": false,
+      "telescoping_residual": -2.168404344971009e-18
+    },
+    {
+      "initial_potential": 0.0027840090804207573,
+      "seed": 20260966,
+      "shaped_return": -0.0027840090804207296,
+      "sparse_return": 0.0,
+      "steps": 400,
+      "success": false,
+      "telescoping_residual": 2.7755575615628914e-17
+    },
+    {
+      "initial_potential": 0.000813021697258054,
+      "seed": 20260967,
+      "shaped_return": 0.417225255964404,
+      "sparse_return": 0.418038277661662,
+      "steps": 175,
+      "success": true,
+      "telescoping_residual": 5.551115123125783e-17
+    },
+    {
+      "initial_potential": 0.0025189249850492202,
+      "seed": 20260968,
+      "shaped_return": -0.002518924985049283,
+      "sparse_return": 0.0,
+      "steps": 400,
+      "success": false,
+      "telescoping_residual": -6.288372600415926e-17
+    },
+    {
+      "initial_potential": 0.0023704385146880672,
+      "seed": 20260969,
+      "shaped_return": -0.0023704385146880802,
+      "sparse_return": 0.0,
+      "steps": 400,
+      "success": false,
+      "telescoping_residual": -1.3010426069826053e-17
+    },
+    {
+      "initial_potential": 0.0017980167353530475,
+      "seed": 20260970,
+      "shaped_return": 0.3998084485624626,
+      "sparse_return": 0.40160646529781563,
+      "steps": 183,
+      "success": true,
+      "telescoping_residual": 3.3393426912553537e-17
+    },
+    {
+      "initial_potential": 0.008210020664408879,
+      "seed": 20260971,
+      "shaped_return": 0.20110538450480642,
+      "sparse_return": 0.20931540516921548,
+      "steps": 313,
+      "success": true,
+      "telescoping_residual": -1.8908485888147197e-16
+    },
+    {
+      "initial_potential": 0.002305748388667539,
+      "seed": 20260972,
+      "shaped_return": -0.002305748388667586,
+      "sparse_return": 0.0,
+      "steps": 400,
+      "success": false,
+      "telescoping_residual": -4.683753385137379e-17
+    },
+    {
+      "initial_potential": 0.0018041959165947198,
+      "seed": 20260973,
+      "shaped_return": -0.0018041959165946975,
+      "sparse_return": 0.0,
+      "steps": 400,
+      "success": false,
+      "telescoping_residual": 2.233456475320139e-17
+    }
+  ],
+  "episodes": 16,
+  "failure_nonterminal_transitions": 5187,
+  "failures": 13,
+  "max_abs_telescoping_residual": 3.7535079211448164e-16,
+  "negative_fraction": 0.5278581068054752,
+  "passed": true,
+  "positive_fraction": 0.23231154810102178,
+  "successes": 3,
+  "term_max": 0.4206724192797089,
+  "term_mean": -0.0003655833901992817,
+  "term_min": -0.49570141982408267,
+  "term_std": 0.03325466229610048,
+  "transitions": 5871
+}

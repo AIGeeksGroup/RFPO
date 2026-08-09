@@ -429,7 +429,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 175
+  total_runs: 176
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -1482,11 +1482,24 @@ experiments:
       spearman_gain: [0.0307029615, -0.0340337416]
       passed: false
       renderer: osmesa
+    - run: square_h51_potential_audit_osmesa_seed20260958
+      metric: potential_shaping_signal
+      value: 0.7601696549
+      episodes: 16
+      successes: 3
+      failures: 13
+      transitions: 5871
+      failure_nonterminal_transitions: 5187
+      max_abs_telescoping_residual: 3.753507921e-16
+      positive_fraction: 0.2323115481
+      negative_fraction: 0.5278581068
+      passed: true
+      renderer: osmesa
 
 outer_loop:
   cycle: 36
-  last_direction: "Audit policy-invariant Square stage shaping before any additional value-guided or large-scale method."
-  last_reflection: "The official SDE sampler is an already-reported DPPO baseline, while raw dense reward can reward hovering. H51 instead uses RoboSuite stage progress only through a telescoping potential difference and requires a frozen-policy signal audit before short paired training."
+  last_direction: "Run the preregistered five-iteration H51 paired Square screen after the potential audit passed."
+  last_reflection: "H51's complete-episode telescoping residual was 3.75e-16, while 76.02% of failed-episode nonterminal transitions carried active signed shaping. The signal is valid and nontrivial, authorizing only the locked short paired training screen."
 
 workspace:
   findings: "findings.md"

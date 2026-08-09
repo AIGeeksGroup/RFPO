@@ -366,6 +366,7 @@ cannot be replaced by this cheap critic substitution.
 - Joint RFS modulation is active but not sufficient on Square: despite bitwise base freezing and nonzero updates in both branches, it reduced mean and sampled success by two points each. Its 224-dimensional exact joint PPO ratio clipped 73-76% of minibatch samples, unlike H33's inactive temporal-clipping premise in FPO++.
 - Temporally factorized RFS ratios cut clipping by 57.56 points and preserve the exact on-policy gradient, but larger effective modulation updates worsened pooled success to 11/40. High joint clipping was protective rather than the dominant failure; RFS modulation is closed at this budget.
 - Privileged simulator inputs do not guarantee a better sparse-reward critic under the official short optimization budget: H50 worsened cross-fit MSE in both folds and failed to improve return ranking consistently.
+- Potential-based Square stage shaping is a valid active credit signal: its complete-episode return telescoped to the sparse objective within `3.75e-16`, while 76.02% of failed-episode nonterminal transitions carried non-negligible signed progress. Reward transfer remains untested until the locked paired screen completes.
 
 ## Lessons and Constraints
 
