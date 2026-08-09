@@ -5,7 +5,11 @@ Date: 2026-08-08
 Run: `2026-08-08_16-24-22_go2_official_seed42_20260808`
 
 Configuration: official 4096 environments, 1500 iterations, seed 42. The runner evaluated all 31
-saved checkpoints with 10 episodes under both zero and random sampling.
+saved checkpoints under both zero and random sampling. Although `eval_episodes=10`, the released
+runner computes `target_episodes_per_env=max(1, eval_episodes // num_envs)`. With 4096 evaluation
+environments it therefore collects one episode per environment, or 4096 episodes per source mode
+and checkpoint, rather than 10. The recorded means below are unchanged; their effective evaluation
+sample size is larger than initially documented.
 
 | Metric | Final | Best | Best iteration |
 |---|---:|---:|---:|
@@ -23,4 +27,3 @@ H0 is supported. The training and evaluation returns both reach and slightly exc
 approximately 40-return reference regime. The complete 31-checkpoint post-evaluation sequence rules
 out an incomplete-run interpretation. A multi-seed uncertainty estimate remains useful for a final
 paper table, but is not required before screening improvement hypotheses.
-
