@@ -378,6 +378,12 @@ hypotheses:
     motivation: "The released 320-step Square rollout ends before the 400-step task horizon, so unsuccessful initial episodes are bootstrapped while successful episodes receive terminal labels."
     parent: H40
     priority: high
+  - id: H48
+    statement: "A frozen Square flow actor jointly modulated by a PPO-trained source-latent policy and bounded residual-action policy improves pooled deterministic/stochastic success."
+    status: active
+    motivation: "RFS separates global latent exploration and local output correction while preserving the pretrained flow field and using an exact explicit-policy PPO ratio."
+    parent: H40
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -1404,8 +1410,8 @@ experiments:
 
 outer_loop:
   cycle: 34
-  last_direction: "Close rollout-horizon censoring and reassess whether another low-cost, reward-relevant mechanism remains before expanding compute."
-  last_reflection: "H47 exposed all initial Square failure terminals but changed success from 16/40 to 14/40; terminal-label completeness is not the dominant reward bottleneck at equal interaction budget."
+  last_direction: "Test RFS-style frozen input/output policy modulation with an exact chunk-level PPO ratio before considering heavier density-transport or value-gradient methods."
+  last_reflection: "H47 exposed all initial Square failure terminals but changed success from 16/40 to 14/40. RFS is a distinct boundary because it freezes the flow actor and learns reward-directed latent and residual controls outside the CFM surrogate."
 
 workspace:
   findings: "findings.md"
