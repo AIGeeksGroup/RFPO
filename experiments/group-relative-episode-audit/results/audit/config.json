@@ -1,0 +1,24 @@
+{
+  "action_steps": 16,
+  "camera_size": 84,
+  "checkpoint_name": "trc7rbt0_step_110000",
+  "device": "cuda",
+  "episode_horizon": 400,
+  "hypothesis": "H63",
+  "local_checkpoint_path": "/home/haoyu/workspace/code/fpo-control/manipulation_experiments/downloaded_checkpoints/trc7rbt0_step_110000",
+  "mode": "audit",
+  "output_dir": "/home/haoyu/workspace/outputs/fpo-control/results/square_h63_group_relative_episodes_audit_osmesa_seed20261080",
+  "renderer_claim": "OSMesa mechanism audit; not an official EGL benchmark",
+  "replicas": 4,
+  "root_seeds": [
+    20261080,
+    20261081,
+    20261082,
+    20261083,
+    20261084,
+    20261085,
+    20261086,
+    20261087
+  ],
+  "sampling_steps": 10
+}

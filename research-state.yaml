@@ -510,7 +510,7 @@ hypotheses:
     priority: high
   - id: H63
     statement: "Complete Square trajectory groups from a shared simulator initialization yield dense leave-one-out terminal-success advantages for critic-free FPO++ weighting."
-    status: planned
+    status: refuted
     motivation: "H62's intermediate binary suffix outcomes were mostly tied, while Square's roughly 35% full-trajectory random success predicts mixed outcomes in about 80% of four-replica common-scene groups."
     parent: H40
     priority: high
@@ -1920,11 +1920,29 @@ experiments:
       validity_passed: true
       passed: false
       renderer: osmesa
+    - run: square_h63_group_relative_episodes_audit_osmesa_seed20261080
+      metric: common_scene_group_relative_signal
+      value: 12.0
+      root_groups: 8
+      replicas_per_group: 4
+      episodes: 32
+      successes: 14
+      failures: 18
+      mixed_groups: 4
+      nonzero_advantages: 16
+      absolute_weight_ess: 12.0
+      source_mean: 0.0010536677
+      source_std: 0.9967722788
+      median_first_chunk_pairwise_normalized_rms: 0.4264316242
+      policy_parameters_bitwise_unchanged: true
+      validity_passed: true
+      passed: false
+      renderer: osmesa
 
 outer_loop:
-  cycle: 50
-  last_direction: "Audit common-scene group-relative complete-episode success as a denser critic-free FPO++ signal before actor integration."
-  last_reflection: "H62 failed because local suffix outcomes were tied, not because exact common-state construction was impossible. Four full Square trajectories from one initial scene should be mixed about 80% of the time at the observed 35% base success rate; leave-one-out returns then provide an unbiased scene-conditioned baseline without adding a learned critic."
+  cycle: 51
+  last_direction: "Close exact-scene group-relative terminal advantages before actor integration because homogeneous scene groups discard half the rollout population."
+  last_reflection: "Complete trajectories restore global success/failure support, but outcomes are more scene-correlated than the marginal 35% success estimate implied. Four of eight groups are homogeneous, leaving only 16 nonzero trajectories and ESS 12; scaling group size would spend substantially more rollout compute without changing the underlying sparse terminal signal."
 
 workspace:
   findings: "findings.md"

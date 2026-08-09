@@ -1,0 +1,208 @@
+{
+  "absolute_weight_ess": 11.999999999999998,
+  "failures": 18,
+  "formal": true,
+  "group_size": 4,
+  "groups": [
+    {
+      "leave_one_out_advantages": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "lengths": [
+        400,
+        400,
+        400,
+        400
+      ],
+      "outcomes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "root_seed": 20261080
+    },
+    {
+      "leave_one_out_advantages": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "lengths": [
+        400,
+        400,
+        400,
+        400
+      ],
+      "outcomes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "root_seed": 20261081
+    },
+    {
+      "leave_one_out_advantages": [
+        0.3333333333333333,
+        0.3333333333333333,
+        -1.0,
+        0.3333333333333333
+      ],
+      "lengths": [
+        343,
+        254,
+        400,
+        251
+      ],
+      "outcomes": [
+        1,
+        1,
+        0,
+        1
+      ],
+      "root_seed": 20261082
+    },
+    {
+      "leave_one_out_advantages": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "lengths": [
+        152,
+        139,
+        154,
+        125
+      ],
+      "outcomes": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "root_seed": 20261083
+    },
+    {
+      "leave_one_out_advantages": [
+        0.3333333333333333,
+        -1.0,
+        0.3333333333333333,
+        0.3333333333333333
+      ],
+      "lengths": [
+        331,
+        400,
+        200,
+        299
+      ],
+      "outcomes": [
+        1,
+        0,
+        1,
+        1
+      ],
+      "root_seed": 20261084
+    },
+    {
+      "leave_one_out_advantages": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "lengths": [
+        400,
+        400,
+        400,
+        400
+      ],
+      "outcomes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "root_seed": 20261085
+    },
+    {
+      "leave_one_out_advantages": [
+        -1.0,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333
+      ],
+      "lengths": [
+        400,
+        193,
+        203,
+        359
+      ],
+      "outcomes": [
+        0,
+        1,
+        1,
+        1
+      ],
+      "root_seed": 20261086
+    },
+    {
+      "leave_one_out_advantages": [
+        -0.3333333333333333,
+        1.0,
+        -0.3333333333333333,
+        -0.3333333333333333
+      ],
+      "lengths": [
+        400,
+        231,
+        400,
+        400
+      ],
+      "outcomes": [
+        0,
+        1,
+        0,
+        0
+      ],
+      "root_seed": 20261087
+    }
+  ],
+  "maximum_group_advantage_sum_residual": 1.1102230246251565e-16,
+  "median_first_chunk_pairwise_normalized_rms": 0.42643162424379694,
+  "mixed_groups": 4,
+  "nonzero_advantages": 16,
+  "num_episodes": 32,
+  "num_groups": 8,
+  "passed": false,
+  "signal": {
+    "gates": {
+      "absolute_weight_ess": false,
+      "mixed_group_count": false,
+      "nonzero_advantage_count": false,
+      "success_and_failure_support": true
+    },
+    "passed": false
+  },
+  "source_mean": 0.0010536676703336207,
+  "source_std": 0.9967722787741946,
+  "source_value_count": 73696,
+  "successes": 14,
+  "validity": {
+    "gates": {
+      "candidate_source_distribution": true,
+      "episodes_complete_binary": true,
+      "first_chunk_action_diversity": true,
+      "initial_observations_exact_within_group": true,
+      "initial_privileged_states_exact_within_group": true,
+      "leave_one_out_zero_sum": true,
+      "policy_parameters_bitwise_unchanged": true
+    },
+    "passed": true
+  }
+}

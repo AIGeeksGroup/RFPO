@@ -1,0 +1,70 @@
+{
+  "absolute_weight_ess": 2.0,
+  "failures": 3,
+  "formal": false,
+  "group_size": 2,
+  "groups": [
+    {
+      "leave_one_out_advantages": [
+        1.0,
+        -1.0
+      ],
+      "lengths": [
+        237,
+        400
+      ],
+      "outcomes": [
+        1,
+        0
+      ],
+      "root_seed": 20261080
+    },
+    {
+      "leave_one_out_advantages": [
+        0.0,
+        0.0
+      ],
+      "lengths": [
+        400,
+        400
+      ],
+      "outcomes": [
+        0,
+        0
+      ],
+      "root_seed": 20261081
+    }
+  ],
+  "maximum_group_advantage_sum_residual": 0.0,
+  "median_first_chunk_pairwise_normalized_rms": 0.41509722890845796,
+  "mixed_groups": 1,
+  "nonzero_advantages": 2,
+  "num_episodes": 4,
+  "num_groups": 2,
+  "passed": true,
+  "signal": {
+    "gates": {
+      "absolute_weight_ess": false,
+      "mixed_group_count": false,
+      "nonzero_advantage_count": false,
+      "success_and_failure_support": false
+    },
+    "passed": null
+  },
+  "source_mean": 0.011364434564385437,
+  "source_std": 0.9876730775277781,
+  "source_value_count": 10080,
+  "successes": 1,
+  "validity": {
+    "gates": {
+      "candidate_source_distribution": true,
+      "episodes_complete_binary": true,
+      "first_chunk_action_diversity": true,
+      "initial_observations_exact_within_group": true,
+      "initial_privileged_states_exact_within_group": true,
+      "leave_one_out_zero_sum": true,
+      "policy_parameters_bitwise_unchanged": true
+    },
+    "passed": true
+  }
+}
