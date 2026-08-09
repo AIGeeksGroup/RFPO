@@ -326,6 +326,7 @@ class RobosuiteGymWrapper:
 
     def _process_obs(self, obs):
         """Process robosuite observations to match expected format."""
+        self._last_raw_obs = obs
         processed_obs = {}
 
         # Extract robot state using the same features as dataset conversion
@@ -375,6 +376,43 @@ class RobosuiteGymWrapper:
             self._logged_obs_keys = True
 
         return processed_obs
+
+    def get_privileged_state(self) -> np.ndarray:
+        """Return train-only simulator state for the single-nut Square task."""
+        if self.env_name != "NutAssemblySquare":
+            raise ValueError("privileged state is currently defined only for Square")
+        if not hasattr(self, "_last_raw_obs") or not hasattr(self, "_last_obs"):
+            raise RuntimeError("environment must be reset before reading privileged state")
+
+        nut = self.env.nuts[self.env.nut_id]
+        nut_name = nut.name
+        raw = self._last_raw_obs
+        required = (
+            f"{nut_name}_pos",
+            f"{nut_name}_quat",
+            f"{nut_name}_to_robot0_eef_pos",
+            f"{nut_name}_to_robot0_eef_quat",
+        )
+        missing = [key for key in required if key not in raw]
+        if missing:
+            raise RuntimeError(f"Square privileged observation keys are missing: {missing}")
+
+        peg_id = self.env.nut_to_id[next(key for key in self.env.nut_to_id if key in nut_name.lower())]
+        peg_body_id = self.env.peg1_body_id if peg_id == 0 else self.env.peg2_body_id
+        peg_pos = np.asarray(self.env.sim.data.body_xpos[peg_body_id])
+        state = np.concatenate(
+            (
+                np.asarray(self._last_obs["observation.state"]),
+                np.asarray(raw[required[0]]),
+                np.asarray(raw[required[1]]),
+                np.asarray(raw[required[2]]),
+                np.asarray(raw[required[3]]),
+                peg_pos,
+            )
+        ).astype(np.float32)
+        if state.shape != (26,) or not np.isfinite(state).all():
+            raise RuntimeError(f"invalid Square privileged state with shape {state.shape}")
+        return state
 
     def _get_expected_image_keys(self, env_name: str):
         """Return the expected image keys for a given environment.
