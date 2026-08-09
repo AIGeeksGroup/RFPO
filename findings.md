@@ -12,7 +12,7 @@ FPO++ stabilizes likelihood-free policy gradients through per-CFM-sample ratios 
 
 The released Can step-1000 checkpoint reproduced its reported behavior. Two 200-episode runs gave zero-sampling success rates of 70.5% and 71.0%; both Wilson intervals include the paper's 73.76% result. Random sampling produced 9.5% and 14.0%, or 11.75% pooled over 400 episodes, consistent with the approximately 10% low-success exploration regime highlighted by the paper. The official parallelism setting is 50 environments; pooled episode counts are retained as the authoritative metric.
 
-The official Go2 configuration reproduced successfully with 4096 environments, 1500 iterations, and seed 42. Final training return was 40.620. All 31 saved checkpoints completed post-training evaluation; the final zero-sampling return was 41.529 and random-sampling return was 40.523, matching the paper's approximately 40-return regime. Separately, one official-budget Can FPO++ update completed from the released checkpoint, including collection, policy/value updates, checkpointing, and both evaluation modes. Its 20-episode post-update scores are treated only as pipeline evidence.
+The official Go2 configuration reproduced successfully with 4096 environments, 1500 iterations, and seed 42. Final training return was 40.620. All 31 saved checkpoints completed post-training evaluation; the final zero-sampling return was 41.529 and random-sampling return was 40.523, matching the paper's approximately 40-return regime. Separately, one official-budget Can FPO++ iteration completed from the released checkpoint, including collection, critic optimization, checkpointing, and both evaluation modes. A retrospective audit established that iteration 1 is critic-only and that all 35 saved actor tensors are bitwise identical to the released step-1000 EMA actor. Its exploratory 20/20 zero-source score is therefore evaluation variance and only pipeline evidence, not a training gain.
 
 An exploratory inference-only WP-Past intervention failed decisively on Can. Under a matched seed,
 the Gaussian source achieved 17/20 zero-sampling and 2/20 random-sampling successes, while replacing
@@ -380,6 +380,7 @@ cannot be replaced by this cheap critic substitution.
 ## Lessons and Constraints
 
 - Reproduce released baselines before changing objectives.
+- Do not label the first 48k-step Can iteration an actor update: it is critic-only, and a meaningful short FPO++ screen requires at least two iterations.
 - Use short validation runs before full 1500-iteration or multi-seed jobs.
 - Stop a candidate when it degrades the primary metric beyond seed noise or fails to improve its claimed mechanism.
 - Keep inference-only warm starts separate from faithful WarmPrior training in claims and experiment labels.

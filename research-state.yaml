@@ -514,6 +514,13 @@ experiments:
     - run: can_fpopp_one_update_seed0
       metric: completed_updates
       value: 1
+      corrected_interpretation: "one critic-only iteration; zero actor updates"
+      actor_tensors_compared: 35
+      actor_changed_tensors: 0
+      actor_l2_distance_from_released_step1000_ema: 0.0
+      actor_max_abs_difference: 0.0
+      actor_bitwise_identical: true
+      post_update_score_is_improvement_evidence: false
     - run: can_h3a_gaussian_zero
       metric: success_rate
       value: 0.85
@@ -1769,9 +1776,9 @@ experiments:
       renderer: osmesa
 
 outer_loop:
-  cycle: 44
-  last_direction: "Close gripper-specific output interventions after H58 swaps the sole successful seed but leaves net random-source success unchanged."
-  last_reflection: "H58 preserved Gaussian arm outputs and substituted deterministic gripper outputs exactly at all 760 replans, yet tied control 1/20 by trading one success for another. Candidate quality, not fixed gripper post-processing, is the next intervention boundary."
+  cycle: 45
+  last_direction: "Withdraw the apparent first-iteration FPO++ gain and return to genuine actor-update or formal reproduction work."
+  last_reflection: "The step-48000 actor is bitwise identical to the released step-1000 EMA actor because iteration 1 is critic-only. Its 20/20 score is evaluation variance, so comparing these identical checkpoints at larger scale would waste episodes."
 
 workspace:
   findings: "findings.md"
