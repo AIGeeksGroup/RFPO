@@ -374,7 +374,7 @@ hypotheses:
     priority: high
   - id: H47
     statement: "Collecting complete 400-step Square rollouts improves FPO++ success by replacing critic-bootstrap censoring of initial failures with observed terminal outcomes."
-    status: active
+    status: refuted
     motivation: "The released 320-step Square rollout ends before the 400-step task horizon, so unsuccessful initial episodes are bootstrapped while successful episodes receive terminal labels."
     parent: H40
     priority: high
@@ -393,7 +393,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 159
+  total_runs: 164
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -1360,11 +1360,52 @@ experiments:
       balanced_episodes_per_env: true
       deterministic_environment_seeds: true
       renderer: osmesa
+    - run: square_h47_fullhorizon_osmesa_seed20260916
+      metric: training_completion
+      value: 1
+      iterations: 4
+      collection_steps: 400
+      completed_episodes_by_iteration: [17, 16, 16, 16]
+      completed_successes_by_iteration: [3, 8, 7, 6]
+      total_environment_steps: 25600
+      renderer: osmesa
+    - run: square_h47_control_zero_balanced20_seed20260923
+      metric: success_rate
+      value: 0.50
+      episodes: 20
+      action_steps: 16
+      balanced_episodes_per_env: true
+      deterministic_environment_seeds: true
+      renderer: osmesa
+    - run: square_h47_control_random_balanced20_seed20260923
+      metric: success_rate
+      value: 0.30
+      episodes: 20
+      action_steps: 16
+      balanced_episodes_per_env: true
+      deterministic_environment_seeds: true
+      renderer: osmesa
+    - run: square_h47_candidate_zero_balanced20_seed20260923
+      metric: success_rate
+      value: 0.40
+      episodes: 20
+      action_steps: 16
+      balanced_episodes_per_env: true
+      deterministic_environment_seeds: true
+      renderer: osmesa
+    - run: square_h47_candidate_random_balanced20_seed20260923
+      metric: success_rate
+      value: 0.30
+      episodes: 20
+      action_steps: 16
+      balanced_episodes_per_env: true
+      deterministic_environment_seeds: true
+      renderer: osmesa
 
 outer_loop:
-  cycle: 33
-  last_direction: "Test complete 400-step Square rollouts at the same total interaction budget before any larger training run."
-  last_reflection: "H46 closes flow geometry as a reward proxy; H43 additionally reveals that 320-step training rollouts censor all initial Square failures before the 400-step task horizon."
+  cycle: 34
+  last_direction: "Close rollout-horizon censoring and reassess whether another low-cost, reward-relevant mechanism remains before expanding compute."
+  last_reflection: "H47 exposed all initial Square failure terminals but changed success from 16/40 to 14/40; terminal-label completeness is not the dominant reward bottleneck at equal interaction budget."
 
 workspace:
   findings: "findings.md"

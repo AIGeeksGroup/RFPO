@@ -291,6 +291,13 @@ best-of-two scored 4/20. The candidate selected both branches 266/238 times over
 lowered curvature by 12.62%, so the mechanism was active but its ranking signal was anti-correlated
 with the aggregate reward outcome in this screen.
 
+Full-horizon Square collection also passed its intended mechanism but failed the reward screen.
+Changing the equal-interaction schedule from five 320-step rollouts to four 400-step rollouts exposed
+17 first-iteration terminals, including 14 failures censored by the shorter control. The final policy
+then tied Gaussian success at 6/20, reduced zero success from 10/20 to 8/20, and reduced pooled
+success from 16/40 to 14/40. Complete failure labels do not compensate for one fewer fresh actor
+rollout and are not the dominant bottleneck under this budget.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -347,6 +354,7 @@ with the aggregate reward outcome in this screen.
 - Uniform averaging within the actor-update trajectory repeats the same tradeoff: zero success rose by 1/20 while Gaussian-source success fell by 2/20. Weight-space smoothing is closed alongside BC-to-final interpolation.
 - Exact advantage-sign stratification raised Gaussian-source Square success by 3/20 with only a 1/20 zero loss, but pooled gain was 2/40 against the locked 3/40 gate. The directional signal is retained; nearby strata and normalization variants are closed.
 - Global flow straightening and within-observation flow ranking both improve their geometry targets without improving reward: corrected lower-curvature best-of-two reduced Square random success by 3/20 despite a 12.62% curvature reduction.
+- Extending Square rollouts to the full 400-step horizon converts censored initial failures into observed terminals, but at equal interaction budget it leaves random success unchanged and reduces deterministic and pooled success.
 
 ## Lessons and Constraints
 
@@ -369,4 +377,4 @@ with the aggregate reward outcome in this screen.
 
 ## Optimization Trajectory
 
-Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, advantage-sign-stratified minibatches, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, rank-based GAE weighting, terminal-sign filtering, fixed and KL-adaptive lower actor learning rates, full-batch gradient accumulation, BC/FPO++ midpoint interpolation, within-trajectory SWA, explicit Gaussian-bridge distillation, antithetic endpoint averaging, curvature-ranked best-of-two, shorter receding-horizon execution, temporally correlated Gaussian inference, advantage-sign and endpoint-anchor gradient surgery, temporal per-timestep clipping, coordinate-wise median and geometric-median gradient aggregation, PPO-RB ratio rollback, equal-NFE midpoint sampling, checkpoint-native Square execution horizon restoration, and rollout-local Adam are closed as reward-improvement routes. Reflow and midpoint retain geometry/sampling-fidelity value only. The next candidate must improve reward without trading away Gaussian-source exploration.
+Can released-checkpoint and Go2 official-seed reproduction are complete. WarmPrior, mixed-endpoint reflow, increased or reallocated Monte Carlo sampling, full-lambda GAE, guided source mixtures, mask reset, ESS-weighted mirror updates, online reflow stabilization, rollout-level advantage normalization, advantage-sign-stratified minibatches, antithetic CFM sampling, successful replay, epoch-resampled CFM losses, active-ratio actor stopping, bounded discounted-success critics, continuous-action DAE, rank-based GAE weighting, terminal-sign filtering, fixed and KL-adaptive lower actor learning rates, full-batch gradient accumulation, BC/FPO++ midpoint interpolation, within-trajectory SWA, explicit Gaussian-bridge distillation, antithetic endpoint averaging, curvature-ranked best-of-two, full-horizon Square collection, shorter receding-horizon execution, temporally correlated Gaussian inference, advantage-sign and endpoint-anchor gradient surgery, temporal per-timestep clipping, coordinate-wise median and geometric-median gradient aggregation, PPO-RB ratio rollback, equal-NFE midpoint sampling, checkpoint-native Square execution horizon restoration, and rollout-local Adam are closed as reward-improvement routes. Reflow and midpoint retain geometry/sampling-fidelity value only. The next candidate must improve reward without trading away Gaussian-source exploration.
