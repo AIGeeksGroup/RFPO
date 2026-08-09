@@ -20,9 +20,10 @@ export PYOPENGL_PLATFORM=osmesa
 CHECKPOINT_ROOT="${CHECKPOINT_ROOT:-$PROJECT_ROOT/manipulation_experiments/downloaded_checkpoints}"
 SQUARE_CHECKPOINT="${SQUARE_CHECKPOINT:-$CHECKPOINT_ROOT/trc7rbt0_step_110000}"
 TRAIN_RUN_NAME="${TRAIN_RUN_NAME:-square_h48_rfs_osmesa_seed20260924}"
+EXPERIMENT_ID="${EXPERIMENT_ID:-h48}"
 RFS_CHECKPOINT="$RUNTIME_ROOT/results/$TRAIN_RUN_NAME/latest.pt"
 SEED="${SEED:-20260925}"
-RUN_NAME="square_h48_candidate_${MODE}_balanced20_seed${SEED}"
+RUN_NAME="square_${EXPERIMENT_ID}_candidate_${MODE}_balanced20_seed${SEED}"
 OUTPUT_DIR="$RUNTIME_ROOT/results/$RUN_NAME"
 LOG_PATH="$RUNTIME_ROOT/logs/$RUN_NAME.log"
 
