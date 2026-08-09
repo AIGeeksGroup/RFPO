@@ -1,0 +1,50 @@
+{
+  "hypothesis": "H65",
+  "task": "Isaac-Velocity-Flat-Unitree-Go2-v0",
+  "artifacts": {
+    "control_zero": "/mnt/data/users/haoyu/workspace/outputs/fpo-control/results/go2_h65_tail_actor_average/control_zero.json",
+    "control_random": "/mnt/data/users/haoyu/workspace/outputs/fpo-control/results/go2_h65_tail_actor_average/control_random.json",
+    "candidate_zero": "/mnt/data/users/haoyu/workspace/outputs/fpo-control/results/go2_h65_tail_actor_average/candidate_zero.json",
+    "candidate_random": "/mnt/data/users/haoyu/workspace/outputs/fpo-control/results/go2_h65_tail_actor_average/candidate_random.json"
+  },
+  "episodes_per_method_mode": 256,
+  "total_completed_episodes": 1024,
+  "bootstrap_seed": 20261092,
+  "bootstrap_samples": 20000,
+  "modes": {
+    "zero": {
+      "control_mean": 41.641517981886864,
+      "candidate_mean": 41.63354857265949,
+      "paired_mean_gain": -0.007969409227371216,
+      "paired_sem": 0.009461465391976598,
+      "paired_bootstrap_95": [
+        -0.02489345669746399,
+        0.011783755570650097
+      ]
+    },
+    "random": {
+      "control_mean": 40.56500092148781,
+      "candidate_mean": 40.56672017276287,
+      "paired_mean_gain": 0.001719251275062561,
+      "paired_sem": 0.08588471296969008,
+      "paired_bootstrap_95": [
+        -0.09433349035680294,
+        0.18209770508110523
+      ]
+    }
+  },
+  "average_mode_gain": -0.0031250789761543274,
+  "pooled_paired_bootstrap_95": [
+    -0.0545871801674366,
+    0.09138607624918216
+  ],
+  "gates": {
+    "all_episode_action_return_validity": true,
+    "zero_gain_at_least_minus_0_05": true,
+    "random_gain_at_least_minus_0_05": true,
+    "average_mode_gain_at_least_0_10": false,
+    "pooled_bootstrap_lower_bound_positive": false
+  },
+  "initial_observation_hashes_match": true,
+  "passed": false
+}

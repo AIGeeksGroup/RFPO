@@ -312,11 +312,20 @@ relative to the official frozen-visual conditioning critic. Spearman changed by 
 short-budget value representation; RLDT's substantially larger replay and trainable double-Q system
 cannot be replaced by this cheap critic substitution.
 
+Fixed-tail actor averaging did not improve the reproduced dense-reward Go2 policy. The locked five-
+checkpoint average moved the actor by 3.51% relative L2 while preserving every other checkpoint
+payload exactly. Across 256 paired episodes per method and source mode, return changed by -0.0080 for
+zero source and +0.0017 for Gaussian source; the equally weighted gain was -0.0031 and the pooled
+paired bootstrap interval was [-0.0546, 0.0914]. Late checkpoint variation is therefore
+behaviorally neutral at this resolution rather than complementary reward structure. Fixed-window
+averaging is closed without checkpoint selection, weight tuning, or official-scale confirmation.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
 - The transferable mechanism from arXiv:2209.03003 is recursive reflow using model-induced endpoint coupling.
 - A reflow method that only improves inference speed is still useful, but it must not be presented as an RL performance gain.
+- Late-checkpoint weight averaging can be active in parameter space yet reward-neutral; the reproduced Go2 tail moved 3.51% from the final actor without a detectable two-mode return gain.
 - WarmPrior (arXiv:2605.13959) offers a more direct reward-improvement hypothesis for chunked manipulation: center the flow source on recent actions and retain residual Gaussian noise for exploration.
 - WarmPrior cannot be grafted onto a Gaussian-trained FPO checkpoint at inference time; training-time source adaptation is necessary on Can.
 - A short 100-update training-time adaptation is also insufficient: it preserves neither deterministic success nor random exploration.

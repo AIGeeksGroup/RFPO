@@ -1,0 +1,49 @@
+{
+  "hypothesis": "H65",
+  "algorithm": "uniform_float64_mean_actor_only",
+  "sources": [
+    {
+      "path": "/mnt/data/users/haoyu/workspace/code/fpo-control/isaaclab_experiments/logs/isaaclab_fpo/unitree_go2_flat_flow/2026-08-08_16-24-22_go2_official_seed42_20260808/model_1300.pt",
+      "sha256": "12ee2e58e7412a5ca79266c5662dd67bbb550d2a1815db4157b5d48469721185"
+    },
+    {
+      "path": "/mnt/data/users/haoyu/workspace/code/fpo-control/isaaclab_experiments/logs/isaaclab_fpo/unitree_go2_flat_flow/2026-08-08_16-24-22_go2_official_seed42_20260808/model_1350.pt",
+      "sha256": "53c1d536492113a5750a57e33f0ad0daf22e54e2c835e79339a760ff906be850"
+    },
+    {
+      "path": "/mnt/data/users/haoyu/workspace/code/fpo-control/isaaclab_experiments/logs/isaaclab_fpo/unitree_go2_flat_flow/2026-08-08_16-24-22_go2_official_seed42_20260808/model_1400.pt",
+      "sha256": "89bee1a30e5fcf8b97b22070e47af1a77e18c7d203e48260a3feaeb82e44ce46"
+    },
+    {
+      "path": "/mnt/data/users/haoyu/workspace/code/fpo-control/isaaclab_experiments/logs/isaaclab_fpo/unitree_go2_flat_flow/2026-08-08_16-24-22_go2_official_seed42_20260808/model_1450.pt",
+      "sha256": "1b3890b1b6a12f4a9e4dff276d75409151d3a541afcecf9fcaeee4216d31e827"
+    },
+    {
+      "path": "/mnt/data/users/haoyu/workspace/code/fpo-control/isaaclab_experiments/logs/isaaclab_fpo/unitree_go2_flat_flow/2026-08-08_16-24-22_go2_official_seed42_20260808/model_1499.pt",
+      "sha256": "6dc5b1869133ae53f3d81e1093a599ecada8d99dabb3490c2aa72244d1fa93c2"
+    }
+  ],
+  "final_container_source": "/mnt/data/users/haoyu/workspace/code/fpo-control/isaaclab_experiments/logs/isaaclab_fpo/unitree_go2_flat_flow/2026-08-08_16-24-22_go2_official_seed42_20260808/model_1499.pt",
+  "output": "/mnt/data/users/haoyu/workspace/outputs/fpo-control/results/go2_h65_tail_actor_average/model_h65_tail_actor_average.pt",
+  "output_sha256": "bc9cbd581f831736598612282b42f5f563ddccf9a865cc0950f55a83b14ad593",
+  "actor_prefix": "actor.",
+  "actor_keys": [
+    "actor.0.weight",
+    "actor.0.bias",
+    "actor.2.weight",
+    "actor.2.bias",
+    "actor.4.weight",
+    "actor.4.bias",
+    "actor.6.weight",
+    "actor.6.bias"
+  ],
+  "actor_tensor_count": 8,
+  "relative_l2_from_final": 0.03514383099333735,
+  "relative_l2_gate": [
+    0.01,
+    0.06
+  ],
+  "non_actor_model_exact": true,
+  "non_model_payload_exact": true,
+  "passed": true
+}
