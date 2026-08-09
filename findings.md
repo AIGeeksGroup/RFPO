@@ -353,6 +353,7 @@ independent-seed generality and deterministic-policy superiority unresolved.
 - A reflow method that only improves inference speed is still useful, but it must not be presented as an RL performance gain.
 - Late-checkpoint weight averaging can be active in parameter space yet reward-neutral; the reproduced Go2 tail moved 3.51% from the final actor without a detectable two-mode return gain.
 - H66's reward gain contains an antithetic-specific component: it remains significant against an IID endpoint pair at identical 128 NFE, not only against a 64-NFE single source.
+- Jia et al. (arXiv:2506.06185) already establish antithetic initial noise and approximate affine antisymmetry in diffusion and normalizing flows; the publishable novelty must come from closed-loop control evidence, equal-compute action projection, and efficiency/training advances.
 - The stronger deployment claim remains open because H67's antithetic-minus-zero interval crosses zero despite a positive point estimate.
 - Across one training trajectory, antithetic pairing beats IID pairing from checkpoints 500 through 1499, while its deficit to zero collapses as the policy matures.
 - WarmPrior (arXiv:2605.13959) offers a more direct reward-improvement hypothesis for chunked manipulation: center the flow source on recent actions and retain residual Gaussian noise for exploration.

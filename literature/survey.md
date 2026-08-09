@@ -13,6 +13,7 @@
 | FMER (2026) | Normalized exponential advantage-weighted CFM and entropy control | Motivates an ESS-controlled mirror-weighted FPO++ objective |
 | Direct Advantage Estimation (2022/2023) | Learns centered action effects directly through a return-decomposition objective | Candidate for replacing unreliable first-update GAE weights; continuous flow actions require Monte Carlo centering |
 | Truly Proximal Policy Optimization (2020) | Rollback gradients on improving out-of-bound PPO ratios | Candidate for stabilizing FPO++ repeated-epoch CFM-ratio updates without changing the on-policy gradient |
+| Antithetic Noise in Diffusion Models (2025) | Negated initial-noise pairs induce negatively correlated generative endpoints under approximate affine antisymmetry | Closest H66 precedent; shifts novelty from pairing itself to closed-loop control, equal-compute attribution, and deployment efficiency |
 
 ## Additional Candidates To Audit After Baseline
 

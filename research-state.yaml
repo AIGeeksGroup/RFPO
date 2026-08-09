@@ -83,6 +83,10 @@ literature:
       title: "Averaging Weights Leads to Wider Optima and Better Generalization"
       year: 2018
       relevance: "Motivates uniform averaging of policy checkpoints along one online optimization trajectory."
+    - id: jia2025_antithetic_noise
+      title: "Antithetic Noise in Diffusion Models"
+      year: 2025
+      relevance: "Direct precedent for z/-z negative endpoint correlation in diffusion and normalizing flows; H66 novelty must be control-specific rather than the pairing operation itself."
     - id: andrychowicz2020_onpolicy
       title: "What Matters In On-Policy Reinforcement Learning? A Large-Scale Empirical Study"
       year: 2020
