@@ -590,6 +590,12 @@ hypotheses:
     motivation: "Publication-level mechanism evidence should directly measure negative endpoint displacement correlation and odd/even decomposition across policies, not infer cancellation from one seed's reward alone."
     parent: H73
     priority: high
+  - id: H76
+    statement: "A policy-level retrospective synthesis preserves the antithetic effect when independent training seeds, rather than nested episodes, are the units of uncertainty."
+    status: supported
+    motivation: "Episode-level bootstrap intervals establish within-policy effects but do not alone justify cross-training-seed generalization; a four-policy summary makes the statistical unit explicit."
+    parent: H73
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -2253,11 +2259,25 @@ experiments:
       all_validity_gates_passed: true
       passed: true
       renderer: egl
+    - run: go2_h76_retrospective_cross_policy_summary
+      metric: policy_level_equal_total_nfe_gain
+      value: 0.9447905069
+      training_seeds: [42, 43, 44, 45]
+      independent_unit: official_training_seed
+      sample_sd: 0.0586230866
+      student_t_95: [0.8515080942, 1.0380729195]
+      two_sided_t_p: 0.0000656262
+      exact_one_sided_sign_p: 0.0625
+      equal_pair_nfe_mean_gain: 0.5655043944
+      equal_pair_nfe_student_t_95: [0.2907383455, 0.8402704433]
+      deployment_mean_gain: -0.0234114462
+      deployment_student_t_95: [-0.0935551136, 0.0467322212]
+      retrospective_no_gate: true
 
 outer_loop:
-  cycle: 64
+  cycle: 65
   last_direction: "Run one medium official Spot cross-task screen before committing to multi-seed Spot/H1/G1 training, with random64, antithetic32, zero32, and zero64 controls."
-  last_reflection: "H75 confirms a stable mechanism across all four Go2 policies: z/-z endpoint displacements have mean cosine -0.9693, antithetic averaging retains 12.40% of one-sided displacement versus 70.99% for IID averaging, and every locked seed gate passes. This strengthens the source-cancellation explanation without changing the H74 cross-task gate or the refuted deterministic-deployment claim."
+  last_reflection: "H76 treats the four official Go2 training seeds as the independent units. Equal-total-NFE gain averages +0.9448 with policy-level t interval [0.8515, 1.0381], and antithetic-minus-IID averages +0.5655 [0.2907, 0.8403]. The exact four-of-four sign test is only p=0.0625, so report strong magnitude and consistency with explicit small-seed uncertainty. H74 remains the cross-task gate."
 
 workspace:
   findings: "findings.md"

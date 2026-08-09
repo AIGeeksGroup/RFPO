@@ -1,0 +1,80 @@
+{
+  "analysis": "H76",
+  "status": "retrospective_no_gate",
+  "independent_unit": "official_training_seed",
+  "training_seeds": [
+    42,
+    43,
+    44,
+    45
+  ],
+  "estimands": {
+    "antithetic32_minus_random64_equal_total_nfe": {
+      "seed_effects": {
+        "42": 0.9813477098941803,
+        "43": 0.9026915328577161,
+        "44": 1.0075025740079582,
+        "45": 0.887620210647583
+      },
+      "n_training_seeds": 4,
+      "mean": 0.9447905068518594,
+      "sample_sd": 0.05862308658060911,
+      "sem": 0.029311543290304554,
+      "student_t_95": [
+        0.8515080942054662,
+        1.0380729194982525
+      ],
+      "t_statistic": 32.23271110274053,
+      "degrees_of_freedom": 3,
+      "two_sided_t_p": 6.56262266169686e-05,
+      "positive_seed_count": 4,
+      "exact_one_sided_sign_p": 0.0625
+    },
+    "antithetic64_minus_iid_pair64_equal_pair_nfe": {
+      "seed_effects": {
+        "42": 0.7792797572910786,
+        "43": 0.356999771669507,
+        "44": 0.5743370011914521,
+        "45": 0.551401047501713
+      },
+      "n_training_seeds": 4,
+      "mean": 0.5655043944134377,
+      "sample_sd": 0.1726759998915728,
+      "sem": 0.0863379999457864,
+      "student_t_95": [
+        0.2907383454803848,
+        0.8402704433464906
+      ],
+      "t_statistic": 6.549889906744779,
+      "degrees_of_freedom": 3,
+      "two_sided_t_p": 0.007235607284006196,
+      "positive_seed_count": 4,
+      "exact_one_sided_sign_p": 0.0625
+    },
+    "antithetic32_minus_zero32_deployment_control": {
+      "seed_effects": {
+        "42": -0.01623651385307312,
+        "43": 0.03500532568432391,
+        "44": -0.045852867886424065,
+        "45": -0.0665617287158966
+      },
+      "n_training_seeds": 4,
+      "mean": -0.02341144619276747,
+      "sample_sd": 0.04408160304132065,
+      "sem": 0.022040801520660326,
+      "student_t_95": [
+        -0.09355511355768445,
+        0.04673222117214951
+      ],
+      "t_statistic": -1.062186698193455,
+      "degrees_of_freedom": 3,
+      "two_sided_t_p": 0.3660791061337574,
+      "positive_seed_count": 1,
+      "exact_one_sided_sign_p": 0.9375
+    }
+  },
+  "software": {
+    "numpy": "2.4.3",
+    "scipy": "1.17.1"
+  }
+}

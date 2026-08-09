@@ -391,6 +391,14 @@ from the zero action, compared with 70.21-71.81% for IID averaging. Mean even-co
 antisymmetry as the mechanism behind central-policy recovery; it is not a novelty claim over Jia et
 al. and does not show superiority to zero-source deployment.
 
+A retrospective policy-level synthesis preserves the behavioral result without treating episodes
+as independent training seeds. Across the four policies, equal-total-NFE antithetic32-minus-random64
+averaged +0.9448 (SD 0.0586), with a df-3 t interval [0.8515, 1.0381]. Equal-pair-NFE
+antithetic-minus-IID averaged +0.5655 (SD 0.1727), interval [0.2907, 0.8403]. All four effects were
+positive in both comparisons, although the exact one-sided sign test is `p=0.0625` with only four
+policies. Antithetic32-minus-zero32 remained null at -0.0234 [-0.0936, 0.0467]. These results support
+effect magnitude and consistency while retaining explicit small-training-seed uncertainty.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -406,6 +414,7 @@ al. and does not show superiority to zero-source deployment.
 - H69 establishes independent-model generality: antithetic pairing beats equal-compute IID averaging in all three new official Go2 seeds and beats one random endpoint by roughly 0.89-0.97 return, while remaining tied with or below zero.
 - H73 preserves the full random-source recovery after halving each symmetric solve: all three new seeds gain 0.89-1.01 return at the same total 64 NFE as random64, with no advantage over zero32.
 - H75 directly confirms the proposed mechanism across four policies: `z/-z` action displacements are nearly opposite (mean cosine -0.9693), and symmetric averaging leaves only 12.40% residual versus 70.99% for IID averaging.
+- A policy-level analysis avoids pseudoreplication: the equal-total-NFE gain remains +0.9448 [0.8515, 1.0381] across four seeds under a t model, while the exact sign test remains p=0.0625 and must temper generalization claims.
 - WarmPrior (arXiv:2605.13959) offers a more direct reward-improvement hypothesis for chunked manipulation: center the flow source on recent actions and retain residual Gaussian noise for exploration.
 - WarmPrior cannot be grafted onto a Gaussian-trained FPO checkpoint at inference time; training-time source adaptation is necessary on Can.
 - A short 100-update training-time adaptation is also insufficient: it preserves neither deterministic success nor random exploration.
