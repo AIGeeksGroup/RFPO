@@ -538,6 +538,12 @@ hypotheses:
     motivation: "H66 must be separated from generic test-time averaging and compared with the stronger zero-source deployment policy before it can support a paper claim."
     parent: H66
     priority: high
+  - id: H68
+    statement: "The equal-compute antithetic-over-IID return gain remains positive at iterations 500 and 1000 of the official Go2 seed-42 training trajectory."
+    status: active
+    motivation: "A publication claim should not rest on a source-cancellation property found only in the final checkpoint; cheap stage generalization precedes independent training seeds."
+    parent: H67
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
