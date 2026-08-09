@@ -63,6 +63,10 @@ literature:
       title: "Truly Proximal Policy Optimization"
       year: 2020
       relevance: "Motivates rollback gradients for improving CFM ratios that cross the FPO++ clipping boundary."
+    - id: wang2026_refpo
+      title: "ReFPO: Reflow Regularization for Flow Matching Policy Gradients"
+      year: 2026
+      relevance: "Specifies an unweighted current-CFM regularizer for reducing fixed-batch FPO proxy-ratio volatility without additional flow evaluations."
     - id: garg2021_heavy_tailed_ppo
       title: "On Proximal Policy Optimization's Heavy-tailed Gradients"
       year: 2021
@@ -475,6 +479,12 @@ hypotheses:
     status: refuted
     motivation: "Rectified-flow geometry and equal-NFE midpoint accuracy are supported, but their Can reward tests were confounded by sparse binary reward and a zero/random tradeoff; Go2 provides dense reward and needs no MuJoCo EGL renderer."
     parent: H1
+    priority: high
+  - id: H61
+    statement: "ReFPO's unweighted current-CFM regularizer reduces fixed-batch FPO++ ratio drift while retaining useful surrogate progress and outcome-gradient direction."
+    status: planned
+    motivation: "A subsequent paper specifies a direct fixed-batch regularizer distinct from H2's failed offline-reflow gradient-disagreement mechanism; it can be falsified in one paired actor-update audit without a long training run."
+    parent: H2
     priority: high
 
 experiments:
