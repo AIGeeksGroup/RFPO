@@ -520,6 +520,12 @@ hypotheses:
     motivation: "H63 proves scene difficulty matters but discards homogeneous Gaussian groups; a deterministic reference rewards stochastic rescues and penalizes stochastic regressions without depending on the sampled Gaussian action."
     parent: H63
     priority: high
+  - id: H65
+    statement: "Uniformly averaging the final five EMA actors from the reproduced official Go2 FPO++ run improves paired zero/random dense return over the final checkpoint."
+    status: planned
+    motivation: "The best zero checkpoint is iteration 1450 while the best random checkpoint is 1499, and the fixed late window occupies a tight parameter neighborhood; averaging may reduce late optimizer-path variance without training or extra inference cost."
+    parent: H0
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -1964,9 +1970,9 @@ experiments:
       renderer: osmesa
 
 outer_loop:
-  cycle: 53
-  last_direction: "Close deterministic-reference terminal advantages before actor integration because they are even sparser than exact group-relative weights."
-  last_reflection: "The zero-source reference has balanced marginal outcomes but matches the within-scene Gaussian majority closely. Only eight of 32 Gaussian trajectories differ from it, reducing H63's nonzero count from 16 to 8 and ESS from 12 to 8. Sparse binary scene-conditioned baselines are now closed; the next direction must obtain denser action-relevant feedback without manufacturing it through more rollout replicas."
+  cycle: 54
+  last_direction: "Test fixed-tail actor averaging on the reproduced dense-return Go2 run before any new optimization or rollout-heavy method."
+  last_reflection: "H62-H64 close small-budget binary scene-conditioned credit. Go2 offers dense return and a measured late-checkpoint source-mode tradeoff. The final five baked-EMA actors lie in a tight common neighborhood with identical observation normalizers, so a coefficient-free uniform average can be screened with 256 paired environments per mode and stopped before official-scale confirmation if its gain is not stable."
 
 workspace:
   findings: "findings.md"
