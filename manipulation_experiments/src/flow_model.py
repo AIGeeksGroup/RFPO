@@ -16,6 +16,11 @@ from torch import Tensor, nn
 
 from src.antithetic_inference import average_antithetic_predictions, build_antithetic_sources
 from src.curvature_selection import select_lower_curvature_candidate
+from src.factorized_source import (
+    build_source_audit_records,
+    build_stateless_gaussian_sources,
+    zero_gripper_source,
+)
 from src.rollout_bookkeeping import apply_source_sampling_scale, apply_zero_sampling_mask
 
 from .flow_model_config import FlowMatchingConfig
@@ -152,6 +157,7 @@ class FlowMatchingPolicy(PreTrainedPolicy):
         }
         self.curvature_selection_records: list[dict[str, object]] = []
         self.temporal_chunk_ensemble_records: list[dict[str, object]] = []
+        self.factorized_source_records: list[dict[str, object]] = []
             
     def get_optim_params(self) -> dict:
         """Get optimizer parameters with different learning rates for backbone and other parts."""
@@ -244,6 +250,8 @@ class FlowMatchingPolicy(PreTrainedPolicy):
         curvature_best_of_two: bool = False,
         temporal_chunk_ensemble: bool = False,
         initial_action_steps: int | None = None,
+        stateless_source_seed: int | None = None,
+        zero_gripper_source_latent: bool = False,
     ) -> Tensor:
         """Select actions for multiple environments with separate buffers.
         
@@ -304,6 +312,29 @@ class FlowMatchingPolicy(PreTrainedPolicy):
                 raise ValueError(
                     "initial_action_steps must lie within the executed action chunk"
                 )
+        if zero_gripper_source_latent and stateless_source_seed is None:
+            raise ValueError(
+                "zero gripper source latent requires a stateless source seed"
+            )
+        if stateless_source_seed is not None:
+            if stateless_source_seed < 0:
+                raise ValueError("stateless source seed must be non-negative")
+            if (
+                zero_sampling
+                or sde_sampling
+                or antithetic_sampling
+                or zero_sampling_mask is not None
+                or source_sampling_scale is not None
+                or temporal_source_correlation > 0
+                or curvature_best_of_two
+                or temporal_chunk_ensemble
+                or initial_action_steps is not None
+            ):
+                raise ValueError(
+                    "stateless source cannot be combined with other sampling interventions"
+                )
+            if self.config.source_prior_mode != "gaussian":
+                raise ValueError("stateless source requires the Gaussian source prior")
         if not 0.0 <= temporal_source_correlation < 1.0:
             raise ValueError("temporal_source_correlation must be in [0, 1)")
         if temporal_source_correlation > 0:
@@ -452,6 +483,35 @@ class FlowMatchingPolicy(PreTrainedPolicy):
                     correlated_sources.append(source)
                 action_chunks, mdp_x_t_path = self.predict_action_chunk(
                     sub_batch, source_noise=torch.stack(correlated_sources)
+                )
+            elif stateless_source_seed is not None:
+                plan_indices = [
+                    self.action_plan_counts[env_id]
+                    for env_id in envs_needing_actions
+                ]
+                raw_source = build_stateless_gaussian_sources(
+                    base_seed=stateless_source_seed,
+                    environment_ids=envs_needing_actions,
+                    plan_indices=plan_indices,
+                    horizon=self.config.horizon,
+                    action_dim=self.model.action_dim,
+                    device=next(iter(sub_batch.values())).device,
+                )
+                used_source = (
+                    zero_gripper_source(raw_source)
+                    if zero_gripper_source_latent
+                    else raw_source
+                )
+                self.factorized_source_records.extend(
+                    build_source_audit_records(
+                        raw_source,
+                        used_source,
+                        envs_needing_actions,
+                        plan_indices,
+                    )
+                )
+                action_chunks, mdp_x_t_path = self.predict_action_chunk(
+                    sub_batch, source_noise=used_source
                 )
             else:
                 action_chunks, mdp_x_t_path = self.predict_action_chunk(
