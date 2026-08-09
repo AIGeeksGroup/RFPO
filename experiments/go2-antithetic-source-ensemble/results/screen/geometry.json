@@ -1,0 +1,23 @@
+{
+  "hypothesis": "H66",
+  "checkpoint": "/mnt/data/users/haoyu/workspace/code/fpo-control/isaaclab_experiments/logs/isaaclab_fpo/unitree_go2_flat_flow/2026-08-08_16-24-22_go2_official_seed42_20260808/model_1499.pt",
+  "task": "Isaac-Velocity-Flat-Unitree-Go2-v0",
+  "seed": 20261100,
+  "source_seed": 20261101,
+  "num_observations_per_step": 256,
+  "rollout_steps": 8,
+  "source_value_count": 24576,
+  "mean_candidate_zero_normalized_rms": 0.03461525001004769,
+  "mean_positive_zero_normalized_rms": 0.2872626957420658,
+  "cancellation_ratio": 0.12050033131043526,
+  "gates": {
+    "finite_sources_and_endpoints": true,
+    "negative_sources_bitwise_exact": true,
+    "candidate_float32_means_bitwise_exact": true,
+    "zero_dispatch_bitwise_exact": true,
+    "candidate_zero_normalized_rms_at_least_0_01": true,
+    "candidate_closer_to_zero_than_positive": true,
+    "actor_parameters_bitwise_unchanged": true
+  },
+  "passed": true
+}

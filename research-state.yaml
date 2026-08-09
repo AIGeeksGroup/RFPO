@@ -528,7 +528,7 @@ hypotheses:
     priority: high
   - id: H66
     statement: "Averaging matched z/-z flow endpoints reduces the reproduced final Go2 actor's random-source return deficit while preserving its zero-source action exactly."
-    status: planned
+    status: active
     motivation: "The final actor has a repeatable roughly one-point zero/random return gap, while H26's pooled antithetic Can result exactly tied zero behavior; dense paired Go2 return can test whether symmetric transport reliably recovers central-policy performance."
     parent: H26
     priority: high
@@ -547,7 +547,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 202
+  total_runs: 203
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -1992,6 +1992,27 @@ experiments:
       non_actor_payload_exact: true
       validity_passed: true
       passed: false
+      renderer: egl
+    - run: go2_h66_antithetic_source_screen_seed20261100
+      metric: paired_random_return_gain
+      value: 1.3613105733
+      mechanism_observations: 2048
+      source_value_count: 24576
+      candidate_zero_normalized_rms: 0.0346152500
+      positive_zero_normalized_rms: 0.2872626957
+      cancellation_ratio: 0.1205003313
+      environments_per_method: 256
+      total_episodes: 512
+      control_mean: 40.3223714512
+      candidate_mean: 41.6836820245
+      paired_sem: 0.2070436446
+      paired_bootstrap_95: [1.0293398557, 1.8189610055]
+      initial_observation_hashes_match: true
+      complete_source_stream_hashes_match: true
+      zero_dispatch_bitwise_exact: true
+      actor_parameters_bitwise_unchanged: true
+      validity_passed: true
+      passed: true
       renderer: egl
 
 outer_loop:

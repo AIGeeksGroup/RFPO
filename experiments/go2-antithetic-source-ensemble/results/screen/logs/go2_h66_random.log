@@ -1,0 +1,796 @@
+[Warning] [simulation_app.simulation_app] Modules: ['omni.kit_app'] were loaded before SimulationApp was started and might not be loaded correctly.
+[Warning] [simulation_app.simulation_app] Please check to make sure no extra omniverse or pxr modules are imported before the call to SimulationApp(...)
+Loading user config located at: '/mnt/data/users/haoyu/workspace/code/fpo-control/isaaclab_experiments/thirdparty/miniconda3/envs/isaaclab_fpo/lib/python3.10/site-packages/omni/data/Kit/Isaac-Sim/4.5/user.config.json'
+[Info] [carb] Logging to file: /mnt/data/users/haoyu/workspace/code/fpo-control/isaaclab_experiments/thirdparty/miniconda3/envs/isaaclab_fpo/lib/python3.10/site-packages/omni/logs/Kit/Isaac-Sim/4.5/kit_20260809_185511.log
+2026-08-09 10:55:11 [0ms] [Warning] [omni.kit.app.plugin] No crash reporter present, dumps uploading isn't available.
+2026-08-09 10:55:11 [7ms] [Warning] [omni.ext.plugin] [ext: rendering_modes] Extensions config 'extension.toml' doesn't exist '/mnt/data/users/haoyu/workspace/code/fpo-control/isaaclab_experiments/thirdparty/IsaacLab/apps/rendering_modes' or '/mnt/data/users/haoyu/workspace/code/fpo-control/isaaclab_experiments/thirdparty/IsaacLab/apps/rendering_modes/config'
+2026-08-09 10:55:12 [356ms] [Warning] [omni.usd_config.extension] Enable omni.materialx.libs extension to use MaterialX
+2026-08-09 10:55:12 [622ms] [Warning] [omni.platforminfo.plugin] failed to open the default display.  Can't verify X Server version.
+2026-08-09 10:55:12 [817ms] [Warning] [omni.datastore] OmniHub is inaccessible
+2026-08-09 10:55:12 [858ms] [Warning] [omni.isaac.dynamic_control] omni.isaac.dynamic_control is deprecated as of Isaac Sim 4.5. No action is needed from end-users.
+2026-08-09 10:55:17 [5,387ms] [Warning] [carb.cudainterop.plugin] CUDA_VISIBLE_DEVICES environment variable is set.
+2026-08-09 10:55:17 [5,387ms] [Warning] [carb.cudainterop.plugin] Note CUDA device enumeration and Omniverse device enumeration are different.
+2026-08-09 10:55:17 [5,387ms] [Warning] [carb.cudainterop.plugin] Setting CUDA_VISIBLE_DEVICES can lead to undesired behavior or crashes.
+2026-08-09 10:55:17 [5,408ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA H200
+2026-08-09 10:55:17 [5,408ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-08-09 10:55:17 [5,409ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA H200
+2026-08-09 10:55:17 [5,409ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-08-09 10:55:17 [5,410ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA H200
+2026-08-09 10:55:17 [5,410ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-08-09 10:55:17 [5,411ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA H200
+2026-08-09 10:55:17 [5,411ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-08-09 10:55:17 [5,412ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA H200
+2026-08-09 10:55:17 [5,412ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-08-09 10:55:17 [5,413ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA H200
+2026-08-09 10:55:17 [5,413ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-08-09 10:55:17 [5,414ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA H200
+2026-08-09 10:55:17 [5,414ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-08-09 10:55:17 [5,414ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA H200
+2026-08-09 10:55:17 [5,414ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-08-09 10:55:17 [5,414ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA H200
+2026-08-09 10:55:17 [5,414ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-08-09 10:55:17 [5,414ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA H200
+2026-08-09 10:55:17 [5,414ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-08-09 10:55:17 [5,414ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA H200
+2026-08-09 10:55:17 [5,414ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-08-09 10:55:17 [5,414ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA H200
+2026-08-09 10:55:17 [5,414ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-08-09 10:55:17 [5,414ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA H200
+2026-08-09 10:55:17 [5,414ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+2026-08-09 10:55:17 [5,414ms] [Warning] [gpu.foundation.plugin] Skipping NVIDIA GPU due CUDA being in bad state: NVIDIA H200
+2026-08-09 10:55:17 [5,414ms] [Warning] [gpu.foundation.plugin] Please restart your system if CUDA is known to work in your system.
+
+|---------------------------------------------------------------------------------------------|
+| Driver Version: 580.126.20    | Graphics API: Vulkan
+|=============================================================================================|
+| GPU | Name                             | Active | LDA | GPU Memory | Vendor-ID | LUID       |
+|     |                                  |        |     |            | Device-ID | UUID       |
+|     |                                  |        |     |            | Bus-ID    |            |
+|---------------------------------------------------------------------------------------------|
+| 0   | NVIDIA H200                      | Yes: 0 |     | 143771  MB | 10de      | 0          |
+|     |                                  |        |     |            | 2335      | cde2e28e.. |
+|     |                                  |        |     |            | 16        |            |
+|---------------------------------------------------------------------------------------------|
+| 1   | NVIDIA H200                      |        |     | 143771  MB | 10de      | 0          |
+|     |                                  |        |     |            | 2335      | 04a9a9be.. |
+|     |                                  |        |     |            | 17        |            |
+|---------------------------------------------------------------------------------------------|
+| 2   | NVIDIA H200                      |        |     | 143771  MB | 10de      | 0          |
+|     |                                  |        |     |            | 2335      | f8cd977f.. |
+|     |                                  |        |     |            | 40        |            |
+|---------------------------------------------------------------------------------------------|
+| 3   | NVIDIA H200                      |        |     | 143771  MB | 10de      | 0          |
+|     |                                  |        |     |            | 2335      | eba08ce9.. |
+|     |                                  |        |     |            | 41        |            |
+|---------------------------------------------------------------------------------------------|
+| 4   | NVIDIA H200                      |        |     | 143771  MB | 10de      | 0          |
+|     |                                  |        |     |            | 2335      | 38095f57.. |
+|     |                                  |        |     |            | 96        |            |
+|---------------------------------------------------------------------------------------------|
+| 5   | NVIDIA H200                      |        |     | 143771  MB | 10de      | 0          |
+|     |                                  |        |     |            | 2335      | cbbbe2fc.. |
+|     |                                  |        |     |            | 97        |            |
+|---------------------------------------------------------------------------------------------|
+| 6   | NVIDIA H200                      |        |     | 143771  MB | 10de      | 0          |
+|     |                                  |        |     |            | 2335      | d832ca5c.. |
+|     |                                  |        |     |            | c0        |            |
+|---------------------------------------------------------------------------------------------|
+| 7   | NVIDIA H200                      |        |     | 143771  MB | 10de      | 0          |
+|     |                                  |        |     |            | 2335      | c97fbf11.. |
+|     |                                  |        |     |            | c1        |            |
+|=============================================================================================|
+| OS: 22.04.5 LTS (Jammy Jellyfish) ubuntu, Version: 22.04.5, Kernel: 5.15.0-126-generic
+| Processor: Intel(R) Xeon(R) Platinum 8468
+| Bare Metal Cores: 96 | Bare Metal Logical Cores: 192
+| Core Usage Quota: 144
+|---------------------------------------------------------------------------------------------|
+| Total Memory (MB): 1638400 | Free Memory: 1594334
+| Total Page/Swap (MB): 0 | Free Page/Swap: 0
+|---------------------------------------------------------------------------------------------|
+2026-08-09 10:55:18 [6,640ms] [Warning] [gpu.foundation.plugin] ECC is enabled on physical device 0
+2026-08-09 10:55:20 [8,528ms] [Warning] [isaaclab.terrains.terrain_importer] Visual material specified for ground plane but no diffuse color found. Using default color: (0.0, 0.0, 0.0)
+2026-08-09 10:55:22 [10,678ms] [Warning] [omni.usd] Warning: in GetNodeDiscoveryResults at line 136 of /builds/omniverse/usd-ci/USD/pxr/usd/usdShade/shaderDefUtils.cpp -- Unable to resolve info:sourceAsset </UsdPreviewSurface.info:mdl:sourceAsset> with value @UsdPreviewSurface.mdl@.
+
+2026-08-09 10:55:22 [10,678ms] [Warning] [omni.usd] Warning: in GetNodeDiscoveryResults at line 136 of /builds/omniverse/usd-ci/USD/pxr/usd/usdShade/shaderDefUtils.cpp -- Unable to resolve info:sourceAsset </UsdUVTexture.info:mdl:sourceAsset> with value @UsdPreviewSurface.mdl@.
+
+2026-08-09 10:55:22 [10,678ms] [Warning] [omni.usd] Warning: in GetNodeDiscoveryResults at line 136 of /builds/omniverse/usd-ci/USD/pxr/usd/usdShade/shaderDefUtils.cpp -- Unable to resolve info:sourceAsset </UsdPrimvarReader_float.info:mdl:sourceAsset> with value @UsdPreviewSurface.mdl@.
+
+2026-08-09 10:55:22 [10,678ms] [Warning] [omni.usd] Warning: in GetNodeDiscoveryResults at line 136 of /builds/omniverse/usd-ci/USD/pxr/usd/usdShade/shaderDefUtils.cpp -- Unable to resolve info:sourceAsset </UsdPrimvarReader_float2.info:mdl:sourceAsset> with value @UsdPreviewSurface.mdl@.
+
+2026-08-09 10:55:22 [10,678ms] [Warning] [omni.usd] Warning: in GetNodeDiscoveryResults at line 136 of /builds/omniverse/usd-ci/USD/pxr/usd/usdShade/shaderDefUtils.cpp -- Unable to resolve info:sourceAsset </UsdPrimvarReader_float3.info:mdl:sourceAsset> with value @UsdPreviewSurface.mdl@.
+
+2026-08-09 10:55:22 [10,678ms] [Warning] [omni.usd] Warning: in GetNodeDiscoveryResults at line 136 of /builds/omniverse/usd-ci/USD/pxr/usd/usdShade/shaderDefUtils.cpp -- Unable to resolve info:sourceAsset </UsdPrimvarReader_float4.info:mdl:sourceAsset> with value @UsdPreviewSurface.mdl@.
+
+2026-08-09 10:55:22 [10,679ms] [Warning] [omni.usd] Warning: in GetNodeDiscoveryResults at line 136 of /builds/omniverse/usd-ci/USD/pxr/usd/usdShade/shaderDefUtils.cpp -- Unable to resolve info:sourceAsset </UsdPrimvarReader_int.info:mdl:sourceAsset> with value @UsdPreviewSurface.mdl@.
+
+2026-08-09 10:55:22 [10,679ms] [Warning] [omni.usd] Warning: in GetN/home/haoyu/workspace/code/fpo-control/isaaclab_experiments/thirdparty/miniconda3/envs/isaaclab_fpo/lib/python3.10/site-packages/torch/_inductor/compile_fx.py:167: UserWarning: TensorFloat32 tensor cores for float32 matrix multiplication available but not enabled. Consider setting `torch.set_float32_matmul_precision('high')` for better performance.
+  warnings.warn(
+[INFO][AppLauncher]: Using device: cuda:0
+[INFO][AppLauncher]: Loading experience file: /mnt/data/users/haoyu/workspace/code/fpo-control/isaaclab_experiments/thirdparty/IsaacLab/apps/isaaclab.python.headless.kit
+[INFO]: Parsing configuration from: isaaclab_tasks.manager_based.locomotion.velocity.config.go2.flat_env_cfg:UnitreeGo2FlatEnvCfg
+Setting seed: 20261100
+[INFO]: Base environment:
+	Environment device    : cuda:0
+	Environment seed      : 20261100
+	Physics step-size     : 0.005
+	Rendering step-size   : 0.02
+	Environment step-size : 0.02
+[INFO]: Time taken for scene creation : 2.439118 seconds
+[INFO]: Scene manager:  <class InteractiveScene>
+	Number of environments: 256
+	Environment spacing   : 2.5
+	Source prim name      : /World/envs/env_0
+	Global prim paths     : ['/World/ground']
+	Replicate physics     : True
+[INFO]: Starting the simulation. This may take a few seconds. Please wait...
+[INFO]: Time taken for simulation start : 0.885396 seconds
+[INFO] Command Manager:  <CommandManager> contains 1 active terms.
++------------------------------------------------+
+|              Active Command Terms              |
++-------+---------------+------------------------+
+| Index | Name          |          Type          |
++-------+---------------+------------------------+
+|   0   | base_velocity | UniformVelocityCommand |
++-------+---------------+------------------------+
+
+[INFO] Event Manager:  <EventManager> contains 2 active terms.
++--------------------------------------+
+| Active Event Terms in Mode: 'startup' |
++----------+---------------------------+
+|  Index   | Name                      |
++----------+---------------------------+
+|    0     | physics_material          |
+|    1     | add_base_mass             |
++----------+---------------------------+
++---------------------------------------+
+|  Active Event Terms in Mode: 'reset'  |
++--------+------------------------------+
+| Index  | Name                         |
++--------+------------------------------+
+|   0    | base_external_force_torque   |
+|   1    | reset_base                   |
+|   2    | reset_robot_joints           |
++--------+------------------------------+
+
+[INFO] Recorder Manager:  <RecorderManager> contains 0 active terms.
++---------------------+
+| Active Recorder Terms |
++-----------+---------+
+|   Index   | Name    |
++-----------+---------+
++-----------+---------+
+
+[INFO] Action Manager:  <ActionManager> contains 1 active terms.
++------------------------------------+
+|  Active Action Terms (shape: 12)   |
++--------+-------------+-------------+
+| Index  | Name        |   Dimension |
++--------+-------------+-------------+
+|   0    | joint_pos   |          12 |
++--------+-------------+-------------+
+
+[INFO] Observation Manager: <ObservationManager> contains 1 groups.
++---------------------------------------------------------+
+| Active Observation Terms in Group: 'policy' (shape: (48,)) |
++-----------+---------------------------------+-----------+
+|   Index   | Name                            |   Shape   |
++-----------+---------------------------------+-----------+
+|     0     | base_lin_vel                    |    (3,)   |
+|     1     | base_ang_vel                    |    (3,)   |
+|     2     | projected_gravity               |    (3,)   |
+|     3     | velocity_commands               |    (3,)   |
+|     4     | joint_pos                       |   (12,)   |
+|     5     | joint_vel                       |   (12,)   |
+|     6     | actions                         |   (12,)   |
++-----------+---------------------------------+-----------+
+
+[INFO] Termination Manager:  <TerminationManager> contains 2 active terms.
++---------------------------------+
+|     Active Termination Terms    |
++-------+--------------+----------+
+| Index | Name         | Time Out |
++-------+--------------+----------+
+|   0   | time_out     |   True   |
+|   1   | base_contact |  False   |
++-------+--------------+----------+
+
+[INFO] Reward Manager:  <RewardManager> contains 10 active terms.
++-----------------------------------------+
+|           Active Reward Terms           |
++-------+----------------------+----------+
+| Index | Name                 |   Weight |
++-------+----------------------+----------+
+|   0   | track_lin_vel_xy_exp |      1.5 |
+|   1   | track_ang_vel_z_exp  |     0.75 |
+|   2   | lin_vel_z_l2         |     -2.0 |
+|   3   | ang_vel_xy_l2        |    -0.05 |
+|   4   | dof_torques_l2       |  -0.0002 |
+|   5   | dof_acc_l2           | -2.5e-07 |
+|   6   | action_rate_l2       |    -0.01 |
+|   7   | feet_air_time        |     0.25 |
+|   8   | flat_orientation_l2  |     -2.5 |
+|   9   | dof_pos_limits       |      0.0 |
++-------+----------------------+----------+
+
+[INFO] Curriculum Manager:  <CurriculumManager> contains 0 active terms.
++----------------------+
+| Active Curriculum Terms |
++-----------+----------+
+|   Index   | Name     |
++-----------+----------+
++-----------+----------+
+
+[INFO]: Completed setting up the environment...
+Actor MLP: Sequential(
+  (0): Linear(in_features=68, out_features=256, bias=True)
+  (1): ELU(alpha=1.0)
+  (2): Linear(in_features=256, out_features=256, bias=True)
+  (3): ELU(alpha=1.0)
+  (4): Linear(in_features=256, out_features=256, bias=True)
+  (5): ELU(alpha=1.0)
+  (6): Linear(in_features=256, out_features=12, bias=True)
+)
+Critic MLP: Sequential(
+  (0): Linear(in_features=48, out_features=768, bias=True)
+  (1): ELU(alpha=1.0)
+  (2): Linear(in_features=768, out_features=768, bias=True)
+  (3): ELU(alpha=1.0)
+  (4): Linear(in_features=768, out_features=768, bias=True)
+  (5): ELU(alpha=1.0)
+  (6): Linear(in_features=768, out_features=1, bias=True)
+)
+EMA enabled with decay=0.95, warmup_steps=500
+[INFO] Loaded EMA state from checkpoint
+[INFO] Restored common_step_counter to 9209856 based on iteration 1499
+{
+  "checkpoint": "/mnt/data/users/haoyu/workspace/code/fpo-control/isaaclab_experiments/logs/isaaclab_fpo/unitree_go2_flat_flow/2026-08-08_16-24-22_go2_official_seed42_20260808/model_1499.pt",
+  "task": "Isaac-Velocity-Flat-Unitree-Go2-v0",
+  "seed": 20261100,
+  "source_seed": 20261101,
+  "num_envs": 256,
+  "episodes_per_mode": 256,
+  "integration_method": "euler",
+  "sampling_steps": 64,
+  "nfe": 64,
+  "modes": {
+    "random": {
+      "episode_returns": [
+        37.714271545410156,
+        41.863914489746094,
+        41.475730895996094,
+        41.694889068603516,
+        40.78208541870117,
+        40.101009368896484,
+        41.51699447631836,
+        40.843048095703125,
+        40.987701416015625,
+        38.689247131347656,
+        40.524269104003906,
+        40.6971435546875,
+        40.8925666809082,
+        39.79827117919922,
+        41.919490814208984,
+        41.1569709777832,
+        40.430641174316406,
+        40.78390121459961,
+        40.09602737426758,
+        41.48894119262695,
+        39.946998596191406,
+        40.07633590698242,
+        41.60955047607422,
+        40.800228118896484,
+        40.46234130859375,
+        40.398170471191406,
+        41.336631774902344,
+        41.089534759521484,
+        40.77730178833008,
+        40.860748291015625,
+        40.338985443115234,
+        41.82743835449219,
+        39.73374938964844,
+        41.2850456237793,
+        42.67289733886719,
+        40.662315368652344,
+        41.56132507324219,
+        40.823482513427734,
+        40.914581298828125,
+        41.36563491821289,
+        41.07319641113281,
+        40.701290130615234,
+        39.80446243286133,
+        42.40892028808594,
+        40.41126251220703,
+        40.960025787353516,
+        41.123558044433594,
+        40.06340408325195,
+        41.21356964111328,
+        41.95756912231445,
+        41.369503021240234,
+        41.325035095214844,
+        41.33700942993164,
+        39.96184539794922,
+        40.01557540893555,
+        40.50542068481445,
+        40.747413635253906,
+        39.43182373046875,
+        40.68750762939453,
+        40.78429412841797,
+        41.60102081298828,
+        40.94976043701172,
+        41.016090393066406,
+        40.32464599609375,
+        41.721649169921875,
+        16.7180233001709,
+        41.55225372314453,
+        41.68280792236328,
+        39.15394973754883,
+        39.931549072265625,
+        40.25612258911133,
+        39.90919876098633,
+        39.963016510009766,
+        41.137908935546875,
+        41.143455505371094,
+        41.2498893737793,
+        39.893558502197266,
+        41.51046371459961,
+        41.084102630615234,
+        40.63318634033203,
+        42.08401870727539,
+        40.61909484863281,
+        39.05606460571289,
+        41.510459899902344,
+        39.576053619384766,
+        41.1072883605957,
+        41.267520904541016,
+        40.19645690917969,
+        41.316165924072266,
+        41.746402740478516,
+        40.378238677978516,
+        41.12271499633789,
+        40.74907302856445,
+        40.95013427734375,
+        41.14875030517578,
+        40.52798080444336,
+        41.90757369995117,
+        40.48147201538086,
+        40.3019905090332,
+        38.99250030517578,
+        40.24768829345703,
+        39.84060287475586,
+        39.489376068115234,
+        40.1611213684082,
+        40.484710693359375,
+        40.39608383178711,
+        41.10100173950195,
+        40.752201080322266,
+        39.30583953857422,
+        40.994598388671875,
+        40.430198669433594,
+        41.38669204711914,
+        40.81939697265625,
+        39.01605987548828,
+        41.666141510009766,
+        42.12115478515625,
+        42.15614318847656,
+        40.62445831298828,
+        41.097442626953125,
+        40.054588317871094,
+        16.809738159179688,
+        40.77001190185547,
+        40.63148880004883,
+        40.316043853759766,
+        40.788814544677734,
+        41.631805419921875,
+        40.551700592041016,
+        40.77611541748047,
+        40.850162506103516,
+        40.970375061035156,
+        41.316871643066406,
+        40.42826461791992,
+        41.03147888183594,
+        41.775447845458984,
+        40.75691223144531,
+        40.60731506347656,
+        39.58407974243164,
+        41.71103286743164,
+        40.80649948120117,
+        41.4520378112793,
+        40.239437103271484,
+        39.70500946044922,
+        40.90274429321289,
+        40.31764602661133,
+        41.98945617675781,
+        41.19462203979492,
+        40.356388092041016,
+        40.7642936706543,
+        40.980045318603516,
+        39.0012092590332,
+        39.29694366455078,
+        41.256282806396484,
+        41.58049392700195,
+        40.6142692565918,
+        40.36925506591797,
+        40.16707229614258,
+        40.17555236816406,
+        41.80263137817383,
+        41.198402404785156,
+        40.527156829833984,
+        39.963993072509766,
+        40.93875503540039,
+        40.87588882446289,
+        41.4470329284668,
+        40.52080154418945,
+        40.83473587036133,
+        39.54581832885742,
+        40.990196228027344,
+        42.078147888183594,
+        41.54044723510742,
+        40.268592834472656,
+        41.512786865234375,
+        38.324981689453125,
+        39.96303939819336,
+        40.96649932861328,
+        39.99969482421875,
+        42.165489196777344,
+        42.1373176574707,
+        41.21319580078125,
+        40.59482192993164,
+        40.9666633605957,
+        40.62045669555664,
+        41.13351058959961,
+        41.4814567565918,
+        40.506038665771484,
+        40.95808029174805,
+        41.448429107666016,
+        41.35118865966797,
+        40.14081954956055,
+        40.89260482788086,
+        39.836151123046875,
+        40.4273681640625,
+        41.43651580810547,
+        40.801998138427734,
+        40.10171127319336,
+        39.66727828979492,
+        39.94380187988281,
+        41.743499755859375,
+        13.85446548461914,
+        41.147315979003906,
+        41.258750915527344,
+        41.84189224243164,
+        40.97268295288086,
+        37.71622085571289,
+        39.755672454833984,
+        41.90087890625,
+        39.470645904541016,
+        40.60840606689453,
+        40.484649658203125,
+        39.825660705566406,
+        41.500492095947266,
+        40.961265563964844,
+        40.376380920410156,
+        40.9787712097168,
+        40.99555969238281,
+        40.59669494628906,
+        40.97429656982422,
+        40.337318420410156,
+        39.558738708496094,
+        41.507965087890625,
+        40.52497863769531,
+        40.99294662475586,
+        41.069610595703125,
+        41.35319900512695,
+        41.11344909667969,
+        40.4017219543457,
+        41.03766632080078,
+        42.116485595703125,
+        39.343650817871094,
+        39.44451141357422,
+        40.87788391113281,
+        41.33125305175781,
+        40.12549591064453,
+        40.497711181640625,
+        5.642808437347412,
+        40.766380310058594,
+        38.31364822387695,
+        41.146175384521484,
+        39.55508804321289,
+        41.624176025390625,
+        41.19793701171875,
+        41.57142639160156,
+        40.879356384277344,
+        40.08348083496094,
+        41.737884521484375,
+        40.58863830566406,
+        40.88641357421875,
+        41.149417877197266,
+        41.54578399658203,
+        42.09917068481445,
+        41.89732360839844,
+        40.6683235168457,
+        39.625450134277344,
+        40.241737365722656,
+        41.73399353027344,
+        40.871063232421875
+      ],
+      "episode_lengths": [
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        569,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        556,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        938,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000
+      ],
+      "mean_reward": 40.32237243652344,
+      "std_reward": 3.5554518699645996,
+      "sem_reward": 0.22221574187278748,
+      "mean_length": 996.33984375,
+      "actions_finite": true,
+      "episodes": 256,
+      "initial_observation_sha256": "b71e1789b9d999b170742d74d94e5becbb9e0d1a1be230601787967c42ff21a8",
+      "source_stream_sha256": "5faef8b6954aa42569fd6776e4a17b550ad1d7f7cb586f7937bf0ee7ca45a066",
+      "source_value_count": 6144000,
+      "endpoint_count_per_action": 1
+    }
+  }
+}odeDiscoveryResults at line 136 of /builds/omniverse/usd-ci/USD/pxr/usd/usdShade/shaderDefUtils.cpp -- Unable to resolve info:sourceAsset </UsdPrimvarReader_string.info:mdl:sourceAsset> with value @UsdPreviewSurface.mdl@.
+
+2026-08-09 10:55:22 [10,679ms] [Warning] [omni.usd] Warning: in GetNodeDiscoveryResults at line 136 of /builds/omniverse/usd-ci/USD/pxr/usd/usdShade/shaderDefUtils.cpp -- Unable to resolve info:sourceAsset </UsdPrimvarReader_normal.info:mdl:sourceAsset> with value @UsdPreviewSurface.mdl@.
+
+2026-08-09 10:55:22 [10,679ms] [Warning] [omni.usd] Warning: in GetNodeDiscoveryResults at line 136 of /builds/omniverse/usd-ci/USD/pxr/usd/usdShade/shaderDefUtils.cpp -- Unable to resolve info:sourceAsset </UsdPrimvarReader_point.info:mdl:sourceAsset> with value @UsdPreviewSurface.mdl@.
+
+2026-08-09 10:55:22 [10,679ms] [Warning] [omni.usd] Warning: in GetNodeDiscoveryResults at line 136 of /builds/omniverse/usd-ci/USD/pxr/usd/usdShade/shaderDefUtils.cpp -- Unable to resolve info:sourceAsset </UsdPrimvarReader_vector.info:mdl:sourceAsset> with value @UsdPreviewSurface.mdl@.
+
+2026-08-09 10:55:22 [10,679ms] [Warning] [omni.usd] Warning: in GetNodeDiscoveryResults at line 136 of /builds/omniverse/usd-ci/USD/pxr/usd/usdShade/shaderDefUtils.cpp -- Unable to resolve info:sourceAsset </UsdPrimvarReader_matrix.info:mdl:sourceAsset> with value @UsdPreviewSurface.mdl@.
+
+2026-08-09 10:55:22 [10,679ms] [Warning] [omni.usd] Warning: in GetNodeDiscoveryResults at line 136 of /builds/omniverse/usd-ci/USD/pxr/usd/usdShade/shaderDefUtils.cpp -- Unable to resolve info:sourceAsset </UsdTransform2d.info:mdl:sourceAsset> with value @UsdPreviewSurface.mdl@.
+
