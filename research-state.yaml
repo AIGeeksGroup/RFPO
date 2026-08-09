@@ -598,7 +598,7 @@ hypotheses:
     priority: high
   - id: H77
     statement: "Matched closed-loop Go2 trajectories driven by z/-z have lower source-induced pair-return variance than trajectories driven by two IID flow sources."
-    status: active
+    status: refuted
     motivation: "H75's immediate action antisymmetry could reduce training variance without collapsing exploration, but only if the covariance survives closed-loop feedback; a fixed-policy return audit can falsify this before any FPO++ training change."
     parent: H75
     priority: high
@@ -2303,11 +2303,31 @@ experiments:
       passed: false
       deployment_passed: false
       renderer: egl
+    - run: go2_h77_mirrored_rollout_variance_seed42
+      metric: mirrored_over_iid_zero_residualized_pair_return_variance
+      value: 0.8823306609
+      training_seed: 42
+      environments_per_mode: 256
+      total_episodes: 1024
+      zero32_mean: 41.4467461631
+      positive32_mean: 40.5460776314
+      negative32_mean: 40.4508357756
+      iid32_mean: 40.4515863024
+      mirrored_deviation_covariance: 6.2546493660
+      iid_deviation_covariance: 6.7911799072
+      mirrored_deviation_correlation: 0.4788884425
+      iid_deviation_correlation: 0.4496109688
+      mirrored_pair_residual_variance: 9.6761209939
+      iid_pair_residual_variance: 10.9665473754
+      variance_ratio_bootstrap_95: [0.4137536451, 1.4754192781]
+      exact_source_negation: true
+      initial_observation_hashes_match: true
+      passed: false
 
 outer_loop:
-  cycle: 66
-  last_direction: "Test H77 as a small fixed-policy prerequisite for using flow antisymmetry as a training-time closed-loop control variate; do not train unless mirrored return variance beats IID pairing."
-  last_reflection: "H74 transfers recovery over the official random source to Spot (+13.78 [5.58, 22.37]) but not the antithetic-specific advantage over an equal-NFE IID pair (+2.67 [-5.72, 10.66]); antithetic32 is also worse than zero32 (-3.92 [-8.60, -0.42]). The current evidence is a strong Go2 result with partial cross-task transfer, not yet a main-conference method claim."
+  cycle: 67
+  last_direction: "Conclude the method-search stage and prepare a workshop/short-paper submission centered on stochastic-source deficit recovery, affine antisymmetry, strong deterministic controls, and cross-task limits."
+  last_reflection: "H77 shows that H75's immediate action antisymmetry does not survive as a reliable closed-loop return control variate: variance ratio 0.882 with bootstrap [0.414, 1.475]. Together with H74, this closes both action-averaging and training-control-variate routes. The evidence supports a rigorous empirical analysis paper, but not a main-conference claim of a universally superior deployment method."
 
 workspace:
   findings: "findings.md"

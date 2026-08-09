@@ -408,6 +408,13 @@ simpler zero32 policy by -3.921 [-8.600, -0.423]. This supports cross-task stoch
 recovery but not cross-task symmetry attribution or deterministic deployment superiority; the
 protocol therefore stops Spot and blocks H1/G1 expansion.
 
+Executing mirrored sources as separate trajectories does not turn the immediate action symmetry
+into a reliable training control variate. On 256 matched Go2 initial states, source-induced return
+deviations for `z/-z` remained positively correlated at 0.479, similar to 0.450 for `z/w`. The
+mirrored pair-residual variance was 88.2% of IID, but its bootstrap interval [0.414, 1.475] crossed
+one and missed the locked 80% threshold. Closed-loop dynamics erase too much of the local odd
+symmetry to justify a paired-gradient audit or training run.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -425,6 +432,7 @@ protocol therefore stops Spot and blocks H1/G1 expansion.
 - H75 directly confirms the proposed mechanism across four policies: `z/-z` action displacements are nearly opposite (mean cosine -0.9693), and symmetric averaging leaves only 12.40% residual versus 70.99% for IID averaging.
 - A policy-level analysis avoids pseudoreplication: the equal-total-NFE gain remains +0.9448 [0.8515, 1.0381] across four seeds under a t model, while the exact sign test remains p=0.0625 and must temper generalization claims.
 - Spot transfers the gain over one random source but not the antithetic-over-IID attribution: generic two-sample averaging explains most of the cross-task recovery, and zero32 remains better.
+- Immediate `z/-z` action displacements do not imply antithetic episode returns: separately executed mirrored trajectories remain positively correlated after feedback and fail the return-variance gate.
 - WarmPrior (arXiv:2605.13959) offers a more direct reward-improvement hypothesis for chunked manipulation: center the flow source on recent actions and retain residual Gaussian noise for exploration.
 - WarmPrior cannot be grafted onto a Gaussian-trained FPO checkpoint at inference time; training-time source adaptation is necessary on Can.
 - A short 100-update training-time adaptation is also insufficient: it preserves neither deterministic success nor random exploration.
