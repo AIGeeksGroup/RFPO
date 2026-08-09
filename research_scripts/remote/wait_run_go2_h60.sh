@@ -20,7 +20,7 @@ case "$STAGE" in
 esac
 
 GPU_UUID="$({ nvidia-smi --query-gpu=index,uuid --format=csv,noheader,nounits; } \
-  | awk -F ', ' -v index="$PHYSICAL_GPU" '$1 == index { print $2 }')"
+  | awk -F ', ' -v gpu_index="$PHYSICAL_GPU" '$1 == gpu_index { print $2 }')"
 if [[ -z "$GPU_UUID" ]]; then
   echo "Could not resolve physical GPU index $PHYSICAL_GPU" >&2
   exit 2
