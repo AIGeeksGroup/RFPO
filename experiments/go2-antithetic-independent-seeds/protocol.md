@@ -53,3 +53,19 @@ and equal-compute attribution; it does not invalidate H69's primary hypothesis.
 The existing seed-42 H67 result is reported descriptively but is not included in
 the three-seed confirmatory gates. Cross-task experiments are authorized only if
 the primary H69 claim passes.
+
+## Archival reanalysis
+
+The analysis CLI may expose an explicit archival mode so the committed JSON
+artifacts can be reanalyzed on a machine that does not hold the remote training
+checkpoints. Archival mode must still require a fixed `model_1499.pt` checkpoint
+name, a lowercase 64-character SHA-256 digest, a positive recorded checkpoint
+size, distinct digests across training seeds, and exact agreement between each
+evaluation artifact and its training manifest. It may skip only the local file
+existence, byte-size, and digest recomputation checks.
+
+The default analysis mode remains the validation path for fresh experiments: it
+must require each checkpoint file, compare its byte size with the manifest, and
+recompute its SHA-256 digest. Archival mode does not create new empirical
+evidence or change any statistical decision; it only makes the committed H69
+analysis reproducible from its archived records.
