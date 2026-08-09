@@ -55,6 +55,10 @@ literature:
       title: "What Matters In On-Policy Reinforcement Learning? A Large-Scale Empirical Study"
       year: 2020
       relevance: "Establishes that minibatch and normalization implementation choices materially affect on-policy continuous control."
+    - id: oh2018_self_imitation
+      title: "Self-Imitation Learning"
+      year: 2018
+      relevance: "Motivates reward-conditioned reuse, but H15's success-gradient bias rejects it as the next FPO++ intervention."
   open_problems:
     - "FPO++ uses many Euler steps; it is unknown whether conditional reflow improves control return or only sampling efficiency."
     - "The relation between flow curvature, CFM ratio variance, and policy-update stability is not established."
@@ -366,6 +370,12 @@ hypotheses:
     statement: "Selecting the lower-curvature of two same-observation Gaussian Square action chunks improves random-source success without changing the checkpoint or zero-source behavior."
     status: refuted
     motivation: "Global sampler and trajectory smoothing repeatedly trade zero and Gaussian modes; within-observation ODE straightness offers a coefficient-free policy-confidence signal that can rank stochastic candidates while leaving zero inference untouched."
+    parent: H40
+    priority: high
+  - id: H47
+    statement: "Collecting complete 400-step Square rollouts improves FPO++ success by replacing critic-bootstrap censoring of initial failures with observed terminal outcomes."
+    status: active
+    motivation: "The released 320-step Square rollout ends before the 400-step task horizon, so unsuccessful initial episodes are bootstrapped while successful episodes receive terminal labels."
     parent: H40
     priority: high
 
@@ -1353,8 +1363,8 @@ experiments:
 
 outer_loop:
   cycle: 33
-  last_direction: "Close curvature-ranked inference and select a reward-relevant intervention distinct from the exhausted geometry and source-ranking routes."
-  last_reflection: "The corrected H46 screen reduced curvature by 12.62% but reduced Square random success from 7/20 to 4/20; within-observation straightness is not a useful action-quality proxy for this checkpoint."
+  last_direction: "Test complete 400-step Square rollouts at the same total interaction budget before any larger training run."
+  last_reflection: "H46 closes flow geometry as a reward proxy; H43 additionally reveals that 320-step training rollouts censor all initial Square failures before the 400-step task horizon."
 
 workspace:
   findings: "findings.md"
