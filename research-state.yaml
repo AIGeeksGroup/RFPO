@@ -43,6 +43,10 @@ literature:
       title: "Learning Fine-Grained Bimanual Manipulation with Low-Cost Hardware"
       year: 2023
       relevance: "Motivates temporally ensembling overlapping action-chunk predictions."
+    - id: xu2026_bcp
+      title: "Continue or Replan? Bernoulli-Continuation Policy Learning for Adaptive Horizon Execution"
+      year: 2026
+      relevance: "Motivates a phase-shift prerequisite before learning an exact-likelihood continuation head."
     - id: lei2026_rldt
       title: "Reinforcement Learning for Flow-Matching Policies with Density Transport"
       year: 2026
@@ -434,6 +438,12 @@ hypotheses:
     statement: "A fixed ACT-inspired ensemble of the previous unused continuation and current visual prefix reduces chunk-boundary discontinuity and improves released Can step-1000 deterministic success."
     status: refuted
     motivation: "The policy predicts 16 actions but discards the last eight at each official eight-step replan; overlapping predictions provide a feedback-preserving smoothing mechanism without more policy calls."
+    parent: null
+    priority: high
+  - id: H55
+    statement: "Can success varies across common-seed first-chunk phase shifts enough to provide oracle headroom for a learned adaptive continuation policy."
+    status: proposed
+    motivation: "H27 rejects globally shorter execution and H54 rejects fixed overlap averaging, but neither tests whether the official eight-step boundaries miss precision-critical task stages."
     parent: null
     priority: high
 
@@ -1677,9 +1687,9 @@ experiments:
       renderer: osmesa
 
 outer_loop:
-  cycle: 39
-  last_direction: "Refute H54 after a valid 16/20 versus 16/20 Can screen; do not tune overlap weights or add a learned gate without an independent predictive signal."
-  last_reflection: "Fixed overlap ensembling reduced full-screen median chunk-boundary jump by 33.82% while retaining a 49.75% new-observation contribution, yet deterministic Can success tied exactly. Continuity at the official chunk boundary is not the limiting reward mechanism."
+  cycle: 40
+  last_direction: "Test H55 as a common-seed phase-shift prerequisite before implementing a BCP continuation head."
+  last_reflection: "H27 and H54 reject global frequency and fixed smoothing, but leave timing alignment unresolved. BCP provides an exact-likelihood adaptive-horizon route, yet its published training is too heavy to justify until a cheap phase oracle demonstrates reward-relevant headroom on Can."
 
 workspace:
   findings: "findings.md"
