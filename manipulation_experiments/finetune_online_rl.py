@@ -75,6 +75,7 @@ from src.ratio_rollback import rollback_clipped_ratio_loss
 from src.adaptive_lr import adapt_learning_rate_from_kl
 from src.rollout_local_optimizer import clear_optimizer_state
 from src.stratified_minibatches import advantage_sign_stratified_permutation
+from src.potential_shaping import collection_fingerprint, potential_shaping_term
 
 # ---- Multiprocessing start method (CUDA compat) ------------------------------
 try:
@@ -214,6 +215,8 @@ class FlowPPOConfig:
     zero_endpoint_pcgrad_train: bool = False
     rollout_local_actor_optimizer: bool = False
     advantage_sign_stratified_minibatches: bool = False
+    potential_stage_shaping: bool = False
+    collection_fingerprint_audit: bool = False
     rollout_zero_fraction: float = 0.0
     rollout_tempered_fraction: float = 0.0
     rollout_tempered_scale: float = 0.5
@@ -1243,6 +1246,12 @@ def main(cfg: FlowPPOConfig):
             for env_id in range(num_envs_per_process)
         ],
     )
+    if cfg.potential_stage_shaping:
+        if cfg.task != "Square" or cfg.discount != 0.995:
+            raise ValueError(
+                "potential stage shaping is locked to Square with discount 0.995"
+            )
+        env.call("set_stage_potential_tracking", True)
     # Init action buffers
     actor_module.init_action_buffers(num_envs_per_process)
     if cfg.rollout_zero_fraction > 0 and cfg.rollout_tempered_fraction > 0:
@@ -1368,11 +1377,16 @@ def main(cfg: FlowPPOConfig):
     endpoint_pcgrad_training_history: list[dict[str, Any]] = []
     rollout_local_optimizer_history: list[dict[str, Any]] = []
     stratified_minibatch_history: list[dict[str, Any]] = []
+    potential_shaping_history: list[dict[str, Any]] = []
+    collection_fingerprint_history: list[dict[str, Any]] = []
 
     obs_state_stored = torch.zeros((steps_per_iteration, num_envs_per_process, joint_pos_dim))
     actions_stored = torch.zeros((steps_per_iteration, num_envs_per_process, action_dim))
     mdp_x_t_paths_stored = torch.zeros((steps_per_iteration, actor_module.config.sampling_steps, num_envs_per_process, action_dim))
     rewards_stored = torch.zeros((steps_per_iteration, num_envs_per_process))
+    sparse_rewards_stored = torch.zeros(
+        (steps_per_iteration, num_envs_per_process)
+    )
     dones_stored = torch.zeros((steps_per_iteration, num_envs_per_process))
     terminals_stored = torch.zeros(
         (steps_per_iteration, num_envs_per_process), dtype=torch.bool
@@ -1827,6 +1841,7 @@ def main(cfg: FlowPPOConfig):
         random_done_episodes = 0
         random_successes = 0
         step = 0
+        iteration_shaping_terms: list[float] = []
         iteration_start_time = time.time()
 
         actor.eval()
@@ -1849,9 +1864,38 @@ def main(cfg: FlowPPOConfig):
                     assert mdp_x_t_path.shape == (num_envs_per_process, actor_module.config.sampling_steps, action_dim), \
                         f"mdp_x_t_path shape should be (num_envs_per_process, actor_module.config.sampling_steps, action_dim), but got {mdp_x_t_path.shape}"
 
-                    next_obs, reward, next_done, truncated, _ = env.step(action)
+                    next_obs, sparse_reward, next_done, truncated, _ = env.step(action)
                     if cfg.truncation_as_done:
                         next_done = next_done | truncated
+                    reward = sparse_reward
+                    if cfg.potential_stage_shaping:
+                        transitions = env.call("get_last_stage_transition")
+                        shaping_terms = torch.tensor(
+                            [
+                                potential_shaping_term(
+                                    transition["potential_before"],
+                                    transition["potential_next"],
+                                    discount=cfg.discount,
+                                    terminal=transition["terminal"],
+                                )
+                                for transition in transitions
+                            ],
+                            device=sparse_reward.device,
+                            dtype=sparse_reward.dtype,
+                        )
+                        tracked_sparse = torch.tensor(
+                            [transition["sparse_reward"] for transition in transitions],
+                            device=sparse_reward.device,
+                            dtype=sparse_reward.dtype,
+                        )
+                        if not torch.equal(tracked_sparse, sparse_reward.view(-1)):
+                            raise RuntimeError(
+                                "tracked and returned sparse Square rewards differ"
+                            )
+                        reward = sparse_reward + shaping_terms
+                        iteration_shaping_terms.extend(
+                            shaping_terms.detach().cpu().tolist()
+                        )
 
                     for obs_key, obs_value in curr_obs.items():
                         if obs_key.startswith("observation.images."):
@@ -1862,16 +1906,17 @@ def main(cfg: FlowPPOConfig):
                     actions_stored[step] = action.cpu()
                     mdp_x_t_paths_stored[step] = mdp_x_t_path.permute(1, 0, 2).cpu()
                     rewards_stored[step] = reward.view(-1).cpu()
+                    sparse_rewards_stored[step] = sparse_reward.view(-1).cpu()
                     next_done = next_done.view(-1).cpu()
                     terminals_stored[step] = next_done.bool()
 
                     if any(next_done):
                         done_episodes += next_done.sum().item()
-                        successes += reward[torch.where(next_done)[0]].sum().item()
+                        successes += sparse_reward[torch.where(next_done)[0]].sum().item()
                         done_env_ids = torch.where(next_done)[0]
                         for env_idx_tensor in done_env_ids:
                             env_idx = int(env_idx_tensor.item())
-                            success = int(reward[env_idx].item() == 1.0)
+                            success = int(sparse_reward[env_idx].item() == 1.0)
                             if env_idx in guided_rollout_env_ids:
                                 guided_done_episodes += 1
                                 guided_successes += success
@@ -1997,6 +2042,44 @@ def main(cfg: FlowPPOConfig):
             logger.info(
                 f"[Rank {rank}] Valid CFM action fraction: {valid_cfm_action_fraction:.2%} "
                 f"({int(valid_cfm_steps.item())}/{int(total_cfm_steps.item())})"
+            )
+
+        if cfg.collection_fingerprint_audit and rank == 0:
+            fingerprint_event = {
+                "iteration": iteration,
+                "fingerprint": collection_fingerprint(
+                    actions_stored.numpy(),
+                    sparse_rewards_stored.numpy(),
+                    terminals_stored.numpy(),
+                ),
+                "sparse_reward_sum": float(sparse_rewards_stored.sum().item()),
+                "terminal_count": int(terminals_stored.sum().item()),
+            }
+            collection_fingerprint_history.append(fingerprint_event)
+            (run_dir / "collection_fingerprints.json").write_text(
+                json.dumps(collection_fingerprint_history, indent=2, sort_keys=True)
+                + "\n"
+            )
+        if cfg.potential_stage_shaping and rank == 0:
+            terms = np.asarray(iteration_shaping_terms, dtype=np.float64)
+            if terms.size != steps_per_iteration * num_envs_per_process:
+                raise RuntimeError("potential shaping did not cover every rollout transition")
+            shaping_event = {
+                "iteration": iteration,
+                "count": int(terms.size),
+                "mean": float(terms.mean()),
+                "std": float(terms.std()),
+                "min": float(terms.min()),
+                "max": float(terms.max()),
+                "positive_fraction": float(np.mean(terms > 1e-4)),
+                "negative_fraction": float(np.mean(terms < -1e-4)),
+                "active_fraction": float(np.mean(np.abs(terms) > 1e-4)),
+                "sparse_reward_sum": float(sparse_rewards_stored.sum().item()),
+                "shaped_reward_sum": float(rewards_stored.sum().item()),
+            }
+            potential_shaping_history.append(shaping_event)
+            (run_dir / "potential_shaping_history.json").write_text(
+                json.dumps(potential_shaping_history, indent=2, sort_keys=True) + "\n"
             )
 
         # ---------- Reshape for training ----------

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+import hashlib
 
 import numpy as np
 
@@ -19,6 +20,19 @@ def potential_shaping_term(
         raise ValueError("potentials must be finite and nonnegative")
     effective_next = 0.0 if terminal else float(potential_next)
     return discount * effective_next - float(potential_before)
+
+
+def collection_fingerprint(*arrays: np.ndarray) -> str:
+    """Hash typed collection arrays in a stable, order-sensitive form."""
+    if not arrays:
+        raise ValueError("at least one collection array is required")
+    digest = hashlib.sha256()
+    for array in arrays:
+        value = np.ascontiguousarray(array)
+        digest.update(str(value.dtype).encode("ascii"))
+        digest.update(str(value.shape).encode("ascii"))
+        digest.update(value.tobytes())
+    return digest.hexdigest()
 
 
 def audit_potential_records(

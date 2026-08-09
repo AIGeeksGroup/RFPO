@@ -1,6 +1,11 @@
 import pytest
+import numpy as np
 
-from src.potential_shaping import audit_potential_records, potential_shaping_term
+from src.potential_shaping import (
+    audit_potential_records,
+    collection_fingerprint,
+    potential_shaping_term,
+)
 
 
 def _record(seed, step, before, after, sparse, terminal, success=False):
@@ -46,3 +51,13 @@ def test_audit_rejects_incomplete_episode():
     record = _record(0, 0, 0.1, 0.2, 0.0, False)
     with pytest.raises(RuntimeError, match="complete episode"):
         audit_potential_records([record], {0}, discount=0.9)
+
+
+def test_collection_fingerprint_is_stable_and_sensitive():
+    first = np.arange(6, dtype=np.float32).reshape(2, 3)
+    second = np.array([False, True])
+    expected = collection_fingerprint(first, second)
+    assert collection_fingerprint(first.copy(), second.copy()) == expected
+    changed = first.copy()
+    changed[0, 0] = 1.0
+    assert collection_fingerprint(changed, second) != expected

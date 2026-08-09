@@ -25,6 +25,8 @@ ROLLOUT_FREQ="${ROLLOUT_FREQ:-None}"
 ZERO_ENDPOINT_PCGRAD_TRAIN="${ZERO_ENDPOINT_PCGRAD_TRAIN:-False}"
 ROLLOUT_LOCAL_ACTOR_OPTIMIZER="${ROLLOUT_LOCAL_ACTOR_OPTIMIZER:-False}"
 ADVANTAGE_SIGN_STRATIFIED_MINIBATCHES="${ADVANTAGE_SIGN_STRATIFIED_MINIBATCHES:-False}"
+POTENTIAL_STAGE_SHAPING="${POTENTIAL_STAGE_SHAPING:-False}"
+COLLECTION_FINGERPRINT_AUDIT="${COLLECTION_FINGERPRINT_AUDIT:-False}"
 SEED="${SEED:-20260913}"
 MASTER_PORT="${MASTER_PORT:-29500}"
 RUN_NAME="${RUN_NAME:-square_fpopp_seed${SEED}_$(timestamp)}"
@@ -81,5 +83,7 @@ torchrun --nproc_per_node=1 --master_port "$MASTER_PORT" finetune_online_rl.py \
   --zero-endpoint-pcgrad-train "$ZERO_ENDPOINT_PCGRAD_TRAIN" \
   --rollout-local-actor-optimizer "$ROLLOUT_LOCAL_ACTOR_OPTIMIZER" \
   --advantage-sign-stratified-minibatches "$ADVANTAGE_SIGN_STRATIFIED_MINIBATCHES" \
+  --potential-stage-shaping "$POTENTIAL_STAGE_SHAPING" \
+  --collection-fingerprint-audit "$COLLECTION_FINGERPRINT_AUDIT" \
   --seed "$SEED" \
   2>&1 | tee "$LOG_PATH"
