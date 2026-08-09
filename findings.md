@@ -376,6 +376,13 @@ below zero in all three point estimates and pooled to -0.085 [-0.212, 0.041]. Th
 therefore cancellation-specific recovery of central-policy return across independent actors, not
 a better deterministic action rule.
 
+The equal-total-NFE construction also transfers across those independent policies. With two
+Euler-32 endpoints versus one Euler-64 random endpoint, seeds 43/44/45 gained +0.903, +1.008, and
++0.888 return. The stratified gain was +0.933 with bootstrap 95% [0.785, 1.085], while every method
+used 64 total NFE/action and exact source streams matched. Antithetic32 again tied zero32, pooling
+to -0.026 [-0.160, 0.110]. Across four training seeds, the effect size against random64 is therefore
+stable near one return point, while deterministic deployment remains the correct upper control.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -389,6 +396,7 @@ a better deterministic action rule.
 - H70 eliminates the twofold NFE penalty on seed 42: two 32-step symmetric solves match the 64-step symmetric solve and recover the roughly one-point random-source deficit at the same total NFE as the baseline.
 - H71 shows that fusing the two half-depth solves is 19.36% faster than sequential pairing and 11.25% faster than random64 at batch 4,096 on H200, but H72 shows this is not the best deployment option because zero32 preserves return with half as many NFE.
 - H69 establishes independent-model generality: antithetic pairing beats equal-compute IID averaging in all three new official Go2 seeds and beats one random endpoint by roughly 0.89-0.97 return, while remaining tied with or below zero.
+- H73 preserves the full random-source recovery after halving each symmetric solve: all three new seeds gain 0.89-1.01 return at the same total 64 NFE as random64, with no advantage over zero32.
 - WarmPrior (arXiv:2605.13959) offers a more direct reward-improvement hypothesis for chunked manipulation: center the flow source on recent actions and retain residual Gaussian noise for exploration.
 - WarmPrior cannot be grafted onto a Gaussian-trained FPO checkpoint at inference time; training-time source adaptation is necessary on Can.
 - A short 100-update training-time adaptation is also insufficient: it preserves neither deterministic success nor random exploration.

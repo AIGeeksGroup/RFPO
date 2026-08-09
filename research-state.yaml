@@ -574,7 +574,7 @@ hypotheses:
     priority: high
   - id: H73
     statement: "Two Euler-32 antithetic endpoints beat one Euler-64 random endpoint at equal total NFE across all three independently trained H69 Go2 policies."
-    status: active
+    status: supported
     motivation: "H69 establishes independent-policy symmetry attribution at 128 NFE and H70 establishes equal-total-NFE recovery on seed 42; their intersection is the critical gate before cross-task training."
     parent: H70
     priority: high
@@ -2206,11 +2206,31 @@ experiments:
       passed: true
       deployment_passed: false
       renderer: egl
+    - run: go2_h73_antithetic_independent_equal_total_nfe_43_44_45
+      metric: pooled_equal_total_nfe_antithetic32_minus_random64_return
+      value: 0.9326047725
+      training_seeds: [43, 44, 45]
+      episodes_per_new_method_seed: 512
+      new_evaluation_episodes: 3072
+      seed_43_gain: 0.9026915329
+      seed_44_gain: 1.0075025740
+      seed_45_gain: 0.8876202106
+      pooled_bootstrap_95: [0.7851226308, 1.0850065432]
+      pooled_antithetic32_minus_zero32: -0.0258030903
+      pooled_antithetic32_minus_zero32_bootstrap_95: [-0.1597077943, 0.1096074109]
+      pooled_zero32_minus_zero64: -0.0466609050
+      pooled_zero32_minus_zero64_bootstrap_95: [-0.1079483172, 0.0002205694]
+      initial_observation_hashes_match: true
+      primary_source_stream_hashes_match: true
+      equal_random_antithetic_total_nfe: true
+      passed: true
+      deployment_passed: false
+      renderer: egl
 
 outer_loop:
-  cycle: 62
-  last_direction: "Confirm H70 equal-total-NFE stochastic-source recovery across the three fixed H69 checkpoints, retaining zero32 as the strongest deployment control."
-  last_reflection: "H69 passed across three independently trained official Go2 policies. Antithetic pairing beat equal-NFE IID averaging in every seed and pooled to +0.4942 [0.3531, 0.6422]; it beat one random source by +0.9203 [0.7713, 1.0746]. Antithetic remained statistically below or tied with zero, so the contribution is stable stochastic-source deficit recovery rather than a new best deterministic deployment."
+  cycle: 63
+  last_direction: "Run one medium official Spot cross-task screen before committing to multi-seed Spot/H1/G1 training, with random64, antithetic32, zero32, and zero64 controls."
+  last_reflection: "H73 confirms equal-total-NFE recovery on all three independent H69 policies: antithetic32-minus-random64 was +0.903/+1.008/+0.888 and pooled to +0.9326 [0.7851, 1.0850]. Antithetic32 still tied zero32, so the robust contribution is source-symmetry recovery under the official stochastic evaluation. The Go2 evidence is now strong enough for one gated cross-task training screen."
 
 workspace:
   findings: "findings.md"
