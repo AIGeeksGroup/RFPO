@@ -15,6 +15,7 @@ recover toward it from the weaker random-source policy?
 - Evaluation seed: `20261110`
 - Primary source seed: `20261111`
 - Independent secondary source seed: `20261112`
+- Bootstrap seed: `20261113`
 - Screen size: 256 environments per method, exactly one episode per environment
 - Methods:
   - `zero`: `F(o, 0)`, 64 NFE/action
@@ -28,10 +29,11 @@ fixed seed. Initial-observation hashes must match across all four methods.
 
 ## Predictions and decisions
 
-The mechanistic prediction is that exact source symmetry cancels substantially
-more source-dependent action displacement than IID averaging. On fixed states,
-the antithetic endpoint mean should be closer to `F(o, 0)` than the IID endpoint
-mean.
+The mechanistic audit uses 256 environments and their first eight states under
+the frozen policy. Exact source symmetry must cancel more source-dependent
+action displacement than IID averaging: the antithetic endpoint mean must have
+lower normalized RMS distance to `F(o, 0)` than the IID endpoint mean. This
+gate authorizes the reward screen but is not itself reward evidence.
 
 The primary reward comparison is paired `antithetic - iid_pair`, since both use
 128 NFE/action. H67 passes the screen only if this point estimate is positive and
@@ -48,4 +50,3 @@ deployment policy.
 Only after the equal-compute attribution is positive may the study proceed to
 multiple checkpoints, independent training seeds, or additional locomotion
 tasks. No official-scale 4096-environment run is authorized by this protocol.
-
