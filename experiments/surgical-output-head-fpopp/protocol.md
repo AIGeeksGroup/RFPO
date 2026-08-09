@@ -21,7 +21,7 @@ and deterministic endpoint drift.
 
 ## Locked Paired Audit
 
-- Initialization: released Square checkpoint `r89y0lt0_step_100000`, EMA weights and official FPO++
+- Initialization: released Square checkpoint `trc7rbt0_step_110000`, EMA weights and official FPO++
   settings.
 - Conditions: official all-nonvisual-layer control and output-head-only candidate.
 - Shared rollout/training seed: `20260981`.
