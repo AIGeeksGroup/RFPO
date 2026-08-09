@@ -420,6 +420,12 @@ hypotheses:
     motivation: "The final velocity head is only about 0.88% of the non-visual Square actor; surgical adaptation may avoid distorting pretrained flow features under scarce sparse-reward updates."
     parent: H40
     priority: high
+  - id: H53
+    statement: "Mirrored complete-episode success differences are reproducible across seed blocks in a fixed 16-direction Square actor parameter subspace."
+    status: proposed
+    motivation: "H0-H52 repeatedly fail inside the critic/GAE/implicit-ratio chain; direct episodic parameter search removes value estimation, temporal credit assignment, and flow-density surrogates."
+    parent: H40
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -1611,9 +1617,9 @@ experiments:
       renderer: osmesa
 
 outer_loop:
-  cycle: 37
-  last_direction: "Close H52 after it retained only about 2% of control surrogate gain; select a genuinely distinct intervention before further runs."
-  last_reflection: "Output-head-only FPO++ raised held-out gradient cosine and reduced endpoint drift by about 99%, but its surrogate progress collapsed to 2.09-2.25% of control. Parameter restriction made the update nearly inert rather than improving the stability-learning tradeoff."
+  cycle: 38
+  last_direction: "Audit whether a fixed mirrored parameter subspace exposes reproducible complete-episode Square success differences before implementing any ES update."
+  last_reflection: "Repeated attempts to stabilize FPO++ preserve behavior only by sacrificing useful surrogate progress. H53 pivots from modifying that gradient to a critic-free, delayed-reward-invariant episodic search signal."
 
 workspace:
   findings: "findings.md"
