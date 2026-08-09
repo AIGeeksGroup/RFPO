@@ -14,6 +14,8 @@ TOTAL_TIMESTEPS="${TOTAL_TIMESTEPS:-$((NUM_ENVS * DATA_COLLECTION_STEPS))}"
 EVAL_EPISODES="${EVAL_EPISODES:-20}"
 N_ACTION_SAMPLES="${N_ACTION_SAMPLES:-8}"
 LEARNING_RATE_ACTOR="${LEARNING_RATE_ACTOR:-1e-5}"
+ADAPTIVE_ACTOR_LR="${ADAPTIVE_ACTOR_LR:-False}"
+ADAPTIVE_ACTOR_LR_TARGET_KL="${ADAPTIVE_ACTOR_LR_TARGET_KL:-1e-4}"
 TRUST_REGION_MODE="${TRUST_REGION_MODE:-ppo}"
 ROLLBACK_ALPHA="${ROLLBACK_ALPHA:-0.3}"
 GRADIENT_ACCUMULATION_STEPS="${GRADIENT_ACCUMULATION_STEPS:-1}"
@@ -169,6 +171,8 @@ torchrun --nproc_per_node=1 --master_port "$MASTER_PORT" finetune_online_rl.py \
   --zero-endpoint-pcgrad-train "$ZERO_ENDPOINT_PCGRAD_TRAIN" \
   --n-action-samples "$N_ACTION_SAMPLES" \
   --learning-rate-actor "$LEARNING_RATE_ACTOR" \
+  --adaptive-actor-lr "$ADAPTIVE_ACTOR_LR" \
+  --adaptive-actor-lr-target-kl "$ADAPTIVE_ACTOR_LR_TARGET_KL" \
   --n-action-steps 16 \
   --num-envs "$NUM_ENVS" \
   --sampling-steps 10 \

@@ -72,6 +72,7 @@ from src.median_microbatch_gradient import (
 )
 from src.terminal_consistency_filter import terminal_consistent_weights
 from src.ratio_rollback import rollback_clipped_ratio_loss
+from src.adaptive_lr import adapt_learning_rate_from_kl
 
 # ---- Multiprocessing start method (CUDA compat) ------------------------------
 try:
@@ -236,6 +237,8 @@ class FlowPPOConfig:
     vf_coef: float = 1.0
     max_grad_norm: float = 1.0
     target_kl: float = 0.1
+    adaptive_actor_lr: bool = False
+    adaptive_actor_lr_target_kl: float = 1e-4
 
     # LRs
     learning_rate_actor: float = 1e-5
@@ -1384,11 +1387,16 @@ def main(cfg: FlowPPOConfig):
         for k in next_obs.keys() if k.startswith("observation.images.")
     }
 
-    def get_cfm_values(actor, obs, n_action_samples=1, cfm_loss_ts=None, cfm_loss_epsilons=None, debug=False):
-        cfm_loss, cfm_loss_t, cfm_loss_eps = actor(
-            obs, n_action_samples, cfm_loss_ts, cfm_loss_epsilons, debug=debug
+    def get_cfm_values(actor, obs, n_action_samples=1, cfm_loss_ts=None, cfm_loss_epsilons=None, debug=False, return_predictions=False):
+        output = actor(
+            obs,
+            n_action_samples,
+            cfm_loss_ts,
+            cfm_loss_epsilons,
+            debug=debug,
+            return_cfm_predictions=return_predictions,
         )
-        return cfm_loss, cfm_loss_t, cfm_loss_eps
+        return output
 
     def replay_audit_objective(
         chunk_indices: torch.Tensor,
@@ -4154,6 +4162,69 @@ def main(cfg: FlowPPOConfig):
                     policy_model=endpoint_anchor_model,
                 ).detach()
 
+        behavior_x1_predictions = None
+        adaptive_lr_events = []
+        actor_lr_at_policy_update_start = float(
+            optimizer_actor.param_groups[0]["lr"]
+        )
+        if cfg.adaptive_actor_lr and iteration > cfg.n_iterations_train_only_value:
+            if cfg.loss_mode != "fpo":
+                raise ValueError("adaptive actor LR requires loss_mode='fpo'")
+            behavior_x1_predictions = torch.empty(
+                local_batch_size,
+                n_action_steps,
+                n_action_samples,
+                action_dim,
+                dtype=b_actions.dtype,
+            )
+            actor_module.eval()
+            with torch.no_grad():
+                for prediction_start in range(0, local_batch_size, minibatch_size):
+                    prediction_end = min(
+                        prediction_start + minibatch_size, local_batch_size
+                    )
+                    prediction_slice = slice(prediction_start, prediction_end)
+                    prediction_obs = {
+                        key: value[prediction_slice, 0].to(device)
+                        for key, value in b_obs_images.items()
+                    }
+                    prediction_obs["observation.state"] = b_obs_state[
+                        prediction_slice, 0
+                    ].to(device)
+                    prediction_obs["action"] = b_actions[prediction_slice].to(device)
+                    prediction_times = b_cfm_loss_ts[prediction_slice].to(device)
+                    prediction_times = prediction_times.permute(0, 2, 1).reshape(
+                        -1, n_action_steps, 1
+                    )
+                    if not (
+                        prediction_times[:, 0, 0]
+                        == prediction_times[:, -1, 0]
+                    ).all():
+                        raise RuntimeError(
+                            "adaptive LR received inconsistent CFM times within a chunk"
+                        )
+                    prediction_times = prediction_times[:, 0:1, :]
+                    prediction_noises = b_cfm_loss_epsilons[
+                        prediction_slice
+                    ].to(device)
+                    prediction_noises = prediction_noises.permute(
+                        0, 2, 1, 3
+                    ).reshape(-1, n_action_steps, action_dim)
+                    _, _, _, behavior_x1 = get_cfm_values(
+                        actor,
+                        prediction_obs,
+                        n_action_samples,
+                        prediction_times,
+                        prediction_noises,
+                        return_predictions=True,
+                    )
+                    behavior_x1_predictions[prediction_slice] = (
+                        behavior_x1.permute(1, 0, 2, 3).cpu()
+                    )
+            actor_module.train()
+            if cfg.freeze_vision_encoder:
+                actor_module.model.vision_encoder.eval()
+
         # ---------- Policy update ----------
         b_inds = np.arange(local_batch_size)
         clipfracs = []
@@ -4172,6 +4243,7 @@ def main(cfg: FlowPPOConfig):
 
         for epoch in trange(cfg.update_epochs, desc=f"[Rank {rank}] Policy update", disable=(rank != 0)):
             early_stop = False
+            adaptive_epoch_event_start = len(adaptive_lr_events)
             np.random.shuffle(b_inds)
             accumulation_counter = 0
             optimizer_actor.zero_grad(set_to_none=True)
@@ -4242,9 +4314,48 @@ def main(cfg: FlowPPOConfig):
                     old_cfm_loss_ts = old_cfm_loss_ts[:, 0:1, :]
                     old_cfm_loss_epsilons = mb_cfm_loss_epsilons.permute(0, 2, 1, 3).reshape(-1, n_action_steps, action_dim)
 
-                    curr_cfm_loss, _, _ = get_cfm_values(
-                        actor, obs_chunk2, n_action_samples, old_cfm_loss_ts, old_cfm_loss_epsilons
-                    )
+                    if behavior_x1_predictions is None:
+                        curr_cfm_loss, _, _ = get_cfm_values(
+                            actor, obs_chunk2, n_action_samples, old_cfm_loss_ts, old_cfm_loss_epsilons
+                        )
+                    else:
+                        curr_cfm_loss, _, _, curr_x1_predictions = get_cfm_values(
+                            actor,
+                            obs_chunk2,
+                            n_action_samples,
+                            old_cfm_loss_ts,
+                            old_cfm_loss_epsilons,
+                            return_predictions=True,
+                        )
+                        current_x1 = curr_x1_predictions.permute(1, 0, 2, 3)
+                        behavior_x1 = behavior_x1_predictions[mb_inds].to(device)
+                        kl_mask = valid_idx_mask_in_chunk[:, :, None, None]
+                        kl_sum = ((current_x1.detach() - behavior_x1).square() * kl_mask).sum()
+                        kl_count = kl_mask.sum() * n_action_samples * action_dim
+                        if is_ddp:
+                            dist.all_reduce(kl_sum, op=dist.ReduceOp.SUM)
+                            dist.all_reduce(kl_count, op=dist.ReduceOp.SUM)
+                        kl_proxy = kl_sum / kl_count.clamp_min(1.0)
+                        previous_lr = optimizer_actor.param_groups[0]["lr"]
+                        lr_decision = adapt_learning_rate_from_kl(
+                            previous_lr,
+                            float(kl_proxy.item()),
+                            desired_kl=cfg.adaptive_actor_lr_target_kl,
+                            minimum=cfg.learning_rate_actor * 0.1,
+                            maximum=cfg.learning_rate_actor * 100.0,
+                        )
+                        for parameter_group in optimizer_actor.param_groups:
+                            parameter_group["lr"] = lr_decision.learning_rate
+                        adaptive_lr_events.append(
+                            {
+                                "epoch": epoch + 1,
+                                "minibatch": len(adaptive_lr_events) + 1,
+                                "kl_proxy": float(kl_proxy.item()),
+                                "previous_lr": float(previous_lr),
+                                "learning_rate": float(lr_decision.learning_rate),
+                                "action": lr_decision.action,
+                            }
+                        )
                     curr_cfm_loss = curr_cfm_loss.permute(1, 0, 2)
 
                     old_cfm_loss = mb_cfm_losses.reshape(mb_cfm_losses.shape[0], -1, n_groups, group_size)
@@ -4561,15 +4672,40 @@ def main(cfg: FlowPPOConfig):
                     )
                     epoch_ratios.append(post_ratios)
                 pooled_ratios = torch.cat(epoch_ratios)
-                early_stop_epoch_results.append(
-                    {
+                epoch_result = {
                         "epoch": epoch + 1,
                         "pooled_active_positive_ratio_fraction": float(
                             (pooled_ratios <= 1 + cfg.clip_coef).float().mean().item()
                         ),
                         "batches": epoch_batch_results,
                     }
-                )
+                epoch_adaptive_events = adaptive_lr_events[adaptive_epoch_event_start:]
+                if epoch_adaptive_events:
+                    epoch_result["adaptive_actor_lr"] = {
+                        "kl_mean": float(
+                            np.mean([event["kl_proxy"] for event in epoch_adaptive_events])
+                        ),
+                        "kl_max": float(
+                            max(event["kl_proxy"] for event in epoch_adaptive_events)
+                        ),
+                        "lr_min": float(
+                            min(event["learning_rate"] for event in epoch_adaptive_events)
+                        ),
+                        "lr_max": float(
+                            max(event["learning_rate"] for event in epoch_adaptive_events)
+                        ),
+                        "lr_final": float(epoch_adaptive_events[-1]["learning_rate"]),
+                        "increase_count": sum(
+                            event["action"] == "increase" for event in epoch_adaptive_events
+                        ),
+                        "decrease_count": sum(
+                            event["action"] == "decrease" for event in epoch_adaptive_events
+                        ),
+                        "hold_count": sum(
+                            event["action"] == "hold" for event in epoch_adaptive_events
+                        ),
+                    }
+                early_stop_epoch_results.append(epoch_result)
                 actor_module.train()
                 if cfg.freeze_vision_encoder:
                     actor_module.model.vision_encoder.eval()
@@ -4732,6 +4868,10 @@ def main(cfg: FlowPPOConfig):
                     if rollback_total_elements
                     else 0.0
                 ),
+                "adaptive_actor_lr": cfg.adaptive_actor_lr,
+                "adaptive_actor_lr_target_kl": cfg.adaptive_actor_lr_target_kl,
+                "actor_lr_at_policy_update_start": actor_lr_at_policy_update_start,
+                "adaptive_actor_lr_events": adaptive_lr_events,
                 "preupdate_batches": early_stop_pre_results,
                 "selected_epoch": selected_epoch,
                 "epochs": early_stop_epoch_results,
@@ -4993,7 +5133,11 @@ def main(cfg: FlowPPOConfig):
                 wandb.log(log_dict, step=global_step)
 
         # Step schedulers
-        lr_scheduler_actor.step()
+        if not (
+            cfg.adaptive_actor_lr
+            and iteration > cfg.n_iterations_train_only_value
+        ):
+            lr_scheduler_actor.step()
         lr_scheduler_critic.step()
         if lr_scheduler_success_critic is not None:
             lr_scheduler_success_critic.step()

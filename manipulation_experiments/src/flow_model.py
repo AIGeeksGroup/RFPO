@@ -19,6 +19,7 @@ from src.rollout_bookkeeping import apply_source_sampling_scale, apply_zero_samp
 
 from .flow_model_config import FlowMatchingConfig
 from .flow_integrators import explicit_midpoint_step
+from .cfm_predictions import flow_endpoint_predictions
 from .flow_net_mlp import FlowMatchingMLPModel
 from .flow_net_unet import FlowMatchingUnetModel
 from .flow_net_residual_mlp import FlowMatchingResidualMLPModel
@@ -501,11 +502,18 @@ class FlowMatchingPolicy(PreTrainedPolicy):
 
         return actions, mdp_x_t_path
 
-    def forward(self, batch: dict[str, Tensor], n_action_samples: int = 1, cfm_loss_t: Tensor = None, cfm_loss_eps: Tensor = None, debug=False, is_dppo: bool = False) -> tuple[Tensor, Tensor, Tensor]:
+    def forward(self, batch: dict[str, Tensor], n_action_samples: int = 1, cfm_loss_t: Tensor = None, cfm_loss_eps: Tensor = None, debug=False, is_dppo: bool = False, return_cfm_predictions: bool = False) -> tuple[Tensor, Tensor, Tensor]:
         if is_dppo:
             return self.forward_dppo(batch, debug)
         else:
-            return self.forward_fpo(batch, n_action_samples, cfm_loss_t, cfm_loss_eps, debug)
+            return self.forward_fpo(
+                batch,
+                n_action_samples,
+                cfm_loss_t,
+                cfm_loss_eps,
+                debug,
+                return_cfm_predictions=return_cfm_predictions,
+            )
 
     def forward_dppo(self, batch: dict[str, Tensor], debug=False) -> tuple[Tensor, Tensor, Tensor]:
         # Compute denoising likelihood
@@ -672,7 +680,7 @@ class FlowMatchingPolicy(PreTrainedPolicy):
             max_noise=max_noise,
         )
 
-    def forward_fpo(self, batch: dict[str, Tensor], n_action_samples: int = 1, cfm_loss_t: Tensor = None, cfm_loss_eps: Tensor = None, debug=False) -> tuple[Tensor, Tensor, Tensor]:
+    def forward_fpo(self, batch: dict[str, Tensor], n_action_samples: int = 1, cfm_loss_t: Tensor = None, cfm_loss_eps: Tensor = None, debug=False, return_cfm_predictions: bool = False) -> tuple[Tensor, Tensor, Tensor]:
         actions = batch[ACTION] # (num_envs, horizon, action_dim)
         B, T, D = actions.shape
         
@@ -711,16 +719,29 @@ class FlowMatchingPolicy(PreTrainedPolicy):
             actions = actions.unsqueeze(1).expand(-1, n_action_samples, -1, -1).reshape(-1, T, D)
             batch[ACTION] = actions
 
-        cfm_loss = self.get_cfm_loss(batch, cfm_loss_eps, cfm_loss_t, non_reduction=True)
+        cfm_output = self.get_cfm_loss(
+            batch,
+            cfm_loss_eps,
+            cfm_loss_t,
+            non_reduction=True,
+            return_predictions=return_cfm_predictions,
+        )
+        if return_cfm_predictions:
+            cfm_loss, x1_pred, _ = cfm_output
+        else:
+            cfm_loss = cfm_output
 
         # Reshape the cfm_loss, cfm_loss_t, cfm_loss_eps
         cfm_loss = cfm_loss.mean(-1).transpose(0,1).reshape(T, B, n_action_samples) # (B * n_action_samples, T) -> (T,B*n_action_samples) -> (T,B,n_action_samples)
         cfm_loss_t = cfm_loss_t.squeeze(-1).transpose(0,1).expand(T, -1).reshape(T, B, n_action_samples) # (B*n_action_samples, 1, 1) -> (T, B, n_action_samples)
         cfm_loss_eps = cfm_loss_eps.permute(1, 0, 2).reshape(T, B, n_action_samples, D) # (B*n_action_samples, T, D) -> (T, B, n_action_samples, D)
 
+        if return_cfm_predictions:
+            x1_pred = x1_pred.permute(1, 0, 2).reshape(T, B, n_action_samples, D)
+            return cfm_loss, cfm_loss_t, cfm_loss_eps, x1_pred
         return cfm_loss, cfm_loss_t, cfm_loss_eps
 
-    def get_cfm_loss(self, batch: dict[str, Tensor], cfm_loss_eps: Tensor = None, cfm_loss_t: Tensor = None, non_reduction: bool = False) -> tuple[Tensor, dict]:
+    def get_cfm_loss(self, batch: dict[str, Tensor], cfm_loss_eps: Tensor = None, cfm_loss_t: Tensor = None, non_reduction: bool = False, return_predictions: bool = False) -> tuple[Tensor, dict]:
         """Forward pass for training with flow matching loss."""
         # Normalize inputs and targets
         batch = self.normalize_inputs(batch)
@@ -769,45 +790,23 @@ class FlowMatchingPolicy(PreTrainedPolicy):
         if self.config.transported_clip_value is not None:
             network_output = network_output.clamp(-self.config.transported_clip_value, self.config.transported_clip_value)
 
+        velocity_pred, x0_pred, x1_pred = flow_endpoint_predictions(
+            x_t,
+            t,
+            network_output,
+            output_parameterization=self.config.flow_network_output_param,
+        )
+
         # Compute loss based on mode
         if self.config.cfm_loss_mode == "x0":
-            # x0 MSE loss
-            if self.config.flow_network_output_param == "u":
-                # If network predicts velocity, compute x0 from it
-                velocity_pred = network_output
-                x0_pred = x_t - t * velocity_pred
-            else:  # flow_network_output_param == "x0"
-                x0_pred = network_output
-            
             loss = self._compute_squared_error(x0_pred, actions)
             
         elif self.config.cfm_loss_mode == "u":
             # Velocity MSE loss
             target_velocity = noise - actions  # True flow velocity from x0 to x1
-            
-            if self.config.flow_network_output_param == "u":
-                velocity_pred = network_output
-            else:  # flow_network_output_param == "x0"
-                x0_pred = network_output
-                # Compute velocity: u = (x_t - x0) / t
-                # Handle t=0 case
-                t_clamped = torch.clamp(t, min=1e-5)
-                velocity_pred = (x_t - x0_pred) / t_clamped
-            
             loss = self._compute_squared_error(velocity_pred, target_velocity)
             
         elif self.config.cfm_loss_mode == "eps":
-            # Epsilon (x1) prediction loss
-            if self.config.flow_network_output_param == "u":
-                velocity_pred = network_output
-                x0_pred = x_t - t * velocity_pred
-                x1_pred = x0_pred + velocity_pred
-            else:  # flow_network_output_param == "x0"
-                x0_pred = network_output
-                # Compute x1 from x0: x_t = (1-t)*x0 + t*x1 => x1 = (x_t - (1-t)*x0) / t
-                t_clamped = torch.clamp(t, min=1e-5)
-                x1_pred = (x_t - (1 - t) * x0_pred) / t_clamped
-            
             loss = self._compute_squared_error(x1_pred, noise)
         
         # Apply timestep-dependent weighting
@@ -815,6 +814,8 @@ class FlowMatchingPolicy(PreTrainedPolicy):
         loss = loss * weight
         
         if non_reduction:
+            if return_predictions:
+                return loss, x1_pred, x0_pred
             return loss
         
         # Handle padding mask if present
