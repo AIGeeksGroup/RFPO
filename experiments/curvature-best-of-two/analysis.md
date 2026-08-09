@@ -2,9 +2,8 @@
 
 ## Outcome
 
-H46 passed its pipeline audit and its first balanced reward gate. This is a positive screening result
-that authorizes an independently seeded confirmation; it is not yet a stable improvement or an
-official benchmark claim.
+H46 passed its pipeline audit. Its first balanced reward comparison appeared to pass, but a later
+seed-propagation audit invalidated that reward decision before confirmation.
 
 The seed-20260921 smoke recorded 202 replanning decisions. All actions, paths, and scores were finite;
 every selection matched the lower of the two normalized straightness errors; both exchangeable
@@ -22,9 +21,10 @@ contributing one episode each, Euler-10, 16 executed actions, no EMA, and OSMesa
 | Ordinary one-sample control | 5/20 (25%) | - |
 | Lower-curvature best-of-two | 8/20 (40%) | +3/20 |
 
-The candidate exactly meets the locked +3/20 gate. Zero-source inference does not enter the new code
-path, so its paired value is identical by construction and the random gain is also a +3 pooled gain
-against a shared zero cell.
+The candidate numerically meets the locked +3/20 gate. However, `eval_checkpoint.py` did not pass
+`cfg.seed` to the spawned environment constructors, so robosuite received `seed=None` in both cells.
+These remain balanced independent samples but do not implement the intended evaluation seed and
+cannot satisfy the protocol gate.
 
 The formal candidate recorded 508 replanning decisions. Both branches were selected exactly 254
 times, all audit invariants passed, and selected curvature was 11.58% lower on average than the two-
@@ -37,6 +37,6 @@ may still provide useful relative confidence between stochastic action candidate
 Gaussian inference and doubles policy network evaluations at replanning time; it does not improve
 training sample efficiency.
 
-Keep H46 active and lock one independent 50-episode balanced confirmation before another rollout.
-Do not change candidate count, score, checkpoint, action horizon, solver, or renderer. Failure of the
-confirmation gate closes the method without another seed or variant.
+Keep H46 active only for an unchanged corrected screen after deterministic per-environment seeding is
+wired into the evaluation entry point. Do not run confirmation, change candidate count, score,
+checkpoint, action horizon, solver, renderer, seed, or reward gate based on the invalid comparison.

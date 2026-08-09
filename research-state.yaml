@@ -1317,6 +1317,8 @@ experiments:
       action_steps: 16
       balanced_episodes_per_env: true
       renderer: osmesa
+      valid: false
+      invalid_reason: "Evaluation entry point did not pass cfg.seed to environment constructors."
     - run: square_h46_candidate_random_balanced20_seed20260922
       metric: success_rate
       value: 0.40
@@ -1327,11 +1329,13 @@ experiments:
       mean_relative_curvature_reduction: 0.1158016542
       balanced_episodes_per_env: true
       renderer: osmesa
+      valid: false
+      invalid_reason: "Evaluation entry point did not pass cfg.seed to environment constructors."
 
 outer_loop:
   cycle: 32
-  last_direction: "H46 passed its first Square screen; lock and run one independent 50-episode confirmation without changing the method."
-  last_reflection: "Lower-curvature best-of-two validly improved random Square success from 5/20 to 8/20 and exactly met the locked gate. Treat this as screening evidence only until an independent larger seed confirms it."
+  last_direction: "Correct deterministic per-environment seeding and rerun the unchanged H46 screen before any confirmation."
+  last_reflection: "The initial H46 mechanism audit is valid, but its 5/20 versus 8/20 reward comparison did not receive the configured environment seeds and is invalid for protocol decisions."
 
 workspace:
   findings: "findings.md"
