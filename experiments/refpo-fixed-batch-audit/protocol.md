@@ -20,8 +20,10 @@ draws. It tests the subsequently published ReFPO objective's direct fixed-batch 
   current losses and stored time-noise pairs. No extra actor forward is allowed.
 - Unchanged settings: actor and critic learning rates, ten epochs, eight minibatches, MC8 sampling,
   clipping, optimizer, GAE, source distribution, and rollout order.
-- Audit data: the same 64 seeded positive-advantage, fully valid chunks in both conditions, split into
-  two disjoint batches of 32. One independent MC8 draw is fixed before either actor update.
+- Audit data: the same 64 seeded, fully valid chunks with an observed-terminal return label in both
+  conditions, split into two disjoint batches of 32. One independent MC8 draw is fixed before either
+  actor update. GAE weights are standardized within each audit batch for the surrogate metric;
+  observed-terminal returns are centered within each batch for the outcome-gradient metric.
 - Record at epoch 10: held-out median absolute log ratio, ratio standard deviation, clip fraction,
   positive advantage-weighted unclipped surrogate gain, and pre/post outcome-gradient cosine.
 - Pairing gate: pre-update observations, actions, advantages, behavior losses, held-out CFM draws,

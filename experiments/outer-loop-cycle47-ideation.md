@@ -29,7 +29,7 @@ non-degradation check.
 ## Selection
 
 Use the paper's MuJoCo coefficient `lambda=0.04` once, without a sweep. First compare it with the
-official update on two exactly paired 32-chunk held-out batches. The candidate must reduce held-out
-ratio drift while retaining at least half of control surrogate progress and must not worsen outcome-
-gradient preservation. A failure stops ReFPO before reward training; a pass permits only a short
-matched reward screen.
+official update on two exactly paired 32-chunk held-out batches with observed-terminal labels. The
+candidate must reduce held-out ratio drift while retaining at least half of control surrogate progress
+and must not worsen centered outcome-gradient preservation. A failure stops ReFPO before reward
+training; a pass permits only a short matched reward screen.
