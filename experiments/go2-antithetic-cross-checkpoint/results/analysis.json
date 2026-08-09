@@ -1,0 +1,90 @@
+{
+  "hypothesis": "H68",
+  "episodes_per_method_checkpoint": 128,
+  "new_completed_episodes": 768,
+  "bootstrap_seed": 20261150,
+  "bootstrap_samples": 20000,
+  "checkpoint_results": {
+    "500": {
+      "mean_returns": {
+        "zero": 39.39091444015503,
+        "iid_pair": 36.75668656826019,
+        "antithetic": 37.193749867379665
+      },
+      "antithetic_minus_iid_pair": {
+        "gain": 0.4370632991194725,
+        "sem": 0.5257371393029155,
+        "bootstrap_95": [
+          -0.6863710328936576,
+          1.3457776011899107
+        ]
+      },
+      "antithetic_minus_zero": {
+        "gain": -2.197164572775364,
+        "sem": 0.5234286474741554,
+        "bootstrap_95": [
+          -3.32013927269727,
+          -1.2934447528794415
+        ]
+      }
+    },
+    "1000": {
+      "mean_returns": {
+        "zero": 41.401094019412994,
+        "iid_pair": 40.61225026845932,
+        "antithetic": 41.35342559218407
+      },
+      "antithetic_minus_iid_pair": {
+        "gain": 0.7411753237247467,
+        "sem": 0.018433246484843572,
+        "bootstrap_95": [
+          0.7043349012732506,
+          0.7767276011407376
+        ]
+      },
+      "antithetic_minus_zero": {
+        "gain": -0.04766842722892761,
+        "sem": 0.011151510114127893,
+        "bootstrap_95": [
+          -0.07033174633979797,
+          -0.026763048022985486
+        ]
+      }
+    }
+  },
+  "pooled_antithetic_minus_iid_pair": {
+    "gain": 0.5891193114221096,
+    "sem": 0.26268648366628977,
+    "bootstrap_95": [
+      0.02233677953481675,
+      1.037704354804009
+    ]
+  },
+  "archived_checkpoint_1499_antithetic_minus_iid_pair": {
+    "gain": 0.7792797572910786,
+    "sem": 0.18958740505774183,
+    "bootstrap_95": [
+      0.49129902869462966,
+      1.2094532404094926
+    ]
+  },
+  "validity": {
+    "500": {
+      "initial_observation_hashes_match": true,
+      "primary_source_stream_hashes_match": true,
+      "equal_pair_nfe": true
+    },
+    "1000": {
+      "initial_observation_hashes_match": true,
+      "primary_source_stream_hashes_match": true,
+      "equal_pair_nfe": true
+    }
+  },
+  "gates": {
+    "all_pairing_and_nfe_validity": true,
+    "checkpoint_500_point_gain_positive": true,
+    "checkpoint_1000_point_gain_positive": true,
+    "pooled_bootstrap_lower_positive": true
+  },
+  "passed": true
+}

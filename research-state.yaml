@@ -540,7 +540,7 @@ hypotheses:
     priority: high
   - id: H68
     statement: "The equal-compute antithetic-over-IID return gain remains positive at iterations 500 and 1000 of the official Go2 seed-42 training trajectory."
-    status: active
+    status: supported
     motivation: "A publication claim should not rest on a source-cancellation property found only in the final checkpoint; cheap stage generalization precedes independent training seeds."
     parent: H67
     priority: high
@@ -559,7 +559,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 206
+  total_runs: 207
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -2075,11 +2075,28 @@ experiments:
       validity_passed: true
       passed: true
       renderer: egl
+    - run: go2_h68_antithetic_cross_checkpoint_seed20261120
+      metric: pooled_equal_nfe_antithetic_minus_iid_paired_return
+      value: 0.5891193114
+      checkpoints: [500, 1000]
+      environments_per_method_checkpoint: 128
+      total_episodes: 768
+      checkpoint_500_gain: 0.4370632991
+      checkpoint_1000_gain: 0.7411753237
+      pooled_bootstrap_95: [0.0223367795, 1.0377043548]
+      checkpoint_500_antithetic_minus_zero: -2.1971645728
+      checkpoint_1000_antithetic_minus_zero: -0.0476684272
+      initial_observation_hashes_match: true
+      primary_source_stream_hashes_match: true
+      equal_pair_nfe: true
+      validity_passed: true
+      passed: true
+      renderer: egl
 
 outer_loop:
-  cycle: 57
-  last_direction: "Deepen H67 with low-cost cross-checkpoint screening, then independent training seeds if the equal-compute advantage persists."
-  last_reflection: "H67 separates antithetic structure from generic ensembling: at exact equal 128 NFE, antithetic pairing beat IID averaging by 0.7793 with bootstrap 95% [0.4913, 1.2095]. It also beat matched zero by 0.2547, but that interval crosses zero. The antithetic mechanism is therefore real, while best-deployment superiority and model generality remain open."
+  cycle: 58
+  last_direction: "Train and evaluate independent official Go2 seeds, retaining equal-compute IID attribution and matched zero/random reporting."
+  last_reflection: "H68 found positive antithetic-over-IID gains at checkpoints 500, 1000, and 1499, with the two new checkpoints pooling to +0.5891 [0.0223, 1.0377]. The gap to zero shrank from -2.197 at iteration 500 to -0.048 at 1000 and a suggestive +0.255 at 1499. Stage generalization passes, but independent-model generality and best-deployment superiority remain open."
 
 workspace:
   findings: "findings.md"
