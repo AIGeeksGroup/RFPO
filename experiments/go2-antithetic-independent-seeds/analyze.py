@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import re
 from pathlib import Path
 
 import numpy as np
@@ -24,10 +25,15 @@ def parse_args():
     parser.add_argument("--results-dir", type=Path, required=True)
     parser.add_argument("--h67-analysis", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--archival",
+        action="store_true",
+        help="reanalyze archived records without reading remote checkpoint files",
+    )
     return parser.parse_args()
 
 
-def _load_manifest(results_dir: Path, training_seed: int) -> dict:
+def _load_manifest(results_dir: Path, training_seed: int, *, archival: bool) -> dict:
     path = results_dir / f"training_seed{training_seed}.json"
     manifest = json.loads(path.read_text())
     expected = {
@@ -41,11 +47,22 @@ def _load_manifest(results_dir: Path, training_seed: int) -> dict:
     for key, value in expected.items():
         if manifest.get(key) != value:
             raise ValueError(f"{path}: expected {key}={value!r}")
-    checkpoint = Path(manifest["final_checkpoint"])
-    if checkpoint.name != "model_1499.pt" or not checkpoint.is_file():
+    checkpoint = Path(manifest.get("final_checkpoint", ""))
+    digest = manifest.get("final_checkpoint_sha256")
+    checkpoint_bytes = manifest.get("final_checkpoint_bytes")
+    if checkpoint.name != "model_1499.pt":
         raise ValueError(f"{path}: invalid final checkpoint")
-    digest = hashlib.sha256(checkpoint.read_bytes()).hexdigest()
-    if digest != manifest.get("final_checkpoint_sha256"):
+    if not isinstance(digest, str) or re.fullmatch(r"[0-9a-f]{64}", digest) is None:
+        raise ValueError(f"{path}: invalid checkpoint digest")
+    if type(checkpoint_bytes) is not int or checkpoint_bytes <= 0:
+        raise ValueError(f"{path}: invalid checkpoint byte size")
+    if archival:
+        return manifest
+    if not checkpoint.is_file():
+        raise ValueError(f"{path}: invalid final checkpoint")
+    if checkpoint.stat().st_size != checkpoint_bytes:
+        raise ValueError(f"{path}: checkpoint byte size differs")
+    if hashlib.sha256(checkpoint.read_bytes()).hexdigest() != digest:
         raise ValueError(f"{path}: checkpoint digest differs")
     return manifest
 
@@ -118,8 +135,10 @@ def _stratified_summary(
     }
 
 
-def analyze(results_dir: Path, h67_analysis_path: Path) -> dict:
-    manifests = {seed: _load_manifest(results_dir, seed) for seed in SEEDS}
+def analyze(results_dir: Path, h67_analysis_path: Path, *, archival: bool = False) -> dict:
+    manifests = {
+        seed: _load_manifest(results_dir, seed, archival=archival) for seed in SEEDS
+    }
     checkpoint_hashes = {
         manifest["final_checkpoint_sha256"] for manifest in manifests.values()
     }
@@ -228,7 +247,7 @@ def main():
     args = parse_args()
     if args.output.exists():
         raise FileExistsError(f"refusing to overwrite {args.output}")
-    result = analyze(args.results_dir, args.h67_analysis)
+    result = analyze(args.results_dir, args.h67_analysis, archival=args.archival)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("x") as handle:
         json.dump(result, handle, indent=2)
