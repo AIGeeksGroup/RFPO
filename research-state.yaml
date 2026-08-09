@@ -534,7 +534,7 @@ hypotheses:
     priority: high
   - id: H67
     statement: "Exact antithetic source pairing improves Go2 return over an IID two-source endpoint average at the same 128 NFE/action."
-    status: active
+    status: supported
     motivation: "H66 must be separated from generic test-time averaging and compared with the stronger zero-source deployment policy before it can support a paper claim."
     parent: H66
     priority: high
@@ -553,7 +553,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 204
+  total_runs: 206
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -2039,11 +2039,41 @@ experiments:
       validity_passed: true
       passed: true
       renderer: egl
+    - run: go2_h67_source_attribution_geometry_seed20261110
+      metric: antithetic_to_iid_zero_displacement_ratio
+      value: 0.1767415487
+      num_observations: 2048
+      positive_zero_normalized_rms: 0.2948441705
+      iid_zero_normalized_rms: 0.2078946915
+      antithetic_zero_normalized_rms: 0.0367012465
+      iid_cancellation_ratio: 0.7051002268
+      antithetic_cancellation_ratio: 0.1244767583
+      validity_passed: true
+      passed: true
+      renderer: egl
+    - run: go2_h67_source_attribution_reward_seed20261110
+      metric: equal_nfe_antithetic_minus_iid_paired_return
+      value: 0.7792797573
+      environments_per_method: 256
+      total_episodes: 1024
+      zero_mean: 41.3747743592
+      random_mean: 40.2002639035
+      iid_pair_mean: 40.8501450978
+      antithetic_mean: 41.6294248551
+      antithetic_minus_iid_bootstrap_95: [0.4912990287, 1.2094532404]
+      antithetic_minus_zero: 0.2546504959
+      antithetic_minus_zero_bootstrap_95: [-0.0266971320, 0.6193677245]
+      initial_observation_hashes_match: true
+      primary_source_stream_hashes_match: true
+      equal_pair_nfe: true
+      validity_passed: true
+      passed: true
+      renderer: egl
 
 outer_loop:
-  cycle: 56
-  last_direction: "Reopen the project for publication-level validation, beginning with equal-compute attribution and matched zero-source evaluation before broader runs."
-  last_reflection: "H66 is statistically stable against one random endpoint, but publication value remains unresolved because it doubles NFE and may only recover toward the already stronger zero-source policy. H67 therefore compares antithetic and IID two-endpoint averages at exact equal compute and reports a matched zero policy before any cross-seed or cross-task expansion."
+  cycle: 57
+  last_direction: "Deepen H67 with low-cost cross-checkpoint screening, then independent training seeds if the equal-compute advantage persists."
+  last_reflection: "H67 separates antithetic structure from generic ensembling: at exact equal 128 NFE, antithetic pairing beat IID averaging by 0.7793 with bootstrap 95% [0.4913, 1.2095]. It also beat matched zero by 0.2547, but that interval crosses zero. The antithetic mechanism is therefore real, while best-deployment superiority and model generality remain open."
 
 workspace:
   findings: "findings.md"

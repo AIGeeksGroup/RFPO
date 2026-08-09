@@ -331,12 +331,22 @@ unchanged, and actor parameters did not move. This establishes a stable official
 gain and an exact +0.458 equally weighted two-mode gain, at the explicit cost of doubling Gaussian
 inference from 64 to 128 NFE.
 
+Equal-compute attribution confirmed that H66 is not merely a generic two-sample ensemble. Across
+256 paired Go2 environments, an IID two-endpoint average scored 40.850 while the antithetic average
+scored 41.629, a +0.779 gain with paired bootstrap 95% [0.491, 1.209] at the same 128 NFE/action.
+Fixed-state displacement explains the distinction: IID averaging retained 70.51% of one random
+endpoint's displacement from the zero action, whereas exact source symmetry retained only 12.45%.
+Antithetic also scored +0.255 above matched zero in this screen, but its interval [-0.027, 0.619]
+crosses zero, so superiority to the deterministic deployment policy remains unproven.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
 - The transferable mechanism from arXiv:2209.03003 is recursive reflow using model-induced endpoint coupling.
 - A reflow method that only improves inference speed is still useful, but it must not be presented as an RL performance gain.
 - Late-checkpoint weight averaging can be active in parameter space yet reward-neutral; the reproduced Go2 tail moved 3.51% from the final actor without a detectable two-mode return gain.
+- H66's reward gain contains an antithetic-specific component: it remains significant against an IID endpoint pair at identical 128 NFE, not only against a 64-NFE single source.
+- The stronger deployment claim remains open because H67's antithetic-minus-zero interval crosses zero despite a positive point estimate.
 - WarmPrior (arXiv:2605.13959) offers a more direct reward-improvement hypothesis for chunked manipulation: center the flow source on recent actions and retain residual Gaussian noise for exploration.
 - WarmPrior cannot be grafted onto a Gaussian-trained FPO checkpoint at inference time; training-time source adaptation is necessary on Can.
 - A short 100-update training-time adaptation is also insufficient: it preserves neither deterministic success nor random exploration.

@@ -1,0 +1,57 @@
+{
+  "hypothesis": "H67",
+  "task": "Isaac-Velocity-Flat-Unitree-Go2-v0",
+  "episodes_per_method": 256,
+  "total_completed_episodes": 1024,
+  "bootstrap_seed": 20261113,
+  "bootstrap_samples": 20000,
+  "mean_returns": {
+    "zero": 41.37477435916662,
+    "random": 40.2002639034763,
+    "iid_pair": 40.85014509782195,
+    "antithetic": 41.62942485511303
+  },
+  "comparisons": {
+    "antithetic_minus_iid_pair": {
+      "gain": 0.7792797572910786,
+      "sem": 0.18958740505774183,
+      "bootstrap_95": [
+        0.49129902869462966,
+        1.2094532404094926
+      ]
+    },
+    "antithetic_minus_zero": {
+      "gain": 0.2546504959464073,
+      "sem": 0.16350792193847064,
+      "bootstrap_95": [
+        -0.026697131991386413,
+        0.6193677244707941
+      ]
+    },
+    "iid_pair_minus_random": {
+      "gain": 0.6498811943456531,
+      "sem": 0.21509934565525632,
+      "bootstrap_95": [
+        0.2811658361228183,
+        1.123089795978739
+      ]
+    },
+    "antithetic_minus_random": {
+      "gain": 1.4291609516367316,
+      "sem": 0.25450969729681316,
+      "bootstrap_95": [
+        1.0007148571312428,
+        1.9844951657811178
+      ]
+    }
+  },
+  "gates": {
+    "episode_action_return_validity": true,
+    "initial_observation_hashes_match": true,
+    "primary_source_stream_hashes_match": true,
+    "equal_antithetic_iid_nfe": true,
+    "antithetic_minus_iid_point_gain_positive": true,
+    "antithetic_minus_iid_bootstrap_lower_positive": true
+  },
+  "passed": true
+}
