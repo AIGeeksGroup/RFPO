@@ -400,7 +400,7 @@ hypotheses:
     priority: high
   - id: H50
     statement: "A simulator-state Square critic ranks complete-episode discounted success more accurately than the official critic trained on frozen visual conditioning."
-    status: active
+    status: refuted
     motivation: "H19 showed that target calibration alone does not fix critic ranking, while RLDT and other value-guided methods require a trustworthy critic before policy transport."
     parent: H40
     priority: high
@@ -419,7 +419,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 174
+  total_runs: 175
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -1457,11 +1457,26 @@ experiments:
       value: 0.30
       episodes: 20
       renderer: osmesa
+    - run: square_h50_asymmetric_critic_osmesa_seed20260926
+      metric: cross_fit_value_prediction
+      value: 0
+      episodes: 32
+      successes: 8
+      failures: 24
+      plans: 704
+      visual_mse: [0.0370303430, 0.0413921513]
+      privileged_mse: [0.0420608558, 0.0456939600]
+      mse_relative_change: [0.1358483991, 0.1039281275]
+      visual_spearman: [0.3770032848, 0.2674008645]
+      privileged_spearman: [0.4077062463, 0.2333671229]
+      spearman_gain: [0.0307029615, -0.0340337416]
+      passed: false
+      renderer: osmesa
 
 outer_loop:
   cycle: 35
-  last_direction: "Audit simulator-state value learning before implementing RLDT or another critic-guided policy transport method."
-  last_reflection: "RLDT has no public implementation and changes too many expensive components at once. H19 and H48-H49 show that stronger policy updates are not useful until reward-relevant value ranking is independently validated."
+  last_direction: "Close the asymmetric critic prerequisite and select a critic-free exploration mechanism before reconsidering full RLDT."
+  last_reflection: "H50's simulator-state critic worsened held-out MSE in both folds and did not reliably improve rank, so privileged value information is not a cheap fix under the official short critic budget. This does not refute RLDT, but removes the justification for a costly code-free port now."
 
 workspace:
   findings: "findings.md"

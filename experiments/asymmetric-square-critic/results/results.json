@@ -1,0 +1,130 @@
+{
+  "config": {
+    "base_policy_local_path": "/home/haoyu/workspace/code/fpo-control/manipulation_experiments/downloaded_checkpoints/trc7rbt0_step_110000",
+    "camera_size": 84,
+    "critic_epochs": 10,
+    "critic_learning_rate": 0.0001,
+    "critic_minibatches": 8,
+    "device": "cuda",
+    "discount": 0.995,
+    "n_action_steps": 16,
+    "num_envs": 16,
+    "num_episodes": 32,
+    "output_dir": "/home/haoyu/workspace/outputs/fpo-control/results/square_h50_asymmetric_critic_osmesa_seed20260926",
+    "sampling_steps": 10,
+    "seed_start": 20260926
+  },
+  "episodes": 32,
+  "failures": 24,
+  "folds": [
+    {
+      "evaluation_seeds": [
+        20260926,
+        20260927,
+        20260930,
+        20260932,
+        20260933,
+        20260936,
+        20260937,
+        20260939,
+        20260941,
+        20260943,
+        20260946,
+        20260948,
+        20260950,
+        20260952,
+        20260953,
+        20260955
+      ],
+      "fold": 0,
+      "mse_relative_change": 0.13584839909068758,
+      "privileged": {
+        "mse": 0.04206085577607155,
+        "prediction_mean": 0.10211442410945892,
+        "prediction_std": 0.122515968978405,
+        "spearman": 0.40770624628982166
+      },
+      "spearman_gain": 0.030702961480299162,
+      "train_seeds": [
+        20260928,
+        20260929,
+        20260931,
+        20260934,
+        20260935,
+        20260938,
+        20260940,
+        20260942,
+        20260944,
+        20260945,
+        20260947,
+        20260949,
+        20260951,
+        20260954,
+        20260956,
+        20260957
+      ],
+      "visual": {
+        "mse": 0.03703034296631813,
+        "prediction_mean": 0.10735757648944855,
+        "prediction_std": 0.1519533097743988,
+        "spearman": 0.3770032848095225
+      }
+    },
+    {
+      "evaluation_seeds": [
+        20260928,
+        20260929,
+        20260931,
+        20260934,
+        20260935,
+        20260938,
+        20260940,
+        20260942,
+        20260944,
+        20260945,
+        20260947,
+        20260949,
+        20260951,
+        20260954,
+        20260956,
+        20260957
+      ],
+      "fold": 1,
+      "mse_relative_change": 0.10392812750396652,
+      "privileged": {
+        "mse": 0.045693960040807724,
+        "prediction_mean": 0.12438046187162399,
+        "prediction_std": 0.11934877187013626,
+        "spearman": 0.2333671228648132
+      },
+      "spearman_gain": -0.03403374160317091,
+      "train_seeds": [
+        20260926,
+        20260927,
+        20260930,
+        20260932,
+        20260933,
+        20260936,
+        20260937,
+        20260939,
+        20260941,
+        20260943,
+        20260946,
+        20260948,
+        20260950,
+        20260952,
+        20260953,
+        20260955
+      ],
+      "visual": {
+        "mse": 0.04139215126633644,
+        "prediction_mean": 0.1264970749616623,
+        "prediction_std": 0.17170485854148865,
+        "spearman": 0.2674008644679841
+      }
+    }
+  ],
+  "passed": false,
+  "plans": 704,
+  "successes": 8
+}

@@ -298,6 +298,13 @@ then tied Gaussian success at 6/20, reduced zero success from 10/20 to 8/20, and
 success from 16/40 to 14/40. Complete failure labels do not compensate for one fewer fresh actor
 rollout and are not the dominant bottleneck under this budget.
 
+An asymmetric simulator-state critic also failed as a prerequisite for value-guided transport. On
+32 complete Square episodes with 704 plan records, it increased held-out MSE by 13.58% and 10.39%
+relative to the official frozen-visual conditioning critic. Spearman changed by only +0.0307 and
+-0.0340 across the two episode-disjoint folds. Full state is therefore not automatically a better
+short-budget value representation; RLDT's substantially larger replay and trainable double-Q system
+cannot be replaced by this cheap critic substitution.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -358,6 +365,7 @@ rollout and are not the dominant bottleneck under this budget.
 - RFS identifies a new intervention boundary after the flow-actor routes were exhausted: keep the pretrained velocity field frozen and optimize explicit latent-source and output-residual distributions with a standard PPO likelihood ratio.
 - Joint RFS modulation is active but not sufficient on Square: despite bitwise base freezing and nonzero updates in both branches, it reduced mean and sampled success by two points each. Its 224-dimensional exact joint PPO ratio clipped 73-76% of minibatch samples, unlike H33's inactive temporal-clipping premise in FPO++.
 - Temporally factorized RFS ratios cut clipping by 57.56 points and preserve the exact on-policy gradient, but larger effective modulation updates worsened pooled success to 11/40. High joint clipping was protective rather than the dominant failure; RFS modulation is closed at this budget.
+- Privileged simulator inputs do not guarantee a better sparse-reward critic under the official short optimization budget: H50 worsened cross-fit MSE in both folds and failed to improve return ranking consistently.
 
 ## Lessons and Constraints
 
@@ -380,6 +388,7 @@ rollout and are not the dominant bottleneck under this budget.
 - Can joint source-latent and bounded residual modulation improve Square reward while keeping the released flow actor bitwise frozen?
 - Does temporally factorizing RFS's explicit PPO ratio restore usable updates under its observed high-dimensional clipping, or is the modulation direction itself harmful?
 - Can a value-aware action-density transport method improve exploration without directly moving the pretrained flow field or learning a harmful additive modulation?
+- Which critic-free exploration mechanism can use the frozen policy's multimodal action support without ranking candidates by curvature or a learned value model?
 
 ## Optimization Trajectory
 
