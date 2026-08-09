@@ -452,6 +452,12 @@ hypotheses:
     motivation: "The checkpoint's gripper statistics reflect a two-state controller, but continuous flow endpoints are executed directly; this isolates contact semantics from the globally harmful action smoothing tested in H31."
     parent: null
     priority: high
+  - id: H57
+    statement: "Keeping a unit-Gaussian arm source while zeroing only the gripper latent improves released Can step-1000 random-source success."
+    status: proposed
+    motivation: "H8-H10 changed complete source trajectories and H56 changed only executed outputs; neither tests whether gripper latent noise contaminates the coupled flow while preserving arm exploration."
+    parent: null
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -1725,8 +1731,8 @@ experiments:
 
 outer_loop:
   cycle: 42
-  last_direction: "Close fixed gripper-support projection after it leaves every common-seed Can outcome unchanged; seek a distinct mechanism rather than gripper thresholds or timing variants."
-  last_reflection: "H56 materially changed 67.55% of executed gripper commands while preserving arm actions and initial states exactly, yet all 20 outcomes matched control. Continuous gripper support mismatch is observable but not reward-limiting on this screen."
+  last_direction: "Test H57 with stateless common Gaussian arm sources and a zero gripper latent against the released Can step-1000 random-source benchmark."
+  last_reflection: "H56 rejects binary output projection, but it does not isolate the upstream effect of gripper latent noise inside the coupled flow. A coordinate-factorized source preserves the benchmark's Gaussian arm exploration and is the cheapest prerequisite before any hybrid discrete/continuous architecture."
 
 workspace:
   findings: "findings.md"
