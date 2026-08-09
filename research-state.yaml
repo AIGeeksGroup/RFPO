@@ -544,6 +544,12 @@ hypotheses:
     motivation: "A publication claim should not rest on a source-cancellation property found only in the final checkpoint; cheap stage generalization precedes independent training seeds."
     parent: H67
     priority: high
+  - id: H69
+    statement: "Antithetic source pairing beats an equal-NFE IID endpoint pair across three independently trained official Go2 policies."
+    status: active
+    motivation: "Same-trajectory checkpoint consistency cannot establish model-seed generality; three fixed final checkpoints provide the minimum publication-stage independent confirmation."
+    parent: H67
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
