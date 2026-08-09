@@ -31,7 +31,7 @@ free_polls=0
 echo "Waiting for GPU $PHYSICAL_GPU ($GPU_UUID) to remain free for $STABLE_POLLS polls"
 while ((SECONDS - started_at < MAX_WAIT_SECONDS)); do
   if nvidia-smi --query-compute-apps=gpu_uuid --format=csv,noheader,nounits \
-    | grep -Fxq "$GPU_UUID"; then
+    | grep -Fx "$GPU_UUID" >/dev/null; then
     free_polls=0
   else
     ((free_polls += 1))
