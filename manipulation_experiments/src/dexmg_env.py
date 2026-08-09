@@ -127,6 +127,8 @@ class RobosuiteGymWrapper:
         logger.info(f"Video key: {self.video_key}")
 
         self.episode_steps = 0
+        self._track_stage_potential = False
+        self._last_stage_transition = None
 
         if env_name not in ENV_ROBOTS:
             raise ValueError(f"Unknown robosuite environment: {env_name}")
@@ -301,6 +303,9 @@ class RobosuiteGymWrapper:
         if action.ndim > 1:
             action = action[0]  # Take first action if batched
 
+        potential_before = (
+            self.get_stage_potential() if self._track_stage_potential else None
+        )
         obs, reward, done, info = self.env.step(action)
         self.episode_steps += 1
         # Convert to the expected format
@@ -314,6 +319,20 @@ class RobosuiteGymWrapper:
         terminated_scalar = bool(success)
         truncated_scalar = bool(done)  # Robosuite returns done when timeout
 
+        if self._track_stage_potential:
+            potential_next = (
+                0.0
+                if terminated_scalar or truncated_scalar
+                else self.get_stage_potential()
+            )
+            self._last_stage_transition = {
+                "potential_before": float(potential_before),
+                "potential_next": float(potential_next),
+                "sparse_reward": reward_scalar,
+                "terminal": bool(terminated_scalar or truncated_scalar),
+                "success": bool(success),
+            }
+
         if terminated_scalar or truncated_scalar:
             info = {
                 **info,
@@ -323,6 +342,28 @@ class RobosuiteGymWrapper:
             self.episode_steps = 0
 
         return processed_obs, reward_scalar, terminated_scalar, truncated_scalar, info
+
+    def set_stage_potential_tracking(self, enabled: bool) -> None:
+        """Enable transition-level Square stage-potential records for audits."""
+        if enabled and self.env_name != "NutAssemblySquare":
+            raise ValueError("stage-potential tracking is currently defined only for Square")
+        self._track_stage_potential = bool(enabled)
+        self._last_stage_transition = None
+
+    def get_stage_potential(self) -> float:
+        """Return RoboSuite's bounded Square task-progress potential."""
+        if self.env_name != "NutAssemblySquare":
+            raise ValueError("stage potential is currently defined only for Square")
+        potential = float(max(self.env.staged_rewards()))
+        if not np.isfinite(potential) or not 0.0 <= potential <= 0.7 + 1e-7:
+            raise RuntimeError(f"invalid Square stage potential: {potential}")
+        return potential
+
+    def get_last_stage_transition(self) -> dict:
+        """Return the most recent tracked stage-potential transition."""
+        if not self._track_stage_potential or self._last_stage_transition is None:
+            raise RuntimeError("no tracked stage-potential transition is available")
+        return dict(self._last_stage_transition)
 
     def _process_obs(self, obs):
         """Process robosuite observations to match expected format."""
