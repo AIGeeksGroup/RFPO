@@ -71,7 +71,13 @@ class EvalCheckpointConfig:
     zero_sampling: bool = True
     """Legacy source selector used when sampling_mode is unset."""
     sampling_mode: Optional[
-        Literal["zero", "random", "antithetic_average", "correlated_random"]
+        Literal[
+            "zero",
+            "random",
+            "antithetic_average",
+            "correlated_random",
+            "curvature_best_of_two",
+        ]
     ] = None
     """Explicit evaluation source mode; overrides zero_sampling when set."""
     source_prior_mode: Optional[str] = None
@@ -80,6 +86,10 @@ class EvalCheckpointConfig:
     """Residual noise scale for previous_action source positions."""
     source_temporal_correlation: float = 0.9
     """AR(1) coefficient used only by correlated_random sampling."""
+    curvature_min_audit_records: int = 0
+    """Minimum recorded replans required in curvature_best_of_two mode."""
+    curvature_require_both_branches: bool = False
+    """Require both exchangeable candidates to be selected in the curvature audit."""
     sampling_steps: Optional[int] = None
     """Optional integration-step override for low-NFE checkpoint evaluation."""
     integration_method: Optional[Literal["euler", "midpoint"]] = None
@@ -166,7 +176,11 @@ def _run_rollouts(
     task: str,
     save_video: bool = True,
     sampling_mode: Literal[
-        "zero", "random", "antithetic_average", "correlated_random"
+        "zero",
+        "random",
+        "antithetic_average",
+        "correlated_random",
+        "curvature_best_of_two",
     ] = "random",
     source_temporal_correlation: float = 0.9,
     balanced_episodes_per_env: bool = False,
@@ -233,6 +247,7 @@ def _run_rollouts(
                     if sampling_mode == "correlated_random"
                     else 0.0
                 ),
+                curvature_best_of_two=sampling_mode == "curvature_best_of_two",
             )
             if not torch.isfinite(action).all():
                 raise FloatingPointError(f"non-finite action produced in {sampling_mode} mode")
@@ -733,6 +748,49 @@ def main(cfg: EvalCheckpointConfig):
         f.write(f"=" * 80 + "\n")
 
     logger.info(colored(f"Summary saved to: {summary_path}", "green"))
+
+    if sampling_mode == "curvature_best_of_two":
+        records = policy.curvature_selection_records
+        selected_counts = [
+            sum(record["selected_index"] == candidate for record in records)
+            for candidate in range(2)
+        ]
+        audit = {
+            "record_count": len(records),
+            "selected_counts": selected_counts,
+            "all_finite": all(
+                np.isfinite(record["scores"]).all() for record in records
+            ),
+            "all_selected_minimum": all(
+                np.isclose(record["selected_score"], min(record["scores"]))
+                for record in records
+            ),
+            "candidate_counts": sorted(
+                {record["candidate_count"] for record in records}
+            ),
+            "sampling_steps": sorted(
+                {record["sampling_steps"] for record in records}
+            ),
+            "records": records,
+        }
+        audit_path = run_dir / "curvature_best_of_two.json"
+        with open(audit_path, "w") as f:
+            json.dump(audit, f, indent=2)
+        if len(records) < cfg.curvature_min_audit_records:
+            raise RuntimeError(
+                "curvature audit recorded "
+                f"{len(records)} replans, expected at least "
+                f"{cfg.curvature_min_audit_records}"
+            )
+        if not audit["all_finite"] or not audit["all_selected_minimum"]:
+            raise RuntimeError("curvature selection failed finite or argmin audit")
+        if audit["candidate_counts"] != [2] or audit["sampling_steps"] != [10]:
+            raise RuntimeError(
+                "curvature selection used unexpected candidate or Euler-step counts"
+            )
+        if cfg.curvature_require_both_branches and min(selected_counts) == 0:
+            raise RuntimeError("curvature selection did not use both candidate branches")
+        logger.info("Curvature selection audit saved to: %s", audit_path)
 
     # Clean up
     env.close()

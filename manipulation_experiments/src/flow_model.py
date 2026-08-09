@@ -15,6 +15,7 @@ from lerobot.configs.types import FeatureType, PolicyFeature
 from torch import Tensor, nn
 
 from src.antithetic_inference import average_antithetic_predictions, build_antithetic_sources
+from src.curvature_selection import select_lower_curvature_candidate
 from src.rollout_bookkeeping import apply_source_sampling_scale, apply_zero_sampling_mask
 
 from .flow_model_config import FlowMatchingConfig
@@ -140,6 +141,7 @@ class FlowMatchingPolicy(PreTrainedPolicy):
         self.mdp_x_t_path_buffers = {
             env_id: deque([], maxlen=self.config.n_action_steps) for env_id in range(self.num_envs)
         }
+        self.curvature_selection_records: list[dict[str, object]] = []
             
     def get_optim_params(self) -> dict:
         """Get optimizer parameters with different learning rates for backbone and other parts."""
@@ -223,6 +225,7 @@ class FlowMatchingPolicy(PreTrainedPolicy):
         zero_sampling_mask: Tensor | None = None,
         source_sampling_scale: Tensor | None = None,
         temporal_source_correlation: float = 0.0,
+        curvature_best_of_two: bool = False,
     ) -> Tensor:
         """Select actions for multiple environments with separate buffers.
         
@@ -241,6 +244,22 @@ class FlowMatchingPolicy(PreTrainedPolicy):
                 raise ValueError("antithetic sampling cannot be combined with other source or SDE options")
             if self.config.source_prior_mode != "gaussian":
                 raise ValueError("antithetic sampling requires the Gaussian source prior")
+        if curvature_best_of_two:
+            if (
+                zero_sampling
+                or sde_sampling
+                or antithetic_sampling
+                or zero_sampling_mask is not None
+                or source_sampling_scale is not None
+                or temporal_source_correlation > 0
+            ):
+                raise ValueError(
+                    "curvature best-of-two cannot be combined with other sampling options"
+                )
+            if self.config.source_prior_mode != "gaussian":
+                raise ValueError("curvature best-of-two requires the Gaussian source prior")
+            if self.config.integration_method != "euler":
+                raise ValueError("curvature best-of-two is locked to Euler integration")
         if not 0.0 <= temporal_source_correlation < 1.0:
             raise ValueError("temporal_source_correlation must be in [0, 1)")
         if temporal_source_correlation > 0:
@@ -302,7 +321,60 @@ class FlowMatchingPolicy(PreTrainedPolicy):
                         previous_actions[i] = torch.stack(list(history))
                         has_previous_actions[i] = True
 
-            if antithetic_sampling:
+            if curvature_best_of_two:
+                candidate_count = 2
+                candidate_sources = torch.randn(
+                    len(envs_needing_actions),
+                    candidate_count,
+                    self.config.horizon,
+                    self.model.action_dim,
+                    device=next(iter(sub_batch.values())).device,
+                )
+                candidate_batch = {
+                    key: value.repeat_interleave(candidate_count, dim=0)
+                    for key, value in sub_batch.items()
+                }
+                flat_actions, flat_paths = self.predict_action_chunk(
+                    candidate_batch,
+                    source_noise=candidate_sources.flatten(0, 1),
+                )
+                candidate_actions = flat_actions.reshape(
+                    len(envs_needing_actions),
+                    candidate_count,
+                    self.config.horizon,
+                    self.model.action_dim,
+                )
+                candidate_paths = flat_paths.reshape(
+                    len(envs_needing_actions),
+                    candidate_count,
+                    self.config.sampling_steps,
+                    self.config.horizon,
+                    self.model.action_dim,
+                )
+                action_chunks, mdp_x_t_path, selection = (
+                    select_lower_curvature_candidate(
+                        candidate_sources,
+                        candidate_paths,
+                        candidate_actions,
+                        action_steps=self.config.n_action_steps,
+                    )
+                )
+                for local_index, env_id in enumerate(envs_needing_actions):
+                    self.curvature_selection_records.append(
+                        {
+                            "env_id": env_id,
+                            "scores": selection["scores"][local_index].cpu().tolist(),
+                            "selected_index": int(
+                                selection["selected_indices"][local_index].item()
+                            ),
+                            "selected_score": float(
+                                selection["selected_scores"][local_index].item()
+                            ),
+                            "candidate_count": candidate_count,
+                            "sampling_steps": self.config.sampling_steps,
+                        }
+                    )
+            elif antithetic_sampling:
                 source_noise = torch.randn(
                     len(envs_needing_actions),
                     self.config.horizon,
