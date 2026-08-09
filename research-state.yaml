@@ -466,7 +466,7 @@ hypotheses:
     priority: high
   - id: H59
     statement: "An exact AdamW extragradient correction improves the first FPO++ actor update's outcome alignment without collapsing surrogate progress."
-    status: active
+    status: refuted
     motivation: "The initial GAE gradient is informative, but held-out direction rotates after actor optimization; lower LR and full-batch accumulation did not correct this curvature-induced path error."
     parent: H2
     priority: high
@@ -1780,11 +1780,27 @@ experiments:
       validity_passed: true
       passed: false
       renderer: osmesa
+    - run: can_h59_adamw_extragradient_audit_osmesa_seed20261050
+      metric: exact_one_step_extragradient_audit
+      value: -0.0714906169
+      eligible_chunks: 249
+      chunks_audited: 64
+      batches: 2
+      candidate_update_cosine_gains: [-0.0714906169, 0.0297969694]
+      candidate_post_cosine_gains: [0.0078581888, -0.4883239500]
+      control_heldout_surrogate_gains: [0.1146429479, 0.1035028100]
+      candidate_heldout_surrogate_gains: [0.0039512068, -0.0128990412]
+      candidate_control_displacement_ratios: [0.9477692810, 0.9433064279]
+      actor_optimizer_state_entries: 0
+      live_actor_restored_bitwise_exact: true
+      validity_passed: true
+      passed: false
+      renderer: osmesa
 
 outer_loop:
   cycle: 45
-  last_direction: "Test exact AdamW extragradient as a first-update path correction; do not reopen same-observation ranking or gripper post-processing."
-  last_reflection: "The step-48000 actor identity audit removes the apparent one-iteration gain. Existing audits still show informative initial GAE followed by rapid gradient rotation, while lower LR and full-batch updates fail; H59 targets that measured boundary with a one-step lookahead."
+  last_direction: "Close exact AdamW extragradient after it collapses held-out surrogate progress and fails outcome-direction gates."
+  last_reflection: "H59 was active and exactly restored the live actor, but candidate update-cosine gains were -0.0715/+0.0298 and held-out surrogate gains collapsed from +0.1146/+0.1035 to +0.0040/-0.0129. Curvature lookahead without new reward information does not solve the update-direction problem."
 
 workspace:
   findings: "findings.md"
