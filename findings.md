@@ -383,6 +383,14 @@ used 64 total NFE/action and exact source streams matched. Antithetic32 again ti
 to -0.026 [-0.160, 0.110]. Across four training seeds, the effect size against random64 is therefore
 stable near one return point, while deterministic deployment remains the correct upper control.
 
+The source-cancellation mechanism is equally stable across those four final policies. Under the
+same Euler-32 construction, flattened `z` and `-z` action displacements had cosine similarities from
+-0.9721 to -0.9643. Antithetic averaging retained only 11.77-13.62% of one endpoint's displacement
+from the zero action, compared with 70.21-71.81% for IID averaging. Mean even-component RMS was
+0.0386 versus 0.3088 for the odd component. This directly supports approximate affine
+antisymmetry as the mechanism behind central-policy recovery; it is not a novelty claim over Jia et
+al. and does not show superiority to zero-source deployment.
+
 ## Patterns and Insights
 
 - FPO++ already uses the linear conditional flow-matching objective, so simply renaming it rectified flow is not a contribution.
@@ -397,6 +405,7 @@ stable near one return point, while deterministic deployment remains the correct
 - H71 shows that fusing the two half-depth solves is 19.36% faster than sequential pairing and 11.25% faster than random64 at batch 4,096 on H200, but H72 shows this is not the best deployment option because zero32 preserves return with half as many NFE.
 - H69 establishes independent-model generality: antithetic pairing beats equal-compute IID averaging in all three new official Go2 seeds and beats one random endpoint by roughly 0.89-0.97 return, while remaining tied with or below zero.
 - H73 preserves the full random-source recovery after halving each symmetric solve: all three new seeds gain 0.89-1.01 return at the same total 64 NFE as random64, with no advantage over zero32.
+- H75 directly confirms the proposed mechanism across four policies: `z/-z` action displacements are nearly opposite (mean cosine -0.9693), and symmetric averaging leaves only 12.40% residual versus 70.99% for IID averaging.
 - WarmPrior (arXiv:2605.13959) offers a more direct reward-improvement hypothesis for chunked manipulation: center the flow source on recent actions and retain residual Gaussian noise for exploration.
 - WarmPrior cannot be grafted onto a Gaussian-trained FPO checkpoint at inference time; training-time source adaptation is necessary on Can.
 - A short 100-update training-time adaptation is also insufficient: it preserves neither deterministic success nor random exploration.

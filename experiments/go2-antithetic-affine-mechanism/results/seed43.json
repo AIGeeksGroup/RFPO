@@ -1,0 +1,32 @@
+{
+  "hypothesis": "H75",
+  "checkpoint": "/mnt/data/users/haoyu/workspace/code/fpo-control/isaaclab_experiments/logs/isaaclab_fpo/unitree_go2_flat_flow/2026-08-09_20-27-42_go2_h69_seed43/model_1499.pt",
+  "training_seed": 43,
+  "task": "Isaac-Velocity-Flat-Unitree-Go2-v0",
+  "seed": 20261650,
+  "source_seed": 20261651,
+  "secondary_source_seed": 20261652,
+  "num_envs": 128,
+  "rollout_steps": 8,
+  "sampling_steps": 32,
+  "source_value_count": 24576,
+  "action_value_count": 12288,
+  "displacement_cosine": -0.9643307065127746,
+  "positive_displacement_rms": 0.3026182669358788,
+  "opposite_displacement_rms": 0.31126475409115173,
+  "even_displacement_rms": 0.041214248657599546,
+  "odd_displacement_rms": 0.30419264765947585,
+  "iid_pair_residual_rms": 0.2156692652325142,
+  "antithetic_residual_ratio": 0.13619220371231705,
+  "iid_residual_ratio": 0.712677616643056,
+  "gates": {
+    "finite_sources_and_endpoints": true,
+    "negative_sources_bitwise_exact": true,
+    "antithetic_float32_means_bitwise_exact": true,
+    "actor_parameters_bitwise_unchanged": true,
+    "displacement_cosine_at_most_negative_0_90": true,
+    "antithetic_residual_ratio_at_most_0_20": true,
+    "antithetic_ratio_at_most_0_30_iid": true
+  },
+  "passed": true
+}

@@ -584,6 +584,12 @@ hypotheses:
     motivation: "Four Go2 training seeds support a stable effect, but publication-level generality requires transfer across robot morphology and the distinct official Spot optimizer configuration before broader task expansion."
     parent: H73
     priority: high
+  - id: H75
+    statement: "Approximate source-to-action affine antisymmetry is stable across all four independently trained Go2 policies used by H70/H73."
+    status: supported
+    motivation: "Publication-level mechanism evidence should directly measure negative endpoint displacement correlation and odd/even decomposition across policies, not infer cancellation from one seed's reward alone."
+    parent: H73
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -599,7 +605,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 207
+  total_runs: 211
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -2232,11 +2238,26 @@ experiments:
       passed: true
       deployment_passed: false
       renderer: egl
+    - run: go2_h75_antithetic_affine_mechanism_42_43_44_45
+      metric: mean_antithetic_residual_ratio
+      value: 0.1239934472
+      training_seeds: [42, 43, 44, 45]
+      environments_per_policy: 128
+      rollout_steps: 8
+      action_values_per_policy: 12288
+      mean_displacement_cosine: -0.9693162138
+      displacement_cosine_range: [-0.9720904277, -0.9643307065]
+      antithetic_residual_ratio_range: [0.1176536139, 0.1361922037]
+      mean_iid_residual_ratio: 0.7098743338
+      iid_residual_ratio_range: [0.7020897127, 0.7181273021]
+      all_validity_gates_passed: true
+      passed: true
+      renderer: egl
 
 outer_loop:
-  cycle: 63
+  cycle: 64
   last_direction: "Run one medium official Spot cross-task screen before committing to multi-seed Spot/H1/G1 training, with random64, antithetic32, zero32, and zero64 controls."
-  last_reflection: "H73 confirms equal-total-NFE recovery on all three independent H69 policies: antithetic32-minus-random64 was +0.903/+1.008/+0.888 and pooled to +0.9326 [0.7851, 1.0850]. Antithetic32 still tied zero32, so the robust contribution is source-symmetry recovery under the official stochastic evaluation. The Go2 evidence is now strong enough for one gated cross-task training screen."
+  last_reflection: "H75 confirms a stable mechanism across all four Go2 policies: z/-z endpoint displacements have mean cosine -0.9693, antithetic averaging retains 12.40% of one-sided displacement versus 70.99% for IID averaging, and every locked seed gate passes. This strengthens the source-cancellation explanation without changing the H74 cross-task gate or the refuted deterministic-deployment claim."
 
 workspace:
   findings: "findings.md"

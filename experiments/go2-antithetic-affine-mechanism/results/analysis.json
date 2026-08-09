@@ -1,0 +1,181 @@
+{
+  "hypothesis": "H75",
+  "training_seeds": [
+    42,
+    43,
+    44,
+    45
+  ],
+  "policies": {
+    "42": {
+      "hypothesis": "H75",
+      "checkpoint": "/mnt/data/users/haoyu/workspace/code/fpo-control/isaaclab_experiments/logs/isaaclab_fpo/unitree_go2_flat_flow/2026-08-08_16-24-22_go2_official_seed42_20260808/model_1499.pt",
+      "training_seed": 42,
+      "task": "Isaac-Velocity-Flat-Unitree-Go2-v0",
+      "seed": 20261650,
+      "source_seed": 20261651,
+      "secondary_source_seed": 20261652,
+      "num_envs": 128,
+      "rollout_steps": 8,
+      "sampling_steps": 32,
+      "source_value_count": 24576,
+      "action_value_count": 12288,
+      "displacement_cosine": -0.9715998740794631,
+      "positive_displacement_rms": 0.3128056443815978,
+      "opposite_displacement_rms": 0.30582831570503505,
+      "even_displacement_rms": 0.03702184886107068,
+      "odd_displacement_rms": 0.3071132485642433,
+      "iid_pair_residual_rms": 0.21961762500770507,
+      "antithetic_residual_ratio": 0.11835415864781199,
+      "iid_residual_ratio": 0.7020897127412099,
+      "gates": {
+        "finite_sources_and_endpoints": true,
+        "negative_sources_bitwise_exact": true,
+        "antithetic_float32_means_bitwise_exact": true,
+        "actor_parameters_bitwise_unchanged": true,
+        "displacement_cosine_at_most_negative_0_90": true,
+        "antithetic_residual_ratio_at_most_0_20": true,
+        "antithetic_ratio_at_most_0_30_iid": true
+      },
+      "passed": true
+    },
+    "43": {
+      "hypothesis": "H75",
+      "checkpoint": "/mnt/data/users/haoyu/workspace/code/fpo-control/isaaclab_experiments/logs/isaaclab_fpo/unitree_go2_flat_flow/2026-08-09_20-27-42_go2_h69_seed43/model_1499.pt",
+      "training_seed": 43,
+      "task": "Isaac-Velocity-Flat-Unitree-Go2-v0",
+      "seed": 20261650,
+      "source_seed": 20261651,
+      "secondary_source_seed": 20261652,
+      "num_envs": 128,
+      "rollout_steps": 8,
+      "sampling_steps": 32,
+      "source_value_count": 24576,
+      "action_value_count": 12288,
+      "displacement_cosine": -0.9643307065127746,
+      "positive_displacement_rms": 0.3026182669358788,
+      "opposite_displacement_rms": 0.31126475409115173,
+      "even_displacement_rms": 0.041214248657599546,
+      "odd_displacement_rms": 0.30419264765947585,
+      "iid_pair_residual_rms": 0.2156692652325142,
+      "antithetic_residual_ratio": 0.13619220371231705,
+      "iid_residual_ratio": 0.712677616643056,
+      "gates": {
+        "finite_sources_and_endpoints": true,
+        "negative_sources_bitwise_exact": true,
+        "antithetic_float32_means_bitwise_exact": true,
+        "actor_parameters_bitwise_unchanged": true,
+        "displacement_cosine_at_most_negative_0_90": true,
+        "antithetic_residual_ratio_at_most_0_20": true,
+        "antithetic_ratio_at_most_0_30_iid": true
+      },
+      "passed": true
+    },
+    "44": {
+      "hypothesis": "H75",
+      "checkpoint": "/mnt/data/users/haoyu/workspace/code/fpo-control/isaaclab_experiments/logs/isaaclab_fpo/unitree_go2_flat_flow/2026-08-09_20-27-42_go2_h69_seed44/model_1499.pt",
+      "training_seed": 44,
+      "task": "Isaac-Velocity-Flat-Unitree-Go2-v0",
+      "seed": 20261650,
+      "source_seed": 20261651,
+      "secondary_source_seed": 20261652,
+      "num_envs": 128,
+      "rollout_steps": 8,
+      "sampling_steps": 32,
+      "source_value_count": 24576,
+      "action_value_count": 12288,
+      "displacement_cosine": -0.9692438468515504,
+      "positive_displacement_rms": 0.3306027113522186,
+      "opposite_displacement_rms": 0.32926527370288394,
+      "even_displacement_rms": 0.040919958067544455,
+      "odd_displacement_rms": 0.32738729896990565,
+      "iid_pair_residual_rms": 0.23741483318153667,
+      "antithetic_residual_ratio": 0.12377381268343265,
+      "iid_residual_ratio": 0.7181273021339468,
+      "gates": {
+        "finite_sources_and_endpoints": true,
+        "negative_sources_bitwise_exact": true,
+        "antithetic_float32_means_bitwise_exact": true,
+        "actor_parameters_bitwise_unchanged": true,
+        "displacement_cosine_at_most_negative_0_90": true,
+        "antithetic_residual_ratio_at_most_0_20": true,
+        "antithetic_ratio_at_most_0_30_iid": true
+      },
+      "passed": true
+    },
+    "45": {
+      "hypothesis": "H75",
+      "checkpoint": "/mnt/data/users/haoyu/workspace/code/fpo-control/isaaclab_experiments/logs/isaaclab_fpo/unitree_go2_flat_flow/2026-08-09_20-27-42_go2_h69_seed45/model_1499.pt",
+      "training_seed": 45,
+      "task": "Isaac-Velocity-Flat-Unitree-Go2-v0",
+      "seed": 20261650,
+      "source_seed": 20261651,
+      "secondary_source_seed": 20261652,
+      "num_envs": 128,
+      "rollout_steps": 8,
+      "sampling_steps": 32,
+      "source_value_count": 24576,
+      "action_value_count": 12288,
+      "displacement_cosine": -0.9720904277036461,
+      "positive_displacement_rms": 0.3002213765941148,
+      "opposite_displacement_rms": 0.29729025761757005,
+      "even_displacement_rms": 0.03532212993840857,
+      "odd_displacement_rms": 0.29666400723416875,
+      "iid_pair_residual_rms": 0.21213723643260674,
+      "antithetic_residual_ratio": 0.1176536139402306,
+      "iid_residual_ratio": 0.7066027037755087,
+      "gates": {
+        "finite_sources_and_endpoints": true,
+        "negative_sources_bitwise_exact": true,
+        "antithetic_float32_means_bitwise_exact": true,
+        "actor_parameters_bitwise_unchanged": true,
+        "displacement_cosine_at_most_negative_0_90": true,
+        "antithetic_residual_ratio_at_most_0_20": true,
+        "antithetic_ratio_at_most_0_30_iid": true
+      },
+      "passed": true
+    }
+  },
+  "aggregate": {
+    "displacement_cosine": {
+      "mean": -0.9693162137868585,
+      "min": -0.9720904277036461,
+      "max": -0.9643307065127746
+    },
+    "antithetic_residual_ratio": {
+      "mean": 0.12399344724594809,
+      "min": 0.1176536139402306,
+      "max": 0.13619220371231705
+    },
+    "iid_residual_ratio": {
+      "mean": 0.7098743338234303,
+      "min": 0.7020897127412099,
+      "max": 0.7181273021339468
+    },
+    "positive_displacement_rms": {
+      "mean": 0.3115619998159525,
+      "min": 0.3002213765941148,
+      "max": 0.3306027113522186
+    },
+    "opposite_displacement_rms": {
+      "mean": 0.3109121502791602,
+      "min": 0.29729025761757005,
+      "max": 0.32926527370288394
+    },
+    "even_displacement_rms": {
+      "mean": 0.038619546381155806,
+      "min": 0.03532212993840857,
+      "max": 0.041214248657599546
+    },
+    "odd_displacement_rms": {
+      "mean": 0.3088393006069484,
+      "min": 0.29666400723416875,
+      "max": 0.32738729896990565
+    }
+  },
+  "gates": {
+    "all_seed_audits_passed": true,
+    "all_validity_gates_passed": true
+  },
+  "passed": true
+}
