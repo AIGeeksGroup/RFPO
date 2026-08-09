@@ -362,6 +362,12 @@ hypotheses:
     motivation: "The official loop combines random chunk shuffling, minibatch-local advantage normalization, and eight sequential Adam steps; H32 shows both advantage signs carry mostly non-conflicting information, so composition should be stabilized rather than projected away."
     parent: H40
     priority: high
+  - id: H46
+    statement: "Selecting the lower-curvature of two same-observation Gaussian Square action chunks improves random-source success without changing the checkpoint or zero-source behavior."
+    status: active
+    motivation: "Global sampler and trajectory smoothing repeatedly trade zero and Gaussian modes; within-observation ODE straightness offers a coefficient-free policy-confidence signal that can rank stochastic candidates while leaving zero inference untouched."
+    parent: H40
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -1297,9 +1303,9 @@ experiments:
       renderer: osmesa
 
 outer_loop:
-  cycle: 31
-  last_direction: "H45 is closed after a near-miss pooled gate; select a non-neighboring mechanism before further training."
-  last_reflection: "Sign stratification validly raised Gaussian-source success by 3/20 and lost one zero-source success, but pooled improvement was only 2/40 against the locked 3/40 gate. This is a directional signal, not confirmation evidence."
+  cycle: 32
+  last_direction: "Evaluate H46 lower-curvature best-of-two Gaussian action chunks on the frozen H43 Square control checkpoint."
+  last_reflection: "H45 is closed below its pooled gate. H46 changes neither training nor zero-source behavior and tests whether within-observation flow geometry can rank Gaussian samples, rather than assuming globally straighter flows have higher reward."
 
 workspace:
   findings: "findings.md"
