@@ -318,6 +318,12 @@ hypotheses:
     motivation: "H18 observes destructive within-update gradient rotation and H23 shows that a fixed lower LR loses progress without preserving direction; Appendix D.2 and the released motion-tracking implementation provide a measured-divergence controller that changes LR only when policy movement leaves a target band."
     parent: H18
     priority: high
+  - id: H40
+    statement: "The released Square base checkpoint provides a non-saturated balanced reward regime suitable for short paired FPO++ method screens."
+    status: active
+    motivation: "Can step 1000 is reward-starved for short training while step 6000 screens can saturate; the paper reports roughly 28.6% Square base success and meaningful FPO++ gains, and the released checkpoint is already available on the server."
+    parent: H0
+    priority: high
 
 experiments:
   proxy_metric: "Go2 evaluation return and Can zero-sampling success rate; secondary metrics are flow curvature, ratio dispersion, and wall-clock inference cost."
@@ -1051,8 +1057,8 @@ experiments:
 
 outer_loop:
   cycle: 27
-  last_direction: "Select a reward-relevant candidate distinct from fixed/adaptive step-size control and active-ratio preservation; do not tune the refuted H39 controller."
-  last_reflection: "H39 raised held-out active ratios but retained only 27-32% of surrogate progress, failed one replicated direction gate, and never increased LR. Divergence-triggered LR reduction behaves like the already-refuted fixed low-LR route in manipulation."
+  last_direction: "Validate the released Square checkpoint as a balanced non-saturated small-scale method-screening regime before registering another training intervention."
+  last_reflection: "H39 closes fixed/adaptive step-size control. Appendix D.5 discourages entropy regularization for manipulation, while Square offers reported headroom and existing local assets without a large training commitment."
 
 workspace:
   findings: "findings.md"
