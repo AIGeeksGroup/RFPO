@@ -338,7 +338,7 @@ hypotheses:
     priority: high
   - id: H43
     statement: "Resetting actor AdamW moments at each new Square rollout prevents stale cross-rollout statistics from distorting FPO++ updates and improves random-source success without degrading zero-source behavior."
-    status: active
+    status: refuted
     motivation: "The released loop carries Adam moments across independently collected on-policy rollouts; prior optimizer tests changed within-rollout update behavior but did not isolate this nonstationary boundary."
     parent: H40
     priority: high
@@ -357,7 +357,7 @@ experiments:
     value: 0.75
     matched_control: 0.735
     episodes_per_method: 200
-  total_runs: 136
+  total_runs: 143
   trajectory:
     - run: can_validation20_zero
       metric: success_rate
@@ -1155,11 +1155,56 @@ experiments:
       action_steps: 8
       balanced_episodes_per_env: true
       renderer: osmesa
+    - run: square_h43_candidate_smoke_osmesa_seed20260918
+      metric: pipeline_completion
+      value: 1
+      iterations: 2
+      formal: false
+    - run: square_h43_control_osmesa_seed20260916
+      metric: training_completion
+      value: 1
+      iterations: 5
+      completed_successes_by_iteration: [2, 9, 4, 4, 7]
+    - run: square_h43_candidate_osmesa_seed20260916
+      metric: rollout_local_optimizer_reset
+      value: 1
+      iterations: 5
+      state_entries_before_reset: [0, 8, 8, 8]
+      state_entries_after_reset: [0, 0, 0, 0]
+      completed_successes_by_iteration: [2, 9, 4, 4, 6]
+    - run: square_h43_control_zero_balanced20_seed20260917
+      metric: success_rate
+      value: 0.25
+      episodes: 20
+      action_steps: 16
+      balanced_episodes_per_env: true
+      renderer: osmesa
+    - run: square_h43_control_random_balanced20_seed20260917
+      metric: success_rate
+      value: 0.40
+      episodes: 20
+      action_steps: 16
+      balanced_episodes_per_env: true
+      renderer: osmesa
+    - run: square_h43_candidate_zero_balanced20_seed20260917
+      metric: success_rate
+      value: 0.45
+      episodes: 20
+      action_steps: 16
+      balanced_episodes_per_env: true
+      renderer: osmesa
+    - run: square_h43_candidate_random_balanced20_seed20260917
+      metric: success_rate
+      value: 0.25
+      episodes: 20
+      action_steps: 16
+      balanced_episodes_per_env: true
+      renderer: osmesa
 
 outer_loop:
   cycle: 29
-  last_direction: "Run H43's paired five-iteration Square test of persistent versus rollout-local actor Adam state."
-  last_reflection: "Inference changes repeatedly trade random and zero-source performance. H43 keeps rollout behavior fixed and isolates stale optimizer statistics carried across changing on-policy datasets."
+  last_direction: "Run an outer-loop synthesis focused on preserving Gaussian exploration while improving deterministic behavior; optimizer-reset variants are closed."
+  last_reflection: "H43's active optimizer reset improved zero success by 4/20 but reduced random success by 3/20, producing only +1/40 pooled. Cross-rollout moments control the source-mode tradeoff but are not a stable improvement target by themselves."
 
 workspace:
   findings: "findings.md"

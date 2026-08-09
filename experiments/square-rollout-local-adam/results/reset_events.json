@@ -1,0 +1,26 @@
+[
+  {
+    "iteration": 2,
+    "learning_rate": 1e-05,
+    "state_entries_after": 0,
+    "state_entries_before": 0
+  },
+  {
+    "iteration": 3,
+    "learning_rate": 1e-05,
+    "state_entries_after": 0,
+    "state_entries_before": 8
+  },
+  {
+    "iteration": 4,
+    "learning_rate": 1e-05,
+    "state_entries_after": 0,
+    "state_entries_before": 8
+  },
+  {
+    "iteration": 5,
+    "learning_rate": 1e-05,
+    "state_entries_after": 0,
+    "state_entries_before": 8
+  }
+]
