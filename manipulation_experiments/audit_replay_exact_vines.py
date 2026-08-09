@@ -434,9 +434,17 @@ def main(cfg: Config) -> None:
             for record in records
         ),
     }
-    validity["passed"] = all(
-        value for key, value in validity.items() if isinstance(value, bool)
-    )
+    required_validity_gates = [
+        "all_replays_exact",
+        "candidate_action_activity",
+        "policy_parameters_bitwise_unchanged",
+        "all_outcomes_binary",
+        "all_lengths_valid",
+    ]
+    if cfg.mode == "audit":
+        required_validity_gates.append("candidate_source_distribution")
+    validity["required_gates"] = required_validity_gates
+    validity["passed"] = all(bool(validity[key]) for key in required_validity_gates)
     if cfg.mode == "audit":
         signal = summarize_vine_records(records)
         passed = bool(validity["passed"] and signal["passed"])
