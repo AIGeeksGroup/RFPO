@@ -31,12 +31,19 @@ python isaaclab_fpo/scripts/train.py --task Isaac-Velocity-Flat-Unitree-Go2-v0 -
 python isaaclab_fpo/scripts/train.py --task Isaac-Velocity-Flat-G1-v0 --headless
 ```
 
-## Eval (locomotion main-table)
+## Eval (locomotion)
 
-Use `isaaclab_fpo/scripts/eval_sampling_steps.py` with steps `64 32 16 8 4 1`
-and modes `zero` / `random`.
+```bash
+python isaaclab_fpo/scripts/eval_sampling_steps.py
+```
 
-## Manipulation
+Use steps `64 32 16 8 4 1` and modes `zero` / `random`.
 
-See `manipulation_experiments/README.md` (`pretrain_flow_bc.py`,
-`finetune_online_rl.py`, `eval_checkpoint.py`).
+## Train / eval (manipulation)
+
+```bash
+cd manipulation_experiments
+python pretrain_flow_bc.py
+python finetune_online_rl.py
+python eval_checkpoint.py
+```
