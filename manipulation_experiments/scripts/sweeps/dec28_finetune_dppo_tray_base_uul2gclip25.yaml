@@ -1,0 +1,131 @@
+program: finetune_online_rl.py
+method: grid  # Can be: grid, random, bayes
+name: finetune_dppo_tray_base_uul2gclip25
+# Base policy is u prediction / u loss mode / l2 loss / gradient clipping 25
+project: flow-bc-fpo-finetuning  # Set your W&B project name here
+entity: far-wandb  # Optional: Set your W&B entity/team name
+
+
+# Additional fixed parameters can be specified here
+command:
+  - ${env}
+  - torchrun
+  - --nproc_per_node=1
+  - ${program}
+  - --distributed
+  - True
+  - --base-policy-wandb-project
+  - flow-bc
+  - --base_policy_wandb_run_id
+  - ri0w9j39
+  - --load-ema
+  - True
+  - --checkpoint_step
+  - step_160000
+  - --wandb_project
+  - flow-bc-fpo-finetuning
+  - --experiment
+  - finetune-dppo-tray-base-uul2gclip25-dec28-v1
+  - --total_timesteps
+  - 5_000_000
+  - --gradient_accumulation_steps
+  - 1
+  - --num_minibatches
+  - 8
+  - --log_freq
+  - 1
+  - --save_freq
+  - 2
+  - --rollout_freq
+  - 2
+  - --task
+  - TwoArmLiftTray
+  - --eval_env
+  - TwoArmLiftTray
+  - --eval_num_episodes
+  - 200
+  - --wandb_enable
+  - True
+  - ${args} 
+
+# let's set logging frequency to 60,000 (num_envs * data_collection_steps * rollout_freq
+# 4 * 300 * 50 = 60,000
+# 50 * 300 * 4 = 60,000
+# 50 * 1200 * 1 = 60,000
+# 25 * 600 * 4 = 60,000
+
+parameters:
+
+  seed: 
+    values: [0, 1, 2]
+
+  loss_mode:
+    values: ['dppo']
+
+  sde_sigma:
+    values: [0.001, 0.005, 0.01, 0.02, 0.05]
+
+  cfm_loss_huber_delta:
+    values: [0.1]
+
+  clip_coef:
+    values: [0.01, 0.02]
+
+  max_grad_norm:
+    values: [1, 25]
+
+  clamp_old_cfm_loss:
+    values: [4.0]
+
+  spo_clip_coef:
+    values: [0.01]
+
+  trust_region_mode:
+    values: ['ppo']  
+
+  cfm_loss_use_huber:
+    values: [True]
+
+  cfm_loss_average_group_size:
+    values: [1]  
+
+  n_action_samples:
+    values: [8]
+
+  discount:
+    values: [0.999]
+
+  gae_lambda:
+    values: [0.99]
+    
+  clamp_logratio:
+    values: [5.0]
+
+  num_envs:
+    values: [30]
+
+  freeze_vision_encoder:
+    values: [True]
+
+  zero_sampling:
+    values: [True]
+  
+  eval_ema:
+    values: [False]
+    
+  exploration_noise_std:
+    values: [None]
+
+  do_chunk_level_ppo:
+    values: [True]
+
+  data_collection_steps:
+    values: [1600]
+
+  n_action_steps:
+    values: [16]
+
+  sampling_steps:
+    values: [10]
+
+

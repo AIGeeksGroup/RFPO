@@ -1,23 +1,29 @@
 # rfpo_new_method
 
-Isaac Lab training code for reproducing the Go2 / G1 main locomotion experiments
-(baseline, reflow, and stacked / teacher-KD variants). Extracted from a local
-`fgo_test` working tree; deployment and manipulation code are not included.
+FPO++ experiment code (Isaac Lab locomotion + manipulation), based on the
+local `fgo_test` tree with Go2/G1 method changes. Deployment packages are not
+included.
 
 ## Layout
 
-- `isaaclab_experiments/` — FPO++ / reflow training package and setup scripts
+- `isaaclab_experiments/` — velocity-conditioned locomotion (Go2/G1/…)
+- `manipulation_experiments/` — manipulation pretrain / fine-tune (FPO++)
 
 ## Setup
 
 ```bash
 git submodule update --init --recursive
+
+# Locomotion
 cd isaaclab_experiments
-bash setup_env.sh
-source source_env.sh
+bash setup_env.sh && source source_env.sh
+
+# Manipulation
+cd ../manipulation_experiments
+bash setup_env.sh && source source_env.sh
 ```
 
-## Train
+## Train (locomotion)
 
 ```bash
 cd isaaclab_experiments
@@ -25,10 +31,12 @@ python isaaclab_fpo/scripts/train.py --task Isaac-Velocity-Flat-Unitree-Go2-v0 -
 python isaaclab_fpo/scripts/train.py --task Isaac-Velocity-Flat-G1-v0 --headless
 ```
 
-Task hyperparameters live in `isaaclab_fpo/isaaclab_fpo/task_cfgs.py`.
+## Eval (locomotion main-table)
 
-## Eval (main-table protocol)
+Use `isaaclab_fpo/scripts/eval_sampling_steps.py` with steps `64 32 16 8 4 1`
+and modes `zero` / `random`.
 
-Use `eval_sampling_steps.py` with steps `64 32 16 8 4 1` and noise modes
-`zero` / `random`. See `isaaclab_experiments/README.md` and package scripts for
-details.
+## Manipulation
+
+See `manipulation_experiments/README.md` (`pretrain_flow_bc.py`,
+`finetune_online_rl.py`, `eval_checkpoint.py`).

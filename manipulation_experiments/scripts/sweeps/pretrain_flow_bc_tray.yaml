@@ -1,0 +1,105 @@
+program: pretrain_flow_bc.py
+method: grid  # Can be: grid, random, bayes
+name: flow_bc_parameter_sweep_tray
+project: flow-bc  # Set your W&B project name here
+entity: far-wandb  # Optional: Set your W&B entity/team name
+
+# Additional fixed parameters can be specified  here
+command:
+  - ${env}
+  - python
+  - ${program}
+  - --policy
+  - flowmatching
+  - --dataset
+  - ankile/dexmg-two-arm-lift-tray
+  - --image_observation_keys
+  - "agentview_image robot0_eye_in_hand_image robot1_eye_in_hand_image"
+  - --num_workers
+  - 16
+  - --wandb_project
+  - flow-bc
+  - --log_freq
+  - 5
+  - --save_freq
+  - 1000
+  - --rollout_freq
+  - 1000
+  - --steps
+  - 1_000_000
+  - --eval_env
+  - TwoArmLiftTray
+  - --eval_num_envs
+  - 25
+  - --eval_num_episodes
+  - 50
+  - --experiment
+  - flow_bc_tray_sweep
+  - --wandb_enable
+  - True
+  - ${args} 
+
+parameters:
+
+  seed:
+    values: [3]
+
+  grad_clip_norm:
+    values: [1.0, 25.0]
+    
+  enable_geometric_augmentations:
+    values: [True]
+
+  mlp_dims:
+    values:
+      - [1024, 1024, 1024]
+
+  network_architecture:
+    values: ["mlp"]
+
+  vision_backbone:
+    values: ["vit"]
+
+  transported_clip_value:
+    values: [None]
+
+  cfm_loss_use_huber:
+    values: [False, True]
+
+  cfm_loss_huber_delta:
+    values: [0.5]
+
+  # Flow model sampling
+  sampling_steps:
+    values: [10]
+
+  horizon:
+    values: [16]
+
+  n_action_steps:
+    values: [8]
+
+  batch_size:
+    values: [512]
+
+  learning_rate:
+    values: [1e-4]
+
+  lr_backbone:
+    values: [1e-5]
+
+  # Weight decay
+  weight_decay:
+    values: [1e-6]
+
+  # Flow network configuration
+  flow_network_output_param:
+    values: ["u", "x0"]  # velocity or position
+
+  # CFM loss mode
+  cfm_loss_mode:
+    values: ["u", "x0"]  # velocity, position, or epsilon
+
+  ema_power:
+    values: [0.995]
+    
