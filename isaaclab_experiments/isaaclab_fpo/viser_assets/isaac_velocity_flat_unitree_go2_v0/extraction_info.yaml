@@ -1,0 +1,244 @@
+metadata:
+  task: Isaac-Velocity-Flat-Unitree-Go2-v0
+  generated: 2025-07-01 06:49:39 UTC
+  extractor_version: 1.0.0
+summary:
+  total_meshes: 45
+  total_vertices: 201815
+  total_faces: 404650
+  total_size_bytes: 7313808
+  total_size_mb: 6.97
+meshes:
+  prototype_000:
+    filename: meshes/prototype_000.glb
+    vertices: 8
+    faces: 12
+    size_bytes: 1060
+  prototype_001:
+    filename: meshes/prototype_001.glb
+    vertices: 102
+    faces: 192
+    size_bytes: 4316
+  prototype_002:
+    filename: meshes/prototype_002.glb
+    vertices: 38765
+    faces: 77928
+    size_bytes: 1401136
+  prototype_003:
+    filename: meshes/prototype_003.glb
+    vertices: 450
+    faces: 896
+    size_bytes: 17004
+  prototype_004:
+    filename: meshes/prototype_004.glb
+    vertices: 34
+    faces: 64
+    size_bytes: 2052
+  prototype_005:
+    filename: meshes/prototype_005.glb
+    vertices: 4285
+    faces: 8602
+    size_bytes: 155464
+  prototype_006:
+    filename: meshes/prototype_006.glb
+    vertices: 15082
+    faces: 30134
+    size_bytes: 543408
+  prototype_007:
+    filename: meshes/prototype_007.glb
+    vertices: 102
+    faces: 192
+    size_bytes: 4316
+  prototype_008:
+    filename: meshes/prototype_008.glb
+    vertices: 102
+    faces: 192
+    size_bytes: 4316
+  prototype_009:
+    filename: meshes/prototype_009.glb
+    vertices: 8
+    faces: 12
+    size_bytes: 1060
+  prototype_010:
+    filename: meshes/prototype_010.glb
+    vertices: 15080
+    faces: 30126
+    size_bytes: 543288
+  prototype_011:
+    filename: meshes/prototype_011.glb
+    vertices: 4286
+    faces: 8602
+    size_bytes: 155476
+  prototype_012:
+    filename: meshes/prototype_012.glb
+    vertices: 2205
+    faces: 4404
+    size_bytes: 80124
+  prototype_013:
+    filename: meshes/prototype_013.glb
+    vertices: 18419
+    faces: 37040
+    size_bytes: 666324
+  prototype_014:
+    filename: meshes/prototype_014.glb
+    vertices: 34
+    faces: 64
+    size_bytes: 2052
+  prototype_015:
+    filename: meshes/prototype_015.glb
+    vertices: 2205
+    faces: 4404
+    size_bytes: 80124
+  prototype_016:
+    filename: meshes/prototype_016.glb
+    vertices: 2205
+    faces: 4404
+    size_bytes: 80124
+  prototype_017:
+    filename: meshes/prototype_017.glb
+    vertices: 450
+    faces: 896
+    size_bytes: 17004
+  prototype_018:
+    filename: meshes/prototype_018.glb
+    vertices: 450
+    faces: 896
+    size_bytes: 17004
+  prototype_019:
+    filename: meshes/prototype_019.glb
+    vertices: 4286
+    faces: 8602
+    size_bytes: 155476
+  prototype_020:
+    filename: meshes/prototype_020.glb
+    vertices: 15082
+    faces: 30134
+    size_bytes: 543408
+  prototype_021:
+    filename: meshes/prototype_021.glb
+    vertices: 450
+    faces: 896
+    size_bytes: 17004
+  prototype_022:
+    filename: meshes/prototype_022.glb
+    vertices: 18419
+    faces: 37040
+    size_bytes: 666324
+  prototype_023:
+    filename: meshes/prototype_023.glb
+    vertices: 18419
+    faces: 37040
+    size_bytes: 666324
+  prototype_024:
+    filename: meshes/prototype_024.glb
+    vertices: 102
+    faces: 192
+    size_bytes: 4316
+  prototype_025:
+    filename: meshes/prototype_025.glb
+    vertices: 4285
+    faces: 8602
+    size_bytes: 155464
+  prototype_026:
+    filename: meshes/prototype_026.glb
+    vertices: 18419
+    faces: 37040
+    size_bytes: 666324
+  prototype_027:
+    filename: meshes/prototype_027.glb
+    vertices: 8
+    faces: 12
+    size_bytes: 1060
+  prototype_028:
+    filename: meshes/prototype_028.glb
+    vertices: 34
+    faces: 64
+    size_bytes: 2052
+  prototype_029:
+    filename: meshes/prototype_029.glb
+    vertices: 34
+    faces: 64
+    size_bytes: 2052
+  prototype_030:
+    filename: meshes/prototype_030.glb
+    vertices: 450
+    faces: 896
+    size_bytes: 17008
+  prototype_031:
+    filename: meshes/prototype_031.glb
+    vertices: 8
+    faces: 12
+    size_bytes: 1060
+  prototype_032:
+    filename: meshes/prototype_032.glb
+    vertices: 15080
+    faces: 30126
+    size_bytes: 543288
+  prototype_033:
+    filename: meshes/prototype_033.glb
+    vertices: 34
+    faces: 64
+    size_bytes: 2052
+  prototype_034:
+    filename: meshes/prototype_034.glb
+    vertices: 2205
+    faces: 4404
+    size_bytes: 80124
+  prototype_035:
+    filename: meshes/prototype_035.glb
+    vertices: 8
+    faces: 12
+    size_bytes: 1056
+  mesh_036:
+    filename: meshes/mesh_036.glb
+    vertices: 4
+    faces: 2
+    size_bytes: 764
+  mesh_037:
+    filename: meshes/mesh_037.glb
+    vertices: 4
+    faces: 2
+    size_bytes: 764
+  mesh_038:
+    filename: meshes/mesh_038.glb
+    vertices: 4
+    faces: 2
+    size_bytes: 764
+  mesh_039:
+    filename: meshes/mesh_039.glb
+    vertices: 52
+    faces: 96
+    size_bytes: 2464
+  mesh_040:
+    filename: meshes/mesh_040.glb
+    vertices: 34
+    faces: 64
+    size_bytes: 1932
+  mesh_041:
+    filename: meshes/mesh_041.glb
+    vertices: 18
+    faces: 32
+    size_bytes: 1340
+  mesh_042:
+    filename: meshes/mesh_042.glb
+    vertices: 52
+    faces: 96
+    size_bytes: 2464
+  mesh_043:
+    filename: meshes/mesh_043.glb
+    vertices: 34
+    faces: 64
+    size_bytes: 1932
+  mesh_044:
+    filename: meshes/mesh_044.glb
+    vertices: 18
+    faces: 32
+    size_bytes: 1340
+usage:
+  description: Use these files to visualize Isaac Lab environments in Viser
+  steps:
+  - 1. Load scene_hierarchy.yaml to build the scene tree
+  - 2. Use prim_to_mesh.yaml to find which GLB to load for each prim
+  - 3. Load GLB files from the meshes/ directory
+  - 4. Apply transforms from scene_hierarchy.yaml
+  - 5. Update transforms in real-time using prim paths as keys

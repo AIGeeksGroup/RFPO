@@ -1,0 +1,12 @@
+thirdparty
+IsaacLab/_isaac_sim
+.env_setup_finished
+logs/
+outputs/
+wandb/
+__pycache__/
+.ipynb_checkpoints
+.claude
+wandb_runs/
+.DS_Store
+/*.npz

@@ -1,0 +1,50 @@
+metadata:
+  task: Isaac-Velocity-Flat-Unitree-Go2-v0
+  generated: 2025-07-01 06:49:39 UTC
+  description: Mapping from USD prim paths to GLB mesh files
+mappings:
+  /World/ground/terrain: mesh_036.glb
+  /World/ground/terrain/Environment: mesh_037.glb
+  /World/ground/terrain/Environment/Geometry: mesh_038.glb
+  /Visuals/Command/velocity_goal/arrow: mesh_039.glb
+  /Visuals/Command/velocity_goal/arrow/Cylinder: mesh_040.glb
+  /Visuals/Command/velocity_goal/arrow/Cone: mesh_041.glb
+  /Visuals/Command/velocity_current/arrow: mesh_042.glb
+  /Visuals/Command/velocity_current/arrow/Cylinder: mesh_043.glb
+  /Visuals/Command/velocity_current/arrow/Cone: mesh_044.glb
+  /World/envs/env_0/Robot/base/visuals: meshes/prototype_002.glb
+  /World/envs/env_0/Robot/base/collisions: meshes/prototype_035.glb
+  /World/envs/env_0/Robot/FL_hip/visuals: meshes/prototype_026.glb
+  /World/envs/env_0/Robot/FL_hip/collisions: meshes/prototype_033.glb
+  /World/envs/env_0/Robot/FL_thigh/visuals: meshes/prototype_020.glb
+  /World/envs/env_0/Robot/FL_thigh/collisions: meshes/prototype_031.glb
+  /World/envs/env_0/Robot/FL_calf/visuals: meshes/prototype_019.glb
+  /World/envs/env_0/Robot/FL_calf/collisions: meshes/prototype_007.glb
+  /World/envs/env_0/Robot/FL_foot/visuals: meshes/prototype_012.glb
+  /World/envs/env_0/Robot/FL_foot/collisions: meshes/prototype_003.glb
+  /World/envs/env_0/Robot/FR_hip/visuals: meshes/prototype_013.glb
+  /World/envs/env_0/Robot/FR_hip/collisions: meshes/prototype_004.glb
+  /World/envs/env_0/Robot/FR_thigh/visuals: meshes/prototype_032.glb
+  /World/envs/env_0/Robot/FR_thigh/collisions: meshes/prototype_027.glb
+  /World/envs/env_0/Robot/FR_calf/visuals: meshes/prototype_025.glb
+  /World/envs/env_0/Robot/FR_calf/collisions: meshes/prototype_008.glb
+  /World/envs/env_0/Robot/FR_foot/visuals: meshes/prototype_015.glb
+  /World/envs/env_0/Robot/FR_foot/collisions: meshes/prototype_021.glb
+  /World/envs/env_0/Robot/Head_upper/collisions: meshes/prototype_014.glb
+  /World/envs/env_0/Robot/Head_lower/collisions: meshes/prototype_030.glb
+  /World/envs/env_0/Robot/RL_hip/visuals: meshes/prototype_023.glb
+  /World/envs/env_0/Robot/RL_hip/collisions: meshes/prototype_029.glb
+  /World/envs/env_0/Robot/RL_thigh/visuals: meshes/prototype_006.glb
+  /World/envs/env_0/Robot/RL_thigh/collisions: meshes/prototype_000.glb
+  /World/envs/env_0/Robot/RL_calf/visuals: meshes/prototype_011.glb
+  /World/envs/env_0/Robot/RL_calf/collisions: meshes/prototype_001.glb
+  /World/envs/env_0/Robot/RL_foot/visuals: meshes/prototype_034.glb
+  /World/envs/env_0/Robot/RL_foot/collisions: meshes/prototype_017.glb
+  /World/envs/env_0/Robot/RR_hip/visuals: meshes/prototype_022.glb
+  /World/envs/env_0/Robot/RR_hip/collisions: meshes/prototype_028.glb
+  /World/envs/env_0/Robot/RR_thigh/visuals: meshes/prototype_010.glb
+  /World/envs/env_0/Robot/RR_thigh/collisions: meshes/prototype_009.glb
+  /World/envs/env_0/Robot/RR_calf/visuals: meshes/prototype_005.glb
+  /World/envs/env_0/Robot/RR_calf/collisions: meshes/prototype_024.glb
+  /World/envs/env_0/Robot/RR_foot/visuals: meshes/prototype_016.glb
+  /World/envs/env_0/Robot/RR_foot/collisions: meshes/prototype_018.glb

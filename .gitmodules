@@ -1,0 +1,6 @@
+[submodule "IsaacLab"]
+	path = isaaclab_experiments/thirdparty/IsaacLab
+	url = https://github.com/isaac-sim/IsaacLab.git
+[submodule "isaaclab_experiments/thirdparty/whole_body_tracking"]
+	path = isaaclab_experiments/thirdparty/whole_body_tracking
+	url = https://github.com/HybridRobotics/whole_body_tracking.git

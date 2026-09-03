@@ -1,0 +1,15 @@
+.claude/
+.DS_Store
+__pycache__/
+*.egg-info/
+wandb/
+logs/
+.work/
+outputs/
+*.pt
+*.pth
+*.ckpt
+*.onnx
+.env_setup_finished
+*.nohup
+*.log

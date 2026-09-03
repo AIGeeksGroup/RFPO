@@ -1,0 +1,458 @@
+metadata:
+  task: Isaac-Cartpole-Direct-v0
+  generated: 2025-07-01 07:18:35 UTC
+  description: Scene hierarchy for Viser visualization
+  transform_type: local
+  transform_description: Transforms are local (relative to parent), not world transforms
+hierarchy:
+  /physicsScene:
+    type: PhysicsScene
+    parent: null
+    children:
+    - /physicsScene/defaultMaterial
+    mesh_file: null
+    transform: null
+    is_instance: false
+    prototype_path: null
+  /physicsScene/defaultMaterial:
+    type: Material
+    parent: /physicsScene
+    children: []
+    mesh_file: null
+    transform: null
+    is_instance: false
+    prototype_path: null
+  /World:
+    type: ''
+    parent: null
+    children:
+    - /World/envs
+    - /World/ground
+    - /World/Light
+    mesh_file: null
+    transform: null
+    is_instance: false
+    prototype_path: null
+  /World/envs:
+    type: Scope
+    parent: /World
+    children:
+    - /World/envs/env_0
+    mesh_file: null
+    transform: null
+    is_instance: false
+    prototype_path: null
+  /World/envs/env_0:
+    type: Xform
+    parent: /World/envs
+    children:
+    - /World/envs/env_0/Robot
+    mesh_file: null
+    transform:
+    - - 1.0
+      - 0.0
+      - 0.0
+      - 0.0
+    - - 0.0
+      - 1.0
+      - 0.0
+      - 0.0
+    - - 0.0
+      - 0.0
+      - 1.0
+      - 0.0
+    - - 0.0
+      - 0.0
+      - 0.0
+      - 1.0
+    is_instance: false
+    prototype_path: null
+  /World/envs/env_0/Robot:
+    type: Xform
+    parent: /World/envs/env_0
+    children:
+    - /World/envs/env_0/Robot/slider
+    - /World/envs/env_0/Robot/root_joint
+    - /World/envs/env_0/Robot/cart
+    - /World/envs/env_0/Robot/pole
+    mesh_file: null
+    transform:
+    - - 1.0
+      - 0.0
+      - 0.0
+      - 0.0
+    - - 0.0
+      - 1.0
+      - 0.0
+      - 0.0
+    - - 0.0
+      - 0.0
+      - 1.0
+      - 0.0
+    - - 0.0
+      - 0.0
+      - 2.0
+      - 1.0
+    is_instance: false
+    prototype_path: null
+  /World/envs/env_0/Robot/slider:
+    type: Xform
+    parent: /World/envs/env_0/Robot
+    children:
+    - /World/envs/env_0/Robot/slider/visuals
+    - /World/envs/env_0/Robot/slider/collisions
+    - /World/envs/env_0/Robot/slider/slider_to_cart
+    mesh_file: null
+    transform:
+    - - 1.0
+      - 0.0
+      - 0.0
+      - 0.0
+    - - 0.0
+      - 1.0
+      - 0.0
+      - 0.0
+    - - 0.0
+      - 0.0
+      - 1.0
+      - 0.0
+    - - 0.0
+      - 0.0
+      - 0.0
+      - 1.0
+    is_instance: false
+    prototype_path: null
+  /World/envs/env_0/Robot/slider/visuals:
+    type: ''
+    parent: /World/envs/env_0/Robot/slider
+    children: []
+    mesh_file: meshes/prototype_002.glb
+    transform: null
+    is_instance: true
+    prototype_path: /__Prototype_3
+  /World/envs/env_0/Robot/slider/collisions:
+    type: ''
+    parent: /World/envs/env_0/Robot/slider
+    children: []
+    mesh_file: meshes/prototype_001.glb
+    transform: null
+    is_instance: true
+    prototype_path: /__Prototype_2
+  /World/envs/env_0/Robot/slider/slider_to_cart:
+    type: PhysicsPrismaticJoint
+    parent: /World/envs/env_0/Robot/slider
+    children: []
+    mesh_file: null
+    transform: null
+    is_instance: false
+    prototype_path: null
+  /World/envs/env_0/Robot/root_joint:
+    type: PhysicsFixedJoint
+    parent: /World/envs/env_0/Robot
+    children: []
+    mesh_file: null
+    transform: null
+    is_instance: false
+    prototype_path: null
+  /World/envs/env_0/Robot/cart:
+    type: Xform
+    parent: /World/envs/env_0/Robot
+    children:
+    - /World/envs/env_0/Robot/cart/visuals
+    - /World/envs/env_0/Robot/cart/collisions
+    - /World/envs/env_0/Robot/cart/cart_to_pole
+    mesh_file: null
+    transform:
+    - - 1.0
+      - 0.0
+      - 0.0
+      - 0.0
+    - - 0.0
+      - 1.0
+      - 0.0
+      - 0.0
+    - - 0.0
+      - 0.0
+      - 1.0
+      - 0.0
+    - - 0.0
+      - 0.0
+      - 0.0
+      - 1.0
+    is_instance: false
+    prototype_path: null
+  /World/envs/env_0/Robot/cart/visuals:
+    type: ''
+    parent: /World/envs/env_0/Robot/cart
+    children: []
+    mesh_file: meshes/prototype_004.glb
+    transform: null
+    is_instance: true
+    prototype_path: /__Prototype_5
+  /World/envs/env_0/Robot/cart/collisions:
+    type: ''
+    parent: /World/envs/env_0/Robot/cart
+    children: []
+    mesh_file: meshes/prototype_003.glb
+    transform: null
+    is_instance: true
+    prototype_path: /__Prototype_4
+  /World/envs/env_0/Robot/cart/cart_to_pole:
+    type: PhysicsRevoluteJoint
+    parent: /World/envs/env_0/Robot/cart
+    children: []
+    mesh_file: null
+    transform: null
+    is_instance: false
+    prototype_path: null
+  /World/envs/env_0/Robot/pole:
+    type: Xform
+    parent: /World/envs/env_0/Robot
+    children:
+    - /World/envs/env_0/Robot/pole/visuals
+    - /World/envs/env_0/Robot/pole/collisions
+    mesh_file: null
+    transform:
+    - - 1.0
+      - 0.0
+      - 0.0
+      - 0.0
+    - - 0.0
+      - 1.0
+      - 0.0
+      - 0.0
+    - - 0.0
+      - 0.0
+      - 1.0
+      - 0.0
+    - - 0.11999999731779099
+      - 0.0
+      - 0.0
+      - 1.0
+    is_instance: false
+    prototype_path: null
+  /World/envs/env_0/Robot/pole/visuals:
+    type: ''
+    parent: /World/envs/env_0/Robot/pole
+    children: []
+    mesh_file: meshes/prototype_000.glb
+    transform: null
+    is_instance: true
+    prototype_path: /__Prototype_1
+  /World/envs/env_0/Robot/pole/collisions:
+    type: ''
+    parent: /World/envs/env_0/Robot/pole
+    children: []
+    mesh_file: meshes/prototype_005.glb
+    transform: null
+    is_instance: true
+    prototype_path: /__Prototype_6
+  /World/ground:
+    type: Xform
+    parent: /World
+    children:
+    - /World/ground/Looks
+    - /World/ground/GroundPlane
+    - /World/ground/SphereLight
+    - /World/ground/Environment
+    - /World/ground/physicsMaterial
+    mesh_file: mesh_006.glb
+    transform:
+    - - 1.0
+      - 0.0
+      - 0.0
+      - 0.0
+    - - 0.0
+      - 1.0
+      - 0.0
+      - 0.0
+    - - 0.0
+      - 0.0
+      - 1.0
+      - 0.0
+    - - 0.0
+      - 0.0
+      - 0.0
+      - 1.0
+    is_instance: false
+    prototype_path: null
+  /World/ground/Looks:
+    type: Scope
+    parent: /World/ground
+    children:
+    - /World/ground/Looks/theGrid
+    mesh_file: null
+    transform: null
+    is_instance: false
+    prototype_path: null
+  /World/ground/Looks/theGrid:
+    type: Material
+    parent: /World/ground/Looks
+    children:
+    - /World/ground/Looks/theGrid/Shader
+    mesh_file: null
+    transform: null
+    is_instance: false
+    prototype_path: null
+  /World/ground/Looks/theGrid/Shader:
+    type: Shader
+    parent: /World/ground/Looks/theGrid
+    children: []
+    mesh_file: null
+    transform: null
+    is_instance: false
+    prototype_path: null
+  /World/ground/GroundPlane:
+    type: Xform
+    parent: /World/ground
+    children:
+    - /World/ground/GroundPlane/CollisionPlane
+    mesh_file: null
+    transform:
+    - - 1.0
+      - 0.0
+      - 0.0
+      - 0.0
+    - - 0.0
+      - 1.0
+      - 0.0
+      - 0.0
+    - - 0.0
+      - 0.0
+      - 1.0
+      - 0.0
+    - - 0.0
+      - 0.0
+      - 0.0
+      - 1.0
+    is_instance: false
+    prototype_path: null
+  /World/ground/GroundPlane/CollisionPlane:
+    type: Plane
+    parent: /World/ground/GroundPlane
+    children: []
+    mesh_file: null
+    transform:
+    - - 0.009999999776482582
+      - 0.0
+      - 0.0
+      - 0.0
+    - - 0.0
+      - 0.009999999776482582
+      - 0.0
+      - 0.0
+    - - 0.0
+      - 0.0
+      - 0.009999999776482582
+      - 0.0
+    - - 0.0
+      - 0.0
+      - 0.0
+      - 1.0
+    is_instance: false
+    prototype_path: null
+  /World/ground/SphereLight:
+    type: SphereLight
+    parent: /World/ground
+    children: []
+    mesh_file: null
+    transform:
+    - - 1.1102230246251565e-16
+      - 1.0
+      - 0.0
+      - 0.0
+    - - -1.6653345369377348e-16
+      - 0.0
+      - 1.0
+      - 0.0
+    - - 1.0
+      - -1.6653345369377348e-16
+      - 1.1102230246251565e-16
+      - 0.0
+    - - 0.0
+      - 0.0
+      - 2.5
+      - 1.0
+    is_instance: false
+    prototype_path: null
+  /World/ground/Environment:
+    type: Xform
+    parent: /World/ground
+    children:
+    - /World/ground/Environment/Geometry
+    mesh_file: mesh_007.glb
+    transform:
+    - - 1.0
+      - 0.0
+      - 0.0
+      - 0.0
+    - - 0.0
+      - 1.0
+      - 0.0
+      - 0.0
+    - - 0.0
+      - 0.0
+      - 1.0
+      - 0.0
+    - - 0.0
+      - 0.0
+      - 0.0
+      - 1.0
+    is_instance: false
+    prototype_path: null
+  /World/ground/Environment/Geometry:
+    type: Mesh
+    parent: /World/ground/Environment
+    children: []
+    mesh_file: mesh_008.glb
+    transform:
+    - - 100.0
+      - 0.0
+      - 0.0
+      - 0.0
+    - - 0.0
+      - 100.0
+      - 0.0
+      - 0.0
+    - - 0.0
+      - 0.0
+      - 1.0
+      - 0.0
+    - - -0.425
+      - 0.425
+      - 0.0
+      - 1.0
+    is_instance: false
+    prototype_path: null
+  /World/ground/physicsMaterial:
+    type: Material
+    parent: /World/ground
+    children: []
+    mesh_file: null
+    transform: null
+    is_instance: false
+    prototype_path: null
+  /World/Light:
+    type: DomeLight
+    parent: /World
+    children: []
+    mesh_file: null
+    transform:
+    - - 1.0
+      - 0.0
+      - 0.0
+      - 0.0
+    - - 0.0
+      - 1.0
+      - 0.0
+      - 0.0
+    - - 0.0
+      - 0.0
+      - 1.0
+      - 0.0
+    - - 0.0
+      - 0.0
+      - 0.0
+      - 1.0
+    is_instance: false
+    prototype_path: null

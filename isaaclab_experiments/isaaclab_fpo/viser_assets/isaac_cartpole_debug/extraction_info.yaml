@@ -1,0 +1,64 @@
+metadata:
+  task: Isaac-Cartpole-Direct-v0
+  generated: 2025-07-01 07:05:12 UTC
+  extractor_version: 1.0.0
+summary:
+  total_meshes: 9
+  total_vertices: 60
+  total_faces: 78
+  total_size_bytes: 8652
+  total_size_mb: 0.01
+meshes:
+  prototype_000:
+    filename: meshes/prototype_000.glb
+    vertices: 8
+    faces: 12
+    size_bytes: 1060
+  prototype_001:
+    filename: meshes/prototype_001.glb
+    vertices: 8
+    faces: 12
+    size_bytes: 1060
+  prototype_002:
+    filename: meshes/prototype_002.glb
+    vertices: 8
+    faces: 12
+    size_bytes: 1060
+  prototype_003:
+    filename: meshes/prototype_003.glb
+    vertices: 8
+    faces: 12
+    size_bytes: 1060
+  prototype_004:
+    filename: meshes/prototype_004.glb
+    vertices: 8
+    faces: 12
+    size_bytes: 1060
+  prototype_005:
+    filename: meshes/prototype_005.glb
+    vertices: 8
+    faces: 12
+    size_bytes: 1060
+  mesh_006:
+    filename: meshes/mesh_006.glb
+    vertices: 4
+    faces: 2
+    size_bytes: 764
+  mesh_007:
+    filename: meshes/mesh_007.glb
+    vertices: 4
+    faces: 2
+    size_bytes: 764
+  mesh_008:
+    filename: meshes/mesh_008.glb
+    vertices: 4
+    faces: 2
+    size_bytes: 764
+usage:
+  description: Use these files to visualize Isaac Lab environments in Viser
+  steps:
+  - 1. Load scene_hierarchy.yaml to build the scene tree
+  - 2. Use prim_to_mesh.yaml to find which GLB to load for each prim
+  - 3. Load GLB files from the meshes/ directory
+  - 4. Apply transforms from scene_hierarchy.yaml
+  - 5. Update transforms in real-time using prim paths as keys

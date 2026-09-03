@@ -1,0 +1,41 @@
+metadata:
+  task: Isaac-Velocity-Flat-H1-v0
+  generated: 2025-07-15 01:53:41 UTC
+  description: Mapping from USD prim paths to GLB mesh files
+mappings:
+  /World/envs/env_0: mesh_023.glb
+  /World/envs/env_0/Robot: mesh_024.glb
+  /World/envs/env_0/Robot/torso_link: mesh_025.glb
+  /World/envs/env_0/Robot/torso_link/sites/imu: mesh_026.glb
+  /World/ground/terrain: mesh_027.glb
+  /World/ground/terrain/Environment: mesh_028.glb
+  /World/ground/terrain/Environment/Geometry: mesh_029.glb
+  /Visuals/Command/velocity_goal/arrow: mesh_030.glb
+  /Visuals/Command/velocity_goal/arrow/Cylinder: mesh_031.glb
+  /Visuals/Command/velocity_goal/arrow/Cone: mesh_032.glb
+  /Visuals/Command/velocity_current/arrow: mesh_033.glb
+  /Visuals/Command/velocity_current/arrow/Cylinder: mesh_034.glb
+  /Visuals/Command/velocity_current/arrow/Cone: mesh_035.glb
+  /World/envs/env_0/Robot/left_hip_yaw_link/visuals: meshes/prototype_019.glb
+  /World/envs/env_0/Robot/left_hip_roll_link/visuals: meshes/prototype_014.glb
+  /World/envs/env_0/Robot/left_hip_pitch_link/visuals: meshes/prototype_010.glb
+  /World/envs/env_0/Robot/left_ankle_link/visuals: meshes/prototype_006.glb
+  /World/envs/env_0/Robot/left_ankle_link/collisions: meshes/prototype_009.glb
+  /World/envs/env_0/Robot/right_hip_yaw_link/visuals: meshes/prototype_002.glb
+  /World/envs/env_0/Robot/right_hip_roll_link/visuals: meshes/prototype_001.glb
+  /World/envs/env_0/Robot/right_hip_pitch_link/visuals: meshes/prototype_012.glb
+  /World/envs/env_0/Robot/right_knee_link/visuals: meshes/prototype_007.glb
+  /World/envs/env_0/Robot/right_ankle_link/collisions: meshes/prototype_005.glb
+  /World/envs/env_0/Robot/right_ankle_link/visuals: meshes/prototype_015.glb
+  /World/envs/env_0/Robot/torso_link/collisions: meshes/prototype_000.glb
+  /World/envs/env_0/Robot/torso_link/visuals: meshes/prototype_008.glb
+  /World/envs/env_0/Robot/left_shoulder_pitch_link/visuals: meshes/prototype_022.glb
+  /World/envs/env_0/Robot/left_shoulder_roll_link/visuals: meshes/prototype_018.glb
+  /World/envs/env_0/Robot/left_shoulder_yaw_link/visuals: meshes/prototype_011.glb
+  /World/envs/env_0/Robot/left_elbow_link/visuals: meshes/prototype_016.glb
+  /World/envs/env_0/Robot/right_shoulder_pitch_link/visuals: meshes/prototype_017.glb
+  /World/envs/env_0/Robot/right_shoulder_roll_link/visuals: meshes/prototype_004.glb
+  /World/envs/env_0/Robot/right_shoulder_yaw_link/visuals: meshes/prototype_020.glb
+  /World/envs/env_0/Robot/right_elbow_link/visuals: meshes/prototype_013.glb
+  /World/envs/env_0/Robot/pelvis/visuals: meshes/prototype_003.glb
+  /World/envs/env_0/Robot/left_knee_link/visuals: meshes/prototype_021.glb

@@ -1,0 +1,14 @@
+metadata:
+  task: Isaac-Cartpole-Direct-v0
+  generated: 2025-07-01 07:18:35 UTC
+  description: Mapping from USD prim paths to GLB mesh files
+mappings:
+  /World/ground: mesh_006.glb
+  /World/ground/Environment: mesh_007.glb
+  /World/ground/Environment/Geometry: mesh_008.glb
+  /World/envs/env_0/Robot/slider/visuals: meshes/prototype_002.glb
+  /World/envs/env_0/Robot/slider/collisions: meshes/prototype_001.glb
+  /World/envs/env_0/Robot/cart/visuals: meshes/prototype_004.glb
+  /World/envs/env_0/Robot/cart/collisions: meshes/prototype_003.glb
+  /World/envs/env_0/Robot/pole/visuals: meshes/prototype_000.glb
+  /World/envs/env_0/Robot/pole/collisions: meshes/prototype_005.glb
