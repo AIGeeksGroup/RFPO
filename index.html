@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="RFPO: Rectified Flow Policy Optimization for Embodied Control">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RFPO: Rectified Flow Policy Optimization for Embodied Control</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+  <meta property="og:site_name" content="RFPO: Rectified Flow Policy Optimization for Embodied Control" />
+  <meta property="og:title" content="RFPO: Rectified Flow Policy Optimization for Embodied Control" />
+  <meta property="og:image:width" content="1280" />
+  <meta property="og:image:height" content="720" />
+
+  <meta property="article:publisher" content="" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="RFPO: Rectified Flow Policy Optimization for Embodied Control" />
+</head>
+
+
+<body>
+  <section class="hero is-link is-fullheight video" style="overflow: hidden; position:relative; background-color: black;">
+    <div class="hero-video" style="height: 100%; width: 177.77777778vh; min-width: 100%;min-height: 56.25vw;">
+      <video playsinline autoplay muted loop style="opacity: 0.6;">
+        <source src="./RFPO_Video/background.mp4" type="video/mp4">
+      </video>
+    </div>
+
+
+    <!-- Hero content: will be in the middle -->
+    <div class="hero-body">
+      <div class="container has-text-centered">
+        <!-- <img src="./delete-soon/icon_opa.png" alt="icon" style="height: 15em; vertical-align: middle; margin-right: 10px;"> -->
+        <h1 class="title is-1 publication-title rfpo-title" style="color: white !important;">
+          RFPO
+        </h1>
+
+        <h1 class="title is-1 publication-title rfpo-subtitle" style="color: white !important;">
+          <span>Rectified Flow Policy Optimization</span>
+          <span>for Embodied Control</span>
+        </h1>
+
+        <div class="rfpo-authors">
+          <div class="rfpo-author-row">
+            <a href="https://believeht029.github.io/" target="_blank" rel="noopener noreferrer">Ting Huang<sup>1*</sup></a>
+            <a href="https://github.com/yuyuyu-maker" target="_blank" rel="noopener noreferrer">Lisiyu Pan<sup>1*</sup></a>
+            <a href="https://github.com/whyyyyy123" target="_blank" rel="noopener noreferrer">Haoyu Wang<sup>1*</sup></a>
+            <a href="https://steve-zeyu-zhang.github.io/" target="_blank" rel="noopener noreferrer">Zeyu Zhang<sup>1*†</sup></a>
+            <a href="https://github.com/SiriYep" target="_blank" rel="noopener noreferrer">Siyuan Qian<sup>1</sup></a>
+          </div>
+          <div class="rfpo-author-row">
+            <a href="https://github.com/yanjun711" target="_blank" rel="noopener noreferrer">Yanjun Li<sup>1</sup></a>
+            <a href="https://scholar.google.com/citations?user=fWDoWsQAAAAJ&amp;hl=en" target="_blank" rel="noopener noreferrer">Yandong Guo<sup>2</sup></a>
+            <a href="https://scholar.google.com/citations?user=K1LjZxcAAAAJ&amp;hl=en" target="_blank" rel="noopener noreferrer">Boxin Shi<sup>1</sup></a>
+            <a href="https://ha0tang.github.io/" target="_blank" rel="noopener noreferrer">Hao Tang<sup>1‡</sup></a>
+          </div>
+        </div>
+        <div class="rfpo-affiliations">
+          <span><sup>1</sup> School of Computer Science, Peking University</span>
+          <span><sup>2</sup> AI<sup>2</sup> Robotics</span>
+        </div>
+        <div class="rfpo-notes">
+          <span><sup>*</sup> Equal contribution.</span>
+          <span><sup>†</sup> Project lead.</span>
+          <span><sup>‡</sup> Corresponding author.</span>
+        </div>
+      
+      <!-- <h1 class="title is-1 publication-title is-size-1-mobile" style="font-size: 1.8rem; color: white !important; margin-top: 7px;">Conference 2026</h1> -->
+
+          <!-- NEW: Links moved here -->
+        <div class="hero-links" style="margin-top: 1.5rem;">
+          <a class="navbar-item pl-1 pr-1" href="">
+            <img src="./static/images/pdf.svg" alt="PDF" style="height: 18px; margin-right: 5px;"> Paper
+          </a>
+          <a class="navbar-item pl-1 pr-1" href="https://github.com/AIGeeksGroup/RFPO">
+            <i class="fab fa-github"></i>&nbsp; Code
+          </a>
+          <a class="navbar-item pl-1 pr-1" href="https://huggingface.co/AIGeeksGroup/RFPO">
+            <img src="./static/images/hf-logo.svg" alt="Demo" style="height: 18px; margin-right: 5px;"> Model
+          </a>
+        </div>
+
+      </div>
+    </div>
+  
+    <!-- Hero footer: will stick at the bottom -->
+  </section>
+
+
+
+  <section class="section">
+    <div class="container">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-8">
+          <h2 class="title is-2">Highlight</h2>
+          <video id="rfpo-highlight-video" controls autoplay loop muted playsinline preload="metadata"
+            src="./RFPO_ICRA_1080p.mp4"
+            aria-label="RFPO project video"
+            style="display: block; width: 100%; height: auto; border: 1px solid #bbb; border-radius: 10px; margin: 32px 0 60px;">
+          </video>
+
+        </div>
+      </div>
+    </div>
+  </section>
+  
+
+  <section class="section" id="method" aria-labelledby="method-title">
+    <div class="container">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-8">
+          <h2 class="title is-2" id="method-title">Method</h2>
+          <figure class="rfpo-method-figure">
+            <img src="./images/teaser.png" width="5909" height="2367" loading="lazy" decoding="async" alt="Full-step and naive few-step actions compared with RFPO's rectified flow policy for reliable few-step execution.">
+            <figcaption><strong>Few-step execution of reward-optimized flow policies.</strong> Naive step reduction can create a discretization gap between full-step and few-step actions. RFPO rectifies student-induced transport paths and uses complementary action-space supervision to enable reliable few-step execution.</figcaption>
+          </figure>
+          <figure class="rfpo-method-figure">
+            <img src="./images/pipeline.png" width="3700" height="2367" loading="lazy" decoding="async" alt="RFPO on-policy training with an online flow student, frozen PPO teacher, reward-aware online Reflow, and action distillation, followed by one-step deployment.">
+            <figcaption><strong>Overview of RFPO.</strong> During on-policy training, student-induced full-step endpoints are rectified by reward-aware online Reflow, while multi-budget student actions are distilled toward a frozen PPO controller. An adaptive budget objective further regularizes the fidelity–compute trade-off. At deployment, all auxiliary components are removed and only the flow student is retained for one-step Euler execution.</figcaption>
+          </figure>
+          <figure class="rfpo-method-figure">
+            <img src="./images/action_flow.png" width="2367" height="1034" loading="lazy" decoding="async" alt="Normalized RFPO action-state densities over flow time for hip and thigh joints across all four legs of Unitree Go2.">
+            <figcaption><strong>Action-flow geometry of RFPO on Unitree Go2.</strong> Normalized action-state densities over flow time for representative hip and thigh joints across all four legs. The learned policy exhibits concentrated and smoothly evolving transport patterns across joint dimensions.</figcaption>
+          </figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="sim2real-g1" aria-labelledby="sim2real-g1-title">
+    <div class="container">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-8">
+          <h2 class="title is-2" id="sim2real-g1-title">Sim2Real on Unitree G1</h2>
+          <div class="columns is-centered sim2real-pair" role="group" aria-label="Unitree G1 forward and backward">
+            <figure class="column is-8">
+              <video class="sim2real-video" controls autoplay loop muted playsinline preload="metadata"
+                src="./RFPO_Video/G1/sim/foward_backward.mp4" aria-label="Unitree G1 forward and backward simulation"></video>
+              <figcaption class="title is-4 sim2real-caption">Simulation</figcaption>
+            </figure>
+            <figure class="column is-8">
+              <video class="sim2real-video" controls autoplay loop muted playsinline preload="metadata"
+                src="./RFPO_Video/G1/real/forward_backward.mp4" aria-label="Unitree G1 forward and backward real world"></video>
+              <figcaption class="title is-4 sim2real-caption">Real World</figcaption>
+            </figure>
+          </div>
+          <div class="columns is-centered sim2real-pair" role="group" aria-label="Unitree G1 backward">
+            <figure class="column is-8">
+              <video class="sim2real-video" controls autoplay loop muted playsinline preload="metadata"
+                src="./RFPO_Video/G1/sim/backward.mp4" aria-label="Unitree G1 backward simulation"></video>
+              <figcaption class="title is-4 sim2real-caption">Simulation</figcaption>
+            </figure>
+            <figure class="column is-8">
+              <video class="sim2real-video" controls autoplay loop muted playsinline preload="metadata"
+                src="./RFPO_Video/G1/real/backward.mp4" aria-label="Unitree G1 backward real world"></video>
+              <figcaption class="title is-4 sim2real-caption">Real World</figcaption>
+            </figure>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="sim2real-go2-step1" aria-labelledby="sim2real-go2-step1-title">
+    <div class="container">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-8">
+          <h2 class="title is-2" id="sim2real-go2-step1-title">Sim2Real on Unitree Go2 (1-Step)</h2>
+          <div class="columns is-centered sim2real-pair" role="group" aria-label="Unitree Go2 1-step forward">
+            <figure class="column is-8">
+              <video class="sim2real-video" controls autoplay loop muted playsinline preload="metadata"
+                src="./RFPO_Video/go2/step1/sim_1/forward.mp4" aria-label="Unitree Go2 1-step forward simulation"></video>
+              <figcaption class="title is-4 sim2real-caption">Simulation</figcaption>
+            </figure>
+            <figure class="column is-8">
+              <video class="sim2real-video" controls autoplay loop muted playsinline preload="metadata"
+                src="./RFPO_Video/go2/step1/real_1/forward.mp4" aria-label="Unitree Go2 1-step forward real world"></video>
+              <figcaption class="title is-4 sim2real-caption">Real World</figcaption>
+            </figure>
+          </div>
+          <div class="columns is-centered sim2real-pair" role="group" aria-label="Unitree Go2 1-step left">
+            <figure class="column is-8">
+              <video class="sim2real-video" controls autoplay loop muted playsinline preload="metadata"
+                src="./RFPO_Video/go2/step1/sim_1/left.mp4" aria-label="Unitree Go2 1-step left simulation"></video>
+              <figcaption class="title is-4 sim2real-caption">Simulation</figcaption>
+            </figure>
+            <figure class="column is-8">
+              <video class="sim2real-video" controls autoplay loop muted playsinline preload="metadata"
+                src="./RFPO_Video/go2/step1/real_1/left.mp4" aria-label="Unitree Go2 1-step left real world"></video>
+              <figcaption class="title is-4 sim2real-caption">Real World</figcaption>
+            </figure>
+          </div>
+          <div class="columns is-centered sim2real-pair" role="group" aria-label="Unitree Go2 1-step yaw">
+            <figure class="column is-8">
+              <video class="sim2real-video" controls autoplay loop muted playsinline preload="metadata"
+                src="./RFPO_Video/go2/step1/sim_1/yaw.mp4" aria-label="Unitree Go2 1-step yaw simulation"></video>
+              <figcaption class="title is-4 sim2real-caption">Simulation</figcaption>
+            </figure>
+            <figure class="column is-8">
+              <video class="sim2real-video" controls autoplay loop muted playsinline preload="metadata"
+                src="./RFPO_Video/go2/step1/real_1/yaw.mp4" aria-label="Unitree Go2 1-step yaw real world"></video>
+              <figcaption class="title is-4 sim2real-caption">Real World</figcaption>
+            </figure>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="sim2real-go2-step64" aria-labelledby="sim2real-go2-step64-title">
+    <div class="container">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-8">
+          <h2 class="title is-2" id="sim2real-go2-step64-title">Sim2Real on Unitree Go2 (64-Step)</h2>
+          <div class="columns is-centered sim2real-pair" role="group" aria-label="Unitree Go2 64-step forward">
+            <figure class="column is-8">
+              <video class="sim2real-video" controls autoplay loop muted playsinline preload="metadata"
+                src="./RFPO_Video/go2/step64/sim/forward.mp4" aria-label="Unitree Go2 64-step forward simulation"></video>
+              <figcaption class="title is-4 sim2real-caption">Simulation</figcaption>
+            </figure>
+            <figure class="column is-8">
+              <video class="sim2real-video" controls autoplay loop muted playsinline preload="metadata"
+                src="./RFPO_Video/go2/step64/real/forward.mp4" aria-label="Unitree Go2 64-step forward real world"></video>
+              <figcaption class="title is-4 sim2real-caption">Real World</figcaption>
+            </figure>
+          </div>
+          <div class="columns is-centered sim2real-pair" role="group" aria-label="Unitree Go2 64-step left">
+            <figure class="column is-8">
+              <video class="sim2real-video" controls autoplay loop muted playsinline preload="metadata"
+                src="./RFPO_Video/go2/step64/sim/left.mp4" aria-label="Unitree Go2 64-step left simulation"></video>
+              <figcaption class="title is-4 sim2real-caption">Simulation</figcaption>
+            </figure>
+            <figure class="column is-8">
+              <video class="sim2real-video" controls autoplay loop muted playsinline preload="metadata"
+                src="./RFPO_Video/go2/step64/real/left.mp4" aria-label="Unitree Go2 64-step left real world"></video>
+              <figcaption class="title is-4 sim2real-caption">Real World</figcaption>
+            </figure>
+          </div>
+          <div class="columns is-centered sim2real-pair" role="group" aria-label="Unitree Go2 64-step yaw">
+            <figure class="column is-8">
+              <video class="sim2real-video" controls autoplay loop muted playsinline preload="metadata"
+                src="./RFPO_Video/go2/step64/sim/yaw.mp4" aria-label="Unitree Go2 64-step yaw simulation"></video>
+              <figcaption class="title is-4 sim2real-caption">Simulation</figcaption>
+            </figure>
+            <figure class="column is-8">
+              <video class="sim2real-video" controls autoplay loop muted playsinline preload="metadata"
+                src="./RFPO_Video/go2/step64/real/yaw.mp4" aria-label="Unitree Go2 64-step yaw real world"></video>
+              <figcaption class="title is-4 sim2real-caption">Real World</figcaption>
+            </figure>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="BibTeX">
+    <div class="container content">
+      <h2 class="titile">BibTeX</h2>
+      <pre><code>@misc{huang2026rfpo,
+  title  = {RFPO: Rectified Flow Policy Optimization for Embodied Control},
+  author = {Ting Huang and Lisiyu Pan and Haoyu Wang and Zeyu Zhang and Siyuan Qian and Yanjun Li and Yandong Guo and Boxin Shi and Hao Tang},
+  year   = {2026}
+}</code></pre>
+    </div>
+  </section>
+  
+  
+  <footer class="footer">
+    <div class="container">
+      <div class="columns is-centered">
+        <div class="column is-8">
+          <div class="content">
+            <p>
+              RFPO: Rectified Flow Policy Optimization for Embodied Control
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
