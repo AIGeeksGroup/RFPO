@@ -386,8 +386,8 @@ class ActorCritic(nn.Module):
         assert student_obs.shape == teacher_obs.shape
         batch_size = student_obs.shape[0]
         device = student_obs.device
-        bins = list(step_bins) if step_bins is not None else [1, 4, 8]
-        bins = [int(s) for s in bins if 0 < int(s) < self.sampling_steps]
+        bins = list(step_bins) if step_bins is not None else [64, 8, 4]
+        bins = [int(s) for s in bins if 0 < int(s) <= self.sampling_steps]
         if not bins:
             zero = torch.tensor(0.0, device=device)
             return zero, {}
@@ -420,6 +420,55 @@ class ActorCritic(nn.Module):
         metrics["teacher_kd_loss"] = loss.item()
         return loss, metrics
 
+    def get_ppo_action_kd_loss(
+        self,
+        observations: torch.Tensor,
+        teacher_actions: torch.Tensor,
+        step_bins: list[int] | None = None,
+        zero_x0_prob: float = 0.0,
+    ) -> tuple[torch.Tensor, dict[str, float]]:
+        """Distil a Gaussian PPO action into student flow trajectories.
+
+        The PPO target is a single deterministic action rather than a flow
+        endpoint.  It therefore has neither a noise initialization nor an
+        integration budget of its own.  The student is supervised at 64, 8 and
+        4 Euler steps; one-step deployment is intentionally not directly matched.
+        """
+        if teacher_actions.shape != (observations.shape[0], self.num_actions):
+            raise ValueError(
+                "teacher_actions must have shape "
+                f"({observations.shape[0]}, {self.num_actions}), got "
+                f"{tuple(teacher_actions.shape)}"
+            )
+        batch_size = observations.shape[0]
+        device = observations.device
+        bins = list(step_bins) if step_bins is not None else [64, 8, 4]
+        bins = [int(s) for s in bins if 0 < int(s) <= self.sampling_steps]
+        if not bins:
+            zero = torch.tensor(0.0, device=device)
+            return zero, {}
+
+        x0 = torch.randn(batch_size, self.num_actions, device=device)
+        if zero_x0_prob > 0.0:
+            zero_mask = torch.rand(batch_size, 1, device=device) < zero_x0_prob
+            x0 = torch.where(zero_mask, torch.zeros_like(x0), x0)
+
+        target = teacher_actions.detach()
+        total_loss = torch.tensor(0.0, device=device)
+        metrics: dict[str, float] = {}
+        for steps in bins:
+            t_k, dt_k, flow_steps = self._flow_integration_grid(device, steps)
+            action_student = self._integrate_flow(
+                observations, x0, t_k, dt_k, flow_steps
+            )
+            step_loss = (action_student - target).pow(2).mean()
+            total_loss = total_loss + step_loss
+            metrics[f"ppo_teacher_kd_{steps}"] = step_loss.item()
+
+        loss = total_loss / float(len(bins))
+        metrics["teacher_kd_loss"] = loss.item()
+        return loss, metrics
+
     def get_adaptive_compute_loss(
         self,
         observations: torch.Tensor,
@@ -443,16 +492,24 @@ class ActorCritic(nn.Module):
                 observations, x0, t_full, dt_full, steps_full
             )
 
-        pred_steps = self.step_predictor.predict_steps(observations)
-        action_low = torch.zeros_like(action_full)
+        logits = self.step_predictor(observations)
+        probabilities = torch.softmax(logits, dim=-1)
+        selected_indices = probabilities.argmax(dim=-1)
+        hard_selector = torch.nn.functional.one_hot(
+            selected_indices, num_classes=len(self.adaptive_step_bins)
+        ).to(dtype=probabilities.dtype)
+        # Use hard argmax execution in the forward pass, with a straight-through
+        # softmax surrogate so fidelity gradients train the step predictor.
+        selector = hard_selector + probabilities - probabilities.detach()
+        candidate_actions = []
         for steps in self.adaptive_step_bins:
-            mask = pred_steps == steps
-            if not mask.any():
-                continue
             t_k, dt_k, flow_steps = self._flow_integration_grid(device, int(steps))
-            action_low[mask] = self._integrate_flow(
-                observations[mask], x0[mask], t_k, dt_k, flow_steps
+            candidate_actions.append(
+                self._integrate_flow(observations, x0, t_k, dt_k, flow_steps)
             )
+        action_low = (
+            torch.stack(candidate_actions, dim=1) * selector.unsqueeze(-1)
+        ).sum(dim=1)
 
         fidelity_loss = (action_low - action_full).pow(2).mean()
         latency_penalty = self.step_predictor.expected_step_fraction(observations).mean()
@@ -464,7 +521,9 @@ class ActorCritic(nn.Module):
         metrics = {
             "adaptive_fidelity_loss": fidelity_loss.item(),
             "adaptive_latency_penalty": latency_penalty.item(),
-            "adaptive_mean_steps": pred_steps.float().mean().item(),
+            "adaptive_mean_steps": torch.tensor(
+                self.adaptive_step_bins, device=device, dtype=observations.dtype
+            )[selected_indices].mean().item(),
         }
         return loss, metrics
 

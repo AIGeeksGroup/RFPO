@@ -22,7 +22,7 @@ def add_fpo_args(parser: argparse.ArgumentParser):
         "--teacher_checkpoint",
         type=str,
         default=None,
-        help="Frozen baseline checkpoint for reflow endpoints / teacher KD.",
+        help="Frozen Gaussian PPO checkpoint used for teacher KD.",
     )
     arg_group.add_argument(
         "--logger", type=str, default=None, choices={"wandb", "tensorboard", "neptune"}, help="Logger module to use."

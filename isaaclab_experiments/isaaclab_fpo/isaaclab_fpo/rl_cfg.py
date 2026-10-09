@@ -407,19 +407,23 @@ class FpoRslRlPpoAlgorithmCfg:  # Keeping name for backwards compatibility
     """Few-step budgets compared against full ``sampling_steps`` under the same x0."""
 
     reflow_teacher_checkpoint: str = ""
-    """Frozen baseline checkpoint whose 64-step actor supplies reflow endpoints / KD targets.
+    """Frozen Gaussian PPO checkpoint used as an action-space KD target.
 
-    Empty disables the frozen teacher. Collection stays ``train_flow_x0_mode=random``.
+    It does not generate Reflow endpoints. Empty disables the teacher; collection
+    stays ``train_flow_x0_mode=random``.
     """
 
+    teacher_kind: Literal["ppo", "flow"] = "ppo"
+    """Teacher checkpoint format. ``ppo`` is the RFPO method; ``flow`` is legacy only."""
+
     teacher_kd_enabled: bool = False
-    """Distill student few-step Euler onto stopgrad teacher 64-step actions (same x0)."""
+    """Distill student trajectories onto stop-gradient teacher actions."""
 
     teacher_kd_coef: float = 0.1
     """Coefficient for ``teacher_kd`` when enabled."""
 
     teacher_kd_steps: list[int] = None  # type: ignore[assignment]
-    """Student Euler budgets matched to the teacher 64-step action."""
+    """Student Euler budgets matched to the PPO action (RFPO: ``[64, 8, 4]``)."""
 
     teacher_aux_zero_x0_prob: float = 0.25
     """Fraction of auxiliary (reflow/KD) samples that use x0=0 (deploy protocol).
@@ -433,7 +437,7 @@ class FpoRslRlPpoAlgorithmCfg:  # Keeping name for backwards compatibility
         if self.random_x0_consistency_steps is None:
             self.random_x0_consistency_steps = [1, 4, 8]
         if self.teacher_kd_steps is None:
-            self.teacher_kd_steps = [1, 4, 8]
+            self.teacher_kd_steps = [64, 8, 4]
 
 
 #########################

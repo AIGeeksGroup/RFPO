@@ -89,15 +89,9 @@ class UnitreeGo2FlatFlowPPORunnerCfgReflowRandomX0(UnitreeGo2FlatFlowPPORunnerCf
     )
 
 
-_GO2_BASELINE_TEACHER_500 = (
-    "/workspace/plsy/fgo_test/isaaclab_experiments/logs/isaaclab_fpo/"
-    "go2_baseline_500/2026-08-27_14-53-04_2026-08-27_14-52-10_baseline/model_499.pt"
-)
-
-
 @configclass
 class UnitreeGo2FlatFlowPPORunnerCfgReflowTeacherKd(UnitreeGo2FlatFlowPPORunnerCfg):
-    """Reflow student with frozen baseline 64-step teacher + few-step KD.
+    """Reflow student with a frozen Gaussian PPO teacher + multi-budget KD.
 
     Collection stays random x0 (no mix). Deploy the student (zero init, few-step).
     """
@@ -107,10 +101,10 @@ class UnitreeGo2FlatFlowPPORunnerCfgReflowTeacherKd(UnitreeGo2FlatFlowPPORunnerC
         reflow_enabled=True,
         reflow_loss_coef=1.0,
         reflow_n_samples_per_obs=4,
-        reflow_teacher_checkpoint=_GO2_BASELINE_TEACHER_500,
+        teacher_kind="ppo",
         teacher_kd_enabled=True,
         teacher_kd_coef=0.1,
-        teacher_kd_steps=[1, 4, 8],
+        teacher_kd_steps=[64, 8, 4],
         teacher_aux_zero_x0_prob=0.25,
     )
 
@@ -205,11 +199,7 @@ class UnitreeGo2FlatFlowPPORunnerCfgAllIdeas(UnitreeGo2FlatFlowPPORunnerCfg):
 
 @configclass
 class UnitreeGo2FlatFlowPPORunnerCfgAllIdeasTeacherKd(UnitreeGo2FlatFlowPPORunnerCfg):
-    """Teacher-KD reflow + stacked ideas: reward_aware, adaptive_compute, theory.
-
-    Frozen baseline supplies reflow endpoints (not EMA / fpo_operator).
-    Collection stays random x0 (no mix).
-    """
+    """RFPO: PPO-KD, student-induced reward-aware Reflow, and adaptive compute."""
 
     experiment_name = "unitree_go2_all_ideas_teacher_kd"
     policy = FpoRslRlPpoActorCriticCfg(
@@ -225,10 +215,10 @@ class UnitreeGo2FlatFlowPPORunnerCfgAllIdeasTeacherKd(UnitreeGo2FlatFlowPPORunne
         reflow_n_samples_per_obs=4,
         reflow_mode="reward_aware",
         reflow_advantage_threshold=0.0,
-        reflow_teacher_checkpoint=_GO2_BASELINE_TEACHER_500,
+        teacher_kind="ppo",
         teacher_kd_enabled=True,
         teacher_kd_coef=0.1,
-        teacher_kd_steps=[1, 4, 8],
+        teacher_kd_steps=[64, 8, 4],
         teacher_aux_zero_x0_prob=0.25,
         theory_metrics_enabled=True,
         adaptive_compute_enabled=True,
@@ -435,15 +425,9 @@ class G1FlatFlowPPORunnerCfgReflow(G1FlatFlowPPORunnerCfg):
     )
 
 
-_G1_BASELINE_TEACHER_2000 = (
-    "/workspace/plsy/fgo_test/isaaclab_experiments/logs/isaaclab_fpo/"
-    "g1_flat_flow/2026-08-27_00-04-43_2026-08-27_00-02-39_g1_baseline/model_1999.pt"
-)
-
-
 @configclass
 class G1FlatFlowPPORunnerCfgReflowTeacherKd(G1FlatFlowPPORunnerCfg):
-    """G1 reflow student with frozen full baseline teacher + few-step KD."""
+    """G1 Reflow student with a frozen Gaussian PPO teacher + multi-budget KD."""
 
     experiment_name = "g1_reflow_teacher_kd"
     algorithm = FpoRslRlPpoAlgorithmCfg(
@@ -452,10 +436,10 @@ class G1FlatFlowPPORunnerCfgReflowTeacherKd(G1FlatFlowPPORunnerCfg):
         reflow_enabled=True,
         reflow_loss_coef=1.0,
         reflow_n_samples_per_obs=4,
-        reflow_teacher_checkpoint=_G1_BASELINE_TEACHER_2000,
+        teacher_kind="ppo",
         teacher_kd_enabled=True,
         teacher_kd_coef=0.1,
-        teacher_kd_steps=[1, 4, 8],
+        teacher_kd_steps=[64, 8, 4],
         teacher_aux_zero_x0_prob=0.25,
     )
 
@@ -612,10 +596,7 @@ class G1FlatFlowPPORunnerCfgAllIdeasFpo(G1FlatFlowPPORunnerCfg):
 
 @configclass
 class G1FlatFlowPPORunnerCfgAllIdeasTeacherKd(G1FlatFlowPPORunnerCfg):
-    """Full G1 stack: frozen baseline teacher + KD + fpo_operator weights + adaptive + theory.
-
-    EMA endpoints are off: the frozen teacher owns x1. Collection stays random.
-    """
+    """G1 RFPO: PPO-KD, student-induced reward-aware Reflow, and adaptive compute."""
 
     experiment_name = "g1_all_ideas_teacher_kd"
     policy = FpoRslRlPpoActorCriticCfg(
@@ -631,12 +612,12 @@ class G1FlatFlowPPORunnerCfgAllIdeasTeacherKd(G1FlatFlowPPORunnerCfg):
         reflow_enabled=True,
         reflow_loss_coef=1.0,
         reflow_n_samples_per_obs=4,
-        reflow_mode="fpo_operator",
-        reflow_use_ema_endpoint=False,
-        reflow_teacher_checkpoint=_G1_BASELINE_TEACHER_2000,
+        reflow_mode="reward_aware",
+        reflow_advantage_threshold=0.0,
+        teacher_kind="ppo",
         teacher_kd_enabled=True,
         teacher_kd_coef=0.1,
-        teacher_kd_steps=[1, 4, 8],
+        teacher_kd_steps=[64, 8, 4],
         teacher_aux_zero_x0_prob=0.25,
         theory_metrics_enabled=True,
         adaptive_compute_enabled=True,

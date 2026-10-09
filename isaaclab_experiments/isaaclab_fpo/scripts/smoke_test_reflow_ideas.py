@@ -4,9 +4,11 @@
 from __future__ import annotations
 
 import sys
+import tempfile
 
 import torch
 
+from isaaclab_fpo.algorithms.fpo import FPO, _FrozenGaussianPpoActor
 from isaaclab_fpo.modules.actor_critic import ActorCritic
 from isaaclab_fpo.modules.reflow_extensions import (
     StepPredictor,
@@ -15,7 +17,7 @@ from isaaclab_fpo.modules.reflow_extensions import (
     compute_path_straightness,
     map_gap_to_reflow_lambda,
 )
-from isaaclab_fpo.rl_cfg import FpoRslRlPpoActorCriticCfg
+from isaaclab_fpo.rl_cfg import FpoRslRlPpoActorCriticCfg, FpoRslRlPpoAlgorithmCfg
 from isaaclab_fpo.task_cfgs import GO2_FPO_VARIANTS
 
 
@@ -86,6 +88,16 @@ def test_actor_critic_variants():
             loss, metrics = policy.get_adaptive_compute_loss(obs, advantages=adv)
             assert torch.isfinite(loss).all(), f"{name} adaptive loss not finite"
             assert "adaptive_mean_steps" in metrics
+            policy.zero_grad(set_to_none=True)
+            loss.backward()
+            predictor_grads = [
+                parameter.grad
+                for parameter in policy.step_predictor.parameters()
+                if parameter.grad is not None
+            ]
+            assert predictor_grads and any(
+                grad.abs().sum() > 0 for grad in predictor_grads
+            ), f"{name} adaptive fidelity did not reach the step predictor"
 
         if variant.algorithm.random_x0_consistency_enabled:
             loss, metrics = policy.get_random_x0_consistency_loss(
@@ -109,20 +121,68 @@ def test_actor_critic_variants():
             assert gap >= 0.0
 
         if variant.algorithm.teacher_kd_enabled:
-            loss, metrics = policy.get_teacher_kd_loss(
+            teacher_actions = torch.randn(batch, act_dim)
+            loss, metrics = policy.get_ppo_action_kd_loss(
                 obs,
-                obs,
-                teacher_actor=policy.actor,
+                teacher_actions,
                 step_bins=variant.algorithm.teacher_kd_steps,
                 zero_x0_prob=variant.algorithm.teacher_aux_zero_x0_prob,
             )
             assert torch.isfinite(loss).all(), f"{name} teacher_kd loss not finite"
             assert "teacher_kd_loss" in metrics
+            assert 1 not in variant.algorithm.teacher_kd_steps
+            assert 64 in variant.algorithm.teacher_kd_steps
+            assert "ppo_teacher_kd_64" in metrics
+
+    full_cfg = GO2_FPO_VARIANTS["all_ideas_teacher_kd"]().algorithm
+    assert full_cfg.teacher_kind == "ppo"
+    assert full_cfg.reflow_teacher_checkpoint == ""
+    assert full_cfg.teacher_kd_steps == [64, 8, 4]
+
+
+def test_gaussian_ppo_actor_loader():
+    actor_state_dict = {
+        "0.weight": torch.randn(16, 48),
+        "0.bias": torch.randn(16),
+        "2.weight": torch.randn(12, 16),
+        "2.bias": torch.randn(12),
+    }
+    actor = _FrozenGaussianPpoActor(actor_state_dict)
+    actions = actor(torch.randn(7, 48))
+    assert actions.shape == (7, 12)
+    assert actor.input_dim == 48
+    assert actor.output_dim == 12
+
+
+def test_ppo_teacher_checkpoint_loading():
+    obs_dim, critic_dim, act_dim = 48, 48, 12
+    policy_cfg = FpoRslRlPpoActorCriticCfg(
+        actor_hidden_dims=[16], critic_hidden_dims=[16], activation="elu"
+    )
+    policy = ActorCritic(obs_dim, critic_dim, act_dim, policy_cfg)
+    teacher_state = {
+        "actor.0.weight": torch.randn(16, obs_dim),
+        "actor.0.bias": torch.randn(16),
+        "actor.2.weight": torch.randn(act_dim, 16),
+        "actor.2.bias": torch.randn(act_dim),
+    }
+    with tempfile.NamedTemporaryFile(suffix=".pt") as checkpoint:
+        torch.save({"model_state_dict": teacher_state}, checkpoint.name)
+        algorithm_cfg = FpoRslRlPpoAlgorithmCfg(
+            teacher_kd_enabled=True,
+            reflow_teacher_checkpoint=checkpoint.name,
+        )
+        algorithm = FPO(policy, algorithm_cfg)
+        assert algorithm._ppo_teacher is not None
+        assert algorithm._teacher_actor is None
+        assert algorithm._reflow_endpoint_actor() is None
 
 
 def main():
     test_reflow_extensions()
     test_actor_critic_variants()
+    test_gaussian_ppo_actor_loader()
+    test_ppo_teacher_checkpoint_loading()
     print("All smoke tests passed.")
     return 0
 

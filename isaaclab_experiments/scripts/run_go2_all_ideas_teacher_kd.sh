@@ -3,8 +3,8 @@
 # Matches the main idea-table budget (16384 envs, 2500 iters) unless overridden.
 #
 # Usage:
-#   GPU=2 bash scripts/run_go2_all_ideas_teacher_kd.sh
-#   GPU=2 NUM_ENVS=4096 MAX_ITERS=2500 bash scripts/run_go2_all_ideas_teacher_kd.sh
+#   GPU=2 PPO_TEACHER=/path/to/gaussian_ppo.pt bash scripts/run_go2_all_ideas_teacher_kd.sh
+#   GPU=2 PPO_TEACHER=/path/to/gaussian_ppo.pt NUM_ENVS=4096 MAX_ITERS=2500 bash scripts/run_go2_all_ideas_teacher_kd.sh
 set -eo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -24,7 +24,7 @@ MAX_ITERS="${MAX_ITERS:-2500}"
 EVAL_ENVS="${EVAL_ENVS:-2048}"
 VARIANT="all_ideas_teacher_kd"
 EXP_NAME="unitree_go2_all_ideas_teacher_kd"
-TEACHER="${TEACHER:-${ROOT}/logs/isaaclab_fpo/go2_baseline_500/2026-08-27_14-53-04_2026-08-27_14-52-10_baseline/model_499.pt}"
+TEACHER="${PPO_TEACHER:?Set PPO_TEACHER to a compatible Gaussian PPO checkpoint}"
 
 STAMP="$(date +%Y-%m-%d_%H-%M-%S)"
 WORKDIR="/dev/shm/go2_all_ideas_teacher_kd"
@@ -40,7 +40,7 @@ run_name="${STAMP}_${VARIANT}"
 
 echo "[$(date '+%F %T')] Go2 ${VARIANT} GPU=${GPU} envs=${NUM_ENVS} iters=${MAX_ITERS}" | tee -a "$OUT"
 echo "  teacher=${TEACHER}" | tee -a "$OUT"
-echo "  stack=teacher_kd + reward_aware + adaptive_compute + theory (no mix, no ema endpoint)" | tee -a "$OUT"
+echo "  stack=Gaussian-PPO KD + student Reflow + reward_aware + adaptive_compute" | tee -a "$OUT"
 
 sync_loop() {
   local src_root="${WORKDIR}/logs/isaaclab_fpo/${EXP_NAME}"

@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import copy
 import os
+import re
 
 import numpy as np
 import torch
@@ -29,6 +30,54 @@ def clamp_ste(x, min=None, max=None):
     clamped = x.clamp(min=min, max=max)
     # forward uses clamped; backward uses identity grad wrt x
     return x + (clamped - x).detach()
+
+
+class _FrozenGaussianPpoActor(nn.Module):
+    """Reconstruct the deterministic mean actor from an rsl_rl PPO checkpoint.
+
+    Checkpoints store the actor as an ``nn.Sequential`` state dict.  Building the
+    linear stack from its tensors avoids coupling RFPO to one hidden-layer layout
+    while preserving the standard ELU activations used by the PPO training setup.
+    """
+
+    def __init__(self, actor_state_dict: dict[str, torch.Tensor]):
+        super().__init__()
+        layer_indices = sorted(
+            int(match.group(1))
+            for key in actor_state_dict
+            if (match := re.fullmatch(r"(\d+)\.weight", key)) is not None
+        )
+        if not layer_indices:
+            raise ValueError("PPO checkpoint does not contain actor linear layers")
+
+        layers: list[nn.Linear] = []
+        for index in layer_indices:
+            weight_key = f"{index}.weight"
+            bias_key = f"{index}.bias"
+            weight = actor_state_dict[weight_key]
+            bias = actor_state_dict.get(bias_key)
+            if weight.ndim != 2 or (bias is not None and bias.shape != (weight.shape[0],)):
+                raise ValueError(f"Invalid PPO actor layer in checkpoint: {weight_key}")
+            layer = nn.Linear(weight.shape[1], weight.shape[0], bias=bias is not None)
+            with torch.no_grad():
+                layer.weight.copy_(weight)
+                if bias is not None:
+                    assert layer.bias is not None
+                    layer.bias.copy_(bias)
+            layers.append(layer)
+
+        for previous, current in zip(layers, layers[1:]):
+            if previous.out_features != current.in_features:
+                raise ValueError("PPO actor checkpoint has incompatible adjacent layers")
+        self.layers = nn.ModuleList(layers)
+        self.input_dim = layers[0].in_features
+        self.output_dim = layers[-1].out_features
+
+    def forward(self, observations: torch.Tensor) -> torch.Tensor:
+        output = observations
+        for layer in self.layers[:-1]:
+            output = torch.nn.functional.elu(layer(output))
+        return self.layers[-1](output)
 
 
 class FPO:
@@ -137,15 +186,27 @@ class FPO:
         self.random_x0_consistency_coef = cfg.random_x0_consistency_coef
         self.random_x0_consistency_steps = list(cfg.random_x0_consistency_steps)
         self.reflow_teacher_checkpoint = str(cfg.reflow_teacher_checkpoint or "")
+        self.teacher_kind = str(getattr(cfg, "teacher_kind", "ppo")).lower()
         self.teacher_kd_enabled = bool(cfg.teacher_kd_enabled)
         self.teacher_kd_coef = float(cfg.teacher_kd_coef)
         self.teacher_kd_steps = list(cfg.teacher_kd_steps)
         self.teacher_aux_zero_x0_prob = float(cfg.teacher_aux_zero_x0_prob)
         self._teacher_actor: nn.Module | None = None
+        self._ppo_teacher: nn.Module | None = None
         self._teacher_obs_normalizer: EmpiricalNormalization | None = None
         self._last_teacher_kd_metrics: dict[str, float] = {}
+        if self.teacher_kind not in {"flow", "ppo"}:
+            raise ValueError(f"Unknown teacher_kind: {self.teacher_kind}")
+        if self.teacher_kd_enabled and not self.reflow_teacher_checkpoint:
+            raise ValueError(
+                "teacher_kd_enabled requires --teacher_checkpoint / a "
+                "reflow_teacher_checkpoint"
+            )
         if self.reflow_teacher_checkpoint:
-            self._load_frozen_teacher(self.reflow_teacher_checkpoint)
+            if self.teacher_kind == "ppo":
+                self._load_frozen_ppo_teacher(self.reflow_teacher_checkpoint)
+            else:
+                self._load_frozen_flow_teacher(self.reflow_teacher_checkpoint)
         self.update_counter = 0
         self._last_theory_metrics: dict[str, float] = {}
         self._last_adaptive_metrics: dict[str, float] = {}
@@ -163,9 +224,9 @@ class FPO:
                 f"random_x0_consistency={self.random_x0_consistency_enabled}, "
                 f"teacher_kd={self.teacher_kd_enabled}"
             )
-        if self._teacher_actor is not None:
+        if self._teacher_actor is not None or self._ppo_teacher is not None:
             print(
-                f"Frozen reflow teacher loaded from {self.reflow_teacher_checkpoint} "
+                f"Frozen {self.teacher_kind} teacher loaded from {self.reflow_teacher_checkpoint} "
                 f"(kd={self.teacher_kd_enabled}, kd_steps={self.teacher_kd_steps}, "
                 f"aux_zero_x0_prob={self.teacher_aux_zero_x0_prob})"
             )
@@ -317,7 +378,7 @@ class FPO:
         self.transition.clear()
         self.policy.reset(dones)
 
-    def _load_frozen_teacher(self, checkpoint_path: str) -> None:
+    def _load_frozen_flow_teacher(self, checkpoint_path: str) -> None:
         """Load a frozen baseline actor + its obs normalizer for reflow endpoints / KD."""
         if not os.path.isfile(checkpoint_path):
             raise FileNotFoundError(
@@ -343,23 +404,65 @@ class FPO:
         teacher_norm.eval()
         self._teacher_obs_normalizer = teacher_norm
 
+    def _load_frozen_ppo_teacher(self, checkpoint_path: str) -> None:
+        """Load a frozen Gaussian PPO actor used only as an action-space target.
+
+        A PPO actor takes observations directly; it is never used as a flow vector
+        field or as a Reflow endpoint generator.
+        """
+        if not os.path.isfile(checkpoint_path):
+            raise FileNotFoundError(
+                f"reflow_teacher_checkpoint not found: {checkpoint_path}"
+            )
+        loaded = torch.load(checkpoint_path, map_location=self.device, weights_only=False)
+        model_sd = loaded["model_state_dict"]
+        actor_sd = {
+            key[len("actor.") :]: value
+            for key, value in model_sd.items()
+            if key.startswith("actor.")
+        }
+        teacher_actor = _FrozenGaussianPpoActor(actor_sd).to(self.device)
+        if teacher_actor.input_dim != self.policy.num_actor_obs:
+            raise ValueError(
+                "PPO teacher observation dimension does not match the flow student: "
+                f"teacher={teacher_actor.input_dim}, student={self.policy.num_actor_obs}"
+            )
+        if teacher_actor.output_dim != self.policy.num_actions:
+            raise ValueError(
+                "PPO teacher action dimension does not match the flow student: "
+                f"teacher={teacher_actor.output_dim}, student={self.policy.num_actions}"
+            )
+        teacher_actor.eval()
+        for param in teacher_actor.parameters():
+            param.requires_grad_(False)
+        self._ppo_teacher = teacher_actor
+
+        if "obs_norm_state_dict" in loaded:
+            obs_dim = int(self.policy.num_actor_obs)
+            teacher_norm = EmpiricalNormalization(shape=(obs_dim,)).to(self.device)
+            teacher_norm.load_state_dict(loaded["obs_norm_state_dict"])
+            teacher_norm.eval()
+            self._teacher_obs_normalizer = teacher_norm
+
     def _to_teacher_obs(
         self, student_obs: torch.Tensor, student_normalizer: nn.Module | None
     ) -> torch.Tensor:
         """Map student-normalized obs into the frozen teacher's normalization."""
-        if self._teacher_obs_normalizer is None:
-            return student_obs
         with torch.no_grad():
             if student_normalizer is not None and hasattr(student_normalizer, "inverse"):
                 raw = student_normalizer.inverse(student_obs)
             else:
                 raw = student_obs
+            if self._teacher_obs_normalizer is None:
+                return raw
             return self._teacher_obs_normalizer(raw)
 
     def _reflow_endpoint_actor(self) -> nn.Module | None:
-        """Frozen baseline actor, detached EMA actor, or None (online actor)."""
-        if self._teacher_actor is not None:
-            return self._teacher_actor
+        """Detached EMA actor, or None to generate endpoints with the online student.
+
+        External teachers are intentionally excluded: RFPO Reflow paths are induced
+        by the evolving student, while the PPO teacher supplies only KD targets.
+        """
         if not self.reflow_use_ema_endpoint or self.ema is None:
             return None
         if self.tot_timesteps <= self.ema_warmup_steps:
@@ -659,11 +762,9 @@ class FPO:
                     reflow_mode=self.reflow_mode,
                     advantage_threshold=self.reflow_advantage_threshold,
                     endpoint_actor=self._reflow_endpoint_actor(),
-                    endpoint_obs=self._to_teacher_obs(obs_batch, obs_normalizer)
-                    if self._teacher_actor is not None
-                    else None,
+                    endpoint_obs=None,
                     zero_x0_prob=self.teacher_aux_zero_x0_prob
-                    if self._teacher_actor is not None
+                    if self._teacher_actor is not None or self._ppo_teacher is not None
                     else 0.0,
                 )
 
@@ -693,19 +794,33 @@ class FPO:
 
             teacher_kd_loss = torch.tensor(0.0, device=self.device)
             if self.teacher_kd_enabled:
-                if self._teacher_actor is None:
+                if self._ppo_teacher is not None:
+                    with torch.no_grad():
+                        teacher_actions = self._ppo_teacher(
+                            self._to_teacher_obs(obs_batch, obs_normalizer)
+                        )
+                    teacher_kd_loss, self._last_teacher_kd_metrics = (
+                        self.policy.get_ppo_action_kd_loss(
+                            obs_batch,
+                            teacher_actions,
+                            step_bins=self.teacher_kd_steps,
+                            zero_x0_prob=self.teacher_aux_zero_x0_prob,
+                        )
+                    )
+                elif self._teacher_actor is not None:
+                    teacher_kd_loss, self._last_teacher_kd_metrics = (
+                        self.policy.get_teacher_kd_loss(
+                            obs_batch,
+                            self._to_teacher_obs(obs_batch, obs_normalizer),
+                            teacher_actor=self._teacher_actor,
+                            step_bins=self.teacher_kd_steps,
+                            zero_x0_prob=self.teacher_aux_zero_x0_prob,
+                        )
+                    )
+                else:
                     raise RuntimeError(
                         "teacher_kd_enabled requires reflow_teacher_checkpoint"
                     )
-                teacher_kd_loss, self._last_teacher_kd_metrics = (
-                    self.policy.get_teacher_kd_loss(
-                        obs_batch,
-                        self._to_teacher_obs(obs_batch, obs_normalizer),
-                        teacher_actor=self._teacher_actor,
-                        step_bins=self.teacher_kd_steps,
-                        zero_x0_prob=self.teacher_aux_zero_x0_prob,
-                    )
-                )
 
             loss = surrogate_loss + self.value_loss_coef * value_loss
             if self.reflow_enabled:
