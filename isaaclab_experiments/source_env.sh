@@ -1,5 +1,5 @@
 SOURCE_ENV_SETUP_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-if [ -n "${ZSH_VERSION:-}" ]; then
+if [ -n "$ZSH_VERSION" ]; then
     SOURCE_ENV_SETUP_DIR="$( cd "$( dirname "$0" )" && pwd )"
 fi
 # Must match setup_env.sh CONDA_ROOT.
@@ -16,16 +16,11 @@ source ${CONDA_ROOT}/bin/activate isaaclab_fpo
 # conda deactivate
 # source ${CONDA_ROOT}/bin/activate isaaclab_fpo
 
-# GL/X11 stubs for Isaac (never apt onto overlay `/`). Runtime copies live on tmpfs.
-ISAAC_SYSLIBS="${ISAAC_SYSLIBS:-/dev/shm/isaac_syslibs}"
-if [[ -d "$ISAAC_SYSLIBS" ]]; then
-  export LD_LIBRARY_PATH="${ISAAC_SYSLIBS}${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-fi
-export LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-}:${CONDA_ROOT}/envs/isaaclab_fpo/lib
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${CONDA_ROOT}/envs/isaaclab_fpo/lib
 export OMNI_KIT_ACCEPT_EULA=YES
 
 # Workaround: newer NVIDIA open kernel modules (driver 580+, kernel 6.17+) may
 # not auto-enumerate GPUs for CUDA. nvidia-smi works but cuInit() fails without this.
-if [ -z "${CUDA_VISIBLE_DEVICES:-}" ]; then
+if [ -z "$CUDA_VISIBLE_DEVICES" ]; then
     export CUDA_VISIBLE_DEVICES=0
 fi

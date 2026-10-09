@@ -56,7 +56,6 @@ from isaaclab_fpo import FpoRslRlOnPolicyRunnerCfg, FpoRslRlVecEnvWrapper
 from isaaclab_fpo.runners import OnPolicyRunner
 
 import isaaclab_tasks  # noqa: F401
-import isaaclab_fpo.go2_extra_envs  # noqa: F401
 from isaaclab_tasks.utils.parse_cfg import parse_env_cfg
 
 

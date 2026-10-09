@@ -247,7 +247,7 @@ class ActorCritic(nn.Module):
         batch_size, action_dim = observations.shape[0], self.num_actions
         device = observations.device
         endpoint_obs = observations if endpoint_obs is None else endpoint_obs
-        assert endpoint_obs.shape[0] == observations.shape[0]
+        assert endpoint_obs.shape == observations.shape
 
         x0 = torch.randn(
             batch_size, n_samples_per_obs, action_dim, device=device
@@ -382,9 +382,8 @@ class ActorCritic(nn.Module):
         """Match student few-step actions to a frozen teacher's 64-step action.
 
         Same x0 for teacher and student. Teacher endpoints are stopgrad.
-        Obs dims may differ (teacher can see privileged lin vel).
         """
-        assert student_obs.shape[0] == teacher_obs.shape[0]
+        assert student_obs.shape == teacher_obs.shape
         batch_size = student_obs.shape[0]
         device = student_obs.device
         bins = list(step_bins) if step_bins is not None else [1, 4, 8]

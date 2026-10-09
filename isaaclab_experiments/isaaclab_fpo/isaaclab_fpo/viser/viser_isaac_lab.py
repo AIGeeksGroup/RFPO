@@ -139,26 +139,12 @@ class ViserIsaacLab:
         self.velocity_scale = 1.0  # Scale factor for velocity arrows
         self.envs_per_row = int(np.ceil(np.sqrt(max(1, self.num_envs))))
 
-        # Scene setup. Keep the grid at robot scale (old 500 m grid made a 0.4 m
-        # Go2 look like a speck until you zoomed into the origin gizmo).
-        grid_span = max(12.0, 4.0 * max(float(env_spacing), 1.5))
-        self.server.scene.add_grid(
-            "/ground",
-            plane="xy",
-            width=grid_span,
-            height=grid_span,
-            cell_size=0.5,
-            section_size=1.0,
-        )
+        # Scene setup
+        self.server.scene.add_grid("/ground", plane="xy", width=500.0, height=500.0)
         if show_axes:
             self.axes_handle = self.server.scene.add_frame(
-                "/world_axes", axes_length=min(axes_size, 0.2), axes_radius=0.008
+                "/world_axes", axes_length=axes_size, axes_radius=0.01
             )
-        try:
-            self.server.initial_camera.position = (1.8, -2.2, 1.0)
-            self.server.initial_camera.look_at = (0.0, 0.0, 0.28)
-        except Exception:
-            pass
 
         # Load scene assets
         self._load_scene()
@@ -187,7 +173,6 @@ class ViserIsaacLab:
         with open(mapping_file, "r") as f:
             mapping_data = yaml.safe_load(f)
             self.prim_to_mesh = mapping_data["mappings"]
-            self._orig_prim_to_mesh = dict(self.prim_to_mesh)
 
         with open(info_file, "r") as f:
             self.info = yaml.safe_load(f)
@@ -202,7 +187,6 @@ class ViserIsaacLab:
         unique_meshes = set(self.prim_to_mesh.values())
         print(f"📦 Loading {len(unique_meshes)} unique meshes...")
 
-        missing = 0
         for mesh_file in unique_meshes:
             mesh_path = self.asset_dir / mesh_file
             if mesh_path.exists():
@@ -212,13 +196,6 @@ class ViserIsaacLab:
                     self.loaded_meshes[mesh_file] = mesh
                 except Exception as e:
                     print(f"  ❌ Failed to load {mesh_file}: {e}")
-            else:
-                missing += 1
-        if missing:
-            print(
-                f"[WARNING] {missing}/{len(unique_meshes)} GLB files missing under {self.asset_dir} "
-                "(meshes/ was not checked in). Will extract from USD or use box proxies after the env loads."
-            )
 
         # Create body name to mesh mapping
         for prim_path, mesh_file in self.prim_to_mesh.items():
@@ -284,204 +261,6 @@ class ViserIsaacLab:
                     except Exception as e:
                         print(f"  ❌ Failed to add {viser_path}: {e}")
 
-    def _load_body_meshes_runtime(self) -> None:
-        """Load official per-link visuals from the live USD stage.
-
-        Training already spawned Isaac Lab's Nucleus ``go2.usd``. The GLBs were
-        never checked in; a naive instance-proxy walk pastes the whole robot
-        onto every link. Filter each mesh by body-local bbox so we keep only
-        that link's visual (same meshes the sim uses).
-        """
-        n = self._try_load_meshes_from_usd()
-        if n >= 8:
-            print(f"[INFO] Using {n} official USD visual meshes (not box proxies)")
-            self._export_extracted_meshes()
-            return
-        print(
-            f"[WARNING] USD visual extract got {n} bodies; falling back to box proxies"
-        )
-        self._create_proxy_body_meshes()
-
-    @staticmethod
-    def _usd_matrix_to_np(m) -> np.ndarray:
-        return np.array([[m[i][j] for j in range(4)] for i in range(4)], dtype=np.float64)
-
-    def _try_load_meshes_from_usd(self) -> int:
-        try:
-            import omni.usd
-            from pxr import Usd, UsdGeom
-        except Exception as e:
-            print(f"[WARNING] USD APIs unavailable: {e}")
-            return 0
-
-        stage = omni.usd.get_context().get_stage()
-        if stage is None:
-            return 0
-
-        root = None
-        for cand in ("/World/envs/env_0/Robot", "/World/envs/env_0/robot"):
-            if stage.GetPrimAtPath(cand).IsValid():
-                root = cand
-                break
-        if root is None:
-            print("[WARNING] Could not find robot prim on USD stage")
-            return 0
-
-        body_names = [b.split("/")[-1] for b in self.robot.body_names]
-        xform_cache = UsdGeom.XformCache(Usd.TimeCode.Default())
-        predicate = Usd.TraverseInstanceProxies(Usd.PrimAllPrimsPredicate)
-        loaded = 0
-
-        for clean in body_names:
-            body_prim = stage.GetPrimAtPath(f"{root}/{clean}")
-            if not body_prim.IsValid():
-                continue
-            try:
-                body_inv = xform_cache.GetLocalToWorldTransform(body_prim).GetInverse()
-            except Exception:
-                continue
-
-            search = stage.GetPrimAtPath(f"{root}/{clean}/visuals")
-            if not search.IsValid():
-                search = body_prim
-
-            parts: list[trimesh.Trimesh] = []
-            for prim in Usd.PrimRange(search, predicate):
-                if not prim.IsA(UsdGeom.Mesh):
-                    continue
-                # Skip meshes that USD nested under a *different* rigid body.
-                path_l = str(prim.GetPath())
-                other = [
-                    n for n in body_names
-                    if n != clean and f"/{n}/" in path_l
-                ]
-                if other:
-                    continue
-                usd_mesh = UsdGeom.Mesh(prim)
-                pts = usd_mesh.GetPointsAttr().Get()
-                counts = usd_mesh.GetFaceVertexCountsAttr().Get()
-                indices = usd_mesh.GetFaceVertexIndicesAttr().Get()
-                if pts is None or counts is None or indices is None:
-                    continue
-                verts = np.asarray(pts, dtype=np.float64)
-                if verts.ndim != 2 or verts.shape[0] < 8:
-                    continue
-                local_xf = body_inv * xform_cache.GetLocalToWorldTransform(prim)
-                hom = np.concatenate([verts, np.ones((verts.shape[0], 1))], axis=1)
-                verts_local = (hom @ self._usd_matrix_to_np(local_xf).T)[:, :3]
-                mn = verts_local.min(axis=0)
-                mx = verts_local.max(axis=0)
-                extent = float(np.max(mx - mn))
-                centroid = 0.5 * (mn + mx)
-                # Full-robot prototype dump is ~1m+ and centered far from this link.
-                if extent > 0.75 or float(np.linalg.norm(centroid)) > 0.45:
-                    continue
-                faces: list[list[int]] = []
-                idx = np.asarray(indices, dtype=np.int64)
-                cursor = 0
-                for c in counts:
-                    c = int(c)
-                    face = idx[cursor : cursor + c]
-                    cursor += c
-                    if c == 3:
-                        faces.append(face.tolist())
-                    elif c >= 4:
-                        for k in range(1, c - 1):
-                            faces.append([int(face[0]), int(face[k]), int(face[k + 1])])
-                if not faces:
-                    continue
-                parts.append(
-                    trimesh.Trimesh(
-                        vertices=verts_local.astype(np.float32),
-                        faces=np.asarray(faces, dtype=np.int64),
-                        process=False,
-                    )
-                )
-
-            if not parts:
-                print(f"   [USD] no link-local visual for '{clean}'")
-                continue
-            # Keep the high-poly visual; drop leftover 8-vert collision cubes.
-            parts.sort(key=lambda m: m.vertices.shape[0], reverse=True)
-            combined = parts[0] if len(parts) == 1 else trimesh.util.concatenate(
-                [p for p in parts if p.vertices.shape[0] >= parts[0].vertices.shape[0] * 0.05]
-            )
-            prim_path = f"{root}/{clean}/visuals"
-            orig = getattr(self, "_orig_prim_to_mesh", {}).get(prim_path, f"meshes/{clean}.glb")
-            self.loaded_meshes[orig] = combined
-            self.prim_to_mesh[prim_path] = orig
-            loaded += 1
-            print(
-                f"   [USD] {clean}: {combined.vertices.shape[0]} verts, "
-                f"extent={float(np.max(combined.vertices.max(0) - combined.vertices.min(0))):.3f} m"
-            )
-
-        return loaded
-
-    def _export_extracted_meshes(self) -> None:
-        """Cache extracted visuals so the next play can load GLBs directly."""
-        n_ok = 0
-        for prim_path, key in list(self.prim_to_mesh.items()):
-            mesh = self.loaded_meshes.get(key)
-            if mesh is None or not str(key).endswith(".glb"):
-                continue
-            if "/Robot/" not in prim_path and "/robot/" not in prim_path:
-                continue
-            out = self.asset_dir / key
-            try:
-                out.parent.mkdir(parents=True, exist_ok=True)
-                mesh.export(str(out))
-                n_ok += 1
-            except Exception as e:
-                print(f"[WARNING] Failed to cache {out}: {e}")
-                break
-        if n_ok:
-            print(f"[INFO] Cached {n_ok} official link GLBs under {self.asset_dir / 'meshes'}")
-
-    def _create_proxy_body_meshes(self) -> None:
-        """Approximate Go2 links in each body frame.
-
-        Unitree Go2 URDF: thigh/calf child joints are at ``(0, 0, -0.213)``, so
-        the limb extends along **-Z**, not +Y. A +Y slab lies on the pitch axis
-        and looks like a pancake with a side nub (what the Viser screenshot showed).
-        """
-        root = "/World/envs/env_0/Robot"
-        thigh_len = 0.213
-        calf_len = 0.213
-
-        def _box(extents, offset=(0.0, 0.0, 0.0)) -> trimesh.Trimesh:
-            mesh = trimesh.creation.box(extents=extents)
-            if any(offset):
-                mesh.apply_translation(offset)
-            return mesh
-
-        geom = {
-            "base": _box((0.376, 0.093, 0.114)),
-            "Head_upper": _box((0.08, 0.08, 0.06), (0.10, 0.0, 0.05)),
-            "Head_lower": _box((0.12, 0.07, 0.05), (0.18, 0.0, 0.0)),
-        }
-        for leg in ("FL", "FR", "RL", "RR"):
-            hip_y = 0.048 if leg in ("FL", "RL") else -0.048
-            geom[f"{leg}_hip"] = _box((0.05, 0.096, 0.05), (0.0, hip_y, 0.0))
-            geom[f"{leg}_thigh"] = _box((0.05, 0.04, thigh_len), (0.0, 0.0, -0.5 * thigh_len))
-            geom[f"{leg}_calf"] = _box((0.04, 0.04, calf_len), (0.0, 0.0, -0.5 * calf_len))
-            geom[f"{leg}_foot"] = _box((0.05, 0.035, 0.03))
-
-        # Drop stale YAML mappings that point at missing GLBs so matching only
-        # sees these body-local proxies.
-        self.loaded_meshes.clear()
-        robot_keys = [k for k in self.prim_to_mesh if "/Robot/" in k or "/robot/" in k]
-        for k in robot_keys:
-            self.prim_to_mesh.pop(k, None)
-
-        for body_name in self.robot.body_names:
-            clean = body_name.split("/")[-1]
-            mesh = geom.get(clean, _box((0.05, 0.05, 0.05)))
-            key = f"proxy_{clean}.glb"
-            self.loaded_meshes[key] = mesh
-            self.prim_to_mesh[f"{root}/{clean}/visuals"] = key
-        print(f"[INFO] Created {len(self.loaded_meshes)} body-local proxy meshes (legs along -Z)")
-
     def load_from_env(self, env):
         """Initialize mapping from Isaac Lab environment.
 
@@ -535,10 +314,6 @@ class ViserIsaacLab:
 
         print(f"🤖 Found robot '{self.robot_name}' with {self.robot.num_bodies} bodies")
         print(f"   Body names: {self.robot.body_names}")
-
-        if not self.loaded_meshes:
-            print("[WARNING] No GLB meshes loaded; trying USD stage, then box proxies")
-            self._load_body_meshes_runtime()
 
         # Debug: Show available mesh handles
         print(f"\n[DEBUG] Available mesh handles:")
@@ -609,28 +384,24 @@ class ViserIsaacLab:
             clean_body_name = (
                 body_name.split("/")[-1] if "/" in body_name else body_name
             )
-            token = f"/{clean_body_name}/"
 
-            # Match a path component, not a substring (``base`` would hit every
-            # leftover YAML mapping under Robot/base/...).
+            # Find visual mesh for this body
             for prim_path, mf in self.prim_to_mesh.items():
-                if token not in f"{prim_path}/":
-                    continue
-                if "robot" not in prim_path.lower():
-                    continue
-                if mf not in self.loaded_meshes:
-                    continue
-                mesh = self.loaded_meshes[mf]
-                if isinstance(mesh, trimesh.Scene):
-                    mesh = mesh.to_geometry()
-                if "visual" in prim_path.lower():
-                    body_visual_meshes[body_idx] = mesh
-                    print(f"   Found visual mesh for body {body_idx} '{body_name}'")
-                elif "collision" in prim_path.lower():
-                    body_collision_meshes[body_idx] = mesh
-                    print(
-                        f"   Found collision mesh for body {body_idx} '{body_name}'"
-                    )
+                if clean_body_name in prim_path and "robot" in prim_path.lower():
+                    if "visual" in prim_path.lower() and mf in self.loaded_meshes:
+                        mesh = self.loaded_meshes[mf]
+                        if isinstance(mesh, trimesh.Scene):
+                            mesh = mesh.to_geometry()
+                        body_visual_meshes[body_idx] = mesh
+                        print(f"   Found visual mesh for body {body_idx} '{body_name}'")
+                    elif "collision" in prim_path.lower() and mf in self.loaded_meshes:
+                        mesh = self.loaded_meshes[mf]
+                        if isinstance(mesh, trimesh.Scene):
+                            mesh = mesh.to_geometry()
+                        body_collision_meshes[body_idx] = mesh
+                        print(
+                            f"   Found collision mesh for body {body_idx} '{body_name}'"
+                        )
 
         # Create batched meshes atomically
         with self.server.atomic():
@@ -639,7 +410,8 @@ class ViserIsaacLab:
                 body_name = self.robot.body_names[body_idx]
                 clean_name = body_name.split("/")[-1] if "/" in body_name else body_name
 
-                batched_colors = self._colors_for_body(body_idx, body_name)
+                # Generate batched colors for visual mesh
+                batched_colors = self._generate_batched_colors(body_idx, body_name)
 
                 # Compute LOD ratio based on mesh complexity (following mjlab pattern)
                 lod_ratio = 1000.0 / mesh.vertices.shape[0]
@@ -726,28 +498,6 @@ class ViserIsaacLab:
             )
 
         print(f"✅ Created {len(self.body_idx_to_batched_handle)} batched meshes")
-
-    def _colors_for_body(self, body_idx: int, body_name: str) -> np.ndarray:
-        """High-contrast colors for box-proxy dogs; HSV wheel otherwise."""
-        using_proxy = any(k.startswith("proxy_") for k in self.loaded_meshes)
-        if not using_proxy:
-            return self._generate_batched_colors(body_idx, body_name)
-        n = body_name.split("/")[-1]
-        if n == "base":
-            rgb = (0.85, 0.40, 0.16)
-        elif "thigh" in n:
-            rgb = (0.95, 0.78, 0.18)
-        elif "calf" in n:
-            rgb = (0.22, 0.52, 0.90)
-        elif "foot" in n:
-            rgb = (0.12, 0.12, 0.12)
-        elif "hip" in n:
-            rgb = (0.38, 0.38, 0.42)
-        elif n.startswith("Head"):
-            rgb = (0.78, 0.74, 0.68)
-        else:
-            rgb = (0.70, 0.70, 0.70)
-        return np.tile(np.asarray(rgb, dtype=np.float32), (self.num_envs, 1))
 
     def update_from_env(self, env, velocity_commands: bool = True, force: bool = False, rewards: Optional[torch.Tensor] = None, actions: Optional[torch.Tensor] = None):
         """Update Viser visualization from Isaac Lab environment state.
@@ -857,25 +607,25 @@ class ViserIsaacLab:
                     )
 
                     # Convert to local coordinates and add precomputed grid offsets
-                    positions_local = np.ascontiguousarray(
-                        positions_world - env_origins + self.grid_offsets, dtype=np.float32
-                    )
-                    quaternions_f = np.ascontiguousarray(quaternions, dtype=np.float32)
+                    positions_local = positions_world - env_origins + self.grid_offsets
 
-                    if self.step_count <= 1 or self.step_count % 100 == 0:
-                        if body_idx == 0:
-                            print(
-                                f"[DEBUG] base env0 local pos={positions_local[0]} "
-                                f"world={positions_world[0]}"
-                            )
-
+                    # Update visual mesh if it exists
                     if body_idx in self.body_idx_to_visual_handle:
-                        self.body_idx_to_visual_handle[body_idx].batched_positions = positions_local
-                        self.body_idx_to_visual_handle[body_idx].batched_wxyzs = quaternions_f
+                        self.body_idx_to_visual_handle[
+                            body_idx
+                        ].batched_positions = positions_local
+                        self.body_idx_to_visual_handle[
+                            body_idx
+                        ].batched_wxyzs = quaternions
 
+                    # Update collision mesh if it exists
                     if body_idx in self.body_idx_to_collision_handle:
-                        self.body_idx_to_collision_handle[body_idx].batched_positions = positions_local
-                        self.body_idx_to_collision_handle[body_idx].batched_wxyzs = quaternions_f
+                        self.body_idx_to_collision_handle[
+                            body_idx
+                        ].batched_positions = positions_local
+                        self.body_idx_to_collision_handle[
+                            body_idx
+                        ].batched_wxyzs = quaternions
 
         # Update velocity visualization
         if velocity_commands:
@@ -1449,7 +1199,33 @@ class ViserIsaacLab:
 # Example usage function
 def example_usage():
     """Example of how to use ViserIsaacLab with a play.py script."""
-    print("See play_with_viser.py for integration.")
+
+    print("""
+    Example integration with play.py:
+
+    # After creating environment
+    env = gym.make(args.task, cfg=env_cfg)
+
+    # Initialize Viser visualization
+    if args.viser:
+        from viser_isaac_lab import ViserIsaacLab
+
+        viser_viz = ViserIsaacLab(
+            asset_dir=Path(args.asset_dir),
+            port=args.viser_port,
+            update_freq=args.viser_update_freq
+        )
+        viser_viz.load_from_env(env.unwrapped)
+
+    # In main loop
+    while simulation_app.is_running():
+        actions = policy(obs)
+        obs, _, _, _ = env.step(actions)
+
+        # Update Viser
+        if args.viser:
+            viser_viz.update_from_env(env.unwrapped)
+    """)
 
 
 if __name__ == "__main__":

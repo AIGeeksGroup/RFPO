@@ -143,7 +143,6 @@ class FPO:
         self.teacher_aux_zero_x0_prob = float(cfg.teacher_aux_zero_x0_prob)
         self._teacher_actor: nn.Module | None = None
         self._teacher_obs_normalizer: EmpiricalNormalization | None = None
-        self._teacher_obs_dim: int | None = None
         self._last_teacher_kd_metrics: dict[str, float] = {}
         if self.reflow_teacher_checkpoint:
             self._load_frozen_teacher(self.reflow_teacher_checkpoint)
@@ -319,11 +318,7 @@ class FPO:
         self.policy.reset(dones)
 
     def _load_frozen_teacher(self, checkpoint_path: str) -> None:
-        """Load a frozen baseline actor + its obs normalizer for reflow endpoints / KD.
-
-        Teacher obs dim may differ from the student (e.g. 48-D lin-vel teacher,
-        45-D NoLinVel student). First Linear is rebuilt to match the checkpoint.
-        """
+        """Load a frozen baseline actor + its obs normalizer for reflow endpoints / KD."""
         if not os.path.isfile(checkpoint_path):
             raise FileNotFoundError(
                 f"reflow_teacher_checkpoint not found: {checkpoint_path}"
@@ -335,75 +330,31 @@ class FPO:
             for key, value in model_sd.items()
             if key.startswith("actor.")
         }
-        if "0.weight" not in actor_sd:
-            raise KeyError(f"teacher checkpoint missing actor.0.weight: {checkpoint_path}")
-        teacher_mlp_in = int(actor_sd["0.weight"].shape[1])
-        teacher_obs_dim = (
-            teacher_mlp_in - int(self.policy.timestep_embed_dim) - int(self.policy.num_actions)
-        )
         teacher_actor = copy.deepcopy(self.policy.actor).to(self.device)
-        first = teacher_actor[0]
-        if isinstance(first, nn.Linear) and first.in_features != teacher_mlp_in:
-            teacher_actor[0] = nn.Linear(teacher_mlp_in, first.out_features).to(self.device)
         teacher_actor.load_state_dict(actor_sd)
         teacher_actor.eval()
         for param in teacher_actor.parameters():
             param.requires_grad_(False)
         self._teacher_actor = teacher_actor
-        self._teacher_obs_dim = teacher_obs_dim
 
-        teacher_norm = EmpiricalNormalization(shape=(teacher_obs_dim,)).to(self.device)
+        obs_dim = int(self.policy.num_actor_obs)
+        teacher_norm = EmpiricalNormalization(shape=(obs_dim,)).to(self.device)
         teacher_norm.load_state_dict(loaded["obs_norm_state_dict"])
         teacher_norm.eval()
         self._teacher_obs_normalizer = teacher_norm
-        print(
-            f"Frozen teacher obs_dim={teacher_obs_dim} student_actor_obs={self.policy.num_actor_obs} "
-            f"from {checkpoint_path}"
-        )
 
     def _to_teacher_obs(
-        self,
-        student_obs: torch.Tensor,
-        student_normalizer: nn.Module | None,
-        critic_obs: torch.Tensor | None = None,
-        privileged_obs_normalizer: nn.Module | None = None,
+        self, student_obs: torch.Tensor, student_normalizer: nn.Module | None
     ) -> torch.Tensor:
-        """Map student (or privileged critic) obs into the frozen teacher's normalization.
-
-        Same-dim student/teacher: keep student proprio, but splice critic lin vel
-        (first 3 dims) so a GT-velocity teacher does not see the student's estimator.
-        """
-        if self._teacher_obs_normalizer is None or self._teacher_obs_dim is None:
+        """Map student-normalized obs into the frozen teacher's normalization."""
+        if self._teacher_obs_normalizer is None:
             return student_obs
         with torch.no_grad():
-            if student_obs.shape[-1] == self._teacher_obs_dim:
-                if student_normalizer is not None and hasattr(student_normalizer, "inverse"):
-                    raw = student_normalizer.inverse(student_obs)
-                else:
-                    raw = student_obs
-                if (
-                    critic_obs is not None
-                    and critic_obs.shape[-1] == self._teacher_obs_dim
-                    and privileged_obs_normalizer is not None
-                    and hasattr(privileged_obs_normalizer, "inverse")
-                ):
-                    critic_raw = privileged_obs_normalizer.inverse(critic_obs)
-                    raw = raw.clone()
-                    raw[..., :3] = critic_raw[..., :3]
-                return self._teacher_obs_normalizer(raw)
-            if critic_obs is not None and critic_obs.shape[-1] == self._teacher_obs_dim:
-                if privileged_obs_normalizer is not None and hasattr(
-                    privileged_obs_normalizer, "inverse"
-                ):
-                    raw = privileged_obs_normalizer.inverse(critic_obs)
-                else:
-                    raw = critic_obs
-                return self._teacher_obs_normalizer(raw)
-            raise RuntimeError(
-                f"Cannot map student obs {tuple(student_obs.shape)} / critic "
-                f"{None if critic_obs is None else tuple(critic_obs.shape)} "
-                f"to teacher dim {self._teacher_obs_dim}"
-            )
+            if student_normalizer is not None and hasattr(student_normalizer, "inverse"):
+                raw = student_normalizer.inverse(student_obs)
+            else:
+                raw = student_obs
+            return self._teacher_obs_normalizer(raw)
 
     def _reflow_endpoint_actor(self) -> nn.Module | None:
         """Frozen baseline actor, detached EMA actor, or None (online actor)."""
@@ -708,12 +659,7 @@ class FPO:
                     reflow_mode=self.reflow_mode,
                     advantage_threshold=self.reflow_advantage_threshold,
                     endpoint_actor=self._reflow_endpoint_actor(),
-                    endpoint_obs=self._to_teacher_obs(
-                        obs_batch,
-                        obs_normalizer,
-                        critic_obs=critic_obs_batch,
-                        privileged_obs_normalizer=privileged_obs_normalizer,
-                    )
+                    endpoint_obs=self._to_teacher_obs(obs_batch, obs_normalizer)
                     if self._teacher_actor is not None
                     else None,
                     zero_x0_prob=self.teacher_aux_zero_x0_prob
@@ -754,12 +700,7 @@ class FPO:
                 teacher_kd_loss, self._last_teacher_kd_metrics = (
                     self.policy.get_teacher_kd_loss(
                         obs_batch,
-                        self._to_teacher_obs(
-                            obs_batch,
-                            obs_normalizer,
-                            critic_obs=critic_obs_batch,
-                            privileged_obs_normalizer=privileged_obs_normalizer,
-                        ),
+                        self._to_teacher_obs(obs_batch, obs_normalizer),
                         teacher_actor=self._teacher_actor,
                         step_bins=self.teacher_kd_steps,
                         zero_x0_prob=self.teacher_aux_zero_x0_prob,

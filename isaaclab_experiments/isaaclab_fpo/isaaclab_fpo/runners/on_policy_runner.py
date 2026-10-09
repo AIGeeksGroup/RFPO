@@ -23,6 +23,7 @@ from isaaclab_fpo.modules import (
     ActorCritic,
     EmpiricalNormalization,
 )
+from isaaclab_fpo.utils import store_code_state
 
 
 class OnPolicyRunner:
@@ -317,6 +318,14 @@ class OnPolicyRunner:
 
             # Clear episode infos
             ep_infos.clear()
+            # Save code state
+            if it == start_iter and not self.disable_logs:
+                # obtain all the diff files
+                git_file_paths = store_code_state(self.log_dir, self.git_status_repos)
+                # if possible store them to wandb
+                if self.logger_type in ["wandb", "neptune"] and git_file_paths:
+                    for path in git_file_paths:
+                        self.writer.save_file(path)
 
         # Save the final model after training
         if self.log_dir is not None and not self.disable_logs:

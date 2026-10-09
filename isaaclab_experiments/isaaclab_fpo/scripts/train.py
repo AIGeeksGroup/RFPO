@@ -94,7 +94,6 @@ from isaaclab.utils.io import dump_pickle, dump_yaml
 from isaaclab_fpo import FpoRslRlOnPolicyRunnerCfg, FpoRslRlVecEnvWrapper
 
 import isaaclab_tasks  # noqa: F401
-import isaaclab_fpo.go2_extra_envs  # noqa: F401 — Go2 DR / NoLinVel gym ids
 import whole_body_tracking  # noqa: F401 — registers motion tracking envs
 from isaaclab_tasks.utils import get_checkpoint_path
 from isaaclab_tasks.utils.parse_cfg import parse_env_cfg
@@ -241,6 +240,8 @@ def main():
     runner = OnPolicyRunner(
         env, agent_cfg, log_dir=log_dir, device=agent_cfg.device
     )
+    # write git state to logs
+    runner.add_git_repo_to_log(__file__)
     # load the checkpoint
     if agent_cfg.resume or agent_cfg.algorithm.class_name == "Distillation":
         print(f"[INFO]: Loading model checkpoint from: {resume_path}")

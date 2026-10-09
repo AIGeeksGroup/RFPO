@@ -28,24 +28,6 @@ Example usage:
 
 """Launch Isaac Sim Simulator first."""
 
-import os
-from pathlib import Path
-
-import sys
-
-# Container root `/tmp` is often 100% full; Isaac / wandb / inductor all write there.
-_tmp = Path(os.environ.get("TMPDIR") or "/workspace/plsy/.tmp")
-_tmp.mkdir(parents=True, exist_ok=True)
-os.environ["TMPDIR"] = str(_tmp)
-os.environ.setdefault("TORCHINDUCTOR_CACHE_DIR", str(_tmp / "torchinductor"))
-Path(os.environ["TORCHINDUCTOR_CACHE_DIR"]).mkdir(parents=True, exist_ok=True)
-
-# Viser play: inductor/ptxas dies on a full overlay `/` and kills the websocket.
-# Disable compile before ActorCriticFpo calls torch.compile().
-if "--viser" in sys.argv:
-    os.environ["TORCHDYNAMO_DISABLE"] = "1"
-    os.environ["TORCH_COMPILE_DISABLE"] = "1"
-
 # HACK: import websockets before isaaclab stuff happens. This is necessary.
 import viser
 
@@ -81,15 +63,6 @@ parser.add_argument("--viser-update-freq", type=int, default=1, help="Update Vis
 parser.add_argument("--viser-env-spacing", type=float, default=1.5, help="Spacing between environments in regular grid visualization (default: 1.5m).")
 parser.add_argument("--viser-fps", type=int, default=60, help="Target frame rate for Viser visualization (default: 60).")
 parser.add_argument("--viser-random-grid-size", type=float, default=0.0, help="Size of grid for random robot offsets. Set to 0.0 to disable random offsets (default: 3x3).")
-parser.add_argument("--vx", type=float, default=None, help="Pin forward velocity command (m/s).")
-parser.add_argument("--vy", type=float, default=0.0, help="Pin lateral velocity command (m/s). Used with --vx.")
-parser.add_argument("--yaw", type=float, default=0.0, help="Pin yaw rate command (rad/s). Used with --vx.")
-parser.add_argument(
-    "--clip_actions",
-    type=float,
-    default=None,
-    help="Override agent.clip_actions (stand_ft / gaitinit used 1.2).",
-)
 
 # Flow matching specific arguments
 parser.add_argument("--flow-sampling-steps", type=int, default=None, help="Number of sampling steps for flow matching inference (default: use training value).")
@@ -121,6 +94,7 @@ import os
 import sys
 import time
 import torch
+import wandb
 
 from isaaclab_fpo.runners import OnPolicyRunner
 
@@ -134,7 +108,6 @@ from isaaclab_fpo.viser import ViserIsaacLab
 from isaaclab_fpo import FpoRslRlOnPolicyRunnerCfg, FpoRslRlVecEnvWrapper, export_policy_as_jit, export_policy_as_onnx
 
 import isaaclab_tasks  # noqa: F401
-import isaaclab_fpo.go2_extra_envs  # noqa: F401
 import whole_body_tracking  # noqa: F401 — registers motion tracking envs
 from isaaclab_tasks.utils import get_checkpoint_path, parse_env_cfg
 
@@ -150,8 +123,6 @@ def download_wandb_checkpoint(run_path, checkpoint_name, download_dir="checkpoin
     Returns:
         Path to the downloaded checkpoint file
     """
-    import wandb
-
     # Create download directory if it doesn't exist
     download_path = Path(download_dir)
     download_path.mkdir(exist_ok=True)
@@ -241,10 +212,6 @@ def main():
         print(f"[WARNING] No saved agent config found at {agent_pkl_path}, using default config")
         agent_cfg: FpoRslRlOnPolicyRunnerCfg = cli_args.parse_fpo_cfg(task_name, args_cli)
 
-    if args_cli.clip_actions is not None:
-        agent_cfg.clip_actions = float(args_cli.clip_actions)
-        print(f"[INFO] clip_actions={agent_cfg.clip_actions}")
-
     # Load environment config
     if os.path.exists(env_pkl_path):
         print(f"[INFO] Loading environment config from: {env_pkl_path}")
@@ -266,16 +233,6 @@ def main():
     print(f"[INFO] Loading experiment from directory: {log_dir}")
     print(f"[INFO] Using policy network hidden dims: {agent_cfg.policy.actor_hidden_dims}")
     print(f"[INFO] Final num_envs for simulation: {env_cfg.scene.num_envs}")
-
-    pin_cmd = args_cli.vx is not None
-    if pin_cmd:
-        env_cfg.commands.base_velocity.heading_command = False
-        env_cfg.commands.base_velocity.rel_standing_envs = 0.0
-        env_cfg.commands.base_velocity.resampling_time_range = (1.0e6, 1.0e6)
-        env_cfg.commands.base_velocity.ranges.lin_vel_x = (args_cli.vx, args_cli.vx)
-        env_cfg.commands.base_velocity.ranges.lin_vel_y = (args_cli.vy, args_cli.vy)
-        env_cfg.commands.base_velocity.ranges.ang_vel_z = (args_cli.yaw, args_cli.yaw)
-        print(f"[INFO] Pinning velocity command vx={args_cli.vx} vy={args_cli.vy} yaw={args_cli.yaw}")
 
     # Override the training sampling steps if specified
     if args_cli.training_sampling_steps is not None and hasattr(agent_cfg.policy, 'training_sampling_steps'):
@@ -368,12 +325,6 @@ def main():
 
             # Load mapping from base environment
             viser_viz.load_from_env(base_env)
-            # Push the standing pose before checkpoint/inductor so the browser
-            # does not sit on identity meshes stacked at the origin.
-            try:
-                viser_viz.update_from_env(base_env, velocity_commands=False, force=True)
-            except Exception as e:
-                print(f"[WARNING] Initial Viser pose update failed: {e}")
 
             print(f"[INFO] Viser server running at http://localhost:{args_cli.viser_port}")
 
@@ -407,39 +358,27 @@ def main():
         # version 2.2 and below
         policy_nn = ppo_runner.alg.actor_critic
 
-    # JIT/ONNX export is for deploy, not visualization. Skip it during Viser play:
-    # it often fails for flow policies and inductor then writes to a full `/tmp`.
-    if not args_cli.viser:
-        export_model_dir = os.path.join(os.path.dirname(resume_path), "exported")
-        try:
-            export_policy_as_jit(policy_nn, ppo_runner.obs_normalizer, path=export_model_dir, filename="policy.pt")
-            print(f"[INFO] Exported policy to JIT format: {os.path.join(export_model_dir, 'policy.pt')}")
-        except Exception as e:
-            print(f"[WARNING] Failed to export policy to JIT: {e}")
-        try:
-            export_policy_as_onnx(
-                policy_nn, normalizer=ppo_runner.obs_normalizer, path=export_model_dir, filename="policy.onnx"
-            )
-            print(f"[INFO] Exported policy to ONNX format: {os.path.join(export_model_dir, 'policy.onnx')}")
-        except Exception as e:
-            print(f"[WARNING] Failed to export policy to ONNX (this is expected for flow matching policies): {e}")
+    # export policy to jit
+    export_model_dir = os.path.join(os.path.dirname(resume_path), "exported")
+    try:
+        export_policy_as_jit(policy_nn, ppo_runner.obs_normalizer, path=export_model_dir, filename="policy.pt")
+        print(f"[INFO] Exported policy to JIT format: {os.path.join(export_model_dir, 'policy.pt')}")
+    except Exception as e:
+        print(f"[WARNING] Failed to export policy to JIT: {e}")
+
+    # Try ONNX export but don't fail if it doesn't work (e.g., for flow matching policies)
+    try:
+        export_policy_as_onnx(
+            policy_nn, normalizer=ppo_runner.obs_normalizer, path=export_model_dir, filename="policy.onnx"
+        )
+        print(f"[INFO] Exported policy to ONNX format: {os.path.join(export_model_dir, 'policy.onnx')}")
+    except Exception as e:
+        print(f"[WARNING] Failed to export policy to ONNX (this is expected for flow matching policies): {e}")
 
     dt = env.unwrapped.step_dt
 
-    def _pin_velocity() -> None:
-        if not pin_cmd:
-            return
-        term = env.unwrapped.command_manager.get_term("base_velocity")
-        term.vel_command_b[:, 0] = float(args_cli.vx)
-        term.vel_command_b[:, 1] = float(args_cli.vy)
-        term.vel_command_b[:, 2] = float(args_cli.yaw)
-        term.is_standing_env[:] = False
-        if hasattr(term, "is_heading_env"):
-            term.is_heading_env[:] = False
-
     # reset environment
     obs, _ = env.get_observations()
-    _pin_velocity()
     timestep = 0
 
     # Performance tracking for Viser
@@ -455,12 +394,10 @@ def main():
 
         # run everything in inference mode
         with torch.inference_mode():
-            _pin_velocity()
             # agent stepping
             actions = policy(obs)
             # env stepping
             obs, rewards, dones, infos = env.step(actions)
-            _pin_velocity()
 
             if reset_requested:
                 print(f"[INFO] Resetting all {env.unwrapped.num_envs} environments...")
@@ -509,4 +446,3 @@ if __name__ == "__main__":
     main()
     # close sim app
     simulation_app.close()
-_app.close()

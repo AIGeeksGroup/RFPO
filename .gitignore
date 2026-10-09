@@ -1,15 +1,44 @@
-.claude/
-.DS_Store
+# Python and editor files
 __pycache__/
+*.py[cod]
 *.egg-info/
-wandb/
-logs/
-.work/
-outputs/
+build/
+dist/
+.venv/
+.idea/
+.vscode/
+.DS_Store
+
+# Experiment outputs and local credentials
+**/logs/
+**/outputs/
+**/wandb/
+**/runs/
+**/checkpoints/
+**/.hydra/
 *.pt
 *.pth
 *.ckpt
 *.onnx
-.env_setup_finished
-*.nohup
+*.safetensors
+*.pkl
+*.pickle
+*.mp4
+*.avi
+*.mov
+
+# Isaac Lab runtime and downloaded assets
+isaaclab_experiments/thirdparty/**
+!isaaclab_experiments/thirdparty/IsaacLab
+!isaaclab_experiments/thirdparty/whole_body_tracking
+isaaclab_experiments/_isaac_sim/
+isaaclab_experiments/.env_setup_finish
+isaaclab_experiments/.env_setup_finished
+isaaclab_experiments/whole_body_tracking_reference_data/*.npz
+
+# Local temporary files
+tmp/
+**/tmp/
 *.log
+*.out
+nohup.out
