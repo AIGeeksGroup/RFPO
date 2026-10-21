@@ -15,9 +15,11 @@ This is the official repository for the paper:
 
 ## 🎥 RFPO
 
-<video src="asset/RFPO.mp4" autoplay loop muted playsinline controls preload="auto" width="100%">
-  Your browser does not support embedded video. [Download RFPO.mp4](asset/RFPO.mp4).
-</video>
+
+
+https://github.com/user-attachments/assets/130ccdca-33b8-45e6-99d4-22952599ea0f
+
+
 
 ## ✏️ Citation
 
