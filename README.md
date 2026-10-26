@@ -10,7 +10,7 @@ This is the official repository for the paper:
 >
 > \*Equal contribution. <sup>†</sup>Project lead. <sup>#</sup>Corresponding author.
 >
-> [**Paper**](https://arxiv.org/abs/2610.10453) · [**Project page**](https://aigeeksgroup.github.io/RFPO/) · [**Model**](https://huggingface.co/AIGeeksGroup/RFPO)
+>  ### [Paper](https://arxiv.org/abs/2610.10453) · [Website](https://aigeeksgroup.github.io/RFPO/) · [Model](https://huggingface.co/AIGeeksGroup/RFPO)
 
 
 ## 🎥 RFPO
